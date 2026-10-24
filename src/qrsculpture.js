@@ -14,16 +14,16 @@ const easeOutBack = (t) => 1 + 2.2 * Math.pow(t - 1, 3) + 1.2 * Math.pow(t - 1, 
 const PLAZA = '#ddd3c2';
 // Timings (ms): model growing in, each morph, the holds on either side of a loop, and the pause before it starts.
 const GROW_MS = 1500, MORPH_MS = 1700, HOLD_QR_MS = 1500, HOLD_MODEL_MS = 1200, START_MS = 200;
-// A pixel's colour, saturated and darkened (same hue) only as far as it takes to stand out from
-// the paving enough to scan (about 4.5:1 contrast), so the code keeps the model's colours.
+// A pixel's colour made vivid for the code: saturated, lightness kept mid-range, and darkened (same
+// hue) only as far as scanning needs (about 2.8:1 against the paving, like the leaves on the tree).
 function inkOf(color) {
   const out = color.clone(), hsl = {};
   const lum = (c) => 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b; // colours are linear in three.js
   out.getHSL(hsl);
-  if (hsl.s > 0.12) out.setHSL(hsl.h, Math.min(1, hsl.s * 1.3 + 0.15), hsl.l);
-  for (let k = 0; k < 30 && lum(out) > 0.1; k++) {
+  if (hsl.s > 0.12) out.setHSL(hsl.h, Math.min(1, hsl.s * 1.4 + 0.2), THREE.MathUtils.clamp(hsl.l, 0.34, 0.5));
+  for (let k = 0; k < 30 && lum(out) > 0.2; k++) {
     out.getHSL(hsl);
-    out.setHSL(hsl.h, hsl.s, hsl.l * 0.92);
+    out.setHSL(hsl.h, hsl.s, hsl.l * 0.94);
   }
   return out;
 }
