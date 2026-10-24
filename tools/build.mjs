@@ -5,6 +5,7 @@ import { readFileSync, writeFileSync, mkdirSync, rmSync, copyFileSync } from 'no
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { variantCount } from '../src/models.js';
 import * as d3 from 'd3-geo';
 import * as topo from 'topojson-client';
 import * as simp from 'topojson-simplify';
@@ -125,84 +126,109 @@ function qrBits(text, type = 0) {
   for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) bits += q.isDark(r, c) ? '1' : '0';
   return { n, bits };
 }
-// Rings of a geometry in projected (grid) coordinates.
-function projectedRings(projection, geo) {
-  const rings = [];
-  let cur;
-  const sink = { point(x, y) { cur.push([x, y]); }, lineStart() { cur = []; }, lineEnd() { if (cur.length > 2) rings.push(cur); }, polygonStart() {}, polygonEnd() {}, sphere() {} };
-  d3.geoStream(geo, projection.stream(sink));
-  return rings;
-}
-// One bit per grid cell: is the cell centre on land (even-odd rule)?
-function landBits(n, rings) {
-  let out = '';
-  for (let r = 0; r < n; r++) {
-    for (let c = 0; c < n; c++) {
-      const x = c + 0.5, y = r + 0.5;
-      let inside = false;
-      for (const ring of rings) {
-        for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-          const [xi, yi] = ring[i], [xj, yj] = ring[j];
-          if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
-        }
-      }
-      out += inside ? '1' : '0';
+// City islands: companies are grouped by metro (or by city), and each group becomes an island on
+// the QR board. Islands keep their real west-to-east, north-to-south arrangement but are packed
+// close together, so the board shows cities rather than empty country.
+const SPACING = 1.5; // board cells between neighbouring companies
+const priorityOf = (c) => (c.kind === 'f500' ? c.rank : 1000);
+function islandLayout(kept, project) {
+  const groups = new Map();
+  for (const c of kept) {
+    const key = c.area || `${c.city}|${c.region}|${c.country}`;
+    if (!groups.has(key)) groups.set(key, { name: c.area ? REGIONS.find((r) => r.id === c.area).short : c.city, members: [] });
+    groups.get(key).members.push(c);
+  }
+  // Fold small towns into the nearest island within ~150 km so the board isn't dotted with singletons.
+  let isl = [...groups.values()];
+  const centre = (g) => ({ lat: g.members.reduce((a, c) => a + c.lat, 0) / g.members.length, lon: g.members.reduce((a, c) => a + c.lon, 0) / g.members.length });
+  for (let merged = true; merged;) {
+    merged = false;
+    isl.sort((a, b) => b.members.length - a.members.length);
+    for (let i = isl.length - 1; i > 0 && !merged; i--) {
+      const small = isl[i], cs = centre(small);
+      let best = -1, bestD = 150;
+      for (let j = 0; j < i; j++) { const d = km(cs, centre(isl[j])); if (d < bestD) { bestD = d; best = j; } }
+      if (best >= 0) { isl[best].members.push(...small.members); isl.splice(i, 1); merged = true; }
     }
   }
-  return out;
-}
-// Push apart points closer than `min` so every model on the board has its own footing.
-function relax(points, min, iterations = 80) {
-  for (let it = 0; it < iterations; it++) {
-    let moved = false;
-    for (let i = 0; i < points.length; i++) {
-      for (let j = i + 1; j < points.length; j++) {
-        const a = points[i], b = points[j];
-        let dx = b[0] - a[0], dy = b[1] - a[1];
-        let d = Math.hypot(dx, dy);
+  for (const g of isl) {
+    const pts = g.members.map((c) => project([c.lon, c.lat]));
+    g.ox = pts.reduce((a, p) => a + p[0], 0) / pts.length;
+    g.oy = pts.reduce((a, p) => a + p[1], 0) / pts.length;
+    g.r = 0.62 * SPACING * Math.sqrt(g.members.length) + 0.8;
+  }
+  // Scale geography so the islands' total area fits about a third of the spread, then push
+  // overlapping islands apart while a weak spring keeps each near its real place.
+  const xs = isl.map((g) => g.ox), ys = isl.map((g) => g.oy);
+  const span = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
+  const area = isl.reduce((a, g) => a + Math.PI * (g.r + 0.8) ** 2, 0);
+  const L = Math.sqrt(area * 1.9) / span;
+  for (const g of isl) { g.tx = g.ox * L; g.ty = g.oy * L; g.x = g.tx; g.y = g.ty; }
+  const gap = 1.0;
+  for (let it = 0; it < 600; it++) {
+    for (let i = 0; i < isl.length; i++) {
+      for (let j = i + 1; j < isl.length; j++) {
+        const a = isl[i], b = isl[j];
+        let dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
+        const min = a.r + b.r + gap;
         if (d >= min) continue;
-        if (d < 1e-6) { dx = Math.cos(i + j); dy = Math.sin(i + j); d = 1; }
-        const push = (min - d) / 2;
-        a[0] -= (dx / d) * push; a[1] -= (dy / d) * push;
-        b[0] += (dx / d) * push; b[1] += (dy / d) * push;
-        moved = true;
+        if (d < 1e-6) { dx = Math.cos(i * 7 + j); dy = Math.sin(i * 7 + j); d = 1; }
+        const push = (min - d) / 2, wa = b.r / (a.r + b.r), wb = a.r / (a.r + b.r);
+        a.x -= (dx / d) * push * 2 * wa; a.y -= (dy / d) * push * 2 * wa;
+        b.x += (dx / d) * push * 2 * wb; b.y += (dy / d) * push * 2 * wb;
       }
     }
-    if (!moved) break;
+    for (const g of isl) { g.x += (g.tx - g.x) * 0.015; g.y += (g.ty - g.y) * 0.015; }
   }
+  const x0 = Math.min(...isl.map((g) => g.x - g.r)), y0 = Math.min(...isl.map((g) => g.y - g.r));
+  const w = Math.max(...isl.map((g) => g.x + g.r)) - x0, h = Math.max(...isl.map((g) => g.y + g.r)) - y0;
+  for (const g of isl) { g.x -= x0 + w / 2; g.y -= y0 + h / 2; }
+  return { isl, size: Math.max(w, h) };
 }
-const BOARD_N = 117; // QR version 25
-const board = { ...qrBits(SITE_URL, 25), modes: {} };
+// Lay the islands onto an n-cell board: positions per company, land bits, island labels.
+function placeIslands({ isl }, n) {
+  const pos = {};
+  for (const g of isl) {
+    g.x += n / 2; g.y += n / 2;
+    // Biggest company in the middle, the rest on a sunflower spiral.
+    [...g.members].sort((a, b) => priorityOf(a) - priorityOf(b)).forEach((c, k) => {
+      const r = 0.58 * SPACING * Math.sqrt(k), a = k * 2.39996;
+      pos[c.slug] = [+(g.x + r * Math.cos(a)).toFixed(2), +(g.y + r * Math.sin(a)).toFixed(2)];
+    });
+  }
+  let land = '';
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) land += isl.some((g) => Math.hypot(c + 0.5 - g.x, r + 0.5 - g.y) <= g.r + 0.7) ? '1' : '0';
+  const islands = isl.filter((g) => g.members.length >= 2).map((g) => [g.name, +g.x.toFixed(2), +g.y.toFixed(2), +g.r.toFixed(2)]);
+  return { pos, land, islands };
+}
+const board = { modes: {} };
 {
   const nationTopo = readJSON('node_modules/us-atlas/nation-10m.json');
   const nation = topo.feature(nationTopo, nationTopo.objects.nation).features[0];
   const conus = { type: 'MultiPolygon', coordinates: nation.geometry.coordinates.filter((p) => { const [lon, lat] = p[0][0]; return lon > -126 && lon < -65 && lat > 24 && lat < 50; }) };
-  const worldTopo = readJSON('node_modules/world-atlas/land-110m.json');
-  const land = topo.feature(worldTopo, worldTopo.objects.land);
-  const n = BOARD_N;
-  const modes = {
-    us: { projection: d3.geoConicEqualArea().parallels([29.5, 45.5]).rotate([96, 0]).fitExtent([[5, 5], [n - 5, n - 5]], conus), geo: conus, min: 1.45, keep: (c) => c.country === 'US' },
-    world: { projection: d3.geoNaturalEarth1().fitExtent([[3, 3], [n - 3, n - 3]], { type: 'Sphere' }), geo: land, min: 0.42, keep: () => true },
-  };
-  for (const [id, m] of Object.entries(modes)) {
-    const kept = companies.filter(m.keep);
-    const pts = kept.map((c) => m.projection([c.lon, c.lat]));
-    relax(pts, m.min);
-    const pos = {};
-    kept.forEach((c, i) => (pos[c.slug] = [+pts[i][0].toFixed(2), +pts[i][1].toFixed(2)]));
+  const us = islandLayout(companies.filter((c) => c.country === 'US'), d3.geoConicEqualArea().parallels([29.5, 45.5]).rotate([96, 0]).fitExtent([[0, 0], [1, 1]], conus));
+  const world = islandLayout(companies, d3.geoNaturalEarth1().fitExtent([[0, 0], [1, 1]], { type: 'Sphere' }));
+  // Smallest QR version whose grid fits both layouts with a margin.
+  const need = Math.max(us.size, world.size) + 8;
+  let version = 10;
+  while (17 + 4 * version < need) version++;
+  Object.assign(board, qrBits(SITE_URL, version));
+  for (const [id, layout] of Object.entries({ us, world })) {
+    const placed = placeIslands(layout, board.n);
     const regionsAt = {};
     for (const r of REGIONS) {
-      const ps = r.members.map((s) => pos[s]).filter(Boolean);
+      const ps = r.members.map((s) => placed.pos[s]).filter(Boolean);
       if (!ps.length) continue;
       const x = ps.reduce((a, p) => a + p[0], 0) / ps.length, y = ps.reduce((a, p) => a + p[1], 0) / ps.length;
-      const spread = Math.max(...ps.map((p) => Math.hypot(p[0] - x, p[1] - y)));
-      regionsAt[r.id] = [+x.toFixed(2), +y.toFixed(2), +spread.toFixed(2)];
+      regionsAt[r.id] = [+x.toFixed(2), +y.toFixed(2), +Math.max(...ps.map((p) => Math.hypot(p[0] - x, p[1] - y))).toFixed(2)];
     }
-    board.modes[id] = { land: landBits(n, projectedRings(m.projection, m.geo)), pos, regions: regionsAt };
+    board.modes[id] = { ...placed, regions: regionsAt };
   }
+  console.log(`board: QR version ${version}, ${board.n}×${board.n}; ${us.isl.length} US islands, ${world.isl.length} world islands`);
 }
-// 3D model for a company on the board.
-// Which signature 3D model a company gets (see data/industries.json and src/models.js).
+
+// Which signature 3D model a company gets (see data/industries.json and src/models.js), and a
+// look (shape variant, brand colours, base) that no other company in the same group shares.
 const industries = readJSON('data/industries.json');
 const MODEL_LABELS = industries._labels;
 const MODEL_OF = new Map();
@@ -211,6 +237,48 @@ const modelOf = (c) => MODEL_OF.get(c.listedName || c.name) || 'tree';
 {
   const unmapped = companies.filter((c) => !MODEL_OF.has(c.listedName || c.name)).map((c) => c.name);
   if (unmapped.length) console.warn(`no model for: ${unmapped.join(', ')}`);
+}
+const PALETTES = [
+  ['#e5533d', '#2b2f36'], ['#3d7be0', '#f0c24a'], ['#2f9e6e', '#f4f1ea'], ['#8a6cf0', '#ffd23f'], ['#f29a3a', '#2b4a6b'], ['#d6336c', '#f8f6f1'],
+  ['#1f6f8b', '#e9c46a'], ['#6b4f3a', '#e5533d'], ['#3fb8a8', '#2b2f36'], ['#c0392b', '#f0c24a'], ['#2b4a9b', '#e5533d'], ['#7a8f2e', '#f4e3b5'],
+];
+const LOOKS = new Map();
+{
+  const overrides = industries._looks || {};
+  const byModel = new Map();
+  for (const c of companies) {
+    const m = modelOf(c);
+    if (!byModel.has(m)) byModel.set(m, []);
+    byModel.get(m).push(c);
+  }
+  for (const [m, list] of byModel) {
+    const V = variantCount(m);
+    const used = new Set();
+    const key = (l) => `${l.v}|${l.a}|${l.b}|${l.base}`;
+    const sorted = [...list].sort((a, b) => priorityOf(a) - priorityOf(b));
+    for (const c of sorted) {
+      const o = overrides[c.listedName || c.name];
+      if (!o) continue;
+      const look = { v: o.v % V, a: o.a, b: o.b, base: o.base ?? 0 };
+      if (used.has(key(look))) throw new Error(`duplicate look override for ${c.name}`);
+      used.add(key(look));
+      LOOKS.set(c.slug, look);
+    }
+    // Everyone else: shapes first, then bases, then palettes, skipping anything taken.
+    let i = 0;
+    for (const c of sorted) {
+      if (LOOKS.has(c.slug)) continue;
+      let look;
+      do {
+        const v = i % V, base = Math.floor(i / V) % 3, p = PALETTES[(Math.floor(i / (V * 3)) + m.length) % PALETTES.length];
+        look = { v, a: p[0], b: p[1], base };
+        i++;
+      } while (used.has(key(look)));
+      if (i > V * 3 * PALETTES.length + 50) throw new Error(`ran out of looks for ${m}`);
+      used.add(key(look));
+      LOOKS.set(c.slug, look);
+    }
+  }
 }
 
 // ---------- helpers for pages ----------
@@ -340,7 +408,7 @@ function companyPage(c, prev, next) {
   if (c.listedName !== c.name && c.listedName) facts.push(['Listed as', esc(c.listedName)]);
   const model = modelOf(c);
   const sub = c.kind === 'f500' ? `Fortune 500 No. ${c.rank} · ${place(c)}` : `${c.sector} startup · ${place(c)}`;
-  const data = { slug: c.slug, name: c.name, model, qr: qrBits(pageUrl) };
+  const data = { slug: c.slug, name: c.name, model, look: LOOKS.get(c.slug), qr: qrBits(pageUrl) };
 
   return `${qwHead({ title: `${c.name} · QR Atlas`, description: describe(c), path, depth: 1 })}
 <body class="qw qw-company">
@@ -351,7 +419,7 @@ function companyPage(c, prev, next) {
     <p>${esc(sub)}</p>
   </header>
   <canvas class="qw-fallback" id="fallback-qr" width="320" height="320" aria-label="QR code for this page"></canvas>
-  <div class="qw-hint" id="hint">${esc(MODEL_LABELS[model] || '')} · tap to turn it into its QR code</div>
+  <div class="qw-hint" id="hint">${esc(((industries._variantLabels || {})[model] || [])[LOOKS.get(c.slug).v] || MODEL_LABELS[model] || '')} · tap to turn it into its QR code</div>
   <div class="qw-dock">
     <div class="qw-url">
       <input id="page-url" readonly value="${pageUrl}" aria-label="Link to this page">
@@ -511,7 +579,8 @@ ${topbar(0, `<div class="search" role="search">
 // ---------- QR world (index) ----------
 function worldPage() {
   const slim = companies.map((c) => {
-    const o = { s: c.slug, n: c.name, k: c.kind === 'f500' ? 0 : 1, t: c.tech ? 1 : 0, c: place(c), m: modelOf(c) };
+    const lk = LOOKS.get(c.slug);
+    const o = { s: c.slug, n: c.name, k: c.kind === 'f500' ? 0 : 1, t: c.tech ? 1 : 0, c: place(c), m: modelOf(c), L: [lk.v, lk.a, lk.b, lk.base] };
     if (c.rank) o.r = c.rank;
     if (c.revenue != null) o.v = c.revenue;
     if (c.sector) o.sec = c.sector;
@@ -656,8 +725,8 @@ ${topbar(0)}
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(join(OUT, 'c'), { recursive: true });
 mkdirSync(join(OUT, 'assets'), { recursive: true });
-for (const f of ['site.css', 'qrworld.css', 'atlas.js', 'qr-card.js', 'directory.js', 'icon.svg', 'qrworld.js', 'models.js', 'qrsculpture.js', 'company3d.js', 'world.js']) copyFileSync(join(ROOT, 'src', f), join(OUT, 'assets', f));
-copyFileSync(join(ROOT, 'node_modules/three/examples/jsm/utils/BufferGeometryUtils.js'), join(OUT, 'assets/BufferGeometryUtils.js'));
+for (const f of ['site.css', 'qrworld.css', 'atlas.js', 'qr-card.js', 'directory.js', 'icon.svg', 'qrworld.js', 'models.js', 'qrsculpture.js', 'company3d.js', 'world.js', 'BufferGeometryUtils.js']) copyFileSync(join(ROOT, 'src', f), join(OUT, 'assets', f));
+
 copyFileSync(join(ROOT, 'node_modules/qrcode-generator/qrcode.js'), join(OUT, 'assets/qrcode.js'));
 copyFileSync(join(ROOT, 'node_modules/three/build/three.module.min.js'), join(OUT, 'assets/three.module.min.js'));
 copyFileSync(join(ROOT, 'node_modules/three/examples/jsm/controls/OrbitControls.js'), join(OUT, 'assets/OrbitControls.js'));

@@ -1,7 +1,7 @@
 // The QR world: one giant QR code (it scans to this site) with the map laid on its tiles and
 // every company standing on it as a 3D model. Tour, search, USA/World, and scan view.
 import { THREE, createStage, buildSlab, buildInk, decodeBits, setCamera, cameraState, flyCamera, stopFlight, tween, lerp, toScreen, webglAvailable } from './qrworld.js';
-import { ARCHETYPES, centerpiece, modelMaterial } from './models.js';
+import { ARCHETYPES, centerpiece, modelMaterial, setBrands } from './models.js';
 import { createQRWorld } from './qrsculpture.js';
 
 const { board, regions, listYear } = window.WORLD;
@@ -71,7 +71,8 @@ function start() {
     }
     tiles.instanceColor.needsUpdate = true;
   }
-  const blockH = (r, c) => (land(r, c) ? 0.55 + ((r * 7 + c * 13) % 5) * 0.06 : 0.22);
+  const blockH = (r, c) => (land(r, c) ? 0.2 + ((r * 7 + c * 13) % 3) * 0.03 : 0.12);
+  const STAND = 0.14 + 0.28; // models stand on top of the tallest tiles
   let flatten = 0; // 0 = 3D, 1 = flat for scan view
   function layoutBlocks() {
     darkCells.forEach(([r, c], i) => {
@@ -92,45 +93,53 @@ function start() {
   const MAXV = Math.max(...DATA.map((d) => d.v || 0));
   const archOf = (d) => (ARCHETYPES[d.m] ? d.m : 'tree');
   const mat = modelMaterial();
+  // Each company's look: shape variant, brand colours, base. Companies sharing a shape and base
+  // share one instanced mesh; their brand colours ride along per instance.
+  const lookOf = (d) => ({ v: d.L[0], a: d.L[1], b: d.L[2], base: d.L[3] });
+  const keyOf = (d) => `${archOf(d)}:${d.L[0]}:${d.L[3]}`;
+  const cpOf = (d) => centerpiece(archOf(d), d.L[0], d.L[3]);
   // Model bounds (body plus moving parts), used to size each company.
   const bounds = new Map();
-  const boundsOf = (a) => {
-    if (!bounds.has(a)) {
-      const cp = centerpiece(a);
+  const boundsOf = (d) => {
+    const key = keyOf(d);
+    if (!bounds.has(key)) {
+      const cp = cpOf(d);
       const b = new THREE.Box3().setFromBufferAttribute(cp.geo.attributes.position);
       for (const mv of cp.moving) b.union(new THREE.Box3().setFromBufferAttribute(mv.geo.attributes.position).translate(new THREE.Vector3(...mv.pivot)));
       const size = b.getSize(new THREE.Vector3());
-      bounds.set(a, { h: Math.max(3, b.max.y), w: Math.max(size.x, size.z) });
+      bounds.set(key, { h: Math.max(3, b.max.y), w: Math.max(size.x, size.z) });
     }
-    return bounds.get(a);
+    return bounds.get(key);
   };
-  const height = (d) => (d.k === 0 ? 1.3 + 5.5 * Math.sqrt((d.v || 0) / MAXV) : 1.8);
+  const height = (d) => (d.k === 0 ? 1.4 + 5 * Math.sqrt((d.v || 0) / MAXV) : 1.9);
   const modelScale = (d) => {
-    const b = boundsOf(archOf(d));
-    const maxW = d.k === 0 ? 1.0 + 1.5 * Math.sqrt((d.v || 0) / MAXV) : 1.1;
+    const b = boundsOf(d);
+    const maxW = d.k === 0 ? 1.1 + 1.4 * Math.sqrt((d.v || 0) / MAXV) : 1.25;
     return Math.min(height(d) / b.h, maxW / b.w);
   };
   const meshes = {}; // name -> InstancedMesh (pickable)
   const owner = new Map(); // `${name}:${i}` -> company index
   const slots = DATA.map(() => 0);
-  const byArch = new Map();
+  const byKey = new Map();
   DATA.forEach((d, di) => {
-    const a = archOf(d);
-    if (!byArch.has(a)) byArch.set(a, []);
-    byArch.get(a).push(di);
+    const k = keyOf(d);
+    if (!byKey.has(k)) byKey.set(k, []);
+    byKey.get(k).push(di);
   });
-  for (const [a, list] of byArch) {
-    const cp = centerpiece(a);
+  for (const [k, list] of byKey) {
+    const cp = cpOf(DATA[list[0]]);
+    const pairs = list.map((di) => [DATA[di].L[1], DATA[di].L[2]]);
     const add = (name, geo) => {
       const im = new THREE.InstancedMesh(geo, mat, list.length);
+      setBrands(im, pairs);
       im.castShadow = im.receiveShadow = true;
       meshes[name] = im;
       scene.add(im);
       list.forEach((di, i) => owner.set(`${name}:${i}`, di));
       return im;
     };
-    add(`c:${a}`, cp.geo);
-    cp.moving.forEach((mv, j) => (add(`m:${a}:${j}`, mv.geo).userData.mv = mv));
+    add(`c:${k}`, cp.geo);
+    cp.moving.forEach((mv, j) => add(`m:${k}:${j}`, mv.geo));
     list.forEach((di, i) => (slots[di] = i));
   }
 
@@ -161,13 +170,13 @@ function start() {
       const sink = 1 - Math.min(1, Math.max(0, (flatten - ((st.x + st.z) / (2 * N) + 0.5) * 0.5) / 0.4));
       const v = Math.max(0, Math.min(1, st.vis)) * k * sink;
       const sc = Math.max(0.0001, v * modelScale(d));
-      const a = archOf(d);
-      const cp = centerpiece(a);
+      const key = keyOf(d);
+      const cp = cpOf(d);
       const hover = cp.hover && moving ? Math.sin(clock * 1.2 + di) * cp.hover * sc * 0.35 : 0;
-      const y0 = 0.14 + hover + hopAmp * Math.sin(Math.PI * Math.min(1, st.hopT || 0));
+      const y0 = lerp(STAND, 0.14, flatten) + hover + hopAmp * Math.sin(Math.PI * Math.min(1, st.hopT || 0));
       const yaw = (di * 2.399) % (Math.PI * 2);
       q.setFromEuler(eul.set(0, yaw, 0));
-      meshes[`c:${a}`].setMatrixAt(slots[di], m4.compose(p.set(st.x, y0, st.z), q, s.set(sc, sc, sc)));
+      meshes[`c:${key}`].setMatrixAt(slots[di], m4.compose(p.set(st.x, y0, st.z), q, s.set(sc, sc, sc)));
       cp.moving.forEach((mv, j) => {
         const t = moving ? clock : 0;
         let dy = 0, ps = sc;
@@ -180,7 +189,7 @@ function start() {
           q2.setFromAxisAngle(axis.set(...mv.axis).normalize(), f * 6);
         }
         pivot.set(mv.pivot[0], mv.pivot[1] + dy, mv.pivot[2]).multiplyScalar(sc).applyQuaternion(q);
-        meshes[`m:${a}:${j}`].setMatrixAt(slots[di], m4.compose(p.set(st.x + pivot.x, y0 + pivot.y, st.z + pivot.z), q2.premultiply(q), s.set(ps, ps, ps)));
+        meshes[`m:${key}:${j}`].setMatrixAt(slots[di], m4.compose(p.set(st.x + pivot.x, y0 + pivot.y, st.z + pivot.z), q2.premultiply(q), s.set(ps, ps, ps)));
       });
     });
     for (const im of Object.values(meshes)) im.instanceMatrix.needsUpdate = true;
@@ -233,7 +242,7 @@ function start() {
   const labelsEl = $('labels');
   const pool = [];
   let selected = null, focus = null;
-  const topOf = (di) => new THREE.Vector3(state[di].x, 0.14 + height(DATA[di]) * modeScale() + 0.4, state[di].z);
+  const topOf = (di) => new THREE.Vector3(state[di].x, STAND + height(DATA[di]) * modeScale() + 0.4, state[di].z);
   function placeLabels() {
     const placed = [];
     let used = 0;
@@ -267,11 +276,9 @@ function start() {
         .slice(0, focus ? 10 : 22);
       for (const d of cands) put(d.n, toScreen(stage, topOf(DATA.indexOf(d))), '', false);
       if (!zoomed && !focus) {
-        for (const r of regions) {
-          const rg = board.modes[mode].regions[r.id];
-          if (!rg) continue;
-          const [x, z] = toBoard(rg);
-          put(r.short, toScreen(stage, new THREE.Vector3(x, 1.5, z)), 'region', false);
+        for (const [name, ix, iy, ir] of [...board.modes[mode].islands].sort((a, b) => b[3] - a[3])) {
+          const [x, z] = toBoard([ix, iy + ir + 0.6]);
+          put(name, toScreen(stage, new THREE.Vector3(x, 0.4, z)), 'region', false);
         }
       }
     }
@@ -416,7 +423,7 @@ function start() {
   function openShowcase(d, { holdModel = 1800, holdQR = 3000 } = {}) {
     closeShowcase();
     const token = ++showToken;
-    const w = createQRWorld($('show-stage'), { slug: d.s, model: d.m, qr: qrFor(d), viewScale: 1.4, insets: () => ({ top: 10, bottom: 10 }) });
+    const w = createQRWorld($('show-stage'), { slug: d.s, model: d.m, look: lookOf(d), qr: qrFor(d), viewScale: 1.4, insets: () => ({ top: 10, bottom: 10 }) });
     show = w;
     let auto = true;
     const btn = $('show-toggle');

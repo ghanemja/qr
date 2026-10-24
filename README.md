@@ -2,7 +2,7 @@
 
 A static site where every company's QR code is a 3D world.
 
-- `docs/index.html`: one large QR code (it scans to the site) with the US or world map laid across its tiles and every company standing at its headquarters as its own 3D model. ▶ plays a walkthrough of each tech city and its biggest tech company; searching a company opens its model next to its QR code.
+- `docs/index.html`: one large QR code (it scans to the site) where each city is an island of its companies, arranged west to east like the real map but packed close together, and every company stands as its own 3D model. ▶ plays a walkthrough of each tech city and its biggest tech company; searching a company opens its model next to its QR code.
 - `docs/c/<company>.html`: one page per company. Its 3D model stands on a plaza paved with its QR code; tap it and the model breaks into pixels that land on the code, giving a scannable QR that links back to the page.
 - `docs/map.html`: flat 2D map of the same data. `docs/companies.html`: searchable directory.
 
@@ -22,4 +22,4 @@ To publish with GitHub Pages, serve the `docs/` folder. The default `SITE_URL` i
 
 ## Signature models
 
-Each company is drawn as one 3D model of what it does: banks get a flying stack of cash with wings, telecoms a cloud raining phones and headsets, oil companies a derrick, AI labs a chat bubble with a spark, Google a magnifying glass, Meta a VR headset, and so on. The models live in `src/models.js`; which company gets which model is set in `data/industries.json`. `src/qrsculpture.js` turns a model into its QR code: the model is sampled into one pixel per dark square, and each pixel flies to its square.
+Each company is drawn as one 3D model of what it does, and no two companies look the same: each kind has several shapes (banks get winged cash, winged gold bars, a vault, a piggy bank, a bull, a columned bank and a stagecoach), and every model is painted in the company's own two colours on one of three bases. For example: banks get a flying stack of cash with wings, telecoms a cloud raining phones and headsets, oil companies a derrick, AI labs a chat bubble with a spark, Google a magnifying glass, Meta a VR headset, and so on. The models live in `src/models.js`; which company gets which model, and the hand-picked looks for big names, are set in `data/industries.json`; the build checks that no two companies share a look. `src/qrsculpture.js` turns a model into its QR code: the model is sampled into one pixel per dark square, and each pixel flies to its square.

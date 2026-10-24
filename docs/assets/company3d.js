@@ -23,6 +23,7 @@ if (!webglAvailable()) {
   const world = createQRWorld(stageEl, {
     slug: C.slug,
     model: C.model,
+    look: C.look,
     qr: C.qr,
     viewScale: stageEl.clientWidth < 640 ? 1.38 : 1.55,
     insets: (W) => (W < 640 ? { top: 100, bottom: 190 } : { top: 110, bottom: 175 }),

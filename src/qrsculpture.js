@@ -3,7 +3,7 @@
 // the QR's dark squares and darken to ink, in a diagonal sweep, while the camera tilts to
 // top-down; setScan(false) plays it backwards and the pixels rebuild the model.
 import { THREE, rng, createStage, buildSlab, buildInk, decodeBits, isFinder, setCamera, flyCamera, tween, lerp } from './qrworld.js';
-import { ARCHETYPES, centerpiece, modelMaterial } from './models.js';
+import { ARCHETYPES, centerpiece, modelMaterial, setBrands, vertexColor } from './models.js';
 
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
@@ -14,12 +14,12 @@ const INK = '#1d232b';
 const PLAZA = '#ddd3c2';
 
 // Random points on a mesh's surface (area-weighted), each with the colour of its triangle.
-function sampleSurface(geos, count, random) {
+function sampleSurface(geos, count, random, brand) {
   const tris = [];
   let total = 0;
   const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), ab = new THREE.Vector3(), ac = new THREE.Vector3();
   for (const { geo, matrix } of geos) {
-    const pos = geo.attributes.position, col = geo.attributes.color;
+    const pos = geo.attributes.position;
     for (let i = 0; i < pos.count; i += 3) {
       a.fromBufferAttribute(pos, i).applyMatrix4(matrix);
       b.fromBufferAttribute(pos, i + 1).applyMatrix4(matrix);
@@ -27,7 +27,7 @@ function sampleSurface(geos, count, random) {
       const area = ab.subVectors(b, a).cross(ac.subVectors(c, a)).length() / 2;
       if (area <= 1e-6) continue;
       total += area;
-      tris.push({ cum: total, a: a.clone(), b: b.clone(), c: c.clone(), color: new THREE.Color(col.getX(i), col.getY(i), col.getZ(i)) });
+      tris.push({ cum: total, a: a.clone(), b: b.clone(), c: c.clone(), color: vertexColor(geo, i, brand) });
     }
   }
   const out = [];
@@ -43,7 +43,7 @@ function sampleSurface(geos, count, random) {
   return { points: out, area: total };
 }
 
-export function createQRWorld(container, { slug, model, qr, insets = () => ({ top: 110, bottom: 175 }), viewScale = 1.55, autoRotate = true } = {}) {
+export function createQRWorld(container, { slug, model, look = { v: 0, a: '#e5533d', b: '#2b2f36', base: 0 }, qr, insets = () => ({ top: 110, bottom: 175 }), viewScale = 1.55, autoRotate = true } = {}) {
   const { n, bits } = qr;
   const dark = decodeBits(n, bits);
   const finder = isFinder(n);
@@ -74,21 +74,30 @@ export function createQRWorld(container, { slug, model, qr, insets = () => ({ to
   scene.add(plaza);
 
   // ---------- the model ----------
-  const cp = centerpiece(arch.id);
+  const cp = centerpiece(arch.id, look.v, look.base);
+  const brand = [look.a, look.b];
   const mat = modelMaterial();
+  // One-instance meshes so the brand colours reach the shader the same way as on the world board.
+  const branded = (geo) => {
+    const m = new THREE.InstancedMesh(geo, mat, 1);
+    m.setMatrixAt(0, new THREE.Matrix4());
+    setBrands(m, [brand]);
+    m.frustumCulled = false;
+    return m;
+  };
   const bb = new THREE.Box3().setFromBufferAttribute(cp.geo.attributes.position);
   for (const mv of cp.moving) bb.union(new THREE.Box3().setFromBufferAttribute(mv.geo.attributes.position).translate(new THREE.Vector3(...mv.pivot)));
   const bsize = bb.getSize(new THREE.Vector3());
   const S = Math.min((n * 0.66) / Math.max(1, bb.max.y), (n * 1.0) / Math.max(bsize.x, bsize.z));
   const modelGroup = new THREE.Group();
   modelGroup.scale.setScalar(S);
-  const center = new THREE.Mesh(cp.geo, mat);
+  const center = branded(cp.geo);
   center.castShadow = center.receiveShadow = true;
   modelGroup.add(center);
   const movers = cp.moving.map((mv) => {
     const g = new THREE.Group();
     g.position.set(...mv.pivot);
-    const mesh = new THREE.Mesh(mv.geo, mat);
+    const mesh = branded(mv.geo);
     mesh.castShadow = true;
     g.add(mesh);
     modelGroup.add(g);
@@ -99,7 +108,7 @@ export function createQRWorld(container, { slug, model, qr, insets = () => ({ to
 
   // ---------- pixels ----------
   // One pixel per dark module, sampled from the model's surface and matched to a nearby square.
-  const sample = sampleSurface([{ geo: cp.geo, matrix: new THREE.Matrix4() }, ...cp.moving.map((mv) => ({ geo: mv.geo, matrix: new THREE.Matrix4().makeTranslation(...mv.pivot) }))], cells.length, random);
+  const sample = sampleSurface([{ geo: cp.geo, matrix: new THREE.Matrix4() }, ...cp.moving.map((mv) => ({ geo: mv.geo, matrix: new THREE.Matrix4().makeTranslation(...mv.pivot) }))], cells.length, random, brand);
   const voxel = THREE.MathUtils.clamp(Math.sqrt((sample.area * S * S) / cells.length) * 1.15, 0.45, 1.3);
   const footprint = Math.max(bsize.x, bsize.z) * S / 2;
   const spread = (n * 0.5) / Math.max(1, footprint);

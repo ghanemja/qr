@@ -678,5 +678,423 @@
  ],
  "bricks": [
   "Databricks"
- ]
+ ],
+ "_looks": {
+  "JPMorgan Chase": {
+   "v": 0,
+   "a": "#2a5aa8",
+   "b": "#8b6b3e"
+  },
+  "Goldman Sachs Group": {
+   "v": 1,
+   "a": "#7399c6",
+   "b": "#c9a227"
+  },
+  "Citigroup": {
+   "v": 2,
+   "a": "#056dae",
+   "b": "#d71e28"
+  },
+  "Capital One Financial": {
+   "v": 3,
+   "a": "#d22e1e",
+   "b": "#004977"
+  },
+  "Morgan Stanley": {
+   "v": 4,
+   "a": "#1d3c78",
+   "b": "#9fb3c8"
+  },
+  "Bank of America": {
+   "v": 5,
+   "a": "#e31837",
+   "b": "#012169"
+  },
+  "Wells Fargo": {
+   "v": 6,
+   "a": "#d71e28",
+   "b": "#ffcd41"
+  },
+  "Berkshire Hathaway": {
+   "v": 5,
+   "a": "#1f3a5f",
+   "b": "#c9a227",
+   "base": 2
+  },
+  "Mastercard": {
+   "v": 0,
+   "a": "#eb001b",
+   "b": "#f79e1b"
+  },
+  "PayPal Holdings": {
+   "v": 1,
+   "a": "#003087",
+   "b": "#009cde"
+  },
+  "Visa": {
+   "v": 2,
+   "a": "#1a1f71",
+   "b": "#f7b600"
+  },
+  "American Express": {
+   "v": 2,
+   "a": "#2e77bc",
+   "b": "#e8eef5",
+   "base": 1
+  },
+  "Stripe": {
+   "v": 0,
+   "a": "#635bff",
+   "b": "#00d4ff",
+   "base": 1
+  },
+  "Apple": {
+   "v": 0,
+   "a": "#a3aaae",
+   "b": "#1d1d1f"
+  },
+  "Dell Technologies": {
+   "v": 1,
+   "a": "#0076ce",
+   "b": "#1d1d1f"
+  },
+  "IBM": {
+   "v": 2,
+   "a": "#0f62fe",
+   "b": "#161616"
+  },
+  "Microsoft": {
+   "v": 1,
+   "a": "#00a4ef",
+   "b": "#7fba00"
+  },
+  "Oracle": {
+   "v": 0,
+   "a": "#c74634",
+   "b": "#f4f1ea"
+  },
+  "salesforce.com": {
+   "v": 0,
+   "a": "#00a1e0",
+   "b": "#032d60",
+   "base": 1
+  },
+  "Amazon.com": {
+   "v": 0,
+   "a": "#ff9900",
+   "b": "#232f3e"
+  },
+  "United Parcel Service": {
+   "v": 1,
+   "a": "#644117",
+   "b": "#ffb500"
+  },
+  "FedEx": {
+   "v": 1,
+   "a": "#4d148c",
+   "b": "#ff6600",
+   "base": 1
+  },
+  "Alphabet": {
+   "v": 0,
+   "a": "#4285f4",
+   "b": "#ea4335"
+  },
+  "Facebook": {
+   "v": 0,
+   "a": "#0866ff",
+   "b": "#1c2b33"
+  },
+  "Tesla": {
+   "v": 0,
+   "a": "#cc0000",
+   "b": "#e8e8e8"
+  },
+  "Ford Motor": {
+   "v": 1,
+   "a": "#003478",
+   "b": "#c9d1d9"
+  },
+  "General Motors": {
+   "v": 0,
+   "a": "#0170ce",
+   "b": "#c9d1d9"
+  },
+  "Goodyear Tire & Rubber": {
+   "v": 2,
+   "a": "#ffdd00",
+   "b": "#004990"
+  },
+  "Nvidia": {
+   "v": 1,
+   "a": "#76b900",
+   "b": "#1a1a1a"
+  },
+  "Intel": {
+   "v": 0,
+   "a": "#0071c5",
+   "b": "#7ac7ff"
+  },
+  "Advanced Micro Devices": {
+   "v": 0,
+   "a": "#ed1c24",
+   "b": "#1a1a1a"
+  },
+  "Micron Technology": {
+   "v": 2,
+   "a": "#0b5394",
+   "b": "#1a1a1a"
+  },
+  "Exxon Mobil": {
+   "v": 0,
+   "a": "#ed1b2d",
+   "b": "#0b4ea2"
+  },
+  "Chevron": {
+   "v": 2,
+   "a": "#0054a4",
+   "b": "#e31937"
+  },
+  "ConocoPhillips": {
+   "v": 1,
+   "a": "#e31937",
+   "b": "#2b2f36"
+  },
+  "Walmart": {
+   "v": 0,
+   "a": "#0071ce",
+   "b": "#ffc220"
+  },
+  "Target": {
+   "v": 1,
+   "a": "#cc0000",
+   "b": "#ffffff"
+  },
+  "Home Depot": {
+   "v": 2,
+   "a": "#f96302",
+   "b": "#ffffff"
+  },
+  "Costco Wholesale": {
+   "v": 0,
+   "a": "#e31837",
+   "b": "#005daa",
+   "base": 1
+  },
+  "Coca-Cola": {
+   "v": 0,
+   "a": "#e41e2b",
+   "b": "#ffffff"
+  },
+  "PepsiCo": {
+   "v": 2,
+   "a": "#004b93",
+   "b": "#e32934"
+  },
+  "Starbucks": {
+   "v": 1,
+   "a": "#00704a",
+   "b": "#ffffff"
+  },
+  "McDonald's": {
+   "v": 0,
+   "a": "#da291c",
+   "b": "#ffc72c"
+  },
+  "Boeing": {
+   "v": 1,
+   "a": "#0039a6",
+   "b": "#c9d1d9"
+  },
+  "Delta Air Lines": {
+   "v": 1,
+   "a": "#c8102e",
+   "b": "#003366",
+   "base": 1
+  },
+  "Marriott International": {
+   "v": 2,
+   "a": "#b2272d",
+   "b": "#2b2f36"
+  },
+  "AT&T": {
+   "v": 0,
+   "a": "#00a8e0",
+   "b": "#1d1d1d"
+  },
+  "Verizon Communications": {
+   "v": 0,
+   "a": "#cd040b",
+   "b": "#1d1d1d",
+   "base": 1
+  },
+  "OpenAI": {
+   "v": 0,
+   "a": "#10a37f",
+   "b": "#1d1d1d"
+  },
+  "Anthropic": {
+   "v": 0,
+   "a": "#d97757",
+   "b": "#3d3929",
+   "base": 1
+  },
+  "SpaceX": {
+   "v": 0,
+   "a": "#005288",
+   "b": "#a7a9ac"
+  },
+  "Lockheed Martin": {
+   "v": 1,
+   "a": "#1f3a6e",
+   "b": "#9aa6b8"
+  },
+  "Northrop Grumman": {
+   "v": 2,
+   "a": "#0b2b57",
+   "b": "#d9a93a"
+  },
+  "Walt Disney": {
+   "v": 0,
+   "a": "#113ccf",
+   "b": "#ffd23f"
+  },
+  "Netflix": {
+   "v": 0,
+   "a": "#e50914",
+   "b": "#221f1f",
+   "base": 1
+  },
+  "State Farm Insurance": {
+   "v": 0,
+   "a": "#e31837",
+   "b": "#ffffff"
+  },
+  "Allstate": {
+   "v": 1,
+   "a": "#0033a0",
+   "b": "#9fb3c8"
+  },
+  "UnitedHealth Group": {
+   "v": 1,
+   "a": "#002677",
+   "b": "#f5b335"
+  },
+  "CVS Health": {
+   "v": 0,
+   "a": "#cc0000",
+   "b": "#ffffff"
+  },
+  "Pfizer": {
+   "v": 2,
+   "a": "#0093d0",
+   "b": "#ffffff"
+  },
+  "General Electric": {
+   "v": 0,
+   "a": "#3b73b9",
+   "b": "#2b2f36"
+  },
+  "Caterpillar": {
+   "v": 1,
+   "a": "#ffcd11",
+   "b": "#1a1a1a"
+  }
+ },
+ "_variantLabels": {
+  "bank": [
+   "Flying money",
+   "Gold bars with wings",
+   "The vault",
+   "Piggy bank",
+   "Charging bull",
+   "The bank",
+   "Stagecoach"
+  ],
+  "payments": [
+   "Card & coins",
+   "Wallet",
+   "Card with wings"
+  ],
+  "insurance": [
+   "Rainy-day umbrella",
+   "Shield",
+   "Lifebuoy"
+  ],
+  "health": [
+   "Medicine",
+   "Heartbeat",
+   "Pill bottle"
+  ],
+  "oil": [
+   "Oil derrick",
+   "Pumpjack",
+   "Storage tank"
+  ],
+  "power": [
+   "Wind turbine",
+   "Power lines",
+   "Light bulb"
+  ],
+  "retail": [
+   "Shopping cart",
+   "Shopping bag",
+   "Storefront"
+  ],
+  "parcel": [
+   "Parcels on the move",
+   "Delivery van",
+   "Parcel with wings"
+  ],
+  "car": [
+   "Showroom",
+   "Pickup truck",
+   "Giant tire"
+  ],
+  "plane": [
+   "Control tower",
+   "Airliner",
+   "Hotel"
+  ],
+  "rocket": [
+   "Launch pad",
+   "Fighter jet",
+   "Satellite"
+  ],
+  "chip": [
+   "Silicon",
+   "Graphics card",
+   "Memory"
+  ],
+  "computer": [
+   "Laptop",
+   "Desktop",
+   "Server rack"
+  ],
+  "software": [
+   "Cloud apps",
+   "Browser",
+   "App blocks"
+  ],
+  "ai": [
+   "AI assistant",
+   "Brain",
+   "Neural network"
+  ],
+  "industrial": [
+   "Machine shop",
+   "Tower crane",
+   "Hard hat"
+  ],
+  "food": [
+   "Order up",
+   "Pizza",
+   "Donuts"
+  ],
+  "drink": [
+   "Soda",
+   "Coffee",
+   "Bottles"
+  ]
+ }
 }
