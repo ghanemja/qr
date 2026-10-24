@@ -2,8 +2,8 @@
 
 A static site where every company's QR code is a 3D world.
 
-- `docs/index.html`: one large QR code (it scans to the site) with the US or world map laid across its tiles and every company standing at its headquarters. It has a guided fly-through tour, company search, a USA/World switch and a scan view.
-- `docs/c/<company>.html`: one page per company. Its QR code grows into a tree (spring, summer, autumn) or a city; tap it to settle into a scannable QR that links back to the page.
+- `docs/index.html`: one large QR code (it scans to the site) with the US or world map laid across its tiles and every company standing at its headquarters as its own 3D model. ▶ plays a walkthrough of each tech city and its biggest tech company; searching a company opens its model next to its QR code.
+- `docs/c/<company>.html`: one page per company. Its 3D model stands on a plaza paved with its QR code; tap it and the model breaks into pixels that land on the code, giving a scannable QR that links back to the page.
 - `docs/map.html`: flat 2D map of the same data. `docs/companies.html`: searchable directory.
 
 Covers the 2019 Fortune 500 (latest list available as open data) plus a hand-picked set of startups. Sources and caveats are on `docs/about.html`.
@@ -22,4 +22,4 @@ To publish with GitHub Pages, serve the `docs/` folder. The default `SITE_URL` i
 
 ## Signature models
 
-Each company is drawn as a 3D model of what it does: banks get a vault in a swirl of flying bills, telecoms a cloud raining phones and headsets, oil companies a derrick with barrels, AI labs a glowing orb, and so on. The models live in `src/models.js`; which company gets which model is set in `data/industries.json`. The small pieces float above the QR code's dark squares, so the scene still flattens into a scannable code.
+Each company is drawn as one 3D model of what it does: banks get a flying stack of cash with wings, telecoms a cloud raining phones and headsets, oil companies a derrick, AI labs a chat bubble with a spark, Google a magnifying glass, Meta a VR headset, and so on. The models live in `src/models.js`; which company gets which model is set in `data/industries.json`. `src/qrsculpture.js` turns a model into its QR code: the model is sampled into one pixel per dark square, and each pixel flies to its square.

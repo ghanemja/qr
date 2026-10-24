@@ -88,7 +88,8 @@ export function createStage(container, { viewSize = 30, background = '#f6f1e7' }
   }
   stage.resize = resize;
   window.addEventListener('resize', resize);
-  new ResizeObserver(resize).observe(container);
+  const ro = new ResizeObserver(resize);
+  ro.observe(container);
   resize();
 
   // Light the board from the upper left; shadow camera covers `size` units.
@@ -110,9 +111,20 @@ export function createStage(container, { viewSize = 30, background = '#f6f1e7' }
     for (const f of stage.frame) f(dt, now / 1000);
     controls.update();
     renderer.render(scene, camera);
-    requestAnimationFrame(loop);
+    if (running) requestAnimationFrame(loop);
   }
+  let running = true;
   requestAnimationFrame(loop);
+  // Free the GL context (pages that open and close small stages).
+  stage.dispose = () => {
+    running = false;
+    window.removeEventListener('resize', resize);
+    ro.disconnect();
+    controls.dispose();
+    renderer.dispose();
+    renderer.forceContextLoss();
+    renderer.domElement.remove();
+  };
   return stage;
 }
 

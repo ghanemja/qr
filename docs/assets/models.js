@@ -1,7 +1,6 @@
-// Low-poly signature models. Each archetype has a centerpiece (about 10 units tall, built at
-// the origin) and a set of small "pieces" (about one QR module across) that float above the
-// dark modules, the way the leaves of a tree do. Geometry carries vertex colours, so one
-// material draws everything and instancing stays cheap.
+// Low-poly signature models: one model per kind of company (about 10 units tall, built at the
+// origin), plus optional moving parts (wings that flap, blades that spin, phones that fall).
+// Geometry carries vertex colours, so one material draws everything and instancing stays cheap.
 import * as THREE from 'three';
 import { mergeGeometries } from './BufferGeometryUtils.js';
 
@@ -69,55 +68,6 @@ const K = {
   cream: '#fbf3e3', orange: '#f29a3a', purple: '#8a6cf0', purpleLt: '#c3b4ff', pink: '#f39ab8', teal: '#3fb8a8', yellow: '#ffd23f', tan: '#e2b37a', brown: '#8a5a36',
 };
 
-// ---------- pieces (fit a 1 x 1 module) ----------
-export const PIECES = {
-  leaf: () => part(ball(0.64, 0), '#ffffff'),
-  bill: () => merge(part(box(0.92, 0.03, 0.5), K.money), part(box(0.72, 0.034, 0.34), K.moneyDk), part(cyl(0.11, 0.11, 0.04, 12), '#e7f3df')),
-  coin: () => merge(part(cyl(0.36, 0.36, 0.09, 18), K.gold), part(cyl(0.25, 0.25, 0.1, 18), K.goldDk), part(box(0.06, 0.105, 0.22), K.gold)),
-  card: () => merge(part(box(0.86, 0.04, 0.55), '#ffffff'), part(box(0.86, 0.045, 0.1), K.ink, { p: [0, 0, -0.15] }), part(box(0.15, 0.05, 0.12), K.gold, { p: [-0.24, 0, 0.06] })),
-  phone: () => merge(part(box(0.44, 0.07, 0.86), K.ink), part(box(0.36, 0.075, 0.7), '#7cc0ff', { p: [0, 0.002, -0.02] }), part(box(0.1, 0.08, 0.03), '#9aa3ad', { p: [0, 0, 0.38] })),
-  headset: () => merge(
-    part(torus(0.3, 0.05, Math.PI, 16), K.ink, { r: [0, 0, 0] }),
-    part(cyl(0.15, 0.15, 0.13, 14), K.red, { p: [0.3, -0.02, 0], r: [0, 0, Math.PI / 2] }),
-    part(cyl(0.15, 0.15, 0.13, 14), K.red, { p: [-0.3, -0.02, 0], r: [0, 0, Math.PI / 2] }),
-    part(cyl(0.025, 0.025, 0.32, 6), K.ink, { p: [0.2, -0.12, 0.12], r: [0.9, 0, 0.5] }),
-  ),
-  puff: () => part(ball(0.55, 1), '#ffffff'),
-  drop: () => merge(part(ball(0.2, 1), '#5aa9e6', { s: [1, 1.05, 1] }), part(cone(0.18, 0.32, 10), '#5aa9e6', { p: [0, 0.22, 0] })),
-  oil: () => merge(part(ball(0.22, 1), '#2b2b30'), part(cone(0.2, 0.34, 10), '#2b2b30', { p: [0, 0.24, 0] })),
-  barrel: () => merge(part(cyl(0.3, 0.3, 0.6, 14), '#2f6aa3'), part(cyl(0.315, 0.315, 0.05, 14), '#204a74', { p: [0, 0.16, 0] }), part(cyl(0.315, 0.315, 0.05, 14), '#204a74', { p: [0, -0.16, 0] }), part(cyl(0.22, 0.22, 0.02, 14), '#4c86bf', { p: [0, 0.305, 0] })),
-  bolt: () => merge(part(box(0.16, 0.42, 0.1), K.yellow, { p: [0.06, 0.22, 0], r: [0, 0, -0.35] }), part(box(0.34, 0.1, 0.1), K.yellow, { p: [0, 0.02, 0] }), part(box(0.16, 0.42, 0.1), K.yellow, { p: [-0.06, -0.2, 0], r: [0, 0, -0.35] })),
-  parcel: () => merge(part(box(0.66, 0.5, 0.66), '#c99a62'), part(box(0.67, 0.505, 0.14), '#ead8b5'), part(box(0.16, 0.51, 0.16), '#ffffff', { p: [0.2, 0.002, 0.2] })),
-  bag: () => merge(part(box(0.5, 0.56, 0.26), '#ffffff'), part(box(0.505, 0.1, 0.265), K.ink, { p: [0, 0.2, 0] }), part(torus(0.13, 0.025, Math.PI, 10), K.ink, { p: [0, 0.28, 0] })),
-  tire: () => merge(part(torus(0.26, 0.12, Math.PI * 2, 18), '#2b2b2e', { r: [Math.PI / 2, 0, 0] }), part(cyl(0.16, 0.16, 0.16, 14), K.steel)),
-  suitcase: () => merge(part(box(0.62, 0.44, 0.26), '#ffffff'), part(box(0.64, 0.06, 0.28), K.ink, { p: [0, 0.1, 0] }), part(torus(0.1, 0.025, Math.PI, 8), K.ink, { p: [0, 0.22, 0] })),
-  chipToken: () => merge(part(cyl(0.34, 0.34, 0.09, 18), '#ffffff'), part(cyl(0.22, 0.22, 0.1, 18), K.white), ring(6, (a) => part(box(0.1, 0.095, 0.08), K.white, { p: [Math.cos(a) * 0.3, 0, Math.sin(a) * 0.3], r: [0, -a, 0] }))),
-  die: () => merge(part(box(0.5, 0.5, 0.5), K.white), [[0, 0.251, 0], [0.1, 0.251, 0.1], [-0.1, 0.251, -0.1], [0.251, 0, 0], [-0.251, 0.1, 0.1], [-0.251, -0.1, -0.1]].map((p) => part(ball(0.05, 0), K.red, { p }))),
-  star: () => part(star(0.42, 0.14), K.yellow, { r: [-Math.PI / 2, 0, 0] }),
-  smoke: () => part(ball(0.55, 1), '#e9e6e1'),
-  voxel: () => merge(part(box(0.62, 0.62, 0.62), '#ffffff'), part(box(0.4, 0.64, 0.4), '#f4f4f4')),
-  app: () => merge(part(box(0.66, 0.16, 0.66), '#ffffff'), part(box(0.26, 0.17, 0.26), K.white)),
-  bubble: () => part(ball(0.3, 1), '#ffffff'),
-  ice: () => part(box(0.44, 0.44, 0.44), '#d6eef9', { r: [0.3, 0.4, 0.1] }),
-  heart: () => merge(part(ball(0.2, 1), '#ffffff', { p: [-0.13, 0.08, 0] }), part(ball(0.2, 1), '#ffffff', { p: [0.13, 0.08, 0] }), part(cone(0.27, 0.36, 4), '#ffffff', { p: [0, -0.16, 0], r: [Math.PI, Math.PI / 4, 0] })),
-  speech: () => merge(part(box(0.66, 0.42, 0.14), '#ffffff'), part(cone(0.1, 0.2, 4), '#ffffff', { p: [-0.18, -0.28, 0], r: [Math.PI, 0, 0] }), ring(3, (a, i) => part(ball(0.045, 0), K.ink, { p: [-0.14 + i * 0.14, 0, 0.075] }))),
-  popcorn: () => merge(part(ball(0.18, 0), K.cream), part(ball(0.15, 0), '#fff8e6', { p: [0.16, 0.06, 0.05] }), part(ball(0.13, 0), '#f6d77a', { p: [-0.1, 0.1, 0.12] })),
-  fry: () => merge(part(box(0.1, 0.62, 0.1), '#f3c443', { r: [0, 0, 0.2] }), part(box(0.1, 0.56, 0.1), '#f0b931', { p: [0.14, 0, 0.05], r: [0, 0, -0.15] }), part(box(0.1, 0.5, 0.1), '#f6cd55', { p: [-0.12, 0, -0.06], r: [0.1, 0, 0.05] })),
-  nugget: () => part(ball(0.26, 0), '#d99a43', { s: [1.2, 0.8, 1] }),
-  corn: () => merge(part(new THREE.CapsuleGeometry(0.15, 0.42, 4, 10), '#f5c84a'), part(box(0.12, 0.5, 0.03), '#6cae54', { p: [0.1, -0.08, 0], r: [0, 0, -0.3] }), part(box(0.12, 0.5, 0.03), '#5f9f49', { p: [-0.1, -0.08, 0], r: [0, 0, 0.3] })),
-  hay: () => merge(part(cyl(0.3, 0.3, 0.5, 14), '#e3c169', { r: [Math.PI / 2, 0, 0] }), part(cyl(0.305, 0.305, 0.05, 14), '#c9a24a', { r: [Math.PI / 2, 0, 0] })),
-  gear: () => merge(part(cyl(0.28, 0.28, 0.14, 16), '#ffffff'), part(cyl(0.09, 0.09, 0.15, 10), K.dark), ring(8, (a) => part(box(0.12, 0.14, 0.12), '#ffffff', { p: [Math.cos(a) * 0.32, 0, Math.sin(a) * 0.32], r: [0, -a, 0] }))),
-  screw: () => merge(part(cyl(0.07, 0.07, 0.46, 8), K.steel), part(cyl(0.16, 0.16, 0.1, 6), K.steelDk, { p: [0, 0.25, 0] })),
-  molecule: () => merge(part(ball(0.18, 1), '#ffffff', { p: [-0.2, 0, 0] }), part(ball(0.14, 1), K.white, { p: [0.22, 0.08, 0] }), part(cyl(0.04, 0.04, 0.4, 6), K.steel, { p: [0, 0.04, 0], r: [0, 0, Math.PI / 2 - 0.2] })),
-  ingot: () => part(cyl(0.22, 0.32, 0.2, 4), '#ffffff', { r: [0, Math.PI / 4, 0], s: [1.3, 1, 0.8] }),
-  ibeam: () => merge(part(box(0.9, 0.06, 0.3), '#b0643c'), part(box(0.9, 0.06, 0.3), '#b0643c', { p: [0, 0.28, 0] }), part(box(0.9, 0.24, 0.06), '#97522f', { p: [0, 0.14, 0] })),
-  house: () => merge(part(box(0.5, 0.36, 0.44), K.white), part(prism(0.62, 0.3, 0.5), '#ffffff', { p: [0, 0.18, 0] }), part(box(0.12, 0.2, 0.02), K.wood, { p: [0, -0.08, 0.225] })),
-  neuron: () => merge(part(ball(0.24, 1), '#ffffff'), ring(3, (a) => part(cyl(0.025, 0.025, 0.3, 5), K.purpleLt, { p: [Math.cos(a) * 0.3, 0, Math.sin(a) * 0.3], r: [0, -a, Math.PI / 2] }))),
-  spark: () => part(star(0.3, 0.1), '#ffffff', { r: [-Math.PI / 2, 0, 0] }),
-  capsule: () => part(new THREE.CapsuleGeometry(0.17, 0.42, 4, 12), (x) => (x > 0 ? K.red : K.white), { r: [0, 0, Math.PI / 2] }),
-  plane: () => merge(part(extrude([[0, 0.45], [0.3, -0.35], [0, -0.2]], 0.02), K.white, { r: [-Math.PI / 2, 0, 0] }), part(extrude([[0, 0.45], [-0.3, -0.35], [0, -0.2]], 0.02), '#e9eef5', { r: [-Math.PI / 2, 0, 0], p: [0, 0.03, 0] })),
-};
-
 // ---------- centerpieces (≈10 units tall) ----------
 const columns = (n, x0, x1, z, h, y, color) => Array.from({ length: n }, (_, i) => part(cyl(0.34, 0.38, h, 12), color, { p: [x0 + ((x1 - x0) * i) / (n - 1), y + h / 2, z] }));
 const cloud = (y, s, tone = K.white, dark = '#dfe5ec') => merge(
@@ -127,15 +77,29 @@ const cloud = (y, s, tone = K.white, dark = '#dfe5ec') => merge(
 const wheel = (p, r = 0.6, w = 0.45) => [part(cyl(r, r, w, 16), '#2b2b2e', { p, r: [Math.PI / 2, 0, 0] }), part(cyl(r * 0.5, r * 0.5, w + 0.04, 12), K.steel, { p, r: [Math.PI / 2, 0, 0] })];
 
 const CENTER = {
-  bank: () => ({ geo: merge(
-    part(box(9, 0.5, 7), K.stoneDk, { p: [0, 0.25, 0] }), part(box(8.2, 0.5, 6.2), K.stone, { p: [0, 0.75, 0] }), part(box(7.4, 0.4, 5.4), K.stoneDk, { p: [0, 1.2, 0] }),
-    part(box(6.2, 4.4, 3.6), '#e4d8c2', { p: [0, 3.6, -0.6] }),
-    columns(6, -3.2, 3.2, 2.1, 4.4, 1.4, K.white), columns(6, -3.2, 3.2, -2.1, 4.4, 1.4, K.white),
-    part(box(7.8, 0.7, 5.6), K.stone, { p: [0, 6.15, 0] }),
-    part(prism(8.2, 2, 5.8), '#d9c9a8', { p: [0, 6.5, 0], r: [0, Math.PI / 2, 0], s: [0.71, 1, 1.41] }),
-    part(cyl(0.75, 0.75, 0.25, 20), K.gold, { p: [0, 7.15, 2.95], r: [Math.PI / 2, 0, 0] }),
-    part(box(1.6, 2.6, 0.2), '#b88a3a', { p: [0, 2.7, 1.25] }),
-  ) }),
+  // A stack of cash with wings.
+  bank: () => {
+    const bills = [];
+    for (let i = 0; i < 7; i++) bills.push(part(box(7, 0.36, 3.6), i % 2 ? K.money : '#86c788', { p: [((i * 37) % 5) * 0.06 - 0.12, 3.4 + i * 0.38, ((i * 53) % 5) * 0.06 - 0.12], r: [0, ((i * 29) % 7) * 0.012 - 0.04, 0] }));
+    // A wing spreads out sideways (x) with feathers fanning backwards; it flaps about the front-back axis.
+    const wing = (side) => merge(
+      part(box(1.6, 0.5, 2.4), '#eef0ec', { p: [side * 0.7, 0, 0] }),
+      [[6.2, 0.05], [5.4, 0.3], [4.6, 0.55], [3.6, 0.8]].map(([len, ang], i) => part(box(len, 0.2, 1.25), i % 2 ? '#ffffff' : '#f1f3f0', { p: [side * Math.cos(ang) * len * 0.5, 0.05 * i, -Math.sin(ang) * len * 0.5 - 0.2], r: [0, side * ang, 0] })),
+    );
+    return {
+      geo: merge(bills,
+        part(box(7.05, 0.5, 1.3), '#f3e6c4', { p: [0, 5.15, 0] }), part(box(1.3, 2.66, 3.65), '#f3e6c4', { p: [0, 4.6, 0] }),
+        part(cyl(0.75, 0.75, 0.16, 20), K.gold, { p: [0, 4.7, 1.86], r: [Math.PI / 2, 0, 0] }), part(box(0.18, 0.95, 0.17), K.goldDk, { p: [0, 4.7, 1.95] }),
+        part(box(5.6, 0.04, 0.9), K.moneyDk, { p: [0, 6.03, 0.9] }), part(box(5.6, 0.04, 0.9), K.moneyDk, { p: [0, 6.03, -0.9] }),
+        part(box(2.2, 0.08, 1.1), K.money, { p: [4.2, 6.8, 1.8], r: [0.4, 0.5, 0.3] }), part(box(2.2, 0.08, 1.1), '#86c788', { p: [-4.4, 7.2, -1.4], r: [-0.3, 0.8, -0.4] }),
+      ),
+      moving: [
+        { geo: wing(1), pivot: [3.4, 5.4, -0.2], axis: [0, 0, 1], mode: 'flap', amp: 0.5, speed: 5 },
+        { geo: wing(-1), pivot: [-3.4, 5.4, -0.2], axis: [0, 0, -1], mode: 'flap', amp: 0.5, speed: 5 },
+      ],
+      hover: 0.6,
+    };
+  },
   payments: () => ({ geo: merge(
     part(box(3.4, 0.6, 2.4), K.dark, { p: [0, 0.3, 0] }),
     part(box(8.6, 5.4, 0.35), (x, y) => (y > 6.6 && y < 7.4 ? K.ink : K.blue), { p: [0, 3.6 + 1.4, 0], r: [-0.18, 0, 0] }),
@@ -256,11 +220,20 @@ const CENTER = {
     cloud(8, 1.15), ring(5, (a, i) => part(cyl(0.08, 0.08, 6.4, 6), i % 2 ? '#7cc0ff' : '#bfe3ff', { p: [-2.4 + i * 1.2, 3.6, (i % 3) - 1] })),
     part(cyl(3, 3.3, 0.5, 24), K.white, { p: [0, 0.25, 0] }), part(cyl(2.2, 2.2, 0.52, 24), '#bfe3ff', { p: [0, 0.27, 0] }),
   ) }),
-  comms: () => ({ geo: merge(
-    cloud(10.5, 1.25, '#f3f5f8', '#b9c3cf'),
-    part(box(3.6, 1.4, 2.4), K.red, { p: [0, 0.7, 0] }), part(cyl(1, 1, 0.3, 16), K.white, { p: [0, 1.45, 0.3] }),
-    part(cyl(0.4, 0.4, 3.4, 10), K.red, { p: [0, 2.1, -0.6], r: [0, 0, Math.PI / 2] }), part(box(0.9, 0.6, 1), K.red, { p: [1.6, 2.2, -0.6] }), part(box(0.9, 0.6, 1), K.red, { p: [-1.6, 2.2, -0.6] }),
-  ) }),
+  // A storm cloud raining phones and headsets onto an old telephone.
+  comms: () => {
+    const phone = () => merge(part(box(1.5, 0.25, 2.9), K.ink), part(box(1.25, 0.26, 2.4), '#7cc0ff', { p: [0, 0.01, -0.06] }));
+    const headset = () => merge(part(torus(1.1, 0.18, Math.PI, 16), K.ink), part(cyl(0.55, 0.55, 0.45, 14), K.red, { p: [1.1, -0.05, 0], r: [0, 0, Math.PI / 2] }), part(cyl(0.55, 0.55, 0.45, 14), K.red, { p: [-1.1, -0.05, 0], r: [0, 0, Math.PI / 2] }));
+    const drops = [[-2.6, 0.4, phone], [1.8, 1.2, headset], [0.2, -1.8, phone], [3.4, -0.8, phone], [-1.2, 2.2, headset], [-3.6, -1.4, headset], [2.4, 2.6, phone]];
+    return {
+      geo: merge(
+        cloud(10.5, 1.25, '#f3f5f8', '#b9c3cf'),
+        part(box(3.6, 1.4, 2.4), K.red, { p: [0, 0.7, 0] }), part(cyl(1, 1, 0.3, 16), K.white, { p: [0, 1.45, 0.3] }),
+        part(cyl(0.4, 0.4, 3.4, 10), K.red, { p: [0, 2.1, -0.6], r: [0, 0, Math.PI / 2] }), part(box(0.9, 0.6, 1), K.red, { p: [1.6, 2.2, -0.6] }), part(box(0.9, 0.6, 1), K.red, { p: [-1.6, 2.2, -0.6] }),
+      ),
+      moving: drops.map(([x, z, make], i) => ({ geo: make(), pivot: [x, 9, z], axis: [1, 0.3, 0.2], mode: 'drop', drop: 8.2, speed: 0.35, phase: i / drops.length })),
+    };
+  },
   social: () => ({ geo: merge(
     part(box(3.6, 7.2, 0.5), K.ink, { p: [-0.8, 3.8, 0], r: [-0.1, 0.2, 0] }), part(box(3.2, 6.2, 0.05), (x, y) => (y > 5.8 ? '#8fb7ff' : '#dfe8ff'), { p: [-0.75, 3.85, 0.28], r: [-0.1, 0.2, 0] }),
     part(box(3.2, 2, 0.5), K.white, { p: [2.4, 7.6, 1] }), part(cone(0.4, 0.8, 4), K.white, { p: [1.4, 6.4, 1], r: [Math.PI, 0, 0] }),
@@ -329,10 +302,43 @@ const CENTER = {
     part(cyl(0.12, 0.12, 2.6, 6), K.wood, { p: [4.4, 1.3, 2.6] }), part(box(1.8, 1.1, 0.1), K.red, { p: [4.4, 2.4, 2.6] }),
     part(ball(1, 1), K.green, { p: [-4.2, 1.4, 1.8] }), part(cyl(0.15, 0.2, 0.8, 6), K.wood, { p: [-4.2, 0.4, 1.8] }),
   ) }),
-  ai: () => ({
-    geo: merge(part(cyl(2.6, 3, 1, 24), K.white, { p: [0, 0.5, 0] }), part(cyl(0.5, 0.8, 3, 12), K.steel, { p: [0, 2.5, 0] }), part(ball(3, 2), K.purple, { p: [0, 7, 0] }), part(ball(2.2, 1), K.purpleLt, { p: [0.6, 7.6, 1.4] })),
-    spin: { geo: merge(part(torus(4.6, 0.14, Math.PI * 2, 48), K.purpleLt, { r: [Math.PI / 2 - 0.4, 0, 0], p: [0, 7, 0] }), part(torus(5.4, 0.1, Math.PI * 2, 48), '#ffffff', { r: [Math.PI / 2 + 0.5, 0.3, 0], p: [0, 7, 0] }), part(ball(0.4, 1), K.yellow, { p: [4.6, 7, 0] })), pivot: [0, 0, 0], axis: [0, 1, 0], speed: 0.6 },
-  }),
+  // An assistant you talk to: a chat bubble with a glowing spark.
+  ai: () => {
+    const W = 8, H = 5.2, D = 1.4, r = 1.1, y0 = 3.2;
+    const bubble = merge(
+      part(box(W - 2 * r, H, D), K.cream, { p: [0, y0 + H / 2, 0] }), part(box(W, H - 2 * r, D), K.cream, { p: [0, y0 + H / 2, 0] }),
+      [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([sx, sy]) => part(cyl(r, r, D, 16), K.cream, { p: [sx * (W / 2 - r), y0 + H / 2 + sy * (H / 2 - r), 0], r: [Math.PI / 2, 0, 0] })),
+      part(extrude([[0, 0], [1.6, 0], [-0.4, -1.6]], D * 0.9), K.cream, { p: [-1.8, y0 + 0.05, 0] }),
+      [2.0, 0.9].map((w, i) => part(box(w * 2.4, 0.42, 0.1), i ? '#c9bfae' : '#b3a893', { p: [-2.6 + w * 1.2, y0 + H - 1.5 - i * 1.0, D / 2 + 0.04] })),
+    );
+    const ray = (a, len, w) => part(box(w, len, w * 0.9), K.orange, { p: [Math.cos(a) * len / 2, Math.sin(a) * len / 2, 0], r: [0, 0, a - Math.PI / 2] });
+    return {
+      geo: merge(bubble, part(cyl(2.4, 2.8, 0.6, 24), K.white, { p: [0, 0.3, 0] }), part(cyl(0.35, 0.45, 2.6, 10), K.steel, { p: [0, 1.6, 0] })),
+      moving: [{ geo: merge(ring(8, (a, i) => ray(a, i % 2 ? 2.1 : 3.1, 0.6)), part(ball(0.75, 1), '#ffb38a')), pivot: [2.2, y0 + H / 2 - 0.2, D / 2 + 0.7], axis: [0, 0, 1], mode: 'spin', speed: 0.5 }],
+    };
+  },
+  // Search: a magnifying glass.
+  search: () => ({ geo: merge(
+    part(cyl(3, 3.3, 0.6, 28), K.white, { p: [0, 0.3, 0] }),
+    part(torus(2.8, 0.55, Math.PI * 2, 36), K.ink, { p: [0, 6.6, 0], r: [0, 0, 0] }), part(cyl(2.5, 2.5, 0.2, 28), '#cfe9f7', { p: [0, 6.6, 0], r: [Math.PI / 2, 0, 0] }),
+    part(box(0.9, 0.3, 0.1), '#ffffff', { p: [-0.9, 7.6, 0.12], r: [0, 0, 0.6] }),
+    part(cyl(0.55, 0.65, 4, 14), K.ink, { p: [0, 2.4, 0] }), part(cyl(0.7, 0.7, 0.5, 14), K.blue, { p: [0, 3.6, 0] }),
+  ), hover: 0.25 }),
+  // A VR headset.
+  vr: () => ({ geo: merge(
+    part(box(7, 3.4, 3), K.ink, { p: [0, 5, 0] }), part(box(6.4, 2.8, 0.2), '#3d4a63', { p: [0, 5, 1.55] }), part(box(5.6, 0.25, 0.25), '#7cc0ff', { p: [0, 5.6, 1.66] }),
+    part(box(7.2, 3.6, 0.6), '#cfd5dc', { p: [0, 5, -1.6] }), part(cyl(0.9, 0.9, 0.4, 16), '#2b2f36', { p: [-1.6, 5, -2], r: [Math.PI / 2, 0, 0] }), part(cyl(0.9, 0.9, 0.4, 16), '#2b2f36', { p: [1.6, 5, -2], r: [Math.PI / 2, 0, 0] }),
+    part(torus(3.6, 0.3, Math.PI, 24), K.dark, { p: [0, 5, -1.9], r: [Math.PI / 2, 0, 0] }), part(cyl(3, 3.3, 0.5, 24), K.white, { p: [0, 0.25, 0] }),
+  ), hover: 0.5 }),
+  // Databricks: a stack of bricks.
+  bricks: () => {
+    const parts = [part(box(8.4, 0.4, 5.4), K.stoneDk, { p: [0, 0.2, 0] })];
+    for (let layer = 0; layer < 5; layer++) {
+      const w = 4 - Math.floor(layer / 1.5), off = (layer % 2) * 0.9;
+      for (let i = 0; i < w; i++) for (let j = 0; j < 2; j++) parts.push(part(box(1.75, 0.9, 1.75), ['#d4583a', '#c24a30', '#e06a45'][(i + j + layer) % 3], { p: [(i - (w - 1) / 2) * 1.85 + (layer % 2 ? 0.2 : 0), 0.85 + layer * 0.95, (j - 0.5) * 1.85 + off * 0.1] }));
+    }
+    return { geo: merge(parts) };
+  },
   robot: () => ({ geo: merge(
     part(box(1, 3, 1.2), K.steel, { p: [-1, 1.5, 0] }), part(box(1, 3, 1.2), K.steel, { p: [1, 1.5, 0] }), part(box(1.3, 0.5, 1.8), K.dark, { p: [-1, 0.25, 0.2] }), part(box(1.3, 0.5, 1.8), K.dark, { p: [1, 0.25, 0.2] }),
     part(box(4, 3.6, 2.4), K.white, { p: [0, 4.9, 0] }), part(box(2.2, 1.4, 0.1), '#7cc0ff', { p: [0, 5.2, 1.22] }),
@@ -344,54 +350,35 @@ const CENTER = {
     const bark = '#7a5233';
     const parts = [part(cyl(0.9, 1.5, 9, 9), bark, { p: [0, 4.5, 0] })];
     ring(7, (a, i) => parts.push(beam([0, 5.5 + (i % 3) * 0.8, 0], [Math.cos(a) * 4.2, 8.6 + (i % 2) * 0.8, Math.sin(a) * 4.2], 0.4, bark)));
+    const greens = ['#7cc456', '#5fae45', '#94d26a', '#4f9a3c', '#86cc5f'];
+    ring(7, (a, i) => parts.push(part(ball(2.1, 0), greens[i % 5], { p: [Math.cos(a) * 4.2, 9.4 + (i % 2) * 0.8, Math.sin(a) * 4.2] })));
+    ring(5, (a, i) => parts.push(part(ball(2.4, 0), greens[(i + 2) % 5], { p: [Math.cos(a + 0.6) * 2, 11.4, Math.sin(a + 0.6) * 2] })));
+    parts.push(part(ball(2.6, 0), greens[1], { p: [0, 12.8, 0] }));
     return { geo: merge(parts) };
   },
 };
 
 // ---------- archetypes ----------
-// layout: canopy | swirl | rain | pile | orbit.  anim: flutter | spin | tumble | bob.
-export const ARCHETYPES = {
-  bank: { pieces: [['bill', 0.78], ['coin', 0.22]], layout: 'swirl', anim: 'flutter', finder: '#cdb37a' },
-  payments: { pieces: [['card', 0.6], ['coin', 0.4]], tints: { card: ['#3d7be0', '#2b2f36', '#e5533d', '#f0c24a', '#5fae5b', '#8a6cf0'] }, layout: 'swirl', anim: 'flutter', finder: '#9fb5e0' },
-  insurance: { pieces: [['drop', 1]], cloud: true, pieceScale: 1.5, layout: 'rain', anim: 'bob', finder: '#e9a191' },
-  health: { pieces: [['capsule', 0.75], ['heart', 0.25]], tints: { heart: ['#e5533d', '#f39ab8'] }, layout: 'orbit', anim: 'tumble', finder: '#a6d9cf' },
-  oil: { pieces: [['barrel', 0.7, 'low'], ['oil', 0.3]], layout: 'orbit', anim: 'bob', finder: '#6f7883' },
-  power: { pieces: [['bolt', 0.6], ['puff', 0.4, 'high']], tints: { puff: ['#ffffff', '#eef3f8'] }, layout: 'orbit', anim: 'spin', finder: '#ffe27a' },
-  retail: { pieces: [['bag', 0.7], ['parcel', 0.3]], tints: { bag: ['#e5533d', '#3d7be0', '#f29a3a', '#5fae5b', '#f39ab8', '#ffd23f'] }, layout: 'pile', anim: 'bob', finder: '#f0a99b' },
-  parcel: { pieces: [['parcel', 0.85], ['plane', 0.15, 'high']], layout: 'pile', anim: 'bob', finder: '#d9b98c' },
-  car: { pieces: [['tire', 1]], layout: 'orbit', anim: 'spin', finder: '#8d96a1' },
-  plane: { pieces: [['puff', 0.3, 'high'], ['suitcase', 0.7, 'low']], pieceScale: 1.15, tints: { puff: ['#ffffff', '#f1f5fa'], suitcase: ['#e5533d', '#3d7be0', '#f29a3a', '#5fae5b'] }, layout: 'orbit', anim: 'bob', finder: '#9fd0ef' },
-  casino: { pieces: [['chipToken', 0.7], ['die', 0.3]], tints: { chipToken: ['#e5533d', '#2b2f36', '#3d7be0', '#5fae5b'] }, layout: 'swirl', anim: 'flutter', finder: '#2f7d4f' },
-  rocket: { pieces: [['star', 0.55, 'high'], ['smoke', 0.45, 'low']], tints: { smoke: ['#f4f1ec', '#e6e2dc', '#ffffff'] }, layout: 'orbit', anim: 'spin', finder: '#8d96a1' },
-  chip: { pieces: [['voxel', 1]], tints: { voxel: ['#3d7be0', '#3fb8a8', '#8a6cf0', '#7cc0ff', '#2b2f36'] }, layout: 'orbit', anim: 'spin', finder: '#2f6b4a' },
-  computer: { pieces: [['app', 0.6], ['voxel', 0.4]], tints: { app: ['#3d7be0', '#e5533d', '#5fae5b', '#f29a3a', '#8a6cf0'], voxel: ['#7cc0ff', '#bfe3ff'] }, layout: 'orbit', anim: 'bob', finder: '#c9ced6' },
-  software: { pieces: [['app', 1]], tints: { app: ['#3d7be0', '#e5533d', '#5fae5b', '#f29a3a', '#8a6cf0', '#3fb8a8'] }, layout: 'orbit', anim: 'bob', finder: '#bfe3ff' },
-  comms: { pieces: [['headset', 0.5], ['phone', 0.5]], cloud: true, pieceScale: 1.55, layout: 'rain', anim: 'tumble', finder: '#b9c3cf' },
-  social: { pieces: [['heart', 0.5], ['speech', 0.5]], tints: { heart: ['#e5533d', '#f39ab8'], speech: ['#ffffff', '#dfe8ff', '#8fb7ff'] }, layout: 'swirl', anim: 'bob', finder: '#f39ab8' },
-  media: { pieces: [['popcorn', 0.6], ['star', 0.4]], layout: 'orbit', anim: 'tumble', finder: '#e5533d' },
-  food: { pieces: [['fry', 0.6], ['nugget', 0.4]], layout: 'orbit', anim: 'tumble', finder: '#f3c443' },
-  drink: { pieces: [['ice', 0.35, 'low'], ['bubble', 0.65]], tints: { bubble: ['#f7fbff', '#d6eef9', '#ffd6d0'] }, layout: 'orbit', anim: 'bob', finder: '#e5533d' },
-  care: { pieces: [['bubble', 1]], tints: { bubble: ['#d6f2ee', '#f9d9e5', '#e6e0ff', '#ffffff'] }, layout: 'orbit', anim: 'bob', finder: '#7fd1c4' },
-  farm: { pieces: [['corn', 0.7], ['hay', 0.3]], layout: 'pile', anim: 'bob', finder: '#7cbf5a' },
-  industrial: { pieces: [['gear', 0.65], ['screw', 0.35]], tints: { gear: ['#f29a3a', '#a9b1bb', '#7d8792'] }, layout: 'orbit', anim: 'spin', finder: '#f29a3a' },
-  chem: { pieces: [['bubble', 0.55], ['molecule', 0.45]], tints: { bubble: ['#5fd08f', '#8fe0b5', '#3fb8a8'], molecule: ['#e5533d', '#3d7be0', '#5fd08f'] }, layout: 'orbit', anim: 'bob', finder: '#5fd08f' },
-  metal: { pieces: [['ingot', 0.55], ['ibeam', 0.45]], tints: { ingot: ['#f0c24a', '#cfd5dc', '#d98c5f'] }, layout: 'pile', anim: 'bob', finder: '#b0643c' },
-  house: { pieces: [['house', 1]], tints: { house: ['#e5533d', '#3d7be0', '#5fae5b', '#f29a3a', '#7a8fa8'] }, layout: 'pile', anim: 'bob', finder: '#7cbf5a' },
-  ai: { pieces: [['neuron', 0.75], ['spark', 0.25]], tints: { neuron: ['#8a6cf0', '#c3b4ff', '#6fa8ff'], spark: ['#ffd23f', '#ffffff'] }, layout: 'swirl', anim: 'bob', finder: '#c3b4ff', glow: '#5b3fff' },
-  robot: { pieces: [['gear', 0.6], ['screw', 0.4]], tints: { gear: ['#a9b1bb', '#f29a3a', '#7cc0ff'] }, layout: 'orbit', anim: 'spin', finder: '#7cc0ff' },
-  tree: { pieces: [['leaf', 1]], layout: 'canopy', anim: 'none', finder: 'grass' },
+// finder: colour of the QR's corner squares around the model. glow: emissive tint.
+const FINDER = {
+  bank: '#cdb37a', payments: '#9fb5e0', insurance: '#e9a191', health: '#a6d9cf', oil: '#6f7883', power: '#ffe27a', retail: '#f0a99b', parcel: '#d9b98c',
+  car: '#8d96a1', plane: '#9fd0ef', casino: '#2f7d4f', rocket: '#8d96a1', chip: '#2f6b4a', computer: '#c9ced6', software: '#bfe3ff', comms: '#b9c3cf',
+  social: '#f39ab8', media: '#e5533d', food: '#f3c443', drink: '#e5533d', care: '#7fd1c4', farm: '#7cbf5a', industrial: '#f29a3a', chem: '#5fd08f',
+  metal: '#b0643c', house: '#7cbf5a', ai: '#f2b08f', robot: '#7cc0ff', tree: '#6fb84e', search: '#9fc3f2', vr: '#9aa6b8', bricks: '#e06a45',
 };
-for (const [id, a] of Object.entries(ARCHETYPES)) a.id = id;
+export const ARCHETYPES = Object.fromEntries(Object.entries(FINDER).map(([id, finder]) => [id, { id, finder }]));
 
 const cache = new Map();
+// { geo, moving: [{ geo, pivot, axis, mode: spin|flap|drop, speed, amp, drop, phase }], hover }
+// A moving part's geometry is built around its own pivot point.
 export function centerpiece(id) {
-  if (!cache.has(id)) cache.set(id, (CENTER[id] || CENTER.tree)());
+  if (!cache.has(id)) {
+    const c = (CENTER[id] || CENTER.tree)();
+    if (c.spin) c.moving = [{ ...c.spin, mode: 'spin' }];
+    c.moving = c.moving || [];
+    cache.set(id, c);
+  }
   return cache.get(id);
-}
-const pieceCache = new Map();
-export function piece(kind) {
-  if (!pieceCache.has(kind)) pieceCache.set(kind, PIECES[kind]());
-  return pieceCache.get(kind);
 }
 
 // Shared material for everything with vertex colours.

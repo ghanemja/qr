@@ -181,7 +181,7 @@ const board = { ...qrBits(SITE_URL, 25), modes: {} };
   const land = topo.feature(worldTopo, worldTopo.objects.land);
   const n = BOARD_N;
   const modes = {
-    us: { projection: d3.geoConicEqualArea().parallels([29.5, 45.5]).rotate([96, 0]).fitExtent([[5, 5], [n - 5, n - 5]], conus), geo: conus, min: 1.15, keep: (c) => c.country === 'US' },
+    us: { projection: d3.geoConicEqualArea().parallels([29.5, 45.5]).rotate([96, 0]).fitExtent([[5, 5], [n - 5, n - 5]], conus), geo: conus, min: 1.45, keep: (c) => c.country === 'US' },
     world: { projection: d3.geoNaturalEarth1().fitExtent([[3, 3], [n - 3, n - 3]], { type: 'Sphere' }), geo: land, min: 0.42, keep: () => true },
   };
   for (const [id, m] of Object.entries(modes)) {
@@ -305,7 +305,7 @@ const qwTop = (depth, eyeLabel = 'I see QR') => {
     <a class="qw-logo" href="${up}index.html" aria-label="QR Atlas home">${LOGO}</a>
     <button class="qw-pill" id="see" aria-pressed="false"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M12 5C6.5 5 2.7 9.3 1.5 12c1.2 2.7 5 7 10.5 7s9.3-4.3 10.5-7C21.3 9.3 17.5 5 12 5Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-2.2a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6Z"/></svg>${eyeLabel}</button>
   </div>
-  <nav class="qw-nav"><a href="${up}index.html">World</a><a href="${up}map.html">Flat map</a><a href="${up}companies.html">Directory</a></nav>`;
+  <nav class="qw-nav">${depth ? `<a href="${up}index.html">← World</a>` : ''}<a href="${up}about.html">About</a></nav>`;
 };
 const ICONS = {
   spring: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.6"/><path d="M12 9.4c-1.6-3.9 1.4-6.4 3.2-4.6 1.6 1.6-.4 4.6-3.2 4.6Zm2.6 2.6c3.9-1.6 6.4 1.4 4.6 3.2-1.6 1.6-4.6-.4-4.6-3.2ZM12 14.6c1.6 3.9-1.4 6.4-3.2 4.6-1.6-1.6.4-4.6 3.2-4.6ZM9.4 12c-3.9 1.6-6.4-1.4-4.6-3.2 1.6-1.6 4.6.4 4.6 3.2Z"/></svg>',
@@ -341,7 +341,7 @@ function companyPage(c, prev, next) {
   const model = modelOf(c);
   const sub = c.kind === 'f500' ? `Fortune 500 No. ${c.rank} · ${place(c)}` : `${c.sector} startup · ${place(c)}`;
   const data = { slug: c.slug, name: c.name, model, qr: qrBits(pageUrl) };
-  const tabs = [['signature', model === 'tree' ? 'Tree' : MODEL_LABELS[model]], ['spring', 'Spring'], ['summer', 'Summer'], ['autumn', 'Autumn'], ['city', 'City']];
+
   return `${qwHead({ title: `${c.name} · QR Atlas`, description: describe(c), path, depth: 1 })}
 <body class="qw qw-company">
 <section class="qw-stage" id="stage">
@@ -351,14 +351,15 @@ function companyPage(c, prev, next) {
     <p>${esc(sub)}</p>
   </header>
   <canvas class="qw-fallback" id="fallback-qr" width="320" height="320" aria-label="QR code for this page"></canvas>
-  <div class="qw-hint" id="hint">Tap the model to see the QR code</div>
+  <div class="qw-hint" id="hint">${esc(MODEL_LABELS[model] || '')} · tap to turn it into its QR code</div>
   <div class="qw-dock">
     <div class="qw-url">
       <input id="page-url" readonly value="${pageUrl}" aria-label="Link to this page">
       <button class="qw-share" id="share" aria-label="Share link">${ICONS.share}<span id="share-label" class="sr">Share</span></button>
     </div>
-    <div class="qw-tabs" role="group" aria-label="World style">
-      ${tabs.map(([id, label]) => `<button data-theme="${id}" aria-pressed="${id === 'signature'}"${id === 'signature' ? ' class="sig"' : ''}>${ICONS[id]}<span>${esc(label)}</span></button>`).join('')}
+    <div class="qw-tabs" role="group" aria-label="View">
+      <button id="toggle" class="sig" aria-pressed="false">${ICONS.signature}<span id="toggle-label">Turn into QR code</span></button>
+      <button id="dock-download">${ICONS.share.replace('M12 15V3M8 7l4-4 4 4', 'M12 3v12M8 11l4 4 4-4')}<span>Download QR</span></button>
     </div>
   </div>
   <a class="qw-scroll" href="#info" aria-label="Company details">Details ↓</a>
@@ -559,12 +560,13 @@ function worldPage() {
     <h2 id="card-name"></h2>
     <p class="place" id="card-place"></p>
     <dl class="qw-facts" id="card-facts"></dl>
+    <div class="qw-show">
+      <div class="show-stage" id="show-stage" aria-label="3D model that turns into this company's QR code"></div>
+      <button class="qw-show-toggle" id="show-toggle">Turn into QR code</button>
+    </div>
     <div class="row">
-      <canvas id="card-qr" width="120" height="120" aria-label="QR code for this company's page"></canvas>
-      <div>
-        <a class="qw-btn primary" id="card-open" href="#">Open its QR world</a>
-        <button class="qw-btn" id="card-copy">Copy link</button>
-      </div>
+      <a class="qw-btn primary" id="card-open" href="#">Open its page</a>
+      <button class="qw-btn" id="card-copy">Copy link</button>
     </div>
     <h3 id="card-near-h"></h3>
     <ul class="qw-chips" id="card-near"></ul>
@@ -654,7 +656,7 @@ ${topbar(0)}
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(join(OUT, 'c'), { recursive: true });
 mkdirSync(join(OUT, 'assets'), { recursive: true });
-for (const f of ['site.css', 'qrworld.css', 'atlas.js', 'qr-card.js', 'directory.js', 'icon.svg', 'qrworld.js', 'models.js', 'company3d.js', 'world.js']) copyFileSync(join(ROOT, 'src', f), join(OUT, 'assets', f));
+for (const f of ['site.css', 'qrworld.css', 'atlas.js', 'qr-card.js', 'directory.js', 'icon.svg', 'qrworld.js', 'models.js', 'qrsculpture.js', 'company3d.js', 'world.js']) copyFileSync(join(ROOT, 'src', f), join(OUT, 'assets', f));
 copyFileSync(join(ROOT, 'node_modules/three/examples/jsm/utils/BufferGeometryUtils.js'), join(OUT, 'assets/BufferGeometryUtils.js'));
 copyFileSync(join(ROOT, 'node_modules/qrcode-generator/qrcode.js'), join(OUT, 'assets/qrcode.js'));
 copyFileSync(join(ROOT, 'node_modules/three/build/three.module.min.js'), join(OUT, 'assets/three.module.min.js'));

@@ -1,7 +1,8 @@
 // The QR world: one giant QR code (it scans to this site) with the map laid on its tiles and
 // every company standing on it as a 3D model. Tour, search, USA/World, and scan view.
-import { THREE, SEASONS, createStage, buildSlab, buildInk, decodeBits, setCamera, cameraState, flyCamera, stopFlight, tween, lerp, toScreen, webglAvailable } from './qrworld.js';
-import { ARCHETYPES, centerpiece, piece, modelMaterial } from './models.js';
+import { THREE, createStage, buildSlab, buildInk, decodeBits, setCamera, cameraState, flyCamera, stopFlight, tween, lerp, toScreen, webglAvailable } from './qrworld.js';
+import { ARCHETYPES, centerpiece, modelMaterial } from './models.js';
+import { createQRWorld } from './qrsculpture.js';
 
 const { board, regions, listYear } = window.WORLD;
 const DATA = window.COMPANIES;
@@ -74,7 +75,7 @@ function start() {
   let flatten = 0; // 0 = 3D, 1 = flat for scan view
   function layoutBlocks() {
     darkCells.forEach(([r, c], i) => {
-      const h = lerp(blockH(r, c), 0.02, flatten);
+      const h = lerp(blockH(r, c), 0.02, Math.min(1, Math.max(0, (flatten - ((r + c) / (2 * N)) * 0.5) / 0.4)));
       blocks.setMatrixAt(i, m4.compose(p.set(cellX(c), 0.14, cellX(r)), q.identity(), s.set(1, h, 1)));
       const pal = land(r, c) ? COLORS.hedge : COLORS.water;
       blocks.setColorAt(i, col.set(pal[(r + c) % 3]));
@@ -87,69 +88,50 @@ function start() {
 
   // ---------- company models ----------
   // Every company stands on the board as its own signature model (src/models.js), sized by
-  // revenue, with two of its pieces circling overhead.
+  // revenue, with its moving parts (wings, blades, falling phones) animated.
   const MAXV = Math.max(...DATA.map((d) => d.v || 0));
   const archOf = (d) => (ARCHETYPES[d.m] ? d.m : 'tree');
-  const materials = new Map();
-  const matFor = (a) => {
-    if (!materials.has(a)) materials.set(a, modelMaterial({ glow: ARCHETYPES[a].glow }));
-    return materials.get(a);
-  };
-  // Model bounds (centerpiece plus its moving part), used to size each company.
+  const mat = modelMaterial();
+  // Model bounds (body plus moving parts), used to size each company.
   const bounds = new Map();
   const boundsOf = (a) => {
     if (!bounds.has(a)) {
       const cp = centerpiece(a);
       const b = new THREE.Box3().setFromBufferAttribute(cp.geo.attributes.position);
-      if (cp.spin) b.union(new THREE.Box3().setFromBufferAttribute(cp.spin.geo.attributes.position));
+      for (const mv of cp.moving) b.union(new THREE.Box3().setFromBufferAttribute(mv.geo.attributes.position).translate(new THREE.Vector3(...mv.pivot)));
       const size = b.getSize(new THREE.Vector3());
       bounds.set(a, { h: Math.max(3, b.max.y), w: Math.max(size.x, size.z) });
     }
     return bounds.get(a);
   };
-  const height = (d) => (d.k === 0 ? 1.3 + 6 * Math.sqrt((d.v || 0) / MAXV) : 1.9) * (d.m === 'tree' ? 0.9 : 1);
+  const height = (d) => (d.k === 0 ? 1.3 + 5.5 * Math.sqrt((d.v || 0) / MAXV) : 1.8);
   const modelScale = (d) => {
     const b = boundsOf(archOf(d));
-    const maxW = d.k === 0 ? 1.1 + 1.8 * Math.sqrt((d.v || 0) / MAXV) : 1.25;
+    const maxW = d.k === 0 ? 1.0 + 1.5 * Math.sqrt((d.v || 0) / MAXV) : 1.1;
     return Math.min(height(d) / b.h, maxW / b.w);
   };
   const meshes = {}; // name -> InstancedMesh (pickable)
   const owner = new Map(); // `${name}:${i}` -> company index
-  const slots = DATA.map(() => ({}));
+  const slots = DATA.map(() => 0);
   const byArch = new Map();
   DATA.forEach((d, di) => {
     const a = archOf(d);
     if (!byArch.has(a)) byArch.set(a, []);
     byArch.get(a).push(di);
   });
-  const halos = new Map(); // piece kind -> { im, list: [{ di, k }] }
   for (const [a, list] of byArch) {
     const cp = centerpiece(a);
-    const im = new THREE.InstancedMesh(cp.geo, matFor(a), list.length);
-    im.castShadow = im.receiveShadow = true;
-    meshes[`c:${a}`] = im;
-    scene.add(im);
-    list.forEach((di, i) => { slots[di].c = i; owner.set(`c:${a}:${i}`, di); });
-    if (cp.spin) {
-      const sim = new THREE.InstancedMesh(cp.spin.geo.clone().translate(...cp.spin.pivot.map((v) => -v)), matFor(a), list.length);
-      sim.castShadow = true;
-      sim.userData.spin = cp.spin;
-      meshes[`s:${a}`] = sim;
-      scene.add(sim);
-      list.forEach((di, i) => { slots[di].s = i; owner.set(`s:${a}:${i}`, di); });
-    }
-    // Two pieces per company, in the model's first piece kind.
-    const kind = ARCHETYPES[a].pieces[0][0];
-    if (!halos.has(kind)) halos.set(kind, { list: [], tints: {} });
-    const h = halos.get(kind);
-    const ts = kind === 'leaf' ? SEASONS.summer.leaves : (ARCHETYPES[a].tints || {})[kind];
-    for (const di of list) for (let k = 0; k < 2; k++) h.list.push({ di, k, tint: ts ? ts[(di + k) % ts.length] : null });
-  }
-  for (const [kind, h] of halos) {
-    h.im = new THREE.InstancedMesh(piece(kind), modelMaterial(), h.list.length);
-    h.im.castShadow = true;
-    h.list.forEach((e, i) => e.tint && h.im.setColorAt(i, col.set(e.tint)));
-    scene.add(h.im);
+    const add = (name, geo) => {
+      const im = new THREE.InstancedMesh(geo, mat, list.length);
+      im.castShadow = im.receiveShadow = true;
+      meshes[name] = im;
+      scene.add(im);
+      list.forEach((di, i) => owner.set(`${name}:${i}`, di));
+      return im;
+    };
+    add(`c:${a}`, cp.geo);
+    cp.moving.forEach((mv, j) => (add(`m:${a}:${j}`, mv.geo).userData.mv = mv));
+    list.forEach((di, i) => (slots[di] = i));
   }
 
   // Per-company animated state: board position and visibility for the current mode/filter.
@@ -169,40 +151,38 @@ function start() {
   });
 
   let hopAmp = 0, clock = 0;
-  const pivot = new THREE.Vector3(), axis = new THREE.Vector3();
+  const pivot = new THREE.Vector3(), axis = new THREE.Vector3(), q2 = new THREE.Quaternion();
   function placeAll() {
-    const k = modeScale() * (1 - flatten);
-    const spinOn = !reduceMotion;
+    const k = modeScale();
+    const moving = !reduceMotion;
     DATA.forEach((d, di) => {
       const st = state[di];
-      const v = Math.max(0, Math.min(1, st.vis)) * k;
-      const y0 = 0.14 + hopAmp * Math.sin(Math.PI * Math.min(1, st.hopT || 0));
+      // Scan view: models sink into the board in the same diagonal sweep as the squares.
+      const sink = 1 - Math.min(1, Math.max(0, (flatten - ((st.x + st.z) / (2 * N) + 0.5) * 0.5) / 0.4));
+      const v = Math.max(0, Math.min(1, st.vis)) * k * sink;
       const sc = Math.max(0.0001, v * modelScale(d));
       const a = archOf(d);
+      const cp = centerpiece(a);
+      const hover = cp.hover && moving ? Math.sin(clock * 1.2 + di) * cp.hover * sc * 0.35 : 0;
+      const y0 = 0.14 + hover + hopAmp * Math.sin(Math.PI * Math.min(1, st.hopT || 0));
       const yaw = (di * 2.399) % (Math.PI * 2);
       q.setFromEuler(eul.set(0, yaw, 0));
-      meshes[`c:${a}`].setMatrixAt(slots[di].c, m4.compose(p.set(st.x, y0, st.z), q, s.set(sc, sc, sc)));
-      const sim = meshes[`s:${a}`];
-      if (sim) {
-        const sp = sim.userData.spin;
-        pivot.set(...sp.pivot).multiplyScalar(sc).applyQuaternion(q);
-        const spinQ = new THREE.Quaternion().setFromAxisAngle(axis.set(...sp.axis), spinOn ? clock * sp.speed + di : di);
-        sim.setMatrixAt(slots[di].s, m4.compose(p.set(st.x + pivot.x, y0 + pivot.y, st.z + pivot.z), q.clone().multiply(spinQ), s.set(sc, sc, sc)));
-      }
-    });
-    for (const [, h] of halos) {
-      h.list.forEach((e, i) => {
-        const d = DATA[e.di], st = state[e.di];
-        const v = Math.max(0, Math.min(1, st.vis)) * k;
-        const H = height(d) * modeScale();
-        const ang = (spinOn ? clock * 0.6 : 0) + e.k * Math.PI + e.di;
-        const rad = Math.max(0.5, boundsOf(archOf(d)).w * modelScale(d) * modeScale() * 0.45);
-        const y = 0.14 + H * (0.75 + 0.12 * e.k) + (spinOn ? Math.sin(clock * 1.4 + e.di + e.k) * 0.15 : 0);
-        const ps = Math.max(0.0001, v * (0.25 + 0.05 * height(d)));
-        h.im.setMatrixAt(i, m4.compose(p.set(st.x + Math.cos(ang) * rad, y, st.z + Math.sin(ang) * rad), q.setFromEuler(eul.set(0.4, ang, 0.2)), s.set(ps, ps, ps)));
+      meshes[`c:${a}`].setMatrixAt(slots[di], m4.compose(p.set(st.x, y0, st.z), q, s.set(sc, sc, sc)));
+      cp.moving.forEach((mv, j) => {
+        const t = moving ? clock : 0;
+        let dy = 0, ps = sc;
+        if (mv.mode === 'spin') q2.setFromAxisAngle(axis.set(...mv.axis).normalize(), t * mv.speed + di);
+        else if (mv.mode === 'flap') q2.setFromAxisAngle(axis.set(...mv.axis).normalize(), Math.sin(t * mv.speed + di) * mv.amp);
+        else {
+          const f = (t * mv.speed + (mv.phase || 0) + di * 0.13) % 1;
+          dy = -f * mv.drop;
+          ps = sc * Math.max(0.001, Math.min(1, f * 8, (1 - f) * 8));
+          q2.setFromAxisAngle(axis.set(...mv.axis).normalize(), f * 6);
+        }
+        pivot.set(mv.pivot[0], mv.pivot[1] + dy, mv.pivot[2]).multiplyScalar(sc).applyQuaternion(q);
+        meshes[`m:${a}:${j}`].setMatrixAt(slots[di], m4.compose(p.set(st.x + pivot.x, y0 + pivot.y, st.z + pivot.z), q2.premultiply(q), s.set(ps, ps, ps)));
       });
-      h.im.instanceMatrix.needsUpdate = true;
-    }
+    });
     for (const im of Object.values(meshes)) im.instanceMatrix.needsUpdate = true;
   }
   placeAll();
@@ -284,7 +264,7 @@ function start() {
       const cands = (focus ? [...focus].map((sl) => bySlug.get(sl)) : zoomed ? DATA : [])
         .filter((d) => d !== selected && matches(d) && board.modes[mode].pos[d.s])
         .sort((a, b) => priority(a) - priority(b))
-        .slice(0, 60);
+        .slice(0, focus ? 10 : 22);
       for (const d of cands) put(d.n, toScreen(stage, topOf(DATA.indexOf(d))), '', false);
       if (!zoomed && !focus) {
         for (const r of regions) {
@@ -363,11 +343,11 @@ function start() {
     ring.scale.setScalar(modeScale() * (1 + 0.25 * Math.sin(t * 4)));
   });
   const card = $('card');
-  function select(slug, { fly = true, hash = true } = {}) {
+  function select(slug, { fly = true, hash = true, fromTour = false } = {}) {
     const d = bySlug.get(slug);
     if (!d) return;
-    if (tour.active && !tour.paused) pauseTour();
-    if (!board.modes[mode].pos[slug]) return switchMode(mode === 'us' ? 'world' : 'us').then(() => select(slug, { fly, hash }));
+    if (!fromTour && tour.active && !tour.paused) pauseTour();
+    if (!board.modes[mode].pos[slug]) return switchMode(mode === 'us' ? 'world' : 'us').then(() => select(slug, { fly, hash, fromTour }));
     if (focus && !focus.has(slug)) focus = null;
     selected = d;
     ring.visible = true;
@@ -376,7 +356,7 @@ function start() {
     if (fly) {
       const di = DATA.indexOf(d);
       const narrow = stageEl.clientWidth < 760;
-      const units = mode === 'us' ? 20 : 12;
+      const units = mode === 'us' ? 16 : 10;
       const target = new THREE.Vector3(state[di].x, height(d) * modeScale() * 0.4, state[di].z);
       const z = zoomFor(units);
       // Keep the model clear of the card (right on desktop, bottom on phones).
@@ -389,6 +369,7 @@ function start() {
     placeLabels();
   }
   function deselect() {
+    closeShowcase();
     selected = null;
     ring.visible = false;
     card.hidden = true;
@@ -406,7 +387,6 @@ function start() {
     if (d.ln) facts.push(['Listed as', esc(d.ln)]);
     $('card-facts').innerHTML = facts.map(([a, b]) => `<div><dt>${a}</dt><dd>${b}</dd></div>`).join('');
     const url = pageUrl(d);
-    QRCard.draw($('card-qr'), url, d.n);
     $('card-open').href = `c/${d.s}.html`;
     $('card-copy').onclick = () => QRCard.copy(url, $('card-copy'));
     const r = d.a && regions.find((x) => x.id === d.a);
@@ -417,6 +397,58 @@ function start() {
     card.hidden = false;
     card.scrollTop = 0;
     document.body.classList.add('card-open');
+    openShowcase(d);
+  }
+
+  // ---------- showcase: the company's own model and its QR code ----------
+  let show = null, showToken = 0;
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  function qrFor(d) {
+    const canonical = document.querySelector('link[rel=canonical]');
+    const q = qrcode(0, 'H');
+    q.addData(new URL(`c/${d.s}.html`, canonical ? canonical.href : location.href).href);
+    q.make();
+    const n = q.getModuleCount();
+    let bits = '';
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) bits += q.isDark(r, c) ? '1' : '0';
+    return { n, bits };
+  }
+  function openShowcase(d, { holdModel = 1800, holdQR = 3000 } = {}) {
+    closeShowcase();
+    const token = ++showToken;
+    const w = createQRWorld($('show-stage'), { slug: d.s, model: d.m, qr: qrFor(d), viewScale: 1.4, insets: () => ({ top: 10, bottom: 10 }) });
+    show = w;
+    let auto = true;
+    const btn = $('show-toggle');
+    const label = () => (btn.textContent = w.scanning ? 'Back to the 3D model' : 'Turn into QR code');
+    label();
+    btn.onclick = () => {
+      auto = false;
+      if (w.busy) return;
+      w.setScan(!w.scanning);
+      label();
+    };
+    // Play it once on its own: the model, then its QR code, then the model again.
+    (async () => {
+      await w.ready;
+      await wait(holdModel);
+      if (token !== showToken || !auto) return;
+      const toQR = w.setScan(true);
+      label();
+      await toQR;
+      await wait(holdQR);
+      if (token !== showToken || !auto) return;
+      const back = w.setScan(false);
+      label();
+      await back;
+    })();
+  }
+  function closeShowcase() {
+    showToken++;
+    if (show) {
+      show.dispose();
+      show = null;
+    }
   }
   $('card-near').addEventListener('click', (e) => { const b = e.target.closest('button[data-s]'); if (b) select(b.dataset.s); });
   $('card-close').addEventListener('click', deselect);
@@ -550,11 +582,19 @@ function start() {
     const f = ds.filter((d) => d.k === 0);
     return { f500: f.length, tech: f.filter((d) => d.t).length, startups: ds.length - f.length, revenue: f.reduce((a, d) => a + (d.v || 0), 0), ds };
   };
+  // The walkthrough: each tech hub, then a close-up of its biggest tech company.
+  const TECH_CITIES = ['bay-area', 'seattle', 'socal', 'austin', 'dfw', 'atlanta', 'dc', 'nyc', 'boston', 'europe', 'asia-pacific'];
   const usSlugs = DATA.filter((d) => board.modes.us.pos[d.s]).map((d) => d.s);
+  const techStops = TECH_CITIES.map((id) => regions.find((r) => r.id === id)).filter(Boolean).map((r, i) => {
+    const ds = r.members.map((sl) => bySlug.get(sl));
+    const tech = ds.filter((d) => d.t).sort((a, b) => priority(a) - priority(b));
+    const star = tech[0] || [...ds].sort((a, b) => priority(a) - priority(b))[0];
+    return { title: r.name, note: `Biggest tech company here: ${star.n}${star.k ? '' : ` (Fortune 500 No. ${star.r})`}.`, mode: r.members.some((sl) => board.modes.us.pos[sl]) ? 'us' : 'world', view: () => regionView(r.id, i), slugs: tech.map((d) => d.s), region: r, star };
+  });
   const steps = [
-    { title: 'A world on a QR code', note: `Every ${listYear} Fortune 500 headquarters and notable startups, standing on a QR code that scans to this site. Towers grow with revenue.`, mode: 'us', view: overview, slugs: usSlugs, list: false },
-    ...regions.map((r, i) => ({ title: r.name, note: r.note, mode: r.members.some((sl) => board.modes.us.pos[sl]) ? 'us' : 'world', view: () => regionView(r.id, i), slugs: r.members, region: r })),
-    { title: 'Scoreboard', note: 'Fortune 500 HQs and startups by region.', mode: 'us', view: overview, score: true },
+    { title: 'Tech cities on a QR code', note: 'A quick flight over each tech hub and its biggest tech company. Each one turns into its own QR code.', mode: 'us', view: overview, slugs: usSlugs.filter((sl) => bySlug.get(sl).t), list: false },
+    ...techStops,
+    { title: 'Tech scoreboard', note: 'Tech HQs by city: Fortune 500 tech companies plus startups.', mode: 'us', view: overview, score: true },
   ];
   const tour = { active: false, paused: false, i: 0, raf: 0, elapsed: 0, hold: 0, start: 0 };
   const HOLD = 6500;
@@ -566,7 +606,7 @@ function start() {
     $('cap-note').textContent = st.note || '';
     $('cap-note').hidden = !st.note;
     if (st.score) {
-      const rows = regions.map((r) => ({ r, ...groupCounts(r.members) })).sort((a, b) => b.f500 + b.startups - (a.f500 + a.startups));
+      const rows = techStops.map(({ region: r }) => ({ r, ...groupCounts(r.members.filter((sl) => bySlug.get(sl).t)) })).sort((a, b) => b.f500 + b.startups - (a.f500 + a.startups));
       const max = Math.max(...rows.map((x) => x.f500 + x.startups));
       $('cap-stats').innerHTML = '';
       $('cap-list').className = 'qw-list qw-bars';
@@ -592,10 +632,17 @@ function start() {
     $('cap-bar').style.width = '0%';
     if (st.mode !== mode) await switchMode(st.mode);
     if (!tour.active) return;
-    const ok = await flyCamera(stage, st.view(), { duration: 2400, arc: 0.45 });
-    if (!ok || !tour.active) return;
+    const step = tour.i;
+    const ok = await flyCamera(stage, st.view(), { duration: 2200, arc: 0.45 });
+    if (!ok || !tour.active || tour.i !== step) return;
     tour.elapsed = 0;
-    tour.hold = st.score ? HOLD * 1.6 : HOLD;
+    tour.hold = st.score ? HOLD * 1.6 : st.star ? HOLD + 3000 : HOLD * 0.6;
+    if (st.star) {
+      // Swoop in on the city's biggest tech company and show its model turning into its QR.
+      await wait(900);
+      if (!tour.active || tour.paused || tour.i !== step) return;
+      select(st.star.s, { hash: false, fromTour: true });
+    }
     if (!tour.paused) runHold();
   }
   function runHold() {
@@ -604,7 +651,7 @@ function start() {
       tour.elapsed = now - tour.start;
       $('cap-bar').style.width = `${Math.min(100, (tour.elapsed / tour.hold) * 100)}%`;
       // Slow drift around the stop keeps the scene moving.
-      if (!reduceMotion) {
+      if (!reduceMotion && !selected) {
         const cs = cameraState(stage);
         setCamera(stage, { ...cs, az: cs.az + 0.0012 });
       }

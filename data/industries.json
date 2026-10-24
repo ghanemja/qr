@@ -27,9 +27,12 @@
   "chem": "Lab",
   "metal": "Steelworks",
   "house": "Neighborhood",
-  "ai": "Neural orb",
+  "ai": "AI assistant",
   "robot": "Robot lab",
-  "tree": "Tree"
+  "tree": "Timber",
+  "search": "Search",
+  "vr": "Virtual reality",
+  "bricks": "Data bricks"
  },
  "bank": [
   "JPMorgan Chase",
@@ -447,7 +450,6 @@
  ],
  "software": [
   "Microsoft",
-  "Alphabet",
   "Oracle",
   "salesforce.com",
   "Adobe",
@@ -492,7 +494,6 @@
   "Discord"
  ],
  "social": [
-  "Facebook",
   "ByteDance"
  ],
  "media": [
@@ -655,7 +656,6 @@
   "Sakana AI",
   "Liquid AI",
   "Lila Sciences",
-  "Databricks",
   "Neuralink"
  ],
  "robot": [
@@ -669,5 +669,14 @@
  "tree": [
   "Weyerhaeuser",
   "International Paper"
+ ],
+ "search": [
+  "Alphabet"
+ ],
+ "vr": [
+  "Facebook"
+ ],
+ "bricks": [
+  "Databricks"
  ]
 }
