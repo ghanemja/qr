@@ -47,6 +47,7 @@ function start() {
   // ---------- slab, lawn and ocean ----------
   // The same cream tile slab as the company pages, with a lawn around the rim and the ocean inside.
   const N = 74, OCEAN = 64;
+  const AZ = 0.3; // camera turn: nearly front-on, so the slab reads as a tile and the US stays upright
   // Fit the lower 48 to the ocean, leaving a strip of sea all round.
   let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
   for (const r of REGIONS) for (const poly of r.polys) for (const [x, y] of poly[0]) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
@@ -290,9 +291,10 @@ function start() {
   stage.frame.add((dt) => {
     if (!mapGroup.visible) return;
     for (const p of pieces.values()) {
-      const target = p.r.id === hover && !exploding ? 1 : 0;
+      const focused = current && current.p === p;
+      const target = p.r.id === hover && !exploding && !focused ? 1 : 0;
       p.hot += (target - p.hot) * Math.min(1, dt * 7);
-      if (!exploding) p.group.position.y = p.hot * 0.7;
+      if (!exploding && !focused) p.group.position.y = p.hot * 0.7;
       p.topMat.emissive.set(p.r.color).multiplyScalar(p.hot * 0.12);
       const style = HOVER[p.r.hover];
       p.models.forEach((g, i) => {
@@ -307,32 +309,106 @@ function start() {
 
   // ---------- labels ----------
   const labelsEl = $('labels'), tip = $('tip');
-  const chips = new Map();
-  for (const r of REGIONS) {
-    const b = document.createElement('button');
-    b.className = 'hm-chip';
-    b.innerHTML = `<b>${esc(r.name)}</b> · ${r.members.length}<span class="go">Click to explore →</span>`;
-    b.addEventListener('click', () => { stopTour(); openRegion(r.id); });
-    b.addEventListener('pointerenter', () => setHover(r.id));
-    b.addEventListener('pointerleave', () => setHover(null));
-    b.addEventListener('focus', () => setHover(r.id));
-    b.addEventListener('blur', () => setHover(null));
-    labelsEl.append(b);
-    chips.set(r.id, b);
+  // Labels can be switched off; the choice is remembered on this device.
+  const labelsBox = $('show-labels');
+  try { labelsBox.checked = localStorage.getItem('qc-labels') !== 'off'; } catch {}
+  const applyLabels = () => {
+    document.body.classList.toggle('hm-no-labels', !labelsBox.checked);
+    try { localStorage.setItem('qc-labels', labelsBox.checked ? 'on' : 'off'); } catch {}
+  };
+  labelsBox.addEventListener('change', applyLabels);
+  applyLabels();
+  // Region names are painted onto each piece near its bottom edge, reading across the screen.
+  const labelMeshes = [];
+  const insidePoly = (polys, x, y) => polys.some((poly) => {
+    let hit = false;
+    for (const ring of poly) for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const [xi, yi] = ring[i], [xj, yj] = ring[j];
+      if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) hit = !hit;
+    }
+    return hit;
+  });
+  function regionLabel(r) {
+    const c = document.createElement('canvas');
+    const g = c.getContext('2d');
+    const nameFont = '800 64px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif';
+    const subFont = '600 38px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif';
+    const sub = `${r.members.length} companies`;
+    g.font = nameFont;
+    const w = Math.ceil(Math.max(g.measureText(r.name.toUpperCase()).width, (g.font = subFont, g.measureText(sub).width)) + 40);
+    c.width = w;
+    c.height = 130;
+    g.textAlign = 'center';
+    g.textBaseline = 'alphabetic';
+    g.shadowColor = 'rgba(255, 250, 240, 0.9)';
+    g.shadowBlur = 10;
+    g.fillStyle = 'rgba(42, 37, 32, 0.88)';
+    g.font = nameFont;
+    g.fillText(r.name.toUpperCase(), w / 2, 66);
+    g.fillStyle = 'rgba(42, 37, 32, 0.62)';
+    g.font = subFont;
+    g.fillText(sub, w / 2, 114);
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    return { tex, aspect: w / c.height };
   }
+  const allPins = REGIONS.flatMap((r) => r.pins);
+  for (const p of pieces.values()) {
+    const r = p.r;
+    const { tex, aspect } = regionLabel(r);
+    // Find the spot nearest the bottom of the screen where the label fits inside the piece,
+    // clear of the company models.
+    const ax = Math.cos(AZ), az = -Math.sin(AZ); // label's reading direction on the ground (map px)
+    const fx = Math.sin(AZ), fz = Math.cos(AZ); // towards the viewer
+    let best = null;
+    const lateral = (dx, dy) => dx * ax + dy * az, depth = (dx, dy) => dx * fx + dy * fz;
+    for (const scale of [1, 0.85, 0.7, 0.56]) {
+      const hW = 3.6 * scale, wW = hW * aspect;
+      const hw = wW / k / 2, hh = hW / k / 2;
+      let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+      for (const [x, y] of r.polys.flatMap((poly) => poly[0])) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+      for (let x = x0; x <= x1; x += 5) for (let y = y0; y <= y1; y += 5) {
+        let ok = true;
+        for (const u of [-1, -0.5, 0, 0.5, 1]) for (const v of [-1, 0, 1]) {
+          if (!ok) break;
+          ok = insidePoly(r.polys, x + ax * u * hw + fx * v * hh, y + az * u * hw + fz * v * hh);
+        }
+        // Clear of every model, and not behind one (models stand up and hide what is behind them).
+        if (!ok || allPins.some(([, px, py]) => {
+          const l = Math.abs(lateral(px - x, py - y)), dd = depth(px - x, py - y);
+          return l < hw + 28 && dd > -hh - 28 && dd < 150;
+        })) continue;
+        const score = x * fx + y * fz;
+        if (!best || score > best.score) best = { x, y, score, hW, wW };
+      }
+      if (best) break;
+    }
+    if (!best) {
+      // Too small to hold its name (the Northeast): print it on the Atlantic off its east coast.
+      let east = null;
+      for (const [x, y] of r.polys.flatMap((poly) => poly[0])) if (!east || x > east[0]) east = [x, y];
+      const hW = 2.4, wW = hW * aspect;
+      best = { x: east[0] + wW / k / 2 + 12, y: east[1] + 30, hW, wW };
+    }
+    const mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(best.wW, best.hW).rotateX(-Math.PI / 2),
+      new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4 }),
+    );
+    const [X, Z] = toWorld(best.x, best.y);
+    mesh.position.set(X - p.home.x, TOP_Y + 0.03, Z - p.home.z);
+    mesh.rotation.y = AZ;
+    mesh.renderOrder = 3;
+    p.group.add(mesh);
+    labelMeshes.push(mesh);
+  }
+  const syncLabels = () => { for (const m of labelMeshes) m.visible = labelsBox.checked; };
+  labelsBox.addEventListener('change', syncLabels);
+  syncLabels();
   const tags = [];
   const v3 = new THREE.Vector3();
   stage.frame.add(() => {
     const onMap = view === 'us';
-    for (const [id, b] of chips) {
-      const p = pieces.get(id);
-      b.hidden = !onMap || exploding;
-      if (b.hidden) continue;
-      const [x, z] = toWorld(p.r.chip[0], p.r.chip[1]);
-      const s = toScreen(stage, v3.set(x, TOP_Y + 7 + p.hot * 1.5, z));
-      if (s) b.style.transform = `translate(${s[0]}px, ${s[1]}px) translate(-50%, -50%)`;
-      b.classList.toggle('is-hot', p.hot > 0.5);
-    }
     // Region view: names over the biggest companies and the selected one.
     const list = !onMap && current ? current.models.filter((g, i) => i < 4 || g.userData.d === selected) : [];
     while (tags.length < list.length) {
@@ -346,7 +422,7 @@ function start() {
       t.hidden = !g;
       if (!g) return;
       g.getWorldPosition(v3);
-      v3.y += g.userData.labelY;
+      v3.y += g.userData.labelY * current.p.group.scale.y;
       const s = toScreen(stage, v3);
       if (!s) { t.hidden = true; return; }
       t.textContent = g.userData.d.n;
@@ -356,7 +432,10 @@ function start() {
   });
 
   // ---------- camera ----------
-  const ISO = { az: Math.PI / 4, polar: 0.92 };
+  const ISO = { az: AZ, polar: 0.92 };
+  // On-screen width and height of a w×d footprint seen from the camera angle.
+  const across = (w, d) => w * Math.cos(ISO.az) + d * Math.sin(ISO.az);
+  const deep = (w, d) => (w * Math.sin(ISO.az) + d * Math.cos(ISO.az)) * Math.cos(ISO.polar);
   const axes = (az, polar) => ({
     right: new THREE.Vector3(Math.cos(az), 0, -Math.sin(az)),
     up: new THREE.Vector3(-Math.cos(polar) * Math.sin(az), Math.sin(polar), -Math.cos(polar) * Math.cos(az)),
@@ -371,10 +450,10 @@ function start() {
     return { target, az, polar, zoom };
   }
   const narrow = () => stageEl.clientWidth < 760;
-  const overview = () => framing(new THREE.Vector3(0, 0, 0), N * Math.SQRT2 * 1.02, N * Math.SQRT2 * Math.cos(ISO.polar) + 6, narrow() ? { top: 150, bottom: 110, left: 8, right: 8 } : { top: 110, bottom: 100, left: 20, right: 20 });
+  const overview = () => framing(new THREE.Vector3(0, 0, 0), across(N, N) * 1.02, deep(N, N) + 6, narrow() ? { top: 150, bottom: 110, left: 8, right: 8 } : { top: 110, bottom: 100, left: 20, right: 20 });
   {
     const o = overview();
-    setCamera(stage, { ...o, az: ISO.az - 0.9, polar: 0.55, zoom: o.zoom * 0.6 });
+    setCamera(stage, { ...o, az: ISO.az - 0.25, polar: 0.7, zoom: o.zoom * 0.8 });
     flyCamera(stage, o, { duration: reduceMotion ? 1 : 2200 });
   }
   addEventListener('resize', () => {
@@ -393,10 +472,10 @@ function start() {
   function setHover(id) {
     hover = exploding ? null : id;
   }
-  function showTip(d, ev) {
-    tip.hidden = !d;
-    if (!d) return;
-    tip.textContent = d.n;
+  function showTip(text, ev) {
+    tip.hidden = !text;
+    if (!text) return;
+    tip.textContent = text;
     tip.style.transform = `translate(${ev.clientX + 14}px, ${ev.clientY + 14}px)`;
   }
   let down = null;
@@ -408,16 +487,17 @@ function start() {
       const slug = hit ? hit.object.userData.slug : null;
       const rid = hit ? hit.object.userData.region || regionOf.get(slug)?.id : null;
       setHover(rid || null);
-      showTip(slug ? bySlug.get(slug) : null, ev);
+      showTip(slug ? bySlug.get(slug).n : rid ? `${regionById.get(rid).name} · click to explore` : null, ev);
       renderer.domElement.style.cursor = rid ? 'pointer' : '';
     } else if (current) {
       const hit = pick(ev, current.pick);
-      showTip(hit ? bySlug.get(hit.object.userData.slug) : null, ev);
+      showTip(hit ? bySlug.get(hit.object.userData.slug).n : null, ev);
       renderer.domElement.style.cursor = hit ? 'pointer' : '';
     }
   });
   renderer.domElement.addEventListener('pointerleave', () => { if (view === 'us') setHover(null); showTip(null); });
   renderer.domElement.addEventListener('pointerup', (ev) => {
+    showTip(null);
     if (!down || Math.hypot(ev.clientX - down[0], ev.clientY - down[1]) > 6) return;
     down = null;
     if (view === 'us') {
@@ -435,6 +515,7 @@ function start() {
 
   // ---------- breaking a region off the map ----------
   async function explode(id) {
+    showTip(null);
     const chosen = pieces.get(id);
     exploding = true;
     hover = null;
@@ -472,143 +553,70 @@ function start() {
     exploding = false;
   }
 
-  // ---------- region view: the piece as its own little moving world ----------
+  // ---------- region explorer: the broken-off piece, close up, with many of its companies ----------
   const regionView = $('region');
-  let current = null;
-  const disposable = [];
-  const COLS = 6, LOT = 4.4, ST = 1.5;
-  function clearRegion() {
-    if (!current) return;
-    scene.remove(current.group);
-    for (const x of disposable.splice(0)) x.dispose();
-    waters.length = 1;
-    current = null;
-  }
-  function buildRegion(r) {
-    clearRegion();
-    const members = r.members.map((s) => bySlug.get(s)).filter(Boolean);
-    const onPlate = members.slice(0, 30);
-    const ROWS = Math.max(2, Math.ceil(onPlate.length / COLS));
-    const W = COLS * LOT + (COLS + 1) * ST, D = ROWS * LOT + (ROWS + 1) * ST;
-    const group = new THREE.Group();
-    const own = (x) => (disposable.push(x), x);
-    // Plate in the region's colour, paved streets, and a lot per company.
-    const plateGeo = own(new THREE.BoxGeometry(W, 1.6, D));
-    const plateMats = [shade(r.color, 0.72), shade(r.color, 0.72), new THREE.Color(r.color), shade(r.color, 0.6), shade(r.color, 0.85), shade(r.color, 0.85)].map((c) => own(new THREE.MeshStandardMaterial({ color: c, roughness: 0.85 })));
-    const plateMesh = new THREE.Mesh(plateGeo, plateMats);
-    plateMesh.position.y = -0.8;
-    plateMesh.receiveShadow = true;
-    const edge = new THREE.LineSegments(own(new THREE.EdgesGeometry(plateGeo)), own(new THREE.LineBasicMaterial({ color: INK })));
-    edge.position.y = -0.8;
-    const pave = new THREE.Mesh(own(new THREE.BoxGeometry(W - 0.4, 0.06, D - 0.4)), own(new THREE.MeshStandardMaterial({ color: '#f3ede2', roughness: 0.95 })));
-    pave.position.y = 0.03;
-    pave.receiveShadow = true;
-    group.add(plateMesh, edge, pave);
-    const lotX = (i) => -W / 2 + ST + LOT / 2 + i * (LOT + ST), lotZ = (j) => -D / 2 + ST + LOT / 2 + j * (LOT + ST);
-    const lots = new THREE.InstancedMesh(own(new THREE.BoxGeometry(LOT, 0.16, LOT)), own(new THREE.MeshStandardMaterial({ color: shade(r.color, 1.25), roughness: 0.8 })), COLS * ROWS);
-    lots.receiveShadow = true;
-    const m4 = new THREE.Matrix4();
-    for (let j = 0; j < ROWS; j++) for (let i = 0; i < COLS; i++) lots.setMatrixAt(j * COLS + i, m4.makeTranslation(lotX(i), 0.08, lotZ(j)));
-    group.add(lots);
-    // Dashed centre lines down every street.
-    const dash = [];
-    for (let i = 0; i <= COLS; i++) { const x = -W / 2 + ST / 2 + i * (LOT + ST); dash.push(x, 0.08, -D / 2 + 0.4, x, 0.08, D / 2 - 0.4); }
-    for (let j = 0; j <= ROWS; j++) { const z = -D / 2 + ST / 2 + j * (LOT + ST); dash.push(-W / 2 + 0.4, 0.08, z, W / 2 - 0.4, 0.08, z); }
-    const dg = own(new THREE.BufferGeometry());
-    dg.setAttribute('position', new THREE.Float32BufferAttribute(dash, 3));
-    const dl = new THREE.LineSegments(dg, own(new THREE.LineDashedMaterial({ color: '#d8ccb6', dashSize: 0.5, gapSize: 0.5 })));
-    dl.computeLineDistances();
-    group.add(dl);
-    // The region's water (Pacific, Gulf, Atlantic or the Great Lakes) along one side.
-    const sea = { left: [-W / 2 - 5, 0, 10, D + 6], bottom: [0, D / 2 + 5, W + 6, 10], right: [0, -D / 2 - 5, W + 6, 10], lake: [0, -D / 2 - 5, W + 6, 10] }[r.water];
-    if (sea) {
-      const [x, z, w, d] = sea;
-      const bed = new THREE.Mesh(own(new THREE.BoxGeometry(w, 1.2, d)), own(new THREE.MeshStandardMaterial({ color: '#7fc0d6' })));
-      bed.position.set(x, -1.1, z);
-      bed.receiveShadow = true;
-      const wm = own(waterMaterial());
-      waters.push(wm);
-      const water = new THREE.Mesh(own(new THREE.PlaneGeometry(w, d).rotateX(-Math.PI / 2)), wm);
-      water.position.set(x, -0.35, z);
-      water.renderOrder = 2;
-      const be = new THREE.LineSegments(own(new THREE.EdgesGeometry(bed.geometry)), own(new THREE.LineBasicMaterial({ color: INK })));
-      be.position.copy(bed.position);
-      group.add(bed, water, be);
-    }
-    // Companies on their lots, biggest first.
+  let current = null; // { p, r, models, pick, ring }
+  function focusRegion(p) {
+    // The map's few pins make way for the explorer's spots: up to 40 companies at their cities.
+    for (const g of p.models) g.visible = false;
     const models = [], pick = [];
-    onPlate.forEach((d, n) => {
-      const big = d.k === 0 && d.r <= 60;
-      const g = buildModel(d, big ? 5.2 : 4.2, LOT * 0.82);
-      g.position.set(lotX(n % COLS), 0.16, lotZ(Math.floor(n / COLS)));
-      g.rotation.y = ((n % 3) - 1) * 0.3;
-      group.add(g);
+    p.r.spots.forEach(([slug, x, y], i) => {
+      const d = bySlug.get(slug);
+      if (!d) return;
+      const big = d.k === 0 && d.r <= 50;
+      const g = buildModel(d, big ? 2.7 : 2.1, 1.3);
+      const [X, Z] = toWorld(x, y);
+      g.position.set(X - p.home.x, TOP_Y, Z - p.home.z);
+      g.rotation.y = ((i % 3) - 1) * 0.3;
+      g.userData.home = g.position.clone();
+      g.userData.spin0 = g.rotation.y;
+      g.userData.wave = X;
+      p.group.add(g);
       models.push(g);
       g.traverse((o) => { if (o.isInstancedMesh) pick.push(o); });
     });
-    // Traffic on the streets.
-    const cars = [];
-    const carGeo = own(new THREE.BoxGeometry(1, 0.45, 0.55).translate(0, 0.32, 0));
-    const cabGeo = own(new THREE.BoxGeometry(0.5, 0.3, 0.5).translate(-0.05, 0.68, 0));
-    const cabMat = own(new THREE.MeshStandardMaterial({ color: '#cfe8f3' }));
-    const r2 = rng(r.id);
-    ['#e5533d', '#3d7be0', '#f0c24a', '#2f9e6e', '#fdf8f0', '#8a6cf0', '#e5533d', '#3d7be0', '#2f9e6e', '#f0c24a'].forEach((c, n) => {
-      const car = new THREE.Group();
-      const body = new THREE.Mesh(carGeo, own(new THREE.MeshStandardMaterial({ color: c })));
-      const cab = new THREE.Mesh(cabGeo, cabMat);
-      body.castShadow = cab.castShadow = true;
-      car.add(body, cab);
-      const alongX = n % 2 === 0;
-      const line = alongX ? Math.floor(r2() * (ROWS + 1)) : Math.floor(r2() * (COLS + 1));
-      const dir = n % 4 < 2 ? 1 : -1;
-      cars.push({ car, alongX, line, lane: dir * 0.35, speed: (0.05 + r2() * 0.05) * dir, u: r2() });
-      group.add(car);
-    });
-    // Clouds drifting over, their shadows sliding across the blocks.
-    const clouds = [];
-    const puff = own(new THREE.IcosahedronGeometry(1, 1));
-    const cloudMat = own(new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1, flatShading: true }));
-    for (let c = 0; c < 3; c++) {
-      const cl = new THREE.Group();
-      for (let p = 0; p < 5; p++) {
-        const m = new THREE.Mesh(puff, cloudMat);
-        m.position.set((p - 2) * 1.1, Math.sin(p) * 0.4, (r2() - 0.5) * 1.2);
-        m.scale.setScalar(1 + r2() * 0.9);
-        m.castShadow = true;
-        cl.add(m);
-      }
-      clouds.push({ cl, z: -D / 2 + (c + 0.5) * (D / 3), speed: 1.2 + r2(), u: r2() });
-      group.add(cl);
-    }
-    // Ring under the selected company.
-    const ring = new THREE.Mesh(own(new THREE.TorusGeometry(2.3, 0.14, 8, 40).rotateX(Math.PI / 2)), own(new THREE.MeshStandardMaterial({ color: INK })));
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.07, 8, 32).rotateX(Math.PI / 2), new THREE.MeshStandardMaterial({ color: INK }));
     ring.visible = false;
-    group.add(ring);
-    scene.add(group);
-    current = { r, group, models, pick, ring, cars, clouds, W, D };
+    p.group.add(ring);
+    current = { p, r: p.r, models, pick, ring };
   }
+  function unfocus() {
+    if (!current) return;
+    const { p, models, ring } = current;
+    // Model geometry is cached and shared (src/models.js), so only the ring needs freeing.
+    for (const g of models) p.group.remove(g);
+    p.group.remove(ring);
+    ring.geometry.dispose();
+    ring.material.dispose();
+    for (const g of p.models) g.visible = true;
+    current = null;
+  }
+  function resetPieces() {
+    for (const p of pieces.values()) {
+      p.group.position.copy(p.home);
+      p.group.scale.setScalar(1);
+      p.group.rotation.set(0, 0, 0);
+      p.group.visible = true;
+    }
+  }
+  // While exploring, the companies keep moving in their region's own style.
   stage.frame.add((dt) => {
     if (!current) return;
-    const { models, cars, clouds, W, D, ring } = current;
-    for (const g of models) animateModel(g, clock);
-    for (const c of cars) {
-      if (!reduceMotion) c.u = (c.u + c.speed * dt + 1) % 1;
-      if (c.alongX) c.car.position.set(lerp(-W / 2 + 0.6, W / 2 - 0.6, c.u), 0.05, -D / 2 + ST / 2 + c.line * (LOT + ST) + c.lane);
-      else c.car.position.set(-W / 2 + ST / 2 + c.line * (LOT + ST) + c.lane, 0.05, lerp(-D / 2 + 0.6, D / 2 - 0.6, c.u));
-      c.car.rotation.y = c.alongX ? (c.speed > 0 ? 0 : Math.PI) : (c.speed > 0 ? -Math.PI / 2 : Math.PI / 2);
-    }
-    for (const c of clouds) {
-      if (!reduceMotion) c.u = (c.u + dt * 0.015 * c.speed) % 1;
-      c.cl.position.set(lerp(-W / 2 - 14, W / 2 + 14, c.u), 11, c.z);
-    }
-    if (ring.visible) ring.rotation.y += dt * 0.8;
+    const style = HOVER[current.r.hover];
+    current.models.forEach((g, i) => {
+      g.position.copy(g.userData.home);
+      g.rotation.set(0, g.userData.spin0, 0);
+      g.scale.set(1, 1, 1);
+      if (!reduceMotion) style(g, clock, 0.35, i);
+      animateModel(g, clock);
+    });
+    if (current.ring.visible) current.ring.rotation.y += dt * 0.8;
   });
   function regionFraming() {
-    const { W, D } = current;
-    const diag = (W + D) / Math.SQRT2;
-    const h = diag * Math.cos(ISO.polar) + 9;
-    const pad = narrow() ? { top: 120, bottom: stageEl.clientHeight * 0.5, left: 8, right: 8 } : { top: 150, bottom: 80, left: 24, right: 420 };
-    return framing(new THREE.Vector3(0, 1.5, 0), diag * 1.04, h, pad);
+    const box = new THREE.Box3().setFromObject(current.p.group);
+    const size = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3());
+    const pad = narrow() ? { top: 190, bottom: stageEl.clientHeight * 0.48, left: 10, right: 10 } : { top: 170, bottom: 90, left: 30, right: 420 };
+    return framing(center, across(size.x, size.z) * 1.06, deep(size.x, size.z) + size.y * Math.sin(ISO.polar), pad);
   }
 
   // ---------- company card: 3D model that turns into its QR code ----------
@@ -636,7 +644,7 @@ function start() {
     for (const b of document.querySelectorAll('#r-list button')) b.setAttribute('aria-current', String(b.dataset.slug === slug));
     const g = current.models.find((m) => m.userData.d === d);
     current.ring.visible = !!g;
-    if (g) current.ring.position.set(g.position.x, 0.22, g.position.z);
+    if (g) current.ring.position.set(g.userData.home.x, TOP_Y + 0.06, g.userData.home.z);
     if (hash) history.replaceState(null, '', `#${slug}`);
     if (show) show.dispose();
     $('c-stage').innerHTML = '';
@@ -663,12 +671,12 @@ function start() {
   let view = 'us';
   async function openRegion(id, { select = null } = {}) {
     const r = regionById.get(id);
-    if (!r || (exploding && view === 'us')) return;
-    stopFlight();
-    if (view === 'us') await explode(id);
-    mapGroup.visible = false;
-    slab.visible = false;
-    buildRegion(r);
+    if (!r || exploding) return;
+    stopFlight(stage);
+    if (view !== 'us') { unfocus(); resetPieces(); }
+    await explode(id);
+    for (const [rid, p] of pieces) p.group.visible = rid === id;
+    focusRegion(pieces.get(id));
     const members = r.members.map((s) => bySlug.get(s));
     $('r-name').textContent = r.name;
     $('r-crumb').textContent = r.name;
@@ -686,10 +694,8 @@ function start() {
     regionView.hidden = false;
     view = id;
     exploding = false;
-    // Drop the camera onto the new world.
-    const to = regionFraming();
-    setCamera(stage, { ...to, zoom: to.zoom * 0.7, polar: ISO.polar - 0.25 });
-    flyCamera(stage, to, { duration: reduceMotion ? 1 : 900 });
+    // Close in on the piece.
+    flyCamera(stage, regionFraming(), { duration: reduceMotion ? 1 : 900 });
     selectCompany(select && regionOf.get(select) === r ? select : r.members[0], { hash: false });
     history.replaceState(null, '', `#${select || id}`);
   }
@@ -698,11 +704,10 @@ function start() {
     stopTour();
     if (show) show.dispose();
     show = null;
-    clearRegion();
+    unfocus();
+    for (const p of pieces.values()) p.group.visible = true;
     selected = null;
     regionView.hidden = true;
-    slab.visible = true;
-    mapGroup.visible = true;
     document.body.classList.remove('hm-in-region');
     view = 'us';
     history.replaceState(null, '', location.pathname + location.search);

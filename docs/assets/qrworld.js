@@ -141,16 +141,16 @@ export function setCamera(stage, s) {
   stage.camera.zoom = s.zoom;
   stage.camera.updateProjectionMatrix();
 }
-let flight = null;
-export function stopFlight() {
-  if (flight) {
-    flight.done(false);
-    flight = null;
+// Each stage has at most one flight at a time; a new one cancels the old.
+export function stopFlight(stage) {
+  if (stage && stage.flight) {
+    stage.flight.done(false);
+    stage.flight = null;
   }
 }
 // Fly the camera; `arc` zooms out mid-flight so long hops read as travel.
 export function flyCamera(stage, to, { duration = 1600, arc = 0 } = {}) {
-  stopFlight();
+  stopFlight(stage);
   const from = cameraState(stage);
   let daz = (to.az ?? from.az) - from.az;
   daz = Math.atan2(Math.sin(daz), Math.cos(daz));
@@ -173,11 +173,11 @@ export function flyCamera(stage, to, { duration = 1600, arc = 0 } = {}) {
         radius: from.radius,
       });
       if (t >= 1) {
-        flight = null;
+        stage.flight = null;
         f.done(true);
       }
     };
-    flight = f;
+    stage.flight = f;
     stage.frame.add(tick);
   });
 }

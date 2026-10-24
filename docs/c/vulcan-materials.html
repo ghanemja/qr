@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vulcan Materials · QR Compass</title>
+<meta name="description" content="Vulcan Materials — No. 485 on the 2026 Fortune 500, headquartered in Birmingham, AL.">
+<meta name="theme-color" content="#f6f1e7">
+<link rel="canonical" href="https://ghanemja.github.io/qr/c/vulcan-materials.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Vulcan Materials · QR Compass">
+<meta property="og:description" content="Vulcan Materials — No. 485 on the 2026 Fortune 500, headquartered in Birmingham, AL.">
+<meta property="og:url" content="https://ghanemja.github.io/qr/c/vulcan-materials.html">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/qrworld.css">
+<script type="importmap">{"imports":{"three":"../assets/three.module.min.js"}}</script>
+</head>
+<body class="qw qw-company">
+<section class="qw-stage" id="stage">
+  <div class="qw-brand">
+    <a class="qw-logo" href="../index.html" aria-label="QR Compass home"><svg class="qw-mark" viewBox="0 0 40 40" width="38" height="38" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#2a2520"/><rect x="18.30" y="4.10" width="3.4" height="3.4" rx="0.7" fill="#ff6a3d" opacity="1"/><rect x="24.48" y="5.93" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="29.09" y="9.01" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="32.17" y="13.62" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="32.50" y="18.30" width="3.4" height="3.4" rx="0.7" fill="#f6f1e7" opacity="1"/><rect x="32.17" y="24.48" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="29.09" y="29.09" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="24.48" y="32.17" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="18.30" y="32.50" width="3.4" height="3.4" rx="0.7" fill="#f6f1e7" opacity="1"/><rect x="13.62" y="32.17" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="9.01" y="29.09" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="5.93" y="24.48" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="4.10" y="18.30" width="3.4" height="3.4" rx="0.7" fill="#f6f1e7" opacity="1"/><rect x="5.93" y="13.62" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="9.01" y="9.01" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="13.62" y="5.93" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><g transform="rotate(32 20 20)"><path d="M20 7.5 24 20h-8z" fill="#ff6a3d"/><path d="M16 20h8l-4 12.5z" fill="#f6f1e7"/></g><circle cx="20" cy="20" r="2" fill="#2a2520" stroke="#f6f1e7" stroke-width="1.2"/></svg><span class="qw-word"><b>QR</b> Compass</span></a>
+  </div>
+  <nav class="qw-nav"><a href="../index.html">← Map</a><a href="../about.html">About</a></nav>
+  <header class="qw-title">
+    <h1>Vulcan Materials</h1>
+    <p>Fortune 500 No. 485 · Birmingham, AL</p>
+  </header>
+  <canvas class="qw-fallback" id="fallback-qr" width="320" height="320" aria-label="QR code for this page"></canvas>
+  <div class="qw-hint" id="hint">Neighborhood · tap to turn it into its QR code</div>
+  <div class="qw-dock">
+    <div class="qw-url">
+      <input id="page-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste your link to make it the QR" aria-label="Your link: the QR code will open it">
+      <button class="qw-share" id="share" aria-label="Share link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg><span id="share-label" class="sr">Share</span></button>
+    </div>
+    <div class="qw-tabs" role="group" aria-label="View">
+      <button id="toggle" class="sig" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg><span id="toggle-label">Turn into QR code</span></button>
+      <button id="dock-download"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg><span>Download QR</span></button>
+    </div>
+  </div>
+  <a class="qw-scroll" href="#info" aria-label="Company details">Details ↓</a>
+</section>
+
+<main class="qw-info" id="info">
+  <div class="qw-badges"><span class="qw-badge">Fortune 500 · No. 485</span></div>
+  <h2>Vulcan Materials</h2>
+  <p class="qw-lede">Headquartered in Birmingham, AL.</p>
+  <dl class="qw-facts"><div><dt>Fortune 500 rank</dt><dd>No. 485 <small>(2026 list)</small></dd></div><div><dt>Revenue</dt><dd>$7.9B <small>FY2025</small></dd></div><div><dt>Profit</dt><dd>$1.1B <small>FY2025</small></dd></div><div><dt>Industry</dt><dd>Building Materials, Glass</dd></div><div><dt>Headquarters</dt><dd>Birmingham, AL</dd></div></dl>
+  <div class="qw-actions">
+    
+    <a class="qw-btn primary" href="../index.html#vulcan-materials">See it on the map</a>
+    <button class="qw-btn" id="download">Download QR</button>
+  </div>
+
+  <h3>Neighbors</h3>
+  <ul class="qw-chips"><li><a href="regions-financial.html"><i class="dot f500 "></i>Regions Financial</a></li></ul>
+
+  <h3>Reference this page</h3>
+  <div class="cite">
+    <label>Link<input readonly value="https://ghanemja.github.io/qr/c/vulcan-materials.html"></label>
+    <label>Markdown<input readonly value="[Vulcan Materials](https://ghanemja.github.io/qr/c/vulcan-materials.html)"></label>
+    <label>HTML<input readonly value="&lt;a href=&quot;https://ghanemja.github.io/qr/c/vulcan-materials.html&quot;&gt;Vulcan Materials&lt;/a&gt;"></label>
+  </div>
+  <p class="qw-share-row">
+    <a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fghanemja.github.io%2Fqr%2Fc%2Fvulcan-materials.html&text=Vulcan%20Materials" target="_blank" rel="noopener">Post on X</a>
+    <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fghanemja.github.io%2Fqr%2Fc%2Fvulcan-materials.html" target="_blank" rel="noopener">Share on LinkedIn</a>
+    <a href="mailto:?subject=Vulcan%20Materials&body=https%3A%2F%2Fghanemja.github.io%2Fqr%2Fc%2Fvulcan-materials.html">Email</a>
+  </p>
+  <nav class="qw-pager">
+    <a href="dover.html">← Dover</a>
+    <a href="api-group.html">APi Group →</a>
+  </nav>
+  <p class="qw-source">Rank and financials: Fortune 500, 2026 list (fiscal 2025). HQ locations: the city on the list, placed with the US Census Gazetteer. <a href="../about.html">About the data</a>.</p>
+</main>
+<script>window.COMPANY={"slug":"vulcan-materials","name":"Vulcan Materials","model":"house","look":{"v":0,"a":"#f29a3a","b":"#2b4a6b","base":2,"prop":9,"topper":5},"qr":{"n":41,"bits":"1111111001001001000111100110111100111111110000010001000011111001101001110101000001101110100111101010000001000000001010111011011101001011001100011111011101100101110110111010111011101011000111111101101011101100000100100010101100100001001110010000011111111010101010101010101010101010111111100000000100101111010000001000111100000000001100111011010100110100101011110110100001110100000110100010101100110111111111011101000010000111100111100001001010011000110110110001101000011001101011000001001000111110011000101000010000010001110100010111101101000010110011100110011100001001000101110110100110111101011100101000111011000111000000110011100000000011111000010100000110110110101010111001000100000011100010011011110010101000110111100010101001101010000110111010010100111110100011010010001110010101100100000000110000101001000100100101100001110111010011011100111000110110111000000010101111011110111100110111111101001110110110101001001110000001101100011011110011110000100100111110101100100011010000111001111101101010111001100000010000010010010001000000100110011100110111001101001101000010100111110000101110000010011000110110111110010001101011001111110100111011101111010111110110010010101101010011110111000000000011100100101110011111001001101001001000111110011100110100111000000001110011000100100011110101110001111111110001001101010111100110000111011111001101111111111010000000010111001011111111110101010001111111111110110100011001111110101101101011010100000100101000111010010000010101000100111011101001001010001011101011001011111110110111010101000100111011000010111000011011101110101101001000110001110000010001010011000001000010001101011100010100111101101011111110000000101100011010010011100001010"}};</script>
+<script src="../assets/qrcode.js"></script>
+<script src="../assets/qr-card.js"></script>
+<script type="module" src="../assets/company3d.js"></script>
+</body>
+</html>

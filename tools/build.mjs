@@ -13,7 +13,7 @@ import * as simp from 'topojson-simplify';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'docs');
 const SITE_URL = (process.env.SITE_URL || 'https://ghanemja.github.io/qr/').replace(/\/?$/, '/');
-const LIST_YEAR = 2019;
+const LIST_YEAR = 2026;
 
 const readJSON = (p) => JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -42,6 +42,14 @@ const MAP_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}"
 
 // Names people actually use, where the list's name is long or formal.
 const SHORT_NAMES = {
+  'Exxon Mobil Holdings': 'Exxon Mobil', 'Cigna Group': 'Cigna', 'StoneX Group': 'StoneX', 'International Business Machines': 'IBM',
+  'United Airlines Holdings': 'United Airlines', 'Uber Technologies': 'Uber', 'United Services Automobile Assn.': 'USAA',
+  'Bank of New York (BNY)': 'BNY', 'Honeywell Technologies': 'Honeywell', 'Lennar Corporation': 'Lennar', 'PNC Financial Services Group': 'PNC',
+  'PayPal Holdings': 'PayPal', 'Hartford Insurance Group': 'The Hartford', 'Reinsurance Group of America': 'RGA', 'Altria Group': 'Altria',
+  'LPL Financial Holdings': 'LPL Financial', 'Bitgo Holdings': 'BitGo', 'Kyndryl Holdings': 'Kyndryl', 'Amentum Holdings': 'Amentum',
+  'Labcorp Holdings': 'Labcorp', 'Equitable Holdings': 'Equitable', 'Fidelity National Information (FIS)': 'FIS', 'Vertiv Holdings': 'Vertiv',
+  'Sirius XM Holdings': 'SiriusXM', 'Hertz Global Holdings': 'Hertz', 'Mondelēz International': 'Mondelēz', 'Lululemon athletica': 'Lululemon',
+  'Westinghouse Air Brake': 'Wabtec', 'Interactive Brokers Group': 'Interactive Brokers', 'Public Service Enterprise Group': 'PSEG',
   'Advanced Micro Devices': 'AMD', 'Amazon.com': 'Amazon', 'salesforce.com': 'Salesforce', 'Jones Financial (Edward Jones)': 'Edward Jones',
   'Bank of New York Mellon': 'BNY Mellon', 'Laboratory Corp. of America': 'Labcorp', 'C.H. Robinson Worldwide': 'C.H. Robinson',
   'Expeditors Intl. of Washington': 'Expeditors', 'Guardian Life Ins. Co. of America': 'Guardian Life', 'United Continental Holdings': 'United Airlines',
@@ -67,10 +75,10 @@ const startups = readJSON('data/startups.json').filter((s) => s.country === 'US'
 const companies = [];
 for (const c of f500) {
   companies.push({
-    kind: 'f500', slug: c.slug, name: SHORT_NAMES[c.now || c.name] || c.now || c.name, listedName: c.name, rank: c.rank,
+    kind: 'f500', slug: c.slug, name: SHORT_NAMES[c.name] || SHORT_NAMES[c.key] || c.name, listedName: c.name, key: c.key, model: c.model, industry: c.industry, rank: c.rank,
     revenue: c.revenue, profit: c.profit, city: c.city, region: c.state, country: 'US',
     lat: c.lat, lon: c.lon, website: c.website, tech: c.sector === 'tech',
-    sector: c.sector === 'tech' ? 'Technology' : '', listedHq: c.listed_hq || '', moved: c.moved || null,
+    sector: c.sector === 'tech' ? 'Technology' : c.industry || '',
   });
 }
 const taken = new Set(companies.map((c) => c.slug));
@@ -152,8 +160,8 @@ function qrBits(text, type = 0) {
 // real city, nudged apart and kept inside the piece; the region view lists them all.
 const priorityOf = (c) => (c.kind === 'f500' ? c.rank : 1000);
 const MAP_REGIONS = [
-  { id: 'northwest', name: 'Northwest', states: ['WA', 'OR', 'ID', 'MT', 'WY'], water: 'left', color: '#a8d68f', hover: 'sway', chip: [235, 165] },
-  { id: 'west', name: 'West', states: ['CA', 'NV'], water: 'left', color: '#cdbfae', hover: 'float', chip: [118, 345] },
+  { id: 'northwest', name: 'Northwest', states: ['WA', 'OR', 'ID', 'MT', 'WY', 'AK'], water: 'left', color: '#a8d68f', hover: 'sway', chip: [235, 165] },
+  { id: 'west', name: 'West', states: ['CA', 'NV', 'HI'], water: 'left', color: '#cdbfae', hover: 'float', chip: [118, 345] },
   { id: 'southwest', name: 'Southwest', states: ['AZ', 'NM', 'UT', 'CO', 'TX', 'OK'], water: 'bottom', color: '#f4bf6a', hover: 'hop', chip: [318, 455] },
   { id: 'midwest', name: 'Midwest', states: ['ND', 'SD', 'NE', 'KS', 'MN', 'IA', 'MO', 'WI', 'IL', 'MI', 'IN', 'OH', 'KY'], water: 'lake', color: '#f5e38a', hover: 'wave', chip: [452, 300] },
   { id: 'southeast', name: 'Southeast', states: ['AR', 'LA', 'MS', 'AL', 'TN', 'GA', 'FL', 'SC', 'NC'], water: 'bottom', color: '#f4a29a', hover: 'swing', chip: [640, 478] },
@@ -185,23 +193,31 @@ const homeMap = (() => {
       }
       return hit;
     });
-    const pins = [];
-    for (const c of members) {
-      const xy = proj([c.lon, c.lat]);
-      if (!xy) continue;
-      let spot = null;
-      for (let k = 0; k < 400 && !spot; k++) {
-        const rr = 4 * Math.sqrt(k), a = k * 2.39996;
-        const x = xy[0] + Math.cos(a) * rr, y = xy[1] + Math.sin(a) * rr;
-        if (inside(x, y) && inside(x + 12, y) && inside(x - 12, y) && inside(x, y + 12) && inside(x, y - 12) && pins.every((q) => Math.hypot(q[1] - x, q[2] - y) >= 36)) spot = [x, y];
+    // Spots near each company's real city, nudged apart and kept inside the piece: `pins` are the
+    // few biggest shown on the US map, `spots` the many shown when the region is opened.
+    const place = (gap, max) => {
+      const out = [];
+      for (const c of members) {
+        const xy = proj([c.lon, c.lat]);
+        if (!xy) continue;
+        const m = gap / 3;
+        let spot = null;
+        for (let k = 0; k < 600 && !spot; k++) {
+          const rr = 3 * Math.sqrt(k), a = k * 2.39996;
+          const x = xy[0] + Math.cos(a) * rr, y = xy[1] + Math.sin(a) * rr;
+          if (inside(x, y) && inside(x + m, y) && inside(x - m, y) && inside(x, y + m) && inside(x, y - m) && out.every((q) => Math.hypot(q[1] - x, q[2] - y) >= gap)) spot = [x, y];
+        }
+        if (spot) out.push([c.slug, Math.round(spot[0]), Math.round(spot[1])]);
+        if (out.length >= max) break;
       }
-      if (spot) pins.push([c.slug, Math.round(spot[0]), Math.round(spot[1])]);
-      if (pins.length >= 8) break;
-    }
+      return out;
+    };
+    const pins = place(36, 8);
+    const spots = place(24, 40);
     const [cx, cy] = path.centroid(shape);
     const r1 = (v) => Math.round(v * 10) / 10;
     return {
-      id: r.id, name: r.name, color: r.color, hover: r.hover, water: r.water, chip: r.chip, cx: Math.round(cx), cy: Math.round(cy), pins, members: members.map((c) => c.slug),
+      id: r.id, name: r.name, color: r.color, hover: r.hover, water: r.water, chip: r.chip, cx: Math.round(cx), cy: Math.round(cy), pins, spots, members: members.map((c) => c.slug),
       polys: polys.map((poly) => poly.map((ring) => ring.map(([x, y]) => [r1(x), r1(y)]))),
       inner: (inner.coordinates || []).map((line) => line.map(([x, y]) => [r1(x), r1(y)])),
     };
@@ -226,9 +242,11 @@ const industries = readJSON('data/industries.json');
 const MODEL_LABELS = industries._labels;
 const MODEL_OF = new Map();
 for (const [model, names] of Object.entries(industries)) if (!model.startsWith('_')) for (const nm of names) MODEL_OF.set(nm, model);
-const modelOf = (c) => MODEL_OF.get(c.listedName || c.name) || 'tree';
+// Companies from the earlier list keep their hand-picked model (keyed by that list's name);
+// newcomers get one from their Fortune industry (tools/prepare_f500.py).
+const modelOf = (c) => MODEL_OF.get(c.key || c.listedName || c.name) || c.model || 'tree';
 {
-  const unmapped = companies.filter((c) => !MODEL_OF.has(c.listedName || c.name)).map((c) => c.name);
+  const unmapped = companies.filter((c) => !MODEL_OF.has(c.key || c.listedName || c.name) && !c.model).map((c) => c.name);
   if (unmapped.length) console.warn(`no model for: ${unmapped.join(', ')}`);
 }
 const PALETTES = [
@@ -258,7 +276,7 @@ const LOOKS = new Map();
     const heroCount = new Array(V).fill(0);
     const sorted = [...list].sort((a, b) => priorityOf(a) - priorityOf(b));
     sorted.forEach((c, idx) => {
-      const name = c.listedName || c.name, island = REGION_OF.get(c.slug);
+      const name = c.key || c.listedName || c.name, island = REGION_OF.get(c.slug);
       const o = overrides[name] || {};
       let v = o.v ?? heroes[name];
       if (v == null) {
@@ -380,7 +398,8 @@ function companyPage(c, prev, next) {
         ['Fortune 500 rank', `No. ${c.rank} <small>(${LIST_YEAR} list)</small>`],
         ['Revenue', `${fmtMoney(c.revenue)} <small>FY${LIST_YEAR - 1}</small>`],
         ['Profit', `${fmtMoney(c.profit)} <small>FY${LIST_YEAR - 1}</small>`],
-        ['Headquarters', esc(place(c)) + (c.moved ? ` <small>since ${c.moved}</small>` : '')],
+        ['Industry', esc(c.industry || '')],
+        ['Headquarters', esc(place(c))],
       ]
     : [
         ['Type', 'Startup / private company'],
@@ -388,7 +407,6 @@ function companyPage(c, prev, next) {
         ['Founded', String(c.founded)],
         ['Headquarters', esc(place(c))],
       ];
-  if (c.listedHq) facts.push(['HQ on the list', esc(c.listedHq)]);
   if (c.listedName !== c.name && c.listedName) facts.push(['Listed as', esc(c.listedName)]);
   const model = modelOf(c);
   const sub = c.kind === 'f500' ? `Fortune 500 No. ${c.rank} · ${place(c)}` : `${c.sector} startup · ${place(c)}`;
@@ -447,7 +465,7 @@ function companyPage(c, prev, next) {
     ${next ? `<a href="${next.slug}.html">${esc(next.name)} →</a>` : '<span></span>'}
   </nav>
   <p class="qw-source">${c.kind === 'f500'
-    ? `Rank and financials: Fortune 500, ${LIST_YEAR} list (fiscal ${LIST_YEAR - 1}). HQ locations: HIFLD Fortune 500 Corporate Headquarters, with corrections and later moves noted.`
+    ? `Rank and financials: Fortune 500, ${LIST_YEAR} list (fiscal ${LIST_YEAR - 1}). HQ locations: the city on the list, placed with the US Census Gazetteer.`
     : 'Startup entries are curated by hand; check the company’s own site for current details.'} <a href="../about.html">About the data</a>.</p>
 </main>
 <script>window.COMPANY=${JSON.stringify(data)};</script>
@@ -578,6 +596,7 @@ function worldPage() {
     <h1>Where America’s biggest companies live</h1>
     <p>Hover a region to wake it up. Click it to break it off the map and walk its streets.</p>
   </div>
+  <label class="hm-toggle"><input type="checkbox" id="show-labels" checked> Labels</label>
   <div id="labels" class="hm-labels"></div>
   <div id="tip" class="hm-tip" role="tooltip" hidden></div>
   <div class="hm-fallback" id="fallback" hidden>
@@ -659,19 +678,16 @@ ${rows.map((c) => `<tr data-k="${c.kind}" data-t="${c.tech ? 1 : 0}" data-q="${e
 }
 
 function aboutPage() {
-  const moved = companies.filter((c) => c.moved);
   return `${head({ title: 'About the data · QR Compass', description: 'Sources and caveats for the QR Compass company map.', path: 'about.html', depth: 0 })}
 <body class="page">
 ${topbar(0)}
 <main class="prose">
   <h1>About the data</h1>
-  <p>QR Compass gives every company a page whose QR code is a small 3D world: a tree or a city growing out of the code. Tap it, or press “Turn into QR code”, and it settles into a flat QR code that scans back to that page, so a post or slide about a company can point to one stable link.</p>
-  <p>The home page is the same idea at full scale: one large QR code that scans to this site, with the map laid across its tiles and every company standing at its headquarters. Towers grow with revenue; startups are trees, rockets (aerospace and defense) or glowing orbs (AI). The <a href="map.html">flat map</a> shows the same data in 2D.</p>
+  <p>QR Compass gives every company a page with its own 3D model. Tap it, or press “Turn into QR code”, and the model breaks into pixels that settle into a QR code that scans back to that page, so a post or slide about a company can point to one stable link.</p>
+  <p>The home page is a 3D map of the US in seven regions. Each region’s biggest companies stand on it near their headquarters; click a region to break it off the map and explore every company in it.</p>
   <h2>Fortune 500</h2>
-  <p>Ranks, names, revenue and profit come from the <strong>${LIST_YEAR} Fortune 500</strong> list (fiscal ${LIST_YEAR - 1} figures), as published in the open dataset at <a href="https://github.com/cmusam/fortune500">github.com/cmusam/fortune500</a>. Fortune publishes a new list every June; ranks here are not current.</p>
-  <p>HQ coordinates come from the HIFLD <em>Fortune 500 Corporate Headquarters</em> dataset (via <a href="https://github.com/anyfactor/f500hqviz">github.com/anyfactor/f500hqviz</a>), corrected by hand where that file was wrong or out of date. Companies that later moved their headquarters are shown at the new location:</p>
-  <ul>${moved.map((c) => `<li><a href="c/${c.slug}.html">${esc(c.name)}</a>: ${esc(c.listedHq)} → ${esc(place(c))} (${c.moved})</li>`).join('')}</ul>
-  <p>A few companies are shown under the name they use today (for example Facebook as Meta Platforms); their page notes the name on the list.</p>
+  <p>Ranks, names, revenue, profit, industry and headquarters city come from the <strong>${LIST_YEAR} Fortune 500</strong> list (fiscal ${LIST_YEAR - 1} figures) as published at <a href="https://fortune.com/ranking/fortune500/${LIST_YEAR}/">fortune.com</a>. Fortune publishes a new list every June.</p>
+  <p>Headquarters are placed at their city using the US Census Bureau’s 2024 Gazetteer of places. Some companies appear under a short name (for example IBM, BNY, USAA); their page notes the name on the list.</p>
   <h2>Startups</h2>
   <p>The ${startups.length} startups and private companies are a hand-picked set of well-known names, not a ranking. Funding and valuations change too fast to keep in a static site, so the pages leave them out.</p>
   <h2>Map</h2>

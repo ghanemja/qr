@@ -232,16 +232,14 @@ body.hm-in-region .hm-intro, body.hm-in-region .hm-dock { display: none; }
 .qw-play .i-stop, body.hm-touring .qw-play .i-play { display: none; }
 body.hm-touring .qw-play .i-stop { display: block; }
 .hm-labels { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
-.hm-chip {
-  position: absolute; left: 0; top: 0; white-space: nowrap; pointer-events: auto; cursor: pointer;
-  padding: 3px 10px; border-radius: 999px; background: #2a2520; color: var(--cream-2); border: 2px solid var(--cream-2);
-  font: 500 12.5px/1.2 var(--font); display: grid; justify-items: center; gap: 2px; box-shadow: 0 3px 0 rgba(42, 37, 32, 0.25);
-}
-.hm-chip b { font-weight: 800; }
-.hm-chip .go { display: none; font-size: 11px; font-weight: 700; color: var(--yellow); }
-.hm-chip.is-hot .go { display: block; }
-.hm-tag { position: absolute; left: 0; top: 0; padding: 3px 9px; border-radius: 999px; background: var(--cream-2); border: 1.5px solid #2a2520; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.hm-tag { position: absolute; left: 0; top: 0; padding: 1px 7px; border-radius: 999px; background: rgba(253, 248, 240, 0.8); border: 1px solid rgba(42, 37, 32, 0.12); font-size: 11px; font-weight: 650; white-space: nowrap; backdrop-filter: blur(4px); }
 .hm-tag.sel { background: #2a2520; color: var(--cream-2); }
+body.hm-no-labels .hm-labels { display: none; }
+.hm-toggle {
+  position: absolute; top: 20px; right: 100px; z-index: 6; display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px;
+  background: rgba(253, 248, 240, 0.85); border: 1px solid var(--line); font-size: 13px; font-weight: 600; cursor: pointer; backdrop-filter: blur(6px);
+}
+.hm-toggle input { width: 15px; height: 15px; margin: 0; accent-color: var(--brown); }
 .hm-tip { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none; padding: 4px 10px; border-radius: 8px; background: #2a2520; color: var(--cream-2); font-size: 13px; font-weight: 650; }
 .hm-fallback { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; }
 
@@ -252,7 +250,7 @@ body.hm-touring .qw-play .i-stop { display: block; }
 }
 .hm-region > * { pointer-events: auto; }
 @keyframes hm-enter { from { opacity: 0; } to { opacity: 1; } }
-.hm-r-head { grid-column: 1; grid-row: 1; display: grid; gap: 4px; justify-self: start; }
+.hm-r-head { grid-column: 1; grid-row: 1; display: grid; gap: 4px; justify-self: start; align-self: start; padding: 12px 16px; border-radius: 16px; background: rgba(253, 248, 240, 0.9); border: 1px solid var(--line); box-shadow: var(--shadow); backdrop-filter: blur(6px); }
 .hm-r-head nav { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); }
 .hm-r-head nav button { border: 0; background: none; padding: 0; font: inherit; font-weight: 650; color: var(--brown-2); cursor: pointer; }
 .hm-r-head h1 { margin: 0; font-size: clamp(28px, 3.4vw, 40px); line-height: 1.05; letter-spacing: -0.03em; text-shadow: 0 0 10px var(--cream); }

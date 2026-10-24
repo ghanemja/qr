@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GXO Logistics · QR Compass</title>
+<meta name="description" content="GXO Logistics — No. 336 on the 2026 Fortune 500, headquartered in Greenwich, CT.">
+<meta name="theme-color" content="#f6f1e7">
+<link rel="canonical" href="https://ghanemja.github.io/qr/c/gxo-logistics.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="GXO Logistics · QR Compass">
+<meta property="og:description" content="GXO Logistics — No. 336 on the 2026 Fortune 500, headquartered in Greenwich, CT.">
+<meta property="og:url" content="https://ghanemja.github.io/qr/c/gxo-logistics.html">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/qrworld.css">
+<script type="importmap">{"imports":{"three":"../assets/three.module.min.js"}}</script>
+</head>
+<body class="qw qw-company">
+<section class="qw-stage" id="stage">
+  <div class="qw-brand">
+    <a class="qw-logo" href="../index.html" aria-label="QR Compass home"><svg class="qw-mark" viewBox="0 0 40 40" width="38" height="38" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#2a2520"/><rect x="18.30" y="4.10" width="3.4" height="3.4" rx="0.7" fill="#ff6a3d" opacity="1"/><rect x="24.48" y="5.93" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="29.09" y="9.01" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="32.17" y="13.62" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="32.50" y="18.30" width="3.4" height="3.4" rx="0.7" fill="#f6f1e7" opacity="1"/><rect x="32.17" y="24.48" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="29.09" y="29.09" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="24.48" y="32.17" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="18.30" y="32.50" width="3.4" height="3.4" rx="0.7" fill="#f6f1e7" opacity="1"/><rect x="13.62" y="32.17" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="9.01" y="29.09" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="5.93" y="24.48" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="4.10" y="18.30" width="3.4" height="3.4" rx="0.7" fill="#f6f1e7" opacity="1"/><rect x="5.93" y="13.62" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="9.01" y="9.01" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><rect x="13.62" y="5.93" width="1.9" height="1.9" rx="0.4" fill="#f6f1e7" opacity="0.55"/><g transform="rotate(32 20 20)"><path d="M20 7.5 24 20h-8z" fill="#ff6a3d"/><path d="M16 20h8l-4 12.5z" fill="#f6f1e7"/></g><circle cx="20" cy="20" r="2" fill="#2a2520" stroke="#f6f1e7" stroke-width="1.2"/></svg><span class="qw-word"><b>QR</b> Compass</span></a>
+  </div>
+  <nav class="qw-nav"><a href="../index.html">← Map</a><a href="../about.html">About</a></nav>
+  <header class="qw-title">
+    <h1>GXO Logistics</h1>
+    <p>Fortune 500 No. 336 · Greenwich, CT</p>
+  </header>
+  <canvas class="qw-fallback" id="fallback-qr" width="320" height="320" aria-label="QR code for this page"></canvas>
+  <div class="qw-hint" id="hint">Parcel with wings · tap to turn it into its QR code</div>
+  <div class="qw-dock">
+    <div class="qw-url">
+      <input id="page-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste your link to make it the QR" aria-label="Your link: the QR code will open it">
+      <button class="qw-share" id="share" aria-label="Share link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg><span id="share-label" class="sr">Share</span></button>
+    </div>
+    <div class="qw-tabs" role="group" aria-label="View">
+      <button id="toggle" class="sig" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg><span id="toggle-label">Turn into QR code</span></button>
+      <button id="dock-download"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 11l4 4 4-4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg><span>Download QR</span></button>
+    </div>
+  </div>
+  <a class="qw-scroll" href="#info" aria-label="Company details">Details ↓</a>
+</section>
+
+<main class="qw-info" id="info">
+  <div class="qw-badges"><span class="qw-badge">Fortune 500 · No. 336</span></div>
+  <h2>GXO Logistics</h2>
+  <p class="qw-lede">Headquartered in Greenwich, CT.</p>
+  <dl class="qw-facts"><div><dt>Fortune 500 rank</dt><dd>No. 336 <small>(2026 list)</small></dd></div><div><dt>Revenue</dt><dd>$13.2B <small>FY2025</small></dd></div><div><dt>Profit</dt><dd>$32M <small>FY2025</small></dd></div><div><dt>Industry</dt><dd>Transportation and Logistics</dd></div><div><dt>Headquarters</dt><dd>Greenwich, CT</dd></div></dl>
+  <div class="qw-actions">
+    
+    <a class="qw-btn primary" href="../index.html#gxo-logistics">See it on the map</a>
+    <button class="qw-btn" id="download">Download QR</button>
+  </div>
+
+  <h3>Neighbors</h3>
+  <ul class="qw-chips"><li><a href="w-r-berkley.html"><i class="dot f500 "></i>W.R. Berkley</a></li><li><a href="interactive-brokers-group.html"><i class="dot f500 "></i>Interactive Brokers</a></li><li><a href="xpo.html"><i class="dot f500 "></i>XPO</a></li><li><a href="pepsico.html"><i class="dot f500 "></i>PepsiCo</a></li><li><a href="mastercard.html"><i class="dot f500 "></i>Mastercard</a></li><li><a href="charter-communications.html"><i class="dot f500 "></i>Charter Communications</a></li><li><a href="philip-morris-international.html"><i class="dot f500 "></i>Philip Morris</a></li><li><a href="synchrony-financial.html"><i class="dot f500 "></i>Synchrony</a></li></ul>
+
+  <h3>Reference this page</h3>
+  <div class="cite">
+    <label>Link<input readonly value="https://ghanemja.github.io/qr/c/gxo-logistics.html"></label>
+    <label>Markdown<input readonly value="[GXO Logistics](https://ghanemja.github.io/qr/c/gxo-logistics.html)"></label>
+    <label>HTML<input readonly value="&lt;a href=&quot;https://ghanemja.github.io/qr/c/gxo-logistics.html&quot;&gt;GXO Logistics&lt;/a&gt;"></label>
+  </div>
+  <p class="qw-share-row">
+    <a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fghanemja.github.io%2Fqr%2Fc%2Fgxo-logistics.html&text=GXO%20Logistics" target="_blank" rel="noopener">Post on X</a>
+    <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fghanemja.github.io%2Fqr%2Fc%2Fgxo-logistics.html" target="_blank" rel="noopener">Share on LinkedIn</a>
+    <a href="mailto:?subject=GXO%20Logistics&body=https%3A%2F%2Fghanemja.github.io%2Fqr%2Fc%2Fgxo-logistics.html">Email</a>
+  </p>
+  <nav class="qw-pager">
+    <a href="henry-schein.html">← Henry Schein</a>
+    <a href="ball.html">Ball →</a>
+  </nav>
+  <p class="qw-source">Rank and financials: Fortune 500, 2026 list (fiscal 2025). HQ locations: the city on the list, placed with the US Census Gazetteer. <a href="../about.html">About the data</a>.</p>
+</main>
+<script>window.COMPANY={"slug":"gxo-logistics","name":"GXO Logistics","model":"parcel","look":{"v":2,"a":"#2f9e6e","b":"#f4f1ea","base":2,"prop":13,"topper":5},"qr":{"n":41,"bits":"1111111000000011000110000111111000111111110000010111011011000000011101101001000001101110100110011001100100001110011010111011011101000110101011111010000011100101110110111010010101001100011001011010101011101100000101000110110101110110011011010000011111111010101010101010101010101010111111100000000100101100010101000111111000000000000011110111011101011110101001011011000101010100011101001010010011001111000111100111111010111111000110011001110010100100011100001000001110110000000101101011011110000011001111100110110011001110010001010000010100001000011010110110000101011101111101010001110110011001001010010010101110010010100110110000101011011110110011000011000011100011101100101001010010010101100101011111100000010011010011101110110100111111011110001110011001000100100011110000110110110010101010010111100100010110110111100010001011100111100101110011000010101100010011101010110011100110001100101110000111000111111010011001010110100001110100100100101001101000001101010000010100001001000010100100001001100001101100100011010110010100000101100100101111111001001011110101110111000100101010000111101010110111001000100010000100100101101000011010110011111100100000010110110011010100101110011100100000000101010010010001111011001110001110001100010000101111001011011101100101010101001011100011000100000000010010001111111110001010111011100100000100001110010011001111110000000000010111101101110101101110110001000111111110100110011000111100010011101011101100000101110111010100011001010011000110011011101011001001010000101100000111111101110111010000110100000000111010010100101011101110100010000101000110101101011100000111000001001101111010010011100011111010101111111110010100101001000100010100100110010"}};</script>
+<script src="../assets/qrcode.js"></script>
+<script src="../assets/qr-card.js"></script>
+<script type="module" src="../assets/company3d.js"></script>
+</body>
+</html>

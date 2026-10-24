@@ -1,0 +1,2022 @@
+{
+ "3M": {
+  "slug": "3m",
+  "website": "https://www.3m.com"
+ },
+ "A-Mark Precious Metals": {
+  "slug": "a-mark-precious-metals",
+  "website": "https://www.amark.com"
+ },
+ "ABM Industries": {
+  "slug": "abm-industries",
+  "website": "https://www.abm.com"
+ },
+ "ADP": {
+  "slug": "adp",
+  "website": "https://www.adp.com"
+ },
+ "AECOM": {
+  "slug": "aecom",
+  "website": "https://www.aecom.com"
+ },
+ "AES": {
+  "slug": "aes",
+  "website": "http://aes.com"
+ },
+ "AGCO": {
+  "slug": "agco",
+  "website": "http://www.agcocorp.com"
+ },
+ "AIG": {
+  "slug": "aig",
+  "website": "http://www.aig.com"
+ },
+ "AK Steel Holding": {
+  "slug": "ak-steel-holding",
+  "website": "http://www.aksteel.com"
+ },
+ "AT&T": {
+  "slug": "at-and-t",
+  "website": "https://www.att.com"
+ },
+ "AbbVie": {
+  "slug": "abbvie",
+  "website": "https://www.abbvie.com"
+ },
+ "Abbott Laboratories": {
+  "slug": "abbott-laboratories",
+  "website": "https://www.abbott.com"
+ },
+ "Activision Blizzard": {
+  "slug": "activision-blizzard",
+  "website": "https://www.activisionblizzard.com"
+ },
+ "Adobe": {
+  "slug": "adobe",
+  "website": "https://www.adobe.com"
+ },
+ "Advance Auto Parts": {
+  "slug": "advance-auto-parts",
+  "website": "https://shop.advanceautoparts.com"
+ },
+ "Advanced Micro Devices": {
+  "slug": "advanced-micro-devices",
+  "website": "https://www.amd.com"
+ },
+ "Aflac": {
+  "slug": "aflac",
+  "website": "https://www.aflac.com"
+ },
+ "Air Products & Chemicals": {
+  "slug": "air-products-and-chemicals",
+  "website": "http://www.airproducts.com"
+ },
+ "Alaska Air Group": {
+  "slug": "alaska-air-group",
+  "website": "https://www.alaskaair.com"
+ },
+ "Albertsons": {
+  "slug": "albertsons",
+  "website": "https://www.albertsons.com"
+ },
+ "Alcoa": {
+  "slug": "alcoa",
+  "website": "https://www.alcoa.com"
+ },
+ "Alleghany": {
+  "slug": "alleghany",
+  "website": "https://www.alleghany.com"
+ },
+ "Alliance Data Systems": {
+  "slug": "alliance-data-systems",
+  "website": "https://www.alliancedata.com"
+ },
+ "Allstate": {
+  "slug": "allstate",
+  "website": "https://www.allstate.com"
+ },
+ "Ally Financial": {
+  "slug": "ally-financial",
+  "website": "https://www.ally.com"
+ },
+ "Alphabet": {
+  "slug": "alphabet",
+  "website": "https://abc.xyz"
+ },
+ "Altice USA": {
+  "slug": "altice-usa",
+  "website": "https://www.alticeusa.com"
+ },
+ "Altria Group": {
+  "slug": "altria-group",
+  "website": "http://www.altria.com"
+ },
+ "Amazon.com": {
+  "slug": "amazon",
+  "website": "https://www.amazon.com"
+ },
+ "Ameren": {
+  "slug": "ameren",
+  "website": "https://www.ameren.com"
+ },
+ "American Airlines Group": {
+  "slug": "american-airlines-group",
+  "website": "https://www.aa.com"
+ },
+ "American Axle & Manufacturing": {
+  "slug": "american-axle-and-manufacturing",
+  "website": "https://www.aam.com"
+ },
+ "American Electric Power": {
+  "slug": "american-electric-power",
+  "website": "https://www.aep.com"
+ },
+ "American Express": {
+  "slug": "american-express",
+  "website": "https://www.americanexpress.com"
+ },
+ "American Family Insurance Group": {
+  "slug": "american-family-insurance-group",
+  "website": "https://www.amfam.com"
+ },
+ "American Financial Group": {
+  "slug": "american-financial-group",
+  "website": "https://www.afginc.com"
+ },
+ "American Tower": {
+  "slug": "american-tower",
+  "website": "http://www.americantower.com"
+ },
+ "Ameriprise Financial": {
+  "slug": "ameriprise-financial",
+  "website": "https://www.ameriprise.com"
+ },
+ "AmerisourceBergen": {
+  "slug": "cencora",
+  "website": "https://www.amerisourcebergen.com"
+ },
+ "Amgen": {
+  "slug": "amgen",
+  "website": "https://www.amgen.com"
+ },
+ "Amphenol": {
+  "slug": "amphenol",
+  "website": "https://www.amphenol.com"
+ },
+ "Anadarko Petroleum": {
+  "slug": "anadarko-petroleum",
+  "website": "https://www.anadarko.com"
+ },
+ "Analog Devices": {
+  "slug": "analog-devices",
+  "website": "https://www.analog.com"
+ },
+ "Anixter International": {
+  "slug": "anixter-international",
+  "website": "https://www.anixter.com"
+ },
+ "Anthem": {
+  "slug": "elevance-health",
+  "website": "https://www.anthem.com"
+ },
+ "Apache": {
+  "slug": "apache",
+  "website": "http://www.apachecorp.com"
+ },
+ "Apple": {
+  "slug": "apple",
+  "website": "https://www.apple.com"
+ },
+ "Applied Materials": {
+  "slug": "applied-materials",
+  "website": "http://www.appliedmaterials.com"
+ },
+ "Aramark": {
+  "slug": "aramark",
+  "website": "https://www.aramark.com"
+ },
+ "Archer Daniels Midland": {
+  "slug": "archer-daniels-midland",
+  "website": "https://www.adm.com"
+ },
+ "Arconic": {
+  "slug": "arconic",
+  "website": "https://www.arconic.com"
+ },
+ "Arrow Electronics": {
+  "slug": "arrow-electronics",
+  "website": "https://www.arrow.com"
+ },
+ "Arthur J. Gallagher": {
+  "slug": "arthur-j-gallagher",
+  "website": "https://www.ajg.com"
+ },
+ "Asbury Automotive Group": {
+  "slug": "asbury-automotive-group",
+  "website": "https://www.asburyauto.com"
+ },
+ "Ascena Retail Group": {
+  "slug": "ascena-retail-group",
+  "website": "http://ascenaretail.com"
+ },
+ "Assurant": {
+  "slug": "assurant",
+  "website": "https://www.assurant.com"
+ },
+ "Auto-Owners Insurance": {
+  "slug": "auto-owners-insurance",
+  "website": "https://www.auto-owners.com"
+ },
+ "AutoNation": {
+  "slug": "autonation",
+  "website": "https://www.autonation.com"
+ },
+ "AutoZone": {
+  "slug": "autozone",
+  "website": "https://www.autozone.com"
+ },
+ "Autoliv": {
+  "slug": "autoliv",
+  "website": "https://www.autoliv.com"
+ },
+ "Avery Dennison": {
+  "slug": "avery-dennison",
+  "website": "https://www.averydennison.com"
+ },
+ "Avis Budget Group": {
+  "slug": "avis-budget-group",
+  "website": "http://www.avisbudgetgroup.com"
+ },
+ "Avnet": {
+  "slug": "avnet",
+  "website": "https://www.avnet.com"
+ },
+ "BB&T Corp.": {
+  "slug": "truist-financial",
+  "website": "https://www.bbt.com"
+ },
+ "BJ's Wholesale Club": {
+  "slug": "bjs-wholesale-club",
+  "website": "https://www.bjs.com"
+ },
+ "Ball": {
+  "slug": "ball",
+  "website": "http://www.ball.com"
+ },
+ "Bank of America": {
+  "slug": "bank-of-america",
+  "website": "https://www.bankofamerica.com"
+ },
+ "Bank of New York Mellon": {
+  "slug": "bank-of-new-york-mellon",
+  "website": "https://www.bnymellon.com"
+ },
+ "Baxter International": {
+  "slug": "baxter-international",
+  "website": "https://www.baxter.com"
+ },
+ "Beacon Roofing Supply": {
+  "slug": "beacon-roofing-supply",
+  "website": "https://www.becn.com"
+ },
+ "Becton Dickinson": {
+  "slug": "becton-dickinson",
+  "website": "http://www.bd.com"
+ },
+ "Bed Bath & Beyond": {
+  "slug": "bed-bath-and-beyond",
+  "website": "https://www.bedbathandbeyond.com"
+ },
+ "Berkshire Hathaway": {
+  "slug": "berkshire-hathaway",
+  "website": "http://www.berkshirehathaway.com"
+ },
+ "Berry Global Group": {
+  "slug": "berry-global-group",
+  "website": "http://www.berryglobal.com"
+ },
+ "Best Buy": {
+  "slug": "best-buy",
+  "website": "https://www.bestbuy.com"
+ },
+ "Biogen": {
+  "slug": "biogen",
+  "website": "https://www.biogen.com"
+ },
+ "BlackRock": {
+  "slug": "blackrock",
+  "website": "https://www.blackrock.com"
+ },
+ "Blackstone Group": {
+  "slug": "blackstone-group",
+  "website": "https://www.blackstone.com"
+ },
+ "Boeing": {
+  "slug": "boeing",
+  "website": "http://www.boeing.com"
+ },
+ "Booking Holdings": {
+  "slug": "booking-holdings",
+  "website": "https://www.bookingholdings.com"
+ },
+ "Booz Allen Hamilton": {
+  "slug": "booz-allen-hamilton",
+  "website": "https://www.boozallen.com"
+ },
+ "BorgWarner": {
+  "slug": "borgwarner",
+  "website": "https://www.borgwarner.com"
+ },
+ "Boston Scientific": {
+  "slug": "boston-scientific",
+  "website": "https://www.bostonscientific.com"
+ },
+ "Brighthouse Financial": {
+  "slug": "brighthouse-financial",
+  "website": "https://www.brighthousefinancial.com"
+ },
+ "Bristol-Myers Squibb": {
+  "slug": "bristol-myers-squibb",
+  "website": "https://www.bms.com"
+ },
+ "Broadcom": {
+  "slug": "broadcom",
+  "website": "https://www.broadcom.com"
+ },
+ "Builders FirstSource": {
+  "slug": "builders-firstsource",
+  "website": "https://www.bldr.com"
+ },
+ "Burlington Stores": {
+  "slug": "burlington-stores",
+  "website": "https://www.burlington.com"
+ },
+ "C.H. Robinson Worldwide": {
+  "slug": "c-h-robinson-worldwide",
+  "website": "https://www.chrobinson.com"
+ },
+ "CBRE Group": {
+  "slug": "cbre-group",
+  "website": "https://www.cbre.us"
+ },
+ "CBS": {
+  "slug": "cbs",
+  "website": "https://www.cbs.com"
+ },
+ "CDW": {
+  "slug": "cdw",
+  "website": "https://www.cdw.com"
+ },
+ "CHS": {
+  "slug": "chs",
+  "website": "http://www.chsinc.com"
+ },
+ "CMS Energy": {
+  "slug": "cms-energy",
+  "website": "https://www.cmsenergy.com"
+ },
+ "CSX": {
+  "slug": "csx",
+  "website": "https://www.csx.com"
+ },
+ "CVS Health": {
+  "slug": "cvs-health",
+  "website": "https://cvshealth.com"
+ },
+ "Caesars Entertainment": {
+  "slug": "caesars-entertainment",
+  "website": "https://www.caesars.com"
+ },
+ "Calpine": {
+  "slug": "calpine",
+  "website": "http://www.calpine.com"
+ },
+ "Campbell Soup": {
+  "slug": "campbell-soup",
+  "website": "https://www.campbells.com"
+ },
+ "Capital One Financial": {
+  "slug": "capital-one-financial",
+  "website": "https://www.capitalone.com"
+ },
+ "CarMax": {
+  "slug": "carmax",
+  "website": "https://www.carmax.com"
+ },
+ "Cardinal Health": {
+  "slug": "cardinal-health",
+  "website": "https://www.cardinalhealth.com"
+ },
+ "Casey's General Stores": {
+  "slug": "caseys-general-stores",
+  "website": "https://www.caseys.com"
+ },
+ "Caterpillar": {
+  "slug": "caterpillar",
+  "website": "https://www.caterpillar.com"
+ },
+ "Celanese": {
+  "slug": "celanese",
+  "website": "https://www.celanese.com"
+ },
+ "Celgene": {
+  "slug": "celgene",
+  "website": "http://www.celgene.com"
+ },
+ "Cencora": {
+  "slug": "cencora",
+  "website": "https://www.amerisourcebergen.com"
+ },
+ "Centene": {
+  "slug": "centene",
+  "website": "https://www.centene.com"
+ },
+ "CenterPoint Energy": {
+  "slug": "centerpoint-energy",
+  "website": "https://www.centerpointenergy.com"
+ },
+ "CenturyLink": {
+  "slug": "centurylink",
+  "website": "https://www.centurylink.com"
+ },
+ "Charles Schwab": {
+  "slug": "charles-schwab",
+  "website": "https://www.schwab.com"
+ },
+ "Charter Communications": {
+  "slug": "charter-communications",
+  "website": "http://ir.charter.com"
+ },
+ "Chemours": {
+  "slug": "chemours",
+  "website": "https://www.chemours.com"
+ },
+ "Cheniere Energy": {
+  "slug": "cheniere-energy",
+  "website": "https://www.cheniere.com"
+ },
+ "Chesapeake Energy": {
+  "slug": "chesapeake-energy",
+  "website": "http://www.chk.com"
+ },
+ "Chevron": {
+  "slug": "chevron",
+  "website": "https://www.chevron.com"
+ },
+ "Cigna": {
+  "slug": "cigna",
+  "website": "https://www.cigna.com"
+ },
+ "Cintas": {
+  "slug": "cintas",
+  "website": "https://www.cintas.com"
+ },
+ "Cisco Systems": {
+  "slug": "cisco-systems",
+  "website": "https://www.cisco.com"
+ },
+ "Citigroup": {
+  "slug": "citigroup",
+  "website": "https://www.citigroup.com"
+ },
+ "Citizens Financial Group": {
+  "slug": "citizens-financial-group",
+  "website": "https://www.citizensbank.com"
+ },
+ "Clorox": {
+  "slug": "clorox",
+  "website": "https://www.thecloroxcompany.com"
+ },
+ "Coca-Cola": {
+  "slug": "coca-cola",
+  "website": "http://www.coca-cola.com"
+ },
+ "Cognizant Technology Solutions": {
+  "slug": "cognizant-technology-solutions",
+  "website": "https://www.cognizant.com"
+ },
+ "Colgate-Palmolive": {
+  "slug": "colgate-palmolive",
+  "website": "https://www.colgatepalmolive.com"
+ },
+ "Comcast": {
+  "slug": "comcast",
+  "website": "https://corporate.comcast.com"
+ },
+ "Community Health Systems": {
+  "slug": "community-health-systems",
+  "website": "http://www.chs.net"
+ },
+ "Conagra Brands": {
+  "slug": "conagra-brands",
+  "website": "https://www.conagrabrands.com"
+ },
+ "ConocoPhillips": {
+  "slug": "conocophillips",
+  "website": "http://www.conocophillips.com"
+ },
+ "Consolidated Edison": {
+  "slug": "consolidated-edison",
+  "website": "https://www.coned.com"
+ },
+ "Constellation Brands": {
+  "slug": "constellation-brands",
+  "website": "https://www.cbrands.com"
+ },
+ "Core-Mark Holding": {
+  "slug": "core-mark-holding",
+  "website": "https://www.core-mark.com"
+ },
+ "Corning": {
+  "slug": "corning",
+  "website": "https://www.corning.com"
+ },
+ "Costco Wholesale": {
+  "slug": "costco-wholesale",
+  "website": "https://www.costco.com"
+ },
+ "Coty": {
+  "slug": "coty",
+  "website": "https://www.coty.com"
+ },
+ "Crown Holdings": {
+  "slug": "crown-holdings",
+  "website": "https://www.crowncork.com"
+ },
+ "Cummins": {
+  "slug": "cummins",
+  "website": "https://www.cummins.com"
+ },
+ "D.R. Horton": {
+  "slug": "d-r-horton",
+  "website": "http://www.drhorton.com"
+ },
+ "DCP Midstream": {
+  "slug": "dcp-midstream",
+  "website": "https://www.dcpmidstream.com"
+ },
+ "DISH Network": {
+  "slug": "dish-network",
+  "website": "https://www.dish.com"
+ },
+ "DTE Energy": {
+  "slug": "dte-energy",
+  "website": "https://www.newlook.dteenergy.com"
+ },
+ "DXC Technology": {
+  "slug": "dxc-technology",
+  "website": "http://www.dxc.technology"
+ },
+ "DaVita": {
+  "slug": "davita",
+  "website": "https://www.davita.com"
+ },
+ "Dana": {
+  "slug": "dana",
+  "website": "http://www.dana.com"
+ },
+ "Danaher": {
+  "slug": "danaher",
+  "website": "http://www.danaher.com"
+ },
+ "Darden Restaurants": {
+  "slug": "darden-restaurants",
+  "website": "https://www.darden.com"
+ },
+ "Dean Foods": {
+  "slug": "dean-foods",
+  "website": "http://www.deanfoods.com"
+ },
+ "Deere": {
+  "slug": "deere",
+  "website": "https://www.deere.com"
+ },
+ "Delek US Holdings": {
+  "slug": "delek-us-holdings",
+  "website": "http://www.delekus.com"
+ },
+ "Dell Technologies": {
+  "slug": "dell-technologies",
+  "website": "http://www.dell.com"
+ },
+ "Delta Air Lines": {
+  "slug": "delta-air-lines",
+  "website": "https://www.delta.com"
+ },
+ "Devon Energy": {
+  "slug": "devon-energy",
+  "website": "http://www.devonenergy.com"
+ },
+ "Dick's Sporting Goods": {
+  "slug": "dicks-sporting-goods",
+  "website": "https://www.dickssportinggoods.com"
+ },
+ "Dillard's": {
+  "slug": "dillards",
+  "website": "https://www.dillards.com"
+ },
+ "Discover Financial Services": {
+  "slug": "discover-financial-services",
+  "website": "https://www.discover.com"
+ },
+ "Discovery": {
+  "slug": "discovery",
+  "website": "https://corporate.discovery.com"
+ },
+ "Dollar General": {
+  "slug": "dollar-general",
+  "website": "https://www.dollargeneral.com"
+ },
+ "Dollar Tree": {
+  "slug": "dollar-tree",
+  "website": "https://www.dollartree.com"
+ },
+ "Dominion Energy": {
+  "slug": "dominion-energy",
+  "website": "https://www.dominionenergy.com"
+ },
+ "Dover": {
+  "slug": "dover",
+  "website": "https://www.dovercorporation.com"
+ },
+ "DuPont de Nemours": {
+  "slug": "dupont-de-nemours",
+  "website": "http://www.dupont.com"
+ },
+ "Duke Energy": {
+  "slug": "duke-energy",
+  "website": "https://www.duke-energy.com"
+ },
+ "EMCOR Group": {
+  "slug": "emcor-group",
+  "website": "https://emcorgroup.com"
+ },
+ "EOG Resources": {
+  "slug": "eog-resources",
+  "website": "http://www.eogresources.com"
+ },
+ "Eastman Chemical": {
+  "slug": "eastman-chemical",
+  "website": "https://www.eastman.com"
+ },
+ "Ecolab": {
+  "slug": "ecolab",
+  "website": "https://www.ecolab.com"
+ },
+ "Edison International": {
+  "slug": "edison-international",
+  "website": "https://www.edison.com"
+ },
+ "Elevance Health": {
+  "slug": "elevance-health",
+  "website": "https://www.anthem.com"
+ },
+ "Eli Lilly": {
+  "slug": "eli-lilly",
+  "website": "https://www.lilly.com"
+ },
+ "Emerson Electric": {
+  "slug": "emerson-electric",
+  "website": "http://www.emerson.com"
+ },
+ "EnLink Midstream": {
+  "slug": "enlink-midstream",
+  "website": "https://www.enlink.com"
+ },
+ "Energy Transfer": {
+  "slug": "energy-transfer",
+  "website": "https://www.energytransfer.com"
+ },
+ "Entergy": {
+  "slug": "entergy",
+  "website": "http://www.entergy.com"
+ },
+ "Enterprise Products Partners": {
+  "slug": "enterprise-products-partners",
+  "website": "https://www.enterpriseproducts.com"
+ },
+ "Erie Insurance Group": {
+  "slug": "erie-insurance-group",
+  "website": "https://www.erieinsurance.com"
+ },
+ "Estee Lauder": {
+  "slug": "estee-lauder",
+  "website": "https://www.esteelauder.com"
+ },
+ "Eversource Energy": {
+  "slug": "eversource-energy",
+  "website": "https://www.eversource.com"
+ },
+ "Exelon": {
+  "slug": "exelon",
+  "website": "http://www.exeloncorp.com"
+ },
+ "Expedia Group": {
+  "slug": "expedia-group",
+  "website": "https://www.expedia.com"
+ },
+ "Expeditors Intl. of Washington": {
+  "slug": "expeditors-intl-of-washington",
+  "website": "https://www.expeditors.com"
+ },
+ "Exxon Mobil": {
+  "slug": "exxon-mobil",
+  "website": "http://corporate.exxonmobil.com"
+ },
+ "Facebook": {
+  "slug": "meta-platforms",
+  "website": "https://www.facebook.com"
+ },
+ "Fannie Mae": {
+  "slug": "fannie-mae",
+  "website": "http://www.fanniemae.com"
+ },
+ "Farmers Insurance Exchange": {
+  "slug": "farmers-insurance-exchange",
+  "website": "https://www.farmers.com"
+ },
+ "FedEx": {
+  "slug": "fedex",
+  "website": "https://www.fedex.com"
+ },
+ "Fidelity National Financial": {
+  "slug": "fidelity-national-financial",
+  "website": "http://www.fnf.com"
+ },
+ "Fidelity National Information Services": {
+  "slug": "fidelity-national-information-services",
+  "website": "https://www.fisglobal.com"
+ },
+ "Fifth Third Bancorp": {
+  "slug": "fifth-third-bancorp",
+  "website": "https://www.53.com"
+ },
+ "First American Financial": {
+  "slug": "first-american-financial",
+  "website": "http://www.firstam.com"
+ },
+ "First Data": {
+  "slug": "first-data",
+  "website": "https://www.firstdata.com"
+ },
+ "FirstEnergy": {
+  "slug": "firstenergy",
+  "website": "https://www.firstenergycorp.com"
+ },
+ "Fiserv": {
+  "slug": "fiserv",
+  "website": "https://www.fiserv.com"
+ },
+ "Fluor": {
+  "slug": "fluor",
+  "website": "http://www.fluor.com"
+ },
+ "Foot Locker": {
+  "slug": "foot-locker",
+  "website": "https://www.footlocker.com"
+ },
+ "Ford Motor": {
+  "slug": "ford-motor",
+  "website": "https://www.ford.com"
+ },
+ "Fortive": {
+  "slug": "fortive",
+  "website": "https://www.fortive.com"
+ },
+ "Franklin Resources": {
+  "slug": "franklin-resources",
+  "website": "http://www.franklinresources.com"
+ },
+ "Freddie Mac": {
+  "slug": "freddie-mac",
+  "website": "http://www.freddiemac.com"
+ },
+ "Freeport-McMoRan": {
+  "slug": "freeport-mcmoran",
+  "website": "https://www.fcx.com"
+ },
+ "Frontier Communications": {
+  "slug": "frontier-communications",
+  "website": "https://frontier.com"
+ },
+ "GameStop": {
+  "slug": "gamestop",
+  "website": "https://www.gamestop.com"
+ },
+ "Gap": {
+  "slug": "gap",
+  "website": "https://www.gap.com"
+ },
+ "General Dynamics": {
+  "slug": "general-dynamics",
+  "website": "https://www.gd.com"
+ },
+ "General Electric": {
+  "slug": "general-electric",
+  "website": "https://www.ge.com"
+ },
+ "General Mills": {
+  "slug": "general-mills",
+  "website": "https://www.generalmills.com"
+ },
+ "General Motors": {
+  "slug": "general-motors",
+  "website": "https://www.gm.com"
+ },
+ "Genuine Parts": {
+  "slug": "genuine-parts",
+  "website": "https://www.genpt.com"
+ },
+ "Genworth Financial": {
+  "slug": "genworth-financial",
+  "website": "https://www.genworth.com"
+ },
+ "Gilead Sciences": {
+  "slug": "gilead-sciences",
+  "website": "https://www.gilead.com"
+ },
+ "Global Partners": {
+  "slug": "global-partners",
+  "website": "http://www.globalp.com"
+ },
+ "Goldman Sachs Group": {
+  "slug": "goldman-sachs-group",
+  "website": "http://www.goldmansachs.com"
+ },
+ "Goodyear Tire & Rubber": {
+  "slug": "goodyear-tire-and-rubber",
+  "website": "https://www.goodyear.com"
+ },
+ "Graphic Packaging Holding": {
+  "slug": "graphic-packaging-holding",
+  "website": "https://www.graphicpkg.com"
+ },
+ "Graybar Electric": {
+  "slug": "graybar-electric",
+  "website": "https://www.graybar.com"
+ },
+ "Group 1 Automotive": {
+  "slug": "group-1-automotive",
+  "website": "https://www.group1auto.com"
+ },
+ "Guardian Life Ins. Co. of America": {
+  "slug": "guardian-life-ins-co-of-america",
+  "website": "https://www.guardianlife.com"
+ },
+ "HCA Healthcare": {
+  "slug": "hca-healthcare",
+  "website": "https://hcahealthcare.com"
+ },
+ "HD Supply Holdings": {
+  "slug": "hd-supply-holdings",
+  "website": "http://www.hdsupply.com"
+ },
+ "HP": {
+  "slug": "hp",
+  "website": "https://www8.hp.com"
+ },
+ "Halliburton": {
+  "slug": "halliburton",
+  "website": "http://www.halliburton.com"
+ },
+ "Hanesbrands": {
+  "slug": "hanesbrands",
+  "website": "https://www.hanes.com"
+ },
+ "Harley-Davidson": {
+  "slug": "harley-davidson",
+  "website": "https://www.harley-davidson.com"
+ },
+ "Hartford Financial Services": {
+  "slug": "hartford-financial-services",
+  "website": "https://www.thehartford.com"
+ },
+ "Henry Schein": {
+  "slug": "henry-schein",
+  "website": "https://www.henryschein.com"
+ },
+ "Hershey": {
+  "slug": "hershey",
+  "website": "https://www.hersheys.com"
+ },
+ "Hertz Global Holdings": {
+  "slug": "hertz-global-holdings",
+  "website": "https://ir.hertz.com"
+ },
+ "Hess": {
+  "slug": "hess",
+  "website": "https://www.hess.com"
+ },
+ "Hewlett Packard Enterprise": {
+  "slug": "hewlett-packard-enterprise",
+  "website": "https://www.hpe.com"
+ },
+ "Hilton Worldwide Holdings": {
+  "slug": "hilton-worldwide-holdings",
+  "website": "https://www.hilton.com"
+ },
+ "HollyFrontier": {
+  "slug": "hollyfrontier",
+  "website": "https://www.hollyfrontier.com"
+ },
+ "Home Depot": {
+  "slug": "home-depot",
+  "website": "https://www.homedepot.com"
+ },
+ "Honeywell International": {
+  "slug": "honeywell-international",
+  "website": "https://www.honeywell.com"
+ },
+ "Hormel Foods": {
+  "slug": "hormel-foods",
+  "website": "https://www.hormelfoods.com"
+ },
+ "Humana": {
+  "slug": "humana",
+  "website": "https://www.humana.com"
+ },
+ "Huntington Ingalls Industries": {
+  "slug": "huntington-ingalls-industries",
+  "website": "http://www.huntingtoningalls.com"
+ },
+ "Huntsman": {
+  "slug": "huntsman",
+  "website": "https://www.huntsman.com"
+ },
+ "IBM": {
+  "slug": "ibm",
+  "website": "https://www.ibm.com"
+ },
+ "INTL FCStone": {
+  "slug": "intl-fcstone",
+  "website": "https://www.intlfcstone.com"
+ },
+ "IQVIA Holdings": {
+  "slug": "iqvia-holdings",
+  "website": "https://www.iqvia.com"
+ },
+ "Icahn Enterprises": {
+  "slug": "icahn-enterprises",
+  "website": "http://www.ielp.com"
+ },
+ "Illinois Tool Works": {
+  "slug": "illinois-tool-works",
+  "website": "http://www.itw.com"
+ },
+ "Ingredion": {
+  "slug": "ingredion",
+  "website": "https://www.ingredion.com"
+ },
+ "Insight Enterprises": {
+  "slug": "insight-enterprises",
+  "website": "https://www.insight.com"
+ },
+ "Intel": {
+  "slug": "intel",
+  "website": "https://www.intel.com"
+ },
+ "Intercontinental Exchange": {
+  "slug": "intercontinental-exchange",
+  "website": "https://www.intercontinentalexchange.com"
+ },
+ "International Paper": {
+  "slug": "international-paper",
+  "website": "http://www.internationalpaper.com"
+ },
+ "Interpublic Group": {
+  "slug": "interpublic-group",
+  "website": "https://www.interpublic.com"
+ },
+ "Intuit": {
+  "slug": "intuit",
+  "website": "https://www.intuit.com"
+ },
+ "J.B. Hunt Transport Services": {
+  "slug": "j-b-hunt-transport-services",
+  "website": "https://www.jbhunt.com"
+ },
+ "J.C. Penney": {
+  "slug": "j-c-penney",
+  "website": "https://www.jcpenney.com"
+ },
+ "J.M. Smucker": {
+  "slug": "j-m-smucker",
+  "website": "http://www.jmsmucker.com"
+ },
+ "JPMorgan Chase": {
+  "slug": "jpmorgan-chase",
+  "website": "https://www.jpmorganchase.com"
+ },
+ "Jabil": {
+  "slug": "jabil",
+  "website": "https://www.jabil.com"
+ },
+ "Jacobs Engineering Group": {
+  "slug": "jacobs-engineering-group",
+  "website": "http://www.jacobs.com"
+ },
+ "Jefferies Financial Group": {
+  "slug": "jefferies-financial-group",
+  "website": "http://www.jefferies.com"
+ },
+ "JetBlue Airways": {
+  "slug": "jetblue-airways",
+  "website": "https://www.jetblue.com"
+ },
+ "Johnson & Johnson": {
+  "slug": "johnson-and-johnson",
+  "website": "https://www.jnj.com"
+ },
+ "Jones Financial (Edward Jones)": {
+  "slug": "jones-financial-edward-jones",
+  "website": "https://www.edwardjones.com"
+ },
+ "Jones Lang LaSalle": {
+  "slug": "jones-lang-lasalle",
+  "website": "http://www.us.jll.com"
+ },
+ "Kellogg": {
+  "slug": "kellogg",
+  "website": "https://www.kelloggs.com"
+ },
+ "Keurig Dr Pepper": {
+  "slug": "keurig-dr-pepper",
+  "website": "https://www.keurigdrpepper.com"
+ },
+ "KeyCorp": {
+  "slug": "keycorp",
+  "website": "https://www.key.com"
+ },
+ "Kimberly-Clark": {
+  "slug": "kimberly-clark",
+  "website": "https://www.kimberly-clark.com"
+ },
+ "Kinder Morgan": {
+  "slug": "kinder-morgan",
+  "website": "https://www.kindermorgan.com"
+ },
+ "Kohl's": {
+  "slug": "kohls",
+  "website": "https://www.kohls.com"
+ },
+ "Kraft Heinz": {
+  "slug": "kraft-heinz",
+  "website": "http://www.kraftheinzcompany.com"
+ },
+ "Kroger": {
+  "slug": "kroger",
+  "website": "https://www.kroger.com"
+ },
+ "L Brands": {
+  "slug": "l-brands",
+  "website": "https://www.lb.com"
+ },
+ "L3 Technologies": {
+  "slug": "l3-technologies",
+  "website": "https://www.l3t.com"
+ },
+ "L3Harris Technologies": {
+  "slug": "l3harris-technologies",
+  "website": "https://www.harris.com"
+ },
+ "LKQ": {
+  "slug": "lkq",
+  "website": "http://www.lkqcorp.com"
+ },
+ "Laboratory Corp. of America": {
+  "slug": "laboratory-corp-of-america",
+  "website": "https://www.labcorp.com"
+ },
+ "Lam Research": {
+  "slug": "lam-research",
+  "website": "https://www.lamresearch.com"
+ },
+ "Land O'Lakes": {
+  "slug": "land-olakes",
+  "website": "https://www.landolakesinc.com"
+ },
+ "Las Vegas Sands": {
+  "slug": "las-vegas-sands",
+  "website": "https://www.sands.com"
+ },
+ "Lear": {
+  "slug": "lear",
+  "website": "http://www.lear.com"
+ },
+ "Leidos Holdings": {
+  "slug": "leidos-holdings",
+  "website": "https://www.leidos.com"
+ },
+ "Lennar": {
+  "slug": "lennar",
+  "website": "https://www.lennar.com"
+ },
+ "Levi Strauss": {
+  "slug": "levi-strauss",
+  "website": "https://www.levistrauss.com"
+ },
+ "Liberty Media": {
+  "slug": "liberty-media",
+  "website": "http://www.libertymedia.com"
+ },
+ "Liberty Mutual Insurance Group": {
+  "slug": "liberty-mutual-insurance-group",
+  "website": "https://www.libertymutual.com"
+ },
+ "Lincoln National": {
+  "slug": "lincoln-national",
+  "website": "https://www.lfg.com"
+ },
+ "Lithia Motors": {
+  "slug": "lithia-motors",
+  "website": "https://www.lithiamotors.com"
+ },
+ "Live Nation Entertainment": {
+  "slug": "live-nation-entertainment",
+  "website": "http://www.livenationentertainment.com"
+ },
+ "Lockheed Martin": {
+  "slug": "lockheed-martin",
+  "website": "https://www.lockheedmartin.com"
+ },
+ "Loews": {
+  "slug": "loews",
+  "website": "https://loews.com"
+ },
+ "Lowe's": {
+  "slug": "lowes",
+  "website": "https://www.lowes.com"
+ },
+ "M&T Bank Corp.": {
+  "slug": "m-and-t-bank-corp",
+  "website": "https://www.mtb.com"
+ },
+ "MGM Resorts International": {
+  "slug": "mgm-resorts-international",
+  "website": "https://www.mgmresorts.com"
+ },
+ "Macy's": {
+  "slug": "macys",
+  "website": "https://www.macys.com"
+ },
+ "Magellan Health": {
+  "slug": "magellan-health",
+  "website": "https://www.magellanhealth.com"
+ },
+ "ManpowerGroup": {
+  "slug": "manpowergroup",
+  "website": "https://www.manpowergroup.com"
+ },
+ "Marathon Oil": {
+  "slug": "marathon-oil",
+  "website": "https://www.marathonoil.com"
+ },
+ "Marathon Petroleum": {
+  "slug": "marathon-petroleum",
+  "website": "http://www.marathonpetroleum.com"
+ },
+ "Markel": {
+  "slug": "markel",
+  "website": "http://www.markelcorp.com"
+ },
+ "Marriott International": {
+  "slug": "marriott-international",
+  "website": "https://www.marriott.com"
+ },
+ "Marsh & McLennan": {
+  "slug": "marsh-and-mclennan",
+  "website": "http://www.mmc.com"
+ },
+ "MasTec": {
+  "slug": "mastec",
+  "website": "https://www.mastec.com"
+ },
+ "Masco": {
+  "slug": "masco",
+  "website": "https://www.masco.com"
+ },
+ "Massachusetts Mutual Life Insurance": {
+  "slug": "massachusetts-mutual-life-insurance",
+  "website": "https://www.massmutual.com"
+ },
+ "Mastercard": {
+  "slug": "mastercard",
+  "website": "https://www.mastercard.us"
+ },
+ "McDonald's": {
+  "slug": "mcdonalds",
+  "website": "https://www.mcdonalds.com"
+ },
+ "McKesson": {
+  "slug": "mckesson",
+  "website": "http://www.mckesson.com"
+ },
+ "Merck": {
+  "slug": "merck",
+  "website": "http://www.merck.com"
+ },
+ "MetLife": {
+  "slug": "metlife",
+  "website": "https://www.metlife.com"
+ },
+ "Meta Platforms": {
+  "slug": "meta-platforms",
+  "website": "https://www.facebook.com"
+ },
+ "Micron Technology": {
+  "slug": "micron-technology",
+  "website": "https://www.micron.com"
+ },
+ "Microsoft": {
+  "slug": "microsoft",
+  "website": "https://www.microsoft.com"
+ },
+ "Mohawk Industries": {
+  "slug": "mohawk-industries",
+  "website": "https://mohawkind.com"
+ },
+ "Molina Healthcare": {
+  "slug": "molina-healthcare",
+  "website": "http://www.molinahealthcare.com"
+ },
+ "Molson Coors Brewing": {
+  "slug": "molson-coors-brewing",
+  "website": "https://www.molsoncoors.com"
+ },
+ "Mondelez International": {
+  "slug": "mondelez-international",
+  "website": "https://www.mondelezinternational.com"
+ },
+ "Morgan Stanley": {
+  "slug": "morgan-stanley",
+  "website": "https://www.morganstanley.com"
+ },
+ "Mosaic": {
+  "slug": "mosaic",
+  "website": "https://www.mosaicco.com"
+ },
+ "Motorola Solutions": {
+  "slug": "motorola-solutions",
+  "website": "https://www.motorolasolutions.com"
+ },
+ "Murphy USA": {
+  "slug": "murphy-usa",
+  "website": "https://www.murphyusa.com"
+ },
+ "Mutual of Omaha Insurance": {
+  "slug": "mutual-of-omaha-insurance",
+  "website": "https://www.mutualofomaha.com"
+ },
+ "NCR": {
+  "slug": "ncr",
+  "website": "https://www.ncr.com"
+ },
+ "NGL Energy Partners": {
+  "slug": "ngl-energy-partners",
+  "website": "http://www.nglenergypartners.com"
+ },
+ "NRG Energy": {
+  "slug": "nrg-energy",
+  "website": "https://www.nrg.com"
+ },
+ "NVR": {
+  "slug": "nvr",
+  "website": "http://www.nvrinc.com"
+ },
+ "National Oilwell Varco": {
+  "slug": "national-oilwell-varco",
+  "website": "https://www.nov.com"
+ },
+ "Nationwide": {
+  "slug": "nationwide",
+  "website": "https://www.nationwide.com"
+ },
+ "Navient": {
+  "slug": "navient",
+  "website": "https://www.navient.com"
+ },
+ "Navistar International": {
+  "slug": "navistar-international",
+  "website": "http://www.navistar.com"
+ },
+ "NetApp": {
+  "slug": "netapp",
+  "website": "https://www.netapp.com"
+ },
+ "Netflix": {
+  "slug": "netflix",
+  "website": "https://www.netflix.com"
+ },
+ "New York Life Insurance": {
+  "slug": "new-york-life-insurance",
+  "website": "https://www.newyorklife.com"
+ },
+ "Newell Brands": {
+  "slug": "newell-brands",
+  "website": "https://www.newellbrands.com"
+ },
+ "Newmont Goldcorp": {
+  "slug": "newmont-goldcorp",
+  "website": "https://www.newmont.com"
+ },
+ "News Corp.": {
+  "slug": "news-corp",
+  "website": "https://newscorp.com"
+ },
+ "NextEra Energy": {
+  "slug": "nextera-energy",
+  "website": "http://www.nexteraenergy.com"
+ },
+ "Nike": {
+  "slug": "nike",
+  "website": "https://www.nike.com"
+ },
+ "Nordstrom": {
+  "slug": "nordstrom",
+  "website": "https://shop.nordstrom.com"
+ },
+ "Norfolk Southern": {
+  "slug": "norfolk-southern",
+  "website": "http://www.nscorp.com"
+ },
+ "Northern Trust": {
+  "slug": "northern-trust",
+  "website": "https://www.northerntrust.com"
+ },
+ "Northrop Grumman": {
+  "slug": "northrop-grumman",
+  "website": "http://www.northropgrumman.com"
+ },
+ "Northwestern Mutual": {
+  "slug": "northwestern-mutual",
+  "website": "https://www.northwesternmutual.com"
+ },
+ "Nucor": {
+  "slug": "nucor",
+  "website": "http://www.nucor.com"
+ },
+ "Nvidia": {
+  "slug": "nvidia",
+  "website": "http://www.nvidia.com"
+ },
+ "O'Reilly Automotive": {
+  "slug": "oreilly-automotive",
+  "website": "https://mohawkind.com"
+ },
+ "ON Semiconductor": {
+  "slug": "on-semiconductor",
+  "website": "https://www.onsemi.com"
+ },
+ "Occidental Petroleum": {
+  "slug": "occidental-petroleum",
+  "website": "https://www.oxy.com"
+ },
+ "Office Depot": {
+  "slug": "office-depot",
+  "website": "https://www.officedepot.com"
+ },
+ "Old Republic International": {
+  "slug": "old-republic-international",
+  "website": "http://www.oldrepublic.com"
+ },
+ "Olin": {
+  "slug": "olin",
+  "website": "https://www.olin.com"
+ },
+ "Omnicom Group": {
+  "slug": "omnicom-group",
+  "website": "http://www.omnicomgroup.com"
+ },
+ "Oneok": {
+  "slug": "oneok",
+  "website": "http://www.oneok.com"
+ },
+ "Oracle": {
+  "slug": "oracle",
+  "website": "https://www.oracle.com"
+ },
+ "Oshkosh": {
+  "slug": "oshkosh",
+  "website": "https://www.oshkosh.com"
+ },
+ "Owens & Minor": {
+  "slug": "owens-and-minor",
+  "website": "https://www.owens-minor.com"
+ },
+ "Owens Corning": {
+  "slug": "owens-corning",
+  "website": "https://www.owenscorning.com"
+ },
+ "Owens-Illinois": {
+  "slug": "owens-illinois",
+  "website": "http://www.o-i.com"
+ },
+ "PBF Energy": {
+  "slug": "pbf-energy",
+  "website": "http://www.pbfenergy.com"
+ },
+ "PG&E": {
+  "slug": "pg-and-e",
+  "website": "http://www.pgecorp.com"
+ },
+ "PNC Financial Services": {
+  "slug": "pnc-financial-services",
+  "website": "https://www.pnc.com"
+ },
+ "PPG Industries": {
+  "slug": "ppg-industries",
+  "website": "http://corporate.ppg.com"
+ },
+ "PPL": {
+  "slug": "ppl",
+  "website": "https://www.pplweb.com"
+ },
+ "PVH": {
+  "slug": "pvh",
+  "website": "https://www.pvh.com"
+ },
+ "Paccar": {
+  "slug": "paccar",
+  "website": "http://www.paccar.com"
+ },
+ "Pacific Life": {
+  "slug": "pacific-life",
+  "website": "https://www.pacificlife.com"
+ },
+ "Packaging Corp. of America": {
+  "slug": "packaging-corp-of-america",
+  "website": "https://www.packagingcorp.com"
+ },
+ "Parker-Hannifin": {
+  "slug": "parker-hannifin",
+  "website": "http://www.parker.com"
+ },
+ "PayPal Holdings": {
+  "slug": "paypal-holdings",
+  "website": "https://investor.paypal-corp.com"
+ },
+ "Peabody Energy": {
+  "slug": "peabody-energy",
+  "website": "https://www.peabodyenergy.com"
+ },
+ "Penske Automotive Group": {
+  "slug": "penske-automotive-group",
+  "website": "http://www.penskeautomotive.com"
+ },
+ "PepsiCo": {
+  "slug": "pepsico",
+  "website": "https://www.pepsi.com"
+ },
+ "Performance Food Group": {
+  "slug": "performance-food-group",
+  "website": "http://www.pfgc.com"
+ },
+ "Peter Kiewit Sons'": {
+  "slug": "peter-kiewit-sons",
+  "website": "https://www.kiewit.com"
+ },
+ "Pfizer": {
+  "slug": "pfizer",
+  "website": "https://www.pfizer.com"
+ },
+ "Philip Morris International": {
+  "slug": "philip-morris-international",
+  "website": "https://www.pmi.com"
+ },
+ "Phillips 66": {
+  "slug": "phillips-66",
+  "website": "http://www.phillips66.com"
+ },
+ "Pioneer Natural Resources": {
+  "slug": "pioneer-natural-resources",
+  "website": "https://www.pxd.com"
+ },
+ "Plains GP Holdings": {
+  "slug": "plains-gp-holdings",
+  "website": "http://ir.pagp.com"
+ },
+ "Polaris Industries": {
+  "slug": "polaris-industries",
+  "website": "https://www.polaris.com"
+ },
+ "Post Holdings": {
+  "slug": "post-holdings",
+  "website": "https://www.postholdings.com"
+ },
+ "Principal Financial": {
+  "slug": "principal-financial",
+  "website": "https://www.principal.com"
+ },
+ "Procter & Gamble": {
+  "slug": "procter-and-gamble",
+  "website": "https://us.pg.com"
+ },
+ "Progressive": {
+  "slug": "progressive",
+  "website": "https://www.progressive.com"
+ },
+ "Prudential Financial": {
+  "slug": "prudential-financial",
+  "website": "https://www.prudential.com"
+ },
+ "Public Service Enterprise Group": {
+  "slug": "public-service-enterprise-group",
+  "website": "https://www.pseg.com"
+ },
+ "Publix Super Markets": {
+  "slug": "publix-super-markets",
+  "website": "http://www.publix.com"
+ },
+ "PulteGroup": {
+  "slug": "pultegroup",
+  "website": "http://www.pultegroupinc.com"
+ },
+ "Qualcomm": {
+  "slug": "qualcomm",
+  "website": "https://www.qualcomm.com"
+ },
+ "Quanta Services": {
+  "slug": "quanta-services",
+  "website": "http://www.quantaservices.com"
+ },
+ "Quest Diagnostics": {
+  "slug": "quest-diagnostics",
+  "website": "https://www.questdiagnostics.com"
+ },
+ "Qurate Retail": {
+  "slug": "qurate-retail",
+  "website": "http://www.libertyinteractive.com"
+ },
+ "R.R. Donnelley & Sons": {
+  "slug": "r-r-donnelley-and-sons",
+  "website": "https://www.rrdonnelley.com"
+ },
+ "RTX": {
+  "slug": "rtx",
+  "website": "http://www.utc.com"
+ },
+ "Ralph Lauren": {
+  "slug": "ralph-lauren",
+  "website": "https://www.ralphlauren.com"
+ },
+ "Raymond James Financial": {
+  "slug": "raymond-james-financial",
+  "website": "https://www.raymondjames.com"
+ },
+ "Raytheon": {
+  "slug": "raytheon",
+  "website": "https://www.raytheon.com"
+ },
+ "Realogy Holdings": {
+  "slug": "realogy-holdings",
+  "website": "https://www.realogy.com"
+ },
+ "Regeneron Pharmaceuticals": {
+  "slug": "regeneron-pharmaceuticals",
+  "website": "https://www.regeneron.com"
+ },
+ "Regions Financial": {
+  "slug": "regions-financial",
+  "website": "http://ir.regions.com"
+ },
+ "Reinsurance Group of America": {
+  "slug": "reinsurance-group-of-america",
+  "website": "https://www.rgare.com"
+ },
+ "Reliance Steel & Aluminum": {
+  "slug": "reliance-steel-and-aluminum",
+  "website": "https://www.rsac.com"
+ },
+ "Republic Services": {
+  "slug": "republic-services",
+  "website": "https://www.republicservices.com"
+ },
+ "Rite Aid": {
+  "slug": "rite-aid",
+  "website": "https://www.riteaid.com"
+ },
+ "Robert Half International": {
+  "slug": "robert-half-international",
+  "website": "https://www.roberthalf.com"
+ },
+ "Rockwell Automation": {
+  "slug": "rockwell-automation",
+  "website": "https://www.rockwellautomation.com"
+ },
+ "Rockwell Collins": {
+  "slug": "rockwell-collins",
+  "website": "https://www.rockwellcollins.com"
+ },
+ "Ross Stores": {
+  "slug": "ross-stores",
+  "website": "https://www.rossstores.com"
+ },
+ "Ryder System": {
+  "slug": "ryder-system",
+  "website": "https://ryder.com"
+ },
+ "S&P Global": {
+  "slug": "s-and-p-global",
+  "website": "https://www.spglobal.com"
+ },
+ "Sanmina": {
+  "slug": "sanmina",
+  "website": "http://www.sanmina.com"
+ },
+ "Seaboard": {
+  "slug": "seaboard",
+  "website": "https://www.seaboardcorp.com"
+ },
+ "Sempra Energy": {
+  "slug": "sempra-energy",
+  "website": "https://www.sempra.com"
+ },
+ "Sherwin-Williams": {
+  "slug": "sherwin-williams",
+  "website": "https://www.sherwin-williams.com"
+ },
+ "Simon Property Group": {
+  "slug": "simon-property-group",
+  "website": "http://www.simon.com"
+ },
+ "Sonic Automotive": {
+  "slug": "sonic-automotive",
+  "website": "https://www.sonicautomotive.com"
+ },
+ "Southern": {
+  "slug": "southern",
+  "website": "https://www.southerncompany.com"
+ },
+ "Southwest Airlines": {
+  "slug": "southwest-airlines",
+  "website": "https://www.southwest.com"
+ },
+ "SpartanNash": {
+  "slug": "spartannash",
+  "website": "https://www.spartannash.com"
+ },
+ "Spirit AeroSystems Holdings": {
+  "slug": "spirit-aerosystems-holdings",
+  "website": "http://www.spiritaero.com"
+ },
+ "Stanley Black & Decker": {
+  "slug": "stanley-black-and-decker",
+  "website": "http://www.stanleyblackanddecker.com"
+ },
+ "Starbucks": {
+  "slug": "starbucks",
+  "website": "https://www.starbucks.com"
+ },
+ "State Farm Insurance": {
+  "slug": "state-farm-insurance",
+  "website": "https://www.statefarm.com"
+ },
+ "State Street Corp.": {
+  "slug": "state-street-corp",
+  "website": "http://www.statestreet.com"
+ },
+ "Steel Dynamics": {
+  "slug": "steel-dynamics",
+  "website": "http://www.steeldynamics.com"
+ },
+ "Stryker": {
+  "slug": "stryker",
+  "website": "https://www.stryker.com"
+ },
+ "SunTrust Banks": {
+  "slug": "suntrust-banks",
+  "website": "https://www.suntrust.com"
+ },
+ "Supervalu": {
+  "slug": "supervalu",
+  "website": "https://www.supervalu.com"
+ },
+ "Synchrony Financial": {
+  "slug": "synchrony-financial",
+  "website": "https://www.synchrony.com"
+ },
+ "Synnex": {
+  "slug": "synnex",
+  "website": "https://www.synnexcorp.com"
+ },
+ "Sysco": {
+  "slug": "sysco",
+  "website": "https://www.sysco.com"
+ },
+ "TIAA": {
+  "slug": "tiaa",
+  "website": "https://www.tiaa.org"
+ },
+ "TJX": {
+  "slug": "tjx",
+  "website": "https://www.tjx.com"
+ },
+ "Tapestry": {
+  "slug": "tapestry",
+  "website": "https://www.tapestry.com"
+ },
+ "Targa Resources": {
+  "slug": "targa-resources",
+  "website": "http://www.targaresources.com"
+ },
+ "Target": {
+  "slug": "target",
+  "website": "https://www.target.com"
+ },
+ "Tech Data": {
+  "slug": "tech-data",
+  "website": "https://www.techdata.com"
+ },
+ "Tenet Healthcare": {
+  "slug": "tenet-healthcare",
+  "website": "https://www.tenethealth.com"
+ },
+ "Tenneco": {
+  "slug": "tenneco",
+  "website": "http://www.tenneco.com"
+ },
+ "Tesla": {
+  "slug": "tesla",
+  "website": "https://www.tesla.com"
+ },
+ "Texas Instruments": {
+  "slug": "texas-instruments",
+  "website": "http://www.ti.com"
+ },
+ "Textron": {
+  "slug": "textron",
+  "website": "https://www.textron.com"
+ },
+ "Thermo Fisher Scientific": {
+  "slug": "thermo-fisher-scientific",
+  "website": "https://www.thermofisher.com"
+ },
+ "Thor Industries": {
+  "slug": "thor-industries",
+  "website": "https://www.thorindustries.com"
+ },
+ "Thrivent Financial for Lutherans": {
+  "slug": "thrivent-financial-for-lutherans",
+  "website": "https://www.thrivent.com"
+ },
+ "Toll Brothers": {
+  "slug": "toll-brothers",
+  "website": "https://www.tollbrothers.com"
+ },
+ "Tractor Supply": {
+  "slug": "tractor-supply",
+  "website": "https://www.tractorsupply.com"
+ },
+ "TravelCenters of America": {
+  "slug": "travelcenters-of-america",
+  "website": "https://www.ta-petro.com"
+ },
+ "Travelers": {
+  "slug": "travelers",
+  "website": "https://www.travelers.com"
+ },
+ "TreeHouse Foods": {
+  "slug": "treehouse-foods",
+  "website": "http://www.treehousefoods.com"
+ },
+ "Truist Financial": {
+  "slug": "truist-financial",
+  "website": "https://www.bbt.com"
+ },
+ "Twenty-First Century Fox": {
+  "slug": "twenty-first-century-fox",
+  "website": "https://www.21cf.com"
+ },
+ "Tyson Foods": {
+  "slug": "tyson-foods",
+  "website": "https://www.tyson.com"
+ },
+ "U.S. Bancorp": {
+  "slug": "u-s-bancorp",
+  "website": "https://www.usbank.com"
+ },
+ "UGI": {
+  "slug": "ugi",
+  "website": "https://www.ugi.com"
+ },
+ "US Foods Holding": {
+  "slug": "us-foods-holding",
+  "website": "https://www.usfoods.com"
+ },
+ "USAA": {
+  "slug": "usaa",
+  "website": "https://www.usaa.com"
+ },
+ "Ulta Beauty": {
+  "slug": "ulta-beauty",
+  "website": "https://www.ulta.com"
+ },
+ "Union Pacific": {
+  "slug": "union-pacific",
+  "website": "https://www.up.com"
+ },
+ "United Continental Holdings": {
+  "slug": "united-continental-holdings",
+  "website": "https://www.united.com"
+ },
+ "United Natural Foods": {
+  "slug": "united-natural-foods",
+  "website": "https://www.unfi.com"
+ },
+ "United Parcel Service": {
+  "slug": "united-parcel-service",
+  "website": "https://www.ups.com"
+ },
+ "United Rentals": {
+  "slug": "united-rentals",
+  "website": "https://www.unitedrentals.com"
+ },
+ "United States Steel": {
+  "slug": "united-states-steel",
+  "website": "https://www.ussteel.com"
+ },
+ "United Technologies": {
+  "slug": "rtx",
+  "website": "http://www.utc.com"
+ },
+ "UnitedHealth Group": {
+  "slug": "unitedhealth-group",
+  "website": "http://www.unitedhealthgroup.com"
+ },
+ "Univar": {
+  "slug": "univar",
+  "website": "http://www.univar.com"
+ },
+ "Universal Health Services": {
+  "slug": "universal-health-services",
+  "website": "https://www.uhsinc.com"
+ },
+ "Unum Group": {
+  "slug": "unum-group",
+  "website": "https://www.unum.com"
+ },
+ "VF": {
+  "slug": "vf",
+  "website": "https://www.vfc.com"
+ },
+ "Valero Energy": {
+  "slug": "valero-energy",
+  "website": "https://www.valero.com"
+ },
+ "Veritiv": {
+  "slug": "veritiv",
+  "website": "https://www.veritivcorp.com"
+ },
+ "Verizon Communications": {
+  "slug": "verizon-communications",
+  "website": "https://www.verizon.com"
+ },
+ "Viacom": {
+  "slug": "viacom",
+  "website": "http://www.viacom.com"
+ },
+ "Visa": {
+  "slug": "visa",
+  "website": "https://usa.visa.com"
+ },
+ "Vistra Energy": {
+  "slug": "vistra-energy",
+  "website": "https://www.vistraenergy.com"
+ },
+ "Voya Financial": {
+  "slug": "voya-financial",
+  "website": "https://www.voya.com"
+ },
+ "W.R. Berkley": {
+  "slug": "w-r-berkley",
+  "website": "https://www.wrberkley.com"
+ },
+ "W.W. Grainger": {
+  "slug": "w-w-grainger",
+  "website": "https://www.grainger.com"
+ },
+ "WEC Energy Group": {
+  "slug": "wec-energy-group",
+  "website": "https://www.wecenergygroup.com"
+ },
+ "WESCO International": {
+  "slug": "wesco-international",
+  "website": "https://www.wesco.com"
+ },
+ "Walgreens Boots Alliance": {
+  "slug": "walgreens-boots-alliance",
+  "website": "http://www.walgreensbootsalliance.com"
+ },
+ "Walmart": {
+  "slug": "walmart",
+  "website": "https://www.walmart.com"
+ },
+ "Walt Disney": {
+  "slug": "walt-disney",
+  "website": "https://www.disney.com"
+ },
+ "Waste Management": {
+  "slug": "waste-management",
+  "website": "https://www.wm.com"
+ },
+ "Wayfair": {
+  "slug": "wayfair",
+  "website": "https://www.wayfair.com"
+ },
+ "WellCare Health Plans": {
+  "slug": "wellcare-health-plans",
+  "website": "https://www.wellcare.com"
+ },
+ "Wells Fargo": {
+  "slug": "wells-fargo",
+  "website": "https://www.wellsfargo.com"
+ },
+ "WestRock": {
+  "slug": "westrock",
+  "website": "https://www.westrock.com"
+ },
+ "Western & Southern Financial Group": {
+  "slug": "western-and-southern-financial-group",
+  "website": "https://www.westernsouthern.com"
+ },
+ "Western Digital": {
+  "slug": "western-digital",
+  "website": "https://www.westerndigital.com"
+ },
+ "Western Union": {
+  "slug": "western-union",
+  "website": "https://www.westernunion.com"
+ },
+ "Westlake Chemical": {
+  "slug": "westlake-chemical",
+  "website": "https://www.westlake.com"
+ },
+ "Weyerhaeuser": {
+  "slug": "weyerhaeuser",
+  "website": "https://www.weyerhaeuser.com"
+ },
+ "Whirlpool": {
+  "slug": "whirlpool",
+  "website": "https://www.whirlpool.com"
+ },
+ "Williams": {
+  "slug": "williams",
+  "website": "http://co.williams.com"
+ },
+ "Williams-Sonoma": {
+  "slug": "williams-sonoma",
+  "website": "https://www.williams-sonomainc.com"
+ },
+ "Windstream Holdings": {
+  "slug": "windstream-holdings",
+  "website": "http://investor.windstream.com"
+ },
+ "World Fuel Services": {
+  "slug": "world-fuel-services",
+  "website": "https://www.wfscorp.com"
+ },
+ "Wynn Resorts": {
+  "slug": "wynn-resorts",
+  "website": "https://www.wynnresorts.com"
+ },
+ "XPO Logistics": {
+  "slug": "xpo-logistics",
+  "website": "https://www.xpo.com"
+ },
+ "Xcel Energy": {
+  "slug": "xcel-energy",
+  "website": "https://www.xcelenergy.com"
+ },
+ "Xerox": {
+  "slug": "xerox",
+  "website": "https://www.xerox.com"
+ },
+ "Yum Brands": {
+  "slug": "yum-brands",
+  "website": "http://www.yum.com"
+ },
+ "Yum China Holdings": {
+  "slug": "yum-china-holdings",
+  "website": "http://www.yum.com"
+ },
+ "Zimmer Biomet Holdings": {
+  "slug": "zimmer-biomet-holdings",
+  "website": "https://www.zimmerbiomet.com"
+ },
+ "Zoetis": {
+  "slug": "zoetis",
+  "website": "https://www.zoetis.com"
+ },
+ "eBay": {
+  "slug": "ebay",
+  "website": "https://www.ebay.com"
+ },
+ "iHeartMedia": {
+  "slug": "iheartmedia",
+  "website": "https://www.iheartmedia.com"
+ },
+ "salesforce.com": {
+  "slug": "salesforce",
+  "website": "https://www.salesforce.com"
+ }
+}
