@@ -32,7 +32,7 @@ function start() {
   const pos = (r, c) => [c - n / 2 + 0.5, r - n / 2 + 0.5];
   const random = rng(C.slug);
 
-  const stage = createStage(stageEl, { viewSize: size * 1.55 });
+  const stage = createStage(stageEl, { viewSize: size * (stageEl.clientWidth < 640 ? 1.38 : 1.55) });
   stage.setSun(size);
   const { scene } = stage;
   scene.add(buildSlab(size));

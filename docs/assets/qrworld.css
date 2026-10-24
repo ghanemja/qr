@@ -147,7 +147,7 @@ i.dot.startup { background: var(--startup); }
 .qw-filters { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); z-index: 5; display: flex; gap: 6px; }
 .qw-filters button {
   display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line);
-  background: rgba(253, 248, 240, 0.9); font-size: 13px; font-weight: 600; cursor: pointer; backdrop-filter: blur(6px);
+  background: rgba(253, 248, 240, 0.9); font-size: 13px; font-weight: 600; cursor: pointer; backdrop-filter: blur(6px); white-space: nowrap;
 }
 .qw-filters button[aria-pressed="true"] { background: var(--ink); color: var(--cream); border-color: var(--ink); }
 

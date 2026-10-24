@@ -241,7 +241,7 @@ const topbar = (depth, extra = '') => {
   return `<header class="topbar">
   <a class="brand" href="${up}index.html"><img src="${up}assets/icon.svg" alt="" width="22" height="22"><span>QR&nbsp;Atlas</span></a>
   ${extra}
-  <nav class="nav"><a href="${up}index.html">Map</a><a href="${up}companies.html">Directory</a></nav>
+  <nav class="nav"><a href="${up}index.html">QR world</a><a href="${up}map.html">Flat map</a><a href="${up}companies.html">Directory</a></nav>
 </header>`;
 };
 
@@ -289,7 +289,7 @@ const qwHead = ({ title, description, path, depth }) => {
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="${up}assets/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="${up}assets/qrworld.css">
-<script type="importmap">{"imports":{"three":"${up}assets/three.module.min.js"}}</script>
+<script type="importmap">{"imports":{"three":"${up || './'}assets/three.module.min.js"}}</script>
 </head>`;
 };
 const qwTop = (depth, eyeLabel = 'I see QR') => {
@@ -298,7 +298,7 @@ const qwTop = (depth, eyeLabel = 'I see QR') => {
     <a class="qw-logo" href="${up}index.html" aria-label="QR Atlas home">${LOGO}</a>
     <button class="qw-pill" id="see" aria-pressed="false"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M12 5C6.5 5 2.7 9.3 1.5 12c1.2 2.7 5 7 10.5 7s9.3-4.3 10.5-7C21.3 9.3 17.5 5 12 5Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-2.2a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6Z"/></svg>${eyeLabel}</button>
   </div>
-  <nav class="qw-nav"><a href="${up}index.html">World</a><a href="${up}companies.html">Directory</a><a href="${up}about.html">About</a></nav>`;
+  <nav class="qw-nav"><a href="${up}index.html">World</a><a href="${up}map.html">Flat map</a><a href="${up}companies.html">Directory</a></nav>`;
 };
 const ICONS = {
   spring: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.6"/><path d="M12 9.4c-1.6-3.9 1.4-6.4 3.2-4.6 1.6 1.6-.4 4.6-3.2 4.6Zm2.6 2.6c3.9-1.6 6.4 1.4 4.6 3.2-1.6 1.6-4.6-.4-4.6-3.2ZM12 14.6c1.6 3.9-1.4 6.4-3.2 4.6-1.6-1.6.4-4.6 3.2-4.6ZM9.4 12c-3.9 1.6-6.4-1.4-4.6-3.2 1.6-1.6 4.6.4 4.6 3.2Z"/></svg>',
@@ -424,7 +424,7 @@ function indexPage() {
   const usView = { x: (Math.min(...us.map((c) => c.x)) + Math.max(...us.map((c) => c.x))) / 2, y: (Math.min(...us.map((c) => c.y)) + Math.max(...us.map((c) => c.y))) / 2, w: (Math.max(...us.map((c) => c.x)) - Math.min(...us.map((c) => c.x))) * 1.15 };
   const config = { W, H, listYear: LIST_YEAR, usView, regions, places };
   const description = `Every ${LIST_YEAR} Fortune 500 headquarters and ${startups.length} notable startups on one map, from Silicon Valley to Boston. Play the tour, search any company, and share its QR page.`;
-  return `${head({ title: 'QR Atlas · Fortune 500 & startup map', description, path: '', depth: 0 })}
+  return `${head({ title: 'Flat map · QR Atlas', description, path: 'map.html', depth: 0 })}
 <body class="atlas">
 ${topbar(0, `<div class="search" role="search">
     <input id="q" type="search" placeholder="Search a company or city…" autocomplete="off" spellcheck="false" aria-label="Search companies" aria-controls="results" aria-expanded="false">
@@ -498,6 +498,92 @@ ${topbar(0, `<div class="search" role="search">
 `;
 }
 
+
+// ---------- QR world (index) ----------
+function worldPage() {
+  const slim = companies.map((c) => {
+    const o = { s: c.slug, n: c.name, k: c.kind === 'f500' ? 0 : 1, t: c.tech ? 1 : 0, c: place(c), m: modelOf(c) };
+    if (c.rank) o.r = c.rank;
+    if (c.revenue != null) o.v = c.revenue;
+    if (c.sector) o.sec = c.sector;
+    if (c.founded) o.f = c.founded;
+    if (c.area) o.a = c.area;
+    if (c.listedName && c.listedName !== c.name) o.ln = c.listedName;
+    return o;
+  });
+  const config = {
+    listYear: LIST_YEAR,
+    board,
+    regions: REGIONS.map(({ id, name, short, note, members }) => ({ id, name, short, note: note || '', members })),
+  };
+  const description = `A 3D world on a QR code: every ${LIST_YEAR} Fortune 500 headquarters and ${startups.length} startups, from Silicon Valley to Boston. Play the tour, search any company, and scan the board.`;
+  return `${qwHead({ title: 'QR Atlas · a world on a QR code', description, path: '', depth: 0 })}
+<body class="qw qw-world">
+<section class="qw-stage" id="stage">
+  ${qwTop(0)}
+  <div class="qw-filters" role="group" aria-label="Filter">
+    <button data-f="all" aria-pressed="true">All</button>
+    <button data-f="tech" aria-pressed="false"><i class="dot tech"></i>Tech</button>
+    <button data-f="startup" aria-pressed="false"><i class="dot startup"></i>Startups</button>
+    <button data-f="f500" aria-pressed="false"><i class="dot f500"></i>Fortune 500</button>
+  </div>
+  <div id="labels" aria-hidden="true"></div>
+  <div id="tip" role="tooltip" hidden></div>
+  <canvas class="qw-fallback" id="fallback-qr" width="320" height="320" aria-label="QR code for this site"></canvas>
+
+  <aside class="qw-caption" id="caption" hidden aria-live="polite">
+    <div class="step" id="cap-step"></div>
+    <h2 id="cap-title"></h2>
+    <p id="cap-note"></p>
+    <div class="qw-stats" id="cap-stats"></div>
+    <ol class="qw-list" id="cap-list"></ol>
+    <div class="qw-progress"><i id="cap-bar"></i></div>
+    <div class="controls">
+      <button class="qw-btn" id="cap-prev" aria-label="Previous stop">‹ Prev</button>
+      <button class="qw-btn" id="cap-next" aria-label="Next stop">Next ›</button>
+      <button class="qw-btn" id="cap-close">End tour</button>
+    </div>
+  </aside>
+
+  <aside class="qw-card" id="card" hidden aria-live="polite">
+    <button class="qw-close" id="card-close" aria-label="Close">×</button>
+    <div class="qw-badges" id="card-badges"></div>
+    <h2 id="card-name"></h2>
+    <p class="place" id="card-place"></p>
+    <dl class="qw-facts" id="card-facts"></dl>
+    <div class="row">
+      <canvas id="card-qr" width="120" height="120" aria-label="QR code for this company's page"></canvas>
+      <div>
+        <a class="qw-btn primary" id="card-open" href="#">Open its QR world</a>
+        <button class="qw-btn" id="card-copy">Copy link</button>
+      </div>
+    </div>
+    <h3 id="card-near-h"></h3>
+    <ul class="qw-chips" id="card-near"></ul>
+  </aside>
+
+  <div class="qw-dock">
+    <div class="qw-search" role="search">
+      <input id="q" type="search" placeholder="Search a company, city or region…" autocomplete="off" spellcheck="false" aria-label="Search companies" aria-controls="results" aria-expanded="false">
+      <ul id="results" role="listbox" hidden></ul>
+      <button class="qw-play" id="play" aria-label="Play tour"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 5.5v13l10.5-6.5z"/></svg></button>
+    </div>
+    <div class="qw-tabs" role="group" aria-label="Board">
+      <button data-mode="us" aria-pressed="true">${ICONS.city}USA</button>
+      <button data-mode="world" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z"/></svg>World</button>
+      <button id="random"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Surprise me</button>
+    </div>
+  </div>
+</section>
+<script>window.WORLD=${JSON.stringify(config)};window.COMPANIES=${JSON.stringify(slim)};</script>
+<script src="assets/qrcode.js"></script>
+<script src="assets/qr-card.js"></script>
+<script type="module" src="assets/world.js"></script>
+</body>
+</html>
+`;
+}
+
 // ---------- directory ----------
 function directoryPage() {
   const rows = [...companies].sort((a, b) => (a.kind === b.kind ? (a.rank || 0) - (b.rank || 0) || a.name.localeCompare(b.name) : a.kind === 'f500' ? -1 : 1));
@@ -537,7 +623,8 @@ function aboutPage() {
 ${topbar(0)}
 <main class="prose">
   <h1>About the data</h1>
-  <p>QR Atlas gives every company a page with a QR code, so a post or slide about a company can point to one stable link. The map shows where they are headquartered.</p>
+  <p>QR Atlas gives every company a page whose QR code is a small 3D world: a tree or a city growing out of the code. Tap it, or press “I see QR”, and it settles into a flat QR code that scans back to that page, so a post or slide about a company can point to one stable link.</p>
+  <p>The home page is the same idea at full scale: one large QR code that scans to this site, with the map laid across its tiles and every company standing at its headquarters. Towers grow with revenue; startups are trees, rockets (aerospace and defense) or glowing orbs (AI). The <a href="map.html">flat map</a> shows the same data in 2D.</p>
   <h2>Fortune 500</h2>
   <p>Ranks, names, revenue and profit come from the <strong>${LIST_YEAR} Fortune 500</strong> list (fiscal ${LIST_YEAR - 1} figures), as published in the open dataset at <a href="https://github.com/cmusam/fortune500">github.com/cmusam/fortune500</a>. Fortune publishes a new list every June; ranks here are not current.</p>
   <p>HQ coordinates come from the HIFLD <em>Fortune 500 Corporate Headquarters</em> dataset (via <a href="https://github.com/anyfactor/f500hqviz">github.com/anyfactor/f500hqviz</a>), corrected by hand where that file was wrong or out of date. Companies that later moved their headquarters are shown at the new location:</p>
@@ -564,7 +651,8 @@ copyFileSync(join(ROOT, 'node_modules/qrcode-generator/qrcode.js'), join(OUT, 'a
 copyFileSync(join(ROOT, 'node_modules/three/build/three.module.min.js'), join(OUT, 'assets/three.module.min.js'));
 copyFileSync(join(ROOT, 'node_modules/three/examples/jsm/controls/OrbitControls.js'), join(OUT, 'assets/OrbitControls.js'));
 writeFileSync(join(OUT, 'assets/map.svg'), MAP_SVG);
-writeFileSync(join(OUT, 'index.html'), indexPage());
+writeFileSync(join(OUT, 'map.html'), indexPage());
+writeFileSync(join(OUT, 'index.html'), worldPage());
 writeFileSync(join(OUT, 'companies.html'), directoryPage());
 writeFileSync(join(OUT, 'about.html'), aboutPage());
 writeFileSync(join(OUT, '.nojekyll'), '');
