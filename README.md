@@ -2,7 +2,7 @@
 
 A static site where every company's QR code is a 3D model, on a 3D map of the US.
 
-- `docs/index.html`: a 3D map of the US (real outline, state lines, Great Lakes, Canada and Mexico around it) with hot zones where companies cluster. Each metro is a district of city blocks at its real spot, every company stands as its own 3D model, and the whole map turns into a QR code that scans to the site. ▶ plays a walkthrough of each tech city and its biggest tech company; searching a company opens its model next to its QR code. On a company page, paste any link and the model turns into a QR code for that link.
+- `docs/index.html`: a 3D cartoon map of the US on a square tiled slab with a lawn around the rim, split into seven regions (Northwest, West, Southwest, Midwest, Southeast, Mid-Atlantic, Northeast). Each region's biggest companies stand on it as their own 3D models near their real cities. Hover a region and its models move in that region's style (sway, float, hop, wave, swing, rush, twirl); click it and the piece breaks off the map and opens as a moving world with every company on its own lot, traffic, clouds and water, plus a card where the company's model turns into its scannable QR code. ▶ tours the regions; search jumps to any company. On a company page, paste any link and the model turns into a QR code for that link.
 - `docs/c/<company>.html`: one page per company. Its 3D model stands on a plaza paved with its QR code; tap it and the model breaks into pixels that land on the code, giving a scannable QR that links back to the page.
 - `docs/map.html`: flat 2D map of the same data. `docs/companies.html`: searchable directory.
 

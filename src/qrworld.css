@@ -221,3 +221,81 @@ i.dot.startup { background: var(--startup); }
   .show-stage { height: 220px; }
   body.card-open .qw-dock, body.card-open .qw-caption { display: none; }
 }
+
+/* ---------- home: 3D region map (src/home.js) ---------- */
+.hm-intro { position: absolute; top: 76px; left: 28px; z-index: 6; max-width: 520px; transition: opacity 0.4s; pointer-events: none; }
+.hm-intro h1 { margin: 0; font-size: clamp(24px, 3.2vw, 36px); line-height: 1.05; letter-spacing: -0.03em; text-shadow: 0 0 12px var(--cream), 0 0 4px var(--cream); }
+.hm-intro p { margin: 8px 0 0; color: var(--muted); font-size: 15px; text-shadow: 0 0 8px var(--cream); }
+.hm-dock { transition: opacity 0.4s; }
+body.hm-exploding .hm-intro, body.hm-exploding .hm-dock { opacity: 0; pointer-events: none; }
+body.hm-in-region .hm-intro, body.hm-in-region .hm-dock { display: none; }
+.qw-play .i-stop, body.hm-touring .qw-play .i-play { display: none; }
+body.hm-touring .qw-play .i-stop { display: block; }
+.hm-labels { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
+.hm-chip {
+  position: absolute; left: 0; top: 0; white-space: nowrap; pointer-events: auto; cursor: pointer;
+  padding: 3px 10px; border-radius: 999px; background: #2a2520; color: var(--cream-2); border: 2px solid var(--cream-2);
+  font: 500 12.5px/1.2 var(--font); display: grid; justify-items: center; gap: 2px; box-shadow: 0 3px 0 rgba(42, 37, 32, 0.25);
+}
+.hm-chip b { font-weight: 800; }
+.hm-chip .go { display: none; font-size: 11px; font-weight: 700; color: var(--yellow); }
+.hm-chip.is-hot .go { display: block; }
+.hm-tag { position: absolute; left: 0; top: 0; padding: 3px 9px; border-radius: 999px; background: var(--cream-2); border: 1.5px solid #2a2520; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.hm-tag.sel { background: #2a2520; color: var(--cream-2); }
+.hm-tip { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none; padding: 4px 10px; border-radius: 8px; background: #2a2520; color: var(--cream-2); font-size: 13px; font-weight: 650; }
+.hm-fallback { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; }
+
+/* region view: UI over the 3D world */
+.hm-region {
+  position: absolute; inset: 0; z-index: 4; display: grid; grid-template-columns: minmax(0, 1fr) 360px; grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 10px 20px; padding: 74px 24px 20px 28px; pointer-events: none; animation: hm-enter 0.6s ease both;
+}
+.hm-region > * { pointer-events: auto; }
+@keyframes hm-enter { from { opacity: 0; } to { opacity: 1; } }
+.hm-r-head { grid-column: 1; grid-row: 1; display: grid; gap: 4px; justify-self: start; }
+.hm-r-head nav { display: flex; gap: 6px; align-items: center; font-size: 13px; color: var(--muted); }
+.hm-r-head nav button { border: 0; background: none; padding: 0; font: inherit; font-weight: 650; color: var(--brown-2); cursor: pointer; }
+.hm-r-head h1 { margin: 0; font-size: clamp(28px, 3.4vw, 40px); line-height: 1.05; letter-spacing: -0.03em; text-shadow: 0 0 10px var(--cream); }
+.hm-stats { display: flex; gap: 20px; }
+.hm-stats div { display: grid; }
+.hm-stats b { font-size: 22px; }
+.hm-stats span { font-size: 12px; color: var(--muted); }
+.hm-card {
+  grid-column: 2; grid-row: 1 / span 3; display: flex; flex-direction: column; gap: 10px; min-height: 0; padding: 18px;
+  border-radius: 18px; background: var(--cream-2); border: 2px solid #2a2520; box-shadow: 0 6px 0 #2a2520;
+}
+.hm-card h2 { margin: 0; font-size: 26px; letter-spacing: -0.02em; line-height: 1.1; }
+.hm-place { margin: -6px 0 0; color: var(--muted); font-size: 14px; }
+.hm-card-stage { position: relative; flex: none; height: 250px; border-radius: 14px; border: 2px solid #2a2520; background: var(--region-soft, var(--cream)); overflow: hidden; }
+.hm-card-stage > canvas { position: absolute; inset: 0; display: block; touch-action: none; }
+.hm-card-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.hm-card h3 { margin: 4px 0 0; font-size: 14px; }
+.hm-list { list-style: none; margin: 0; padding: 0; overflow: auto; flex: 1; min-height: 0; }
+.hm-list button { width: 100%; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 7px 9px; border: 0; border-radius: 8px; background: none; text-align: left; cursor: pointer; font-size: 14px; color: var(--ink); }
+.hm-list button:hover { background: var(--sand); }
+.hm-list button[aria-current="true"] { background: var(--region-soft); font-weight: 700; }
+.hm-list small { white-space: nowrap; }
+.hm-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; padding: 0 12px; white-space: nowrap; border-radius: 12px; border: 2px solid #2a2520; background: var(--cream-2); color: var(--ink); font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: none; }
+.hm-btn:hover { text-decoration: none; background: var(--sand); }
+.hm-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+.hm-btn.dark { background: #2a2520; color: var(--cream-2); }
+.hm-btn.brown { background: var(--brown); border-color: var(--brown); color: #fff; }
+.hm-r-bar { grid-column: 1; grid-row: 3; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-self: start; }
+#r-stop { display: none; }
+body.hm-touring #r-stop { display: inline-flex; }
+.hm-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.hm-pills button { min-height: 40px; padding: 0 12px; border-radius: 10px; border: 2px solid #2a2520; background: var(--cream-2); font-size: 13px; font-weight: 650; cursor: pointer; }
+.hm-pills button[aria-pressed="true"] { background: var(--pill); }
+@media (max-width: 760px) {
+  .hm-intro { top: 70px; left: 16px; right: 16px; }
+  .hm-intro p { font-size: 13px; }
+  .hm-region { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr auto; padding: 68px 12px 12px; }
+  .hm-card { grid-column: 1; grid-row: 3; box-shadow: none; max-height: 50vh; padding: 12px; gap: 8px; }
+  .hm-card h2 { font-size: 21px; }
+  .hm-card-stage { height: 170px; }
+  .hm-list { display: none; }
+  .hm-card h3 { display: none; }
+  .hm-r-bar { grid-row: 2; align-self: start; }
+  .hm-pills { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .hm-region { animation: none; } }

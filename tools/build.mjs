@@ -135,7 +135,7 @@ for (const r of REGIONS) {
   for (const c of members) if (!c.area) c.area = r.id;
 }
 
-// ---------- QR board (3D world) ----------
+// ---------- QR codes ----------
 const qrcode = createRequire(import.meta.url)('qrcode-generator');
 function qrBits(text, type = 0) {
   const q = qrcode(type, 'H');
@@ -146,99 +146,66 @@ function qrBits(text, type = 0) {
   for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) bits += q.isDark(r, c) ? '1' : '0';
   return { n, bits };
 }
-// The board is a map of the US: the real outline (with Canada and Mexico around it) rasterized
-// onto the grid, state lines on top, and each metro a district of city blocks at its real spot.
-// Districts are pushed apart just enough that every company gets its own lot.
-const SPACING = 2.6; // board cells from one company's lot to the next
-const BOARD_N = 250;
+// ---------- home map: a cartoon US in seven regions ----------
+// Region pieces are the merged state outlines (pre-projected Albers USA, 975×610), simplified so
+// they read as chunky puzzle pieces; the home page extrudes them into 3D. Each region shows its biggest companies as pins near their
+// real city, nudged apart and kept inside the piece; the region view lists them all.
 const priorityOf = (c) => (c.kind === 'f500' ? c.rank : 1000);
-// Even-odd scanline fill of projected rings onto an n×n grid of cell centres.
-function fillRings(rings, n) {
-  const out = new Uint8Array(n * n);
-  for (let r = 0; r < n; r++) {
-    const y = r + 0.5, xs = [];
-    for (const ring of rings) {
-      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-        const [x1, y1] = ring[i], [x2, y2] = ring[j];
-        if ((y1 <= y && y < y2) || (y2 <= y && y < y1)) xs.push(x1 + ((y - y1) / (y2 - y1)) * (x2 - x1));
+const MAP_REGIONS = [
+  { id: 'northwest', name: 'Northwest', states: ['WA', 'OR', 'ID', 'MT', 'WY'], water: 'left', color: '#a8d68f', hover: 'sway', chip: [235, 165] },
+  { id: 'west', name: 'West', states: ['CA', 'NV'], water: 'left', color: '#cdbfae', hover: 'float', chip: [118, 345] },
+  { id: 'southwest', name: 'Southwest', states: ['AZ', 'NM', 'UT', 'CO', 'TX', 'OK'], water: 'bottom', color: '#f4bf6a', hover: 'hop', chip: [318, 455] },
+  { id: 'midwest', name: 'Midwest', states: ['ND', 'SD', 'NE', 'KS', 'MN', 'IA', 'MO', 'WI', 'IL', 'MI', 'IN', 'OH', 'KY'], water: 'lake', color: '#f5e38a', hover: 'wave', chip: [452, 300] },
+  { id: 'southeast', name: 'Southeast', states: ['AR', 'LA', 'MS', 'AL', 'TN', 'GA', 'FL', 'SC', 'NC'], water: 'bottom', color: '#f4a29a', hover: 'swing', chip: [640, 478] },
+  { id: 'midatlantic', name: 'Mid-Atlantic', states: ['NY', 'PA', 'NJ', 'DE', 'MD', 'DC', 'VA', 'WV'], water: 'right', color: '#86d3cf', hover: 'rush', chip: [772, 300] },
+  { id: 'northeast', name: 'Northeast', states: ['ME', 'NH', 'VT', 'MA', 'RI', 'CT'], water: 'right', color: '#b8acf2', hover: 'twirl', chip: [955, 62] },
+];
+const REGION_OF = new Map();
+const homeMap = (() => {
+  const FIPS = { WA: 53, OR: 41, ID: 16, MT: 30, WY: 56, CA: 6, NV: 32, AZ: 4, NM: 35, UT: 49, CO: 8, TX: 48, OK: 40, ND: 38, SD: 46, NE: 31, KS: 20, MN: 27, IA: 19, MO: 29, WI: 55, IL: 17, MI: 26, IN: 18, OH: 39, KY: 21, AR: 5, LA: 22, MS: 28, AL: 1, TN: 47, GA: 13, FL: 12, SC: 45, NC: 37, NY: 36, PA: 42, NJ: 34, DE: 10, MD: 24, DC: 11, VA: 51, WV: 54, ME: 23, NH: 33, VT: 50, MA: 25, RI: 44, CT: 9 };
+  const stateOf = Object.fromEntries(Object.entries(FIPS).map(([k, v]) => [String(v).padStart(2, '0'), k]));
+  const t = simp.simplify(simp.presimplify(readJSON('node_modules/us-atlas/states-albers-10m.json'), simp.planarTriangleArea), 18);
+  const path = d3.geoPath().digits(0);
+  const proj = d3.geoAlbersUsa().scale(1300).translate([487.5, 305]);
+  const geoms = t.objects.states.geometries;
+  const regions = MAP_REGIONS.map((r) => {
+    const g = geoms.filter((x) => r.states.includes(stateOf[x.id]));
+    const merged = topo.merge(t, g);
+    // Drop slivers the simplification leaves behind (tiny islands).
+    const polys = (merged.type === 'Polygon' ? [merged.coordinates] : merged.coordinates).filter((poly) => Math.abs(d3.geoPath().area({ type: 'Polygon', coordinates: poly })) > 40);
+    const shape = { type: 'MultiPolygon', coordinates: polys };
+    const inner = topo.mesh(t, { type: 'GeometryCollection', geometries: g }, (a, b) => a !== b);
+    const members = companies.filter((c) => r.states.includes(c.region)).sort((a, b) => priorityOf(a) - priorityOf(b));
+    members.forEach((c) => REGION_OF.set(c.slug, r.id));
+    const inside = (x, y) => polys.some((poly) => {
+      let hit = false;
+      for (const ring of poly) for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const [xi, yi] = ring[i], [xj, yj] = ring[j];
+        if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) hit = !hit;
       }
-    }
-    xs.sort((a, b) => a - b);
-    for (let k = 0; k + 1 < xs.length; k += 2) {
-      for (let c = Math.max(0, Math.ceil(xs[k] - 0.5)); c < n && c + 0.5 <= xs[k + 1]; c++) out[r * n + c] = 1;
-    }
-  }
-  return out;
-}
-const ringsOf = (geometry, pj) => (geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates).flat().map((ring) => ring.map((pt) => pj(pt)));
-function usBoard(kept) {
-  const n = BOARD_N;
-  const nationTopo = readJSON('node_modules/us-atlas/nation-10m.json');
-  const nation = topo.feature(nationTopo, nationTopo.objects.nation).features[0];
-  const conus = { type: 'MultiPolygon', coordinates: nation.geometry.coordinates.filter((p) => { const [lon, lat] = p[0][0]; return lon > -126 && lon < -65 && lat > 24 && lat < 50; }) };
-  const pj = d3.geoConicEqualArea().parallels([29.5, 45.5]).rotate([96, 0]).fitExtent([[7, 7], [n - 7, n - 7]], conus);
-  // Shift the map so it sits in the middle of the board vertically.
-  const box = d3.geoPath(pj).bounds(conus);
-  pj.translate([pj.translate()[0], pj.translate()[1] + (n - box[1][1] - box[0][1]) / 2]);
-  // Metro districts.
-  const groups = new Map();
-  for (const c of kept) {
-    const key = c.area || `${c.city}|${c.region}`;
-    if (!groups.has(key)) groups.set(key, { name: c.area ? REGIONS.find((r) => r.id === c.area).short : c.city, members: [] });
-    groups.get(key).members.push(c);
-  }
-  let isl = [...groups.values()];
-  const centre = (g) => ({ lat: g.members.reduce((a, c) => a + c.lat, 0) / g.members.length, lon: g.members.reduce((a, c) => a + c.lon, 0) / g.members.length });
-  for (let merged = true; merged;) {
-    merged = false;
-    isl.sort((a, b) => b.members.length - a.members.length);
-    for (let i = isl.length - 1; i > 0 && !merged; i--) {
-      const small = isl[i], cs = centre(small);
-      let best = -1, bestD = 90;
-      for (let j = 0; j < i; j++) { const d = km(cs, centre(isl[j])); if (d < bestD) { bestD = d; best = j; } }
-      if (best >= 0) { isl[best].members.push(...small.members); isl.splice(i, 1); merged = true; }
-    }
-  }
-  for (const g of isl) {
-    const pts = g.members.map((c) => pj([c.lon, c.lat]));
-    g.tx = g.x = pts.reduce((a, p) => a + p[0], 0) / pts.length;
-    g.ty = g.y = pts.reduce((a, p) => a + p[1], 0) / pts.length;
-    g.r = SPACING * Math.sqrt(g.members.length / Math.PI) * 1.05 + SPACING * 0.5;
-  }
-  const gap = 0.8;
-  for (let it = 0; it < 800; it++) {
-    for (let i = 0; i < isl.length; i++) {
-      for (let j = i + 1; j < isl.length; j++) {
-        const a = isl[i], b = isl[j];
-        let dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy);
-        const min = a.r + b.r + gap;
-        if (d >= min) continue;
-        if (d < 1e-6) { dx = Math.cos(i * 7 + j); dy = Math.sin(i * 7 + j); d = 1; }
-        const push = (min - d) / 2, wa = b.r / (a.r + b.r), wb = a.r / (a.r + b.r);
-        a.x -= (dx / d) * push * 2 * wa; a.y -= (dy / d) * push * 2 * wa;
-        b.x += (dx / d) * push * 2 * wb; b.y += (dy / d) * push * 2 * wb;
-      }
-    }
-    for (const g of isl) {
-      g.x += (g.tx - g.x) * 0.03; g.y += (g.ty - g.y) * 0.03;
-      g.x = Math.min(n - g.r - 2, Math.max(g.r + 2, g.x)); g.y = Math.min(n - g.r - 2, Math.max(g.r + 2, g.y));
-    }
-  }
-  // Lots: grid points nearest the district's centre, biggest company in the middle.
-  const pos = {}, lots = [];
-  for (const g of isl) {
-    const span = Math.ceil(Math.sqrt(g.members.length)) + 2;
-    const grid = [];
-    for (let i = -span; i <= span; i++) for (let j = -span; j <= span; j++) grid.push([i, j, Math.hypot(i, j * 1.02) + (i + j) * 1e-3]);
-    grid.sort((a, b) => a[2] - b[2]);
-    [...g.members].sort((a, b) => priorityOf(a) - priorityOf(b)).forEach((c, k) => {
-      const x = Math.round(g.x) + grid[k][0] * SPACING, y = Math.round(g.y) + grid[k][1] * SPACING;
-      pos[c.slug] = [+x.toFixed(2), +y.toFixed(2)];
-      lots.push([x, y]);
+      return hit;
     });
-  }
-  // Rasterize: US land, Canada and Mexico, districts (paved city blocks) and lots.
-  // The census outline fills in the Great Lakes, so cut them back out (rough shorelines).
+    const pins = [];
+    for (const c of members) {
+      const xy = proj([c.lon, c.lat]);
+      if (!xy) continue;
+      let spot = null;
+      for (let k = 0; k < 400 && !spot; k++) {
+        const rr = 4 * Math.sqrt(k), a = k * 2.39996;
+        const x = xy[0] + Math.cos(a) * rr, y = xy[1] + Math.sin(a) * rr;
+        if (inside(x, y) && inside(x + 12, y) && inside(x - 12, y) && inside(x, y + 12) && inside(x, y - 12) && pins.every((q) => Math.hypot(q[1] - x, q[2] - y) >= 36)) spot = [x, y];
+      }
+      if (spot) pins.push([c.slug, Math.round(spot[0]), Math.round(spot[1])]);
+      if (pins.length >= 8) break;
+    }
+    const [cx, cy] = path.centroid(shape);
+    const r1 = (v) => Math.round(v * 10) / 10;
+    return {
+      id: r.id, name: r.name, color: r.color, hover: r.hover, water: r.water, chip: r.chip, cx: Math.round(cx), cy: Math.round(cy), pins, members: members.map((c) => c.slug),
+      polys: polys.map((poly) => poly.map((ring) => ring.map(([x, y]) => [r1(x), r1(y)]))),
+      inner: (inner.coordinates || []).map((line) => line.map(([x, y]) => [r1(x), r1(y)])),
+    };
+  });
   const LAKES = [
     [[-92.1, 46.7], [-90.4, 46.6], [-88.4, 47.4], [-87.0, 46.5], [-84.6, 46.5], [-84.8, 47.5], [-85.9, 48.0], [-88.3, 48.6], [-89.6, 48.0], [-91.5, 47.3]],
     [[-87.8, 42.2], [-87.6, 41.7], [-86.9, 41.7], [-86.3, 42.4], [-86.2, 43.6], [-86.5, 44.6], [-85.6, 45.2], [-85.0, 45.8], [-84.7, 45.9], [-86.0, 45.9], [-87.0, 45.8], [-87.6, 44.9], [-87.9, 43.8], [-87.8, 42.8]],
@@ -246,58 +213,12 @@ function usBoard(kept) {
     [[-83.4, 41.7], [-82.7, 41.4], [-81.6, 41.5], [-80.0, 42.1], [-78.9, 42.8], [-79.8, 42.8], [-81.3, 42.6], [-82.5, 42.0], [-83.2, 42.0]],
     [[-79.8, 43.3], [-78.0, 43.4], [-76.3, 43.5], [-76.2, 44.2], [-77.2, 43.9], [-78.7, 43.9], [-79.4, 43.6]],
   ];
-  const lakeBits = fillRings(LAKES.map((ring) => ring.map((pt) => pj(pt))), n);
-  const usBits = fillRings(ringsOf(conus, pj), n).map((v, i) => v && !lakeBits[i]);
-  const countriesTopo = readJSON('node_modules/world-atlas/countries-50m.json');
-  const neighbours = topo.feature(countriesTopo, countriesTopo.objects.countries).features.filter((f) => f.id === '124' || f.id === '484');
-  const abroadBits = fillRings(neighbours.flatMap((f) => ringsOf(f.geometry, pj)), n).map((v, i) => v && !lakeBits[i]);
-  let land = '', lot = '', town = '', abroad = '';
-  for (let r = 0; r < n; r++) {
-    for (let c = 0; c < n; c++) {
-      const x = c + 0.5, y = r + 0.5, i = r * n + c;
-      const inTown = isl.some((g) => Math.hypot(x - g.x, y - g.y) <= g.r);
-      land += usBits[i] || inTown ? '1' : '0';
-      town += inTown ? '1' : '0';
-      abroad += !usBits[i] && !inTown && abroadBits[i] ? '1' : '0';
-      lot += lots.some(([lx, ly]) => Math.abs(x - lx) < SPACING * 0.36 && Math.abs(y - ly) < SPACING * 0.36) ? '1' : '0';
-    }
-  }
-  // State lines and the national border, as board-space polylines.
-  const statesTopo = simp.simplify(simp.presimplify(readJSON('node_modules/us-atlas/states-10m.json')), 0.002);
-  const lines = (mesh) => mesh.coordinates.map((line) => {
-    const out = [];
-    for (const pt of line) {
-      const [x, y] = pj(pt);
-      if (out.length && Math.hypot(x - out[out.length - 2], y - out[out.length - 1]) < 0.7) continue;
-      out.push(+x.toFixed(1), +y.toFixed(1));
-    }
-    return out;
-  }).filter((l) => l.length >= 4 && l.every((v) => v > -2 && v < n + 2));
-  const stateLines = lines(topo.mesh(statesTopo, statesTopo.objects.states, (a, b) => a !== b));
-  const islands = isl.filter((g) => g.members.length >= 2).map((g) => [g.name, +g.x.toFixed(2), +g.y.toFixed(2), +g.r.toFixed(2)]);
-  const moved = isl.map((g) => Math.hypot(g.x - g.tx, g.y - g.ty));
-  console.log(`map: ${isl.length} districts, median shift ${moved.sort((a, b) => a - b)[moved.length >> 1].toFixed(1)} cells, max ${Math.max(...moved).toFixed(1)}`);
-  return { isl, placed: { pos, land, lot, town, abroad, islands, states: stateLines } };
-}
-const board = { modes: {} };
-const ISLAND_OF = new Map();
-{
-  const us = usBoard(companies);
-  us.isl.forEach((g, i) => g.members.forEach((c) => ISLAND_OF.set(c.slug, i)));
-  // The map's own grid; scan view lays a separate QR code (it scans to this site) over it.
-  board.n = BOARD_N;
-  board.qr = qrBits(SITE_URL);
-  const placed = us.placed;
-  const regionsAt = {};
-  for (const r of REGIONS) {
-    const ps = r.members.map((s) => placed.pos[s]).filter(Boolean);
-    if (!ps.length) continue;
-    const x = ps.reduce((a, p) => a + p[0], 0) / ps.length, y = ps.reduce((a, p) => a + p[1], 0) / ps.length;
-    regionsAt[r.id] = [+x.toFixed(2), +y.toFixed(2), +Math.max(...ps.map((p) => Math.hypot(p[0] - x, p[1] - y))).toFixed(2)];
-  }
-  board.modes.us = { ...placed, regions: regionsAt };
-  console.log(`board: ${board.n}×${board.n} map, ${board.qr.n}×${board.qr.n} QR`);
-}
+  const lakes = LAKES.map((ring) => ring.map((p) => proj(p).map(Math.round)));
+  const missing = companies.filter((c) => !REGION_OF.has(c.slug)).map((c) => c.name);
+  if (missing.length) console.warn(`no region for: ${missing.join(', ')}`);
+  console.log(`home map: ${regions.map((r) => `${r.id} ${r.members.length}`).join(', ')}`);
+  return { regions, lakes };
+})();
 
 // Which signature 3D model a company gets (see data/industries.json and src/models.js), and a
 // look (shape variant, brand colours, base) that no other company in the same group shares.
@@ -337,7 +258,7 @@ const LOOKS = new Map();
     const heroCount = new Array(V).fill(0);
     const sorted = [...list].sort((a, b) => priorityOf(a) - priorityOf(b));
     sorted.forEach((c, idx) => {
-      const name = c.listedName || c.name, island = ISLAND_OF.get(c.slug);
+      const name = c.listedName || c.name, island = REGION_OF.get(c.slug);
       const o = overrides[name] || {};
       let v = o.v ?? heroes[name];
       if (v == null) {
@@ -639,87 +560,67 @@ ${topbar(0, `<div class="search" role="search">
 }
 
 
-// ---------- QR world (index) ----------
+// ---------- home (index): the cartoon region map ----------
 function worldPage() {
   const slim = companies.map((c) => {
     const lk = LOOKS.get(c.slug);
     const o = { s: c.slug, n: c.name, k: c.kind === 'f500' ? 0 : 1, t: c.tech ? 1 : 0, c: place(c), m: modelOf(c), L: [lk.v, lk.a, lk.b, lk.base, lk.prop, lk.topper] };
     if (c.rank) o.r = c.rank;
-    if (c.revenue != null) o.v = c.revenue;
-    if (c.sector) o.sec = c.sector;
-    if (c.founded) o.f = c.founded;
-    if (c.area) o.a = c.area;
     if (c.listedName && c.listedName !== c.name) o.ln = c.listedName;
     return o;
   });
-  const config = {
-    listYear: LIST_YEAR,
-    board,
-    regions: REGIONS.map(({ id, name, short, note, members }) => ({ id, name, short, note: note || '', members })),
-  };
-  const description = `A 3D map of the US on a QR code: every ${LIST_YEAR} Fortune 500 headquarters and ${startups.length} startups, from Silicon Valley to Boston. Play the tour, search any company, and scan the map.`;
-  return `${qwHead({ title: 'QR Compass · America’s companies on a QR code', description, path: '', depth: 0 })}
-<body class="qw qw-world">
-<section class="qw-stage" id="stage">
+  const description = `America’s biggest companies on a 3D map: every ${LIST_YEAR} Fortune 500 headquarters and ${startups.length} startups in seven regions. Open a region, find a company, and turn its 3D model into its QR code.`;
+  return `${qwHead({ title: 'QR Compass · America’s companies on a map', description, path: '', depth: 0 })}
+<body class="qw qw-home">
+<section class="qw-stage hm-stage" id="stage">
   ${qwTop(0)}
-  <div class="qw-filters" role="group" aria-label="Filter">
-    <button data-f="all" aria-pressed="true">All</button>
-    <button data-f="tech" aria-pressed="false"><i class="dot tech"></i>Tech</button>
-    <button data-f="startup" aria-pressed="false"><i class="dot startup"></i>Startups</button>
-    <button data-f="f500" aria-pressed="false"><i class="dot f500"></i>Fortune 500</button>
+  <div class="hm-intro" id="intro">
+    <h1>Where America’s biggest companies live</h1>
+    <p>Hover a region to wake it up. Click it to break it off the map and walk its streets.</p>
   </div>
-  <div id="labels" aria-hidden="true"></div>
-  <div id="tip" role="tooltip" hidden></div>
-  <canvas class="qw-fallback" id="fallback-qr" width="320" height="320" aria-label="QR code for this site"></canvas>
+  <div id="labels" class="hm-labels"></div>
+  <div id="tip" class="hm-tip" role="tooltip" hidden></div>
+  <div class="hm-fallback" id="fallback" hidden>
+    <p>Your browser can’t show the 3D map. Pick a company from the <a href="companies.html">directory</a> instead.</p>
+  </div>
 
-  <aside class="qw-caption" id="caption" hidden aria-live="polite">
-    <div class="step" id="cap-step"></div>
-    <h2 id="cap-title"></h2>
-    <p id="cap-note"></p>
-    <div class="qw-stats" id="cap-stats"></div>
-    <ol class="qw-list" id="cap-list"></ol>
-    <div class="qw-progress"><i id="cap-bar"></i></div>
-    <div class="controls">
-      <button class="qw-btn" id="cap-prev" aria-label="Previous stop">‹ Prev</button>
-      <button class="qw-btn" id="cap-next" aria-label="Next stop">Next ›</button>
-      <button class="qw-btn" id="cap-close">End tour</button>
+  <section class="hm-region" id="region" hidden aria-labelledby="r-name">
+    <header class="hm-r-head">
+      <nav aria-label="Breadcrumb"><button id="r-crumb-home">United States</button><span aria-hidden="true">/</span><span id="r-crumb"></span></nav>
+      <h1 id="r-name"></h1>
+      <div class="hm-stats"><div><b id="r-f"></b><span>Fortune 500 HQs</span></div><div><b id="r-s"></b><span>startups</span></div><div><b id="r-t"></b><span>in tech</span></div></div>
+    </header>
+    <aside class="hm-card" aria-live="polite">
+      <div class="qw-badges"><span class="qw-badge" id="c-badge"></span><span class="qw-badge" id="c-kind"></span></div>
+      <h2 id="c-name"></h2>
+      <p class="hm-place" id="c-place"></p>
+      <div class="hm-card-stage" id="c-stage" aria-label="3D model that turns into this company's QR code"></div>
+      <div class="hm-card-actions">
+        <button class="hm-btn dark" id="c-toggle" aria-pressed="false">${ICONS.signature}<span id="c-toggle-label">Turn into QR code</span></button>
+        <a class="hm-btn" id="c-open" href="#">Open its page</a>
+      </div>
+      <h3>All <span id="r-all-n"></span> companies here</h3>
+      <ul class="hm-list" id="r-list"></ul>
+    </aside>
+    <div class="hm-r-bar">
+      <button class="hm-btn brown" id="r-back">← US map</button>
+      <button class="hm-btn" id="r-stop">Stop tour</button>
+      <div class="hm-pills" id="r-pills" role="group" aria-label="Regions"></div>
     </div>
-  </aside>
+  </section>
 
-  <aside class="qw-card" id="card" hidden aria-live="polite">
-    <button class="qw-close" id="card-close" aria-label="Close">×</button>
-    <div class="qw-badges" id="card-badges"></div>
-    <h2 id="card-name"></h2>
-    <p class="place" id="card-place"></p>
-    <dl class="qw-facts" id="card-facts"></dl>
-    <div class="qw-show">
-      <div class="show-stage" id="show-stage" aria-label="3D model that turns into this company's QR code"></div>
-      <button class="qw-show-toggle" id="show-toggle">Turn into QR code</button>
-    </div>
-    <div class="row">
-      <a class="qw-btn primary" id="card-open" href="#">Open its page</a>
-      <button class="qw-btn" id="card-copy">Copy link</button>
-    </div>
-    <h3 id="card-near-h"></h3>
-    <ul class="qw-chips" id="card-near"></ul>
-  </aside>
-
-  <div class="qw-dock">
+  <div class="qw-dock hm-dock" id="dock">
     <div class="qw-search" role="search">
       <input id="q" type="search" placeholder="Search a company, city or region…" autocomplete="off" spellcheck="false" aria-label="Search companies" aria-controls="results" aria-expanded="false">
       <ul id="results" role="listbox" hidden></ul>
-      <button class="qw-play" id="play" aria-label="Play tour"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 5.5v13l10.5-6.5z"/></svg></button>
-    </div>
-    <div class="qw-tabs" role="group" aria-label="Board">
-      <button id="scan-btn" class="sig" aria-pressed="false">${ICONS.signature}<span id="scan-label">Turn the map into a QR code</span></button>
-      <button id="random"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Surprise me</button>
+      <button class="qw-play" id="play" aria-label="Play the region tour"><svg class="i-play" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 5.5v13l10.5-6.5z"/></svg><svg class="i-stop" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1.5" fill="currentColor"/></svg></button>
     </div>
   </div>
 </section>
-<script>window.WORLD=${JSON.stringify(config)};window.COMPANIES=${JSON.stringify(slim)};</script>
+<script>window.HOME=${JSON.stringify({ ...homeMap, labels: MODEL_LABELS })};window.COMPANIES=${JSON.stringify(slim)};</script>
 <script src="assets/qrcode.js"></script>
 <script src="assets/qr-card.js"></script>
-<script type="module" src="assets/world.js"></script>
+<script type="module" src="assets/home.js"></script>
 </body>
 </html>
 `;
@@ -787,7 +688,7 @@ ${topbar(0)}
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(join(OUT, 'c'), { recursive: true });
 mkdirSync(join(OUT, 'assets'), { recursive: true });
-for (const f of ['site.css', 'qrworld.css', 'atlas.js', 'qr-card.js', 'directory.js', 'icon.svg', 'qrworld.js', 'models.js', 'qrsculpture.js', 'company3d.js', 'world.js', 'BufferGeometryUtils.js']) copyFileSync(join(ROOT, 'src', f), join(OUT, 'assets', f));
+for (const f of ['site.css', 'qrworld.css', 'atlas.js', 'qr-card.js', 'directory.js', 'icon.svg', 'qrworld.js', 'models.js', 'qrsculpture.js', 'company3d.js', 'home.js', 'BufferGeometryUtils.js']) copyFileSync(join(ROOT, 'src', f), join(OUT, 'assets', f));
 
 copyFileSync(join(ROOT, 'node_modules/qrcode-generator/qrcode.js'), join(OUT, 'assets/qrcode.js'));
 copyFileSync(join(ROOT, 'node_modules/three/build/three.module.min.js'), join(OUT, 'assets/three.module.min.js'));
