@@ -62,7 +62,8 @@ const SHORT_NAMES = {
 
 // ---------- companies ----------
 const f500 = readJSON('data/fortune500.json');
-const startups = readJSON('data/startups.json');
+// US only for now: Fortune 500 HQs and US startups.
+const startups = readJSON('data/startups.json').filter((s) => s.country === 'US');
 const companies = [];
 for (const c of f500) {
   companies.push({
@@ -118,13 +119,12 @@ const REGIONS = [
   { id: 'detroit', name: 'Detroit', lat: 42.45, lon: -83.2, r: 45 },
   { id: 'atlanta', name: 'Atlanta', lat: 33.85, lon: -84.35, r: 45 },
   { id: 'charlotte', name: 'Charlotte', lat: 35.3, lon: -80.85, r: 45 },
+  { id: 'philly', name: 'Philadelphia', lat: 40.0, lon: -75.3, r: 40 },
   { id: 'dc', name: 'Washington, D.C. area', lat: 38.92, lon: -77.15, r: 45, note: 'Defense primes and government contractors.' },
   { id: 'nyc', name: 'New York metro', lat: 40.8, lon: -74.0, r: 60, note: 'Finance, media and a fast-growing AI scene.' },
   { id: 'boston', name: 'Boston & Cambridge', lat: 42.4, lon: -71.25, r: 50, note: 'Robotics, biotech and MIT spinouts.' },
-  { id: 'europe', name: 'Europe', countries: ['GB', 'FR', 'DE', 'SE', 'EE'], note: 'London, Paris and Munich lead the startup map.' },
-  { id: 'asia-pacific', name: 'Asia & the Pacific', countries: ['CN', 'JP', 'IN', 'AU', 'SA'] },
 ];
-const SHORT = { seattle: 'Seattle', 'bay-area': 'Bay Area', socal: 'SoCal', phoenix: 'Phoenix', denver: 'Denver', austin: 'Austin', dfw: 'Dallas–Fort Worth', houston: 'Houston', msp: 'Twin Cities', chicago: 'Chicago', detroit: 'Detroit', atlanta: 'Atlanta', charlotte: 'Charlotte', dc: 'Washington', nyc: 'New York', boston: 'Boston', europe: 'Europe', 'asia-pacific': 'Asia-Pacific' };
+const SHORT = { seattle: 'Seattle', 'bay-area': 'Bay Area', socal: 'SoCal', phoenix: 'Phoenix', denver: 'Denver', austin: 'Austin', dfw: 'Dallas–Fort Worth', houston: 'Houston', msp: 'Twin Cities', chicago: 'Chicago', detroit: 'Detroit', atlanta: 'Atlanta', charlotte: 'Charlotte', philly: 'Philadelphia', dc: 'Washington', nyc: 'New York', boston: 'Boston', europe: 'Europe', 'asia-pacific': 'Asia-Pacific' };
 for (const r of REGIONS) {
   r.short = SHORT[r.id];
   const members = companies.filter((c) => (r.countries ? r.countries.includes(c.country) : km(r, c) <= r.r));
@@ -146,19 +146,47 @@ function qrBits(text, type = 0) {
   for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) bits += q.isDark(r, c) ? '1' : '0';
   return { n, bits };
 }
-// City islands: companies are grouped by metro (or by city), and each group becomes an island.
-// Islands keep their real west-to-east, north-to-south arrangement but sit close together, and
-// inside each island companies stand on city blocks with streets between them.
-const SPACING = 2.8; // board cells from one company's lot to the next
+// The board is a map of the US: the real outline (with Canada and Mexico around it) rasterized
+// onto the grid, state lines on top, and each metro a district of city blocks at its real spot.
+// Districts are pushed apart just enough that every company gets its own lot.
+const SPACING = 2.6; // board cells from one company's lot to the next
+const BOARD_N = 250;
 const priorityOf = (c) => (c.kind === 'f500' ? c.rank : 1000);
-function islandLayout(kept, project) {
+// Even-odd scanline fill of projected rings onto an n×n grid of cell centres.
+function fillRings(rings, n) {
+  const out = new Uint8Array(n * n);
+  for (let r = 0; r < n; r++) {
+    const y = r + 0.5, xs = [];
+    for (const ring of rings) {
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const [x1, y1] = ring[i], [x2, y2] = ring[j];
+        if ((y1 <= y && y < y2) || (y2 <= y && y < y1)) xs.push(x1 + ((y - y1) / (y2 - y1)) * (x2 - x1));
+      }
+    }
+    xs.sort((a, b) => a - b);
+    for (let k = 0; k + 1 < xs.length; k += 2) {
+      for (let c = Math.max(0, Math.ceil(xs[k] - 0.5)); c < n && c + 0.5 <= xs[k + 1]; c++) out[r * n + c] = 1;
+    }
+  }
+  return out;
+}
+const ringsOf = (geometry, pj) => (geometry.type === 'Polygon' ? [geometry.coordinates] : geometry.coordinates).flat().map((ring) => ring.map((pt) => pj(pt)));
+function usBoard(kept) {
+  const n = BOARD_N;
+  const nationTopo = readJSON('node_modules/us-atlas/nation-10m.json');
+  const nation = topo.feature(nationTopo, nationTopo.objects.nation).features[0];
+  const conus = { type: 'MultiPolygon', coordinates: nation.geometry.coordinates.filter((p) => { const [lon, lat] = p[0][0]; return lon > -126 && lon < -65 && lat > 24 && lat < 50; }) };
+  const pj = d3.geoConicEqualArea().parallels([29.5, 45.5]).rotate([96, 0]).fitExtent([[7, 7], [n - 7, n - 7]], conus);
+  // Shift the map so it sits in the middle of the board vertically.
+  const box = d3.geoPath(pj).bounds(conus);
+  pj.translate([pj.translate()[0], pj.translate()[1] + (n - box[1][1] - box[0][1]) / 2]);
+  // Metro districts.
   const groups = new Map();
   for (const c of kept) {
-    const key = c.area || `${c.city}|${c.region}|${c.country}`;
+    const key = c.area || `${c.city}|${c.region}`;
     if (!groups.has(key)) groups.set(key, { name: c.area ? REGIONS.find((r) => r.id === c.area).short : c.city, members: [] });
     groups.get(key).members.push(c);
   }
-  // Fold small towns into the nearest island within ~150 km so the board isn't dotted with singletons.
   let isl = [...groups.values()];
   const centre = (g) => ({ lat: g.members.reduce((a, c) => a + c.lat, 0) / g.members.length, lon: g.members.reduce((a, c) => a + c.lon, 0) / g.members.length });
   for (let merged = true; merged;) {
@@ -166,26 +194,19 @@ function islandLayout(kept, project) {
     isl.sort((a, b) => b.members.length - a.members.length);
     for (let i = isl.length - 1; i > 0 && !merged; i--) {
       const small = isl[i], cs = centre(small);
-      let best = -1, bestD = 150;
+      let best = -1, bestD = 90;
       for (let j = 0; j < i; j++) { const d = km(cs, centre(isl[j])); if (d < bestD) { bestD = d; best = j; } }
       if (best >= 0) { isl[best].members.push(...small.members); isl.splice(i, 1); merged = true; }
     }
   }
   for (const g of isl) {
-    const pts = g.members.map((c) => project([c.lon, c.lat]));
-    g.ox = pts.reduce((a, p) => a + p[0], 0) / pts.length;
-    g.oy = pts.reduce((a, p) => a + p[1], 0) / pts.length;
-    g.r = SPACING * Math.sqrt(g.members.length / Math.PI) * 1.08 + SPACING * 0.55;
+    const pts = g.members.map((c) => pj([c.lon, c.lat]));
+    g.tx = g.x = pts.reduce((a, p) => a + p[0], 0) / pts.length;
+    g.ty = g.y = pts.reduce((a, p) => a + p[1], 0) / pts.length;
+    g.r = SPACING * Math.sqrt(g.members.length / Math.PI) * 1.05 + SPACING * 0.5;
   }
-  // Scale geography so the islands' total area fits about a third of the spread, then push
-  // overlapping islands apart while a weak spring keeps each near its real place.
-  const xs = isl.map((g) => g.ox), ys = isl.map((g) => g.oy);
-  const span = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
-  const area = isl.reduce((a, g) => a + Math.PI * (g.r + 0.8) ** 2, 0);
-  const L = Math.sqrt(area * 1.9) / span;
-  for (const g of isl) { g.tx = g.ox * L; g.ty = g.oy * L; g.x = g.tx; g.y = g.ty; }
-  const gap = 2.2;
-  for (let it = 0; it < 600; it++) {
+  const gap = 0.8;
+  for (let it = 0; it < 800; it++) {
     for (let i = 0; i < isl.length; i++) {
       for (let j = i + 1; j < isl.length; j++) {
         const a = isl[i], b = isl[j];
@@ -198,20 +219,14 @@ function islandLayout(kept, project) {
         b.x += (dx / d) * push * 2 * wb; b.y += (dy / d) * push * 2 * wb;
       }
     }
-    for (const g of isl) { g.x += (g.tx - g.x) * 0.015; g.y += (g.ty - g.y) * 0.015; }
+    for (const g of isl) {
+      g.x += (g.tx - g.x) * 0.03; g.y += (g.ty - g.y) * 0.03;
+      g.x = Math.min(n - g.r - 2, Math.max(g.r + 2, g.x)); g.y = Math.min(n - g.r - 2, Math.max(g.r + 2, g.y));
+    }
   }
-  const x0 = Math.min(...isl.map((g) => g.x - g.r)), y0 = Math.min(...isl.map((g) => g.y - g.r));
-  const w = Math.max(...isl.map((g) => g.x + g.r)) - x0, h = Math.max(...isl.map((g) => g.y + g.r)) - y0;
-  for (const g of isl) { g.x -= x0 + w / 2; g.y -= y0 + h / 2; }
-  return { isl, size: Math.max(w, h) };
-}
-// Lay the islands onto an n-cell board: positions per company, land and lot bits, island labels.
-function placeIslands({ isl }, n) {
-  const pos = {};
-  const lots = [];
+  // Lots: grid points nearest the district's centre, biggest company in the middle.
+  const pos = {}, lots = [];
   for (const g of isl) {
-    g.x += n / 2; g.y += n / 2;
-    // City blocks: grid points nearest the island's centre, biggest company in the middle.
     const span = Math.ceil(Math.sqrt(g.members.length)) + 2;
     const grid = [];
     for (let i = -span; i <= span; i++) for (let j = -span; j <= span; j++) grid.push([i, j, Math.hypot(i, j * 1.02) + (i + j) * 1e-3]);
@@ -222,43 +237,66 @@ function placeIslands({ isl }, n) {
       lots.push([x, y]);
     });
   }
-  // Land: inside an island. Lots: the grass square each company stands on; the rest is street.
-  let land = '', lot = '';
+  // Rasterize: US land, Canada and Mexico, districts (paved city blocks) and lots.
+  // The census outline fills in the Great Lakes, so cut them back out (rough shorelines).
+  const LAKES = [
+    [[-92.1, 46.7], [-90.4, 46.6], [-88.4, 47.4], [-87.0, 46.5], [-84.6, 46.5], [-84.8, 47.5], [-85.9, 48.0], [-88.3, 48.6], [-89.6, 48.0], [-91.5, 47.3]],
+    [[-87.8, 42.2], [-87.6, 41.7], [-86.9, 41.7], [-86.3, 42.4], [-86.2, 43.6], [-86.5, 44.6], [-85.6, 45.2], [-85.0, 45.8], [-84.7, 45.9], [-86.0, 45.9], [-87.0, 45.8], [-87.6, 44.9], [-87.9, 43.8], [-87.8, 42.8]],
+    [[-84.7, 45.9], [-83.5, 45.9], [-81.6, 45.3], [-80.7, 45.9], [-80.0, 45.0], [-81.7, 44.4], [-81.7, 43.3], [-82.4, 43.0], [-82.9, 44.0], [-83.4, 43.9], [-83.3, 44.5], [-84.1, 45.5]],
+    [[-83.4, 41.7], [-82.7, 41.4], [-81.6, 41.5], [-80.0, 42.1], [-78.9, 42.8], [-79.8, 42.8], [-81.3, 42.6], [-82.5, 42.0], [-83.2, 42.0]],
+    [[-79.8, 43.3], [-78.0, 43.4], [-76.3, 43.5], [-76.2, 44.2], [-77.2, 43.9], [-78.7, 43.9], [-79.4, 43.6]],
+  ];
+  const lakeBits = fillRings(LAKES.map((ring) => ring.map((pt) => pj(pt))), n);
+  const usBits = fillRings(ringsOf(conus, pj), n).map((v, i) => v && !lakeBits[i]);
+  const countriesTopo = readJSON('node_modules/world-atlas/countries-50m.json');
+  const neighbours = topo.feature(countriesTopo, countriesTopo.objects.countries).features.filter((f) => f.id === '124' || f.id === '484');
+  const abroadBits = fillRings(neighbours.flatMap((f) => ringsOf(f.geometry, pj)), n).map((v, i) => v && !lakeBits[i]);
+  let land = '', lot = '', town = '', abroad = '';
   for (let r = 0; r < n; r++) {
     for (let c = 0; c < n; c++) {
-      const x = c + 0.5, y = r + 0.5;
-      land += isl.some((g) => Math.hypot(x - g.x, y - g.y) <= g.r) ? '1' : '0';
+      const x = c + 0.5, y = r + 0.5, i = r * n + c;
+      const inTown = isl.some((g) => Math.hypot(x - g.x, y - g.y) <= g.r);
+      land += usBits[i] || inTown ? '1' : '0';
+      town += inTown ? '1' : '0';
+      abroad += !usBits[i] && !inTown && abroadBits[i] ? '1' : '0';
       lot += lots.some(([lx, ly]) => Math.abs(x - lx) < SPACING * 0.36 && Math.abs(y - ly) < SPACING * 0.36) ? '1' : '0';
     }
   }
+  // State lines and the national border, as board-space polylines.
+  const statesTopo = simp.simplify(simp.presimplify(readJSON('node_modules/us-atlas/states-10m.json')), 0.002);
+  const lines = (mesh) => mesh.coordinates.map((line) => {
+    const out = [];
+    for (const pt of line) {
+      const [x, y] = pj(pt);
+      if (out.length && Math.hypot(x - out[out.length - 2], y - out[out.length - 1]) < 0.7) continue;
+      out.push(+x.toFixed(1), +y.toFixed(1));
+    }
+    return out;
+  }).filter((l) => l.length >= 4 && l.every((v) => v > -2 && v < n + 2));
+  const stateLines = lines(topo.mesh(statesTopo, statesTopo.objects.states, (a, b) => a !== b));
   const islands = isl.filter((g) => g.members.length >= 2).map((g) => [g.name, +g.x.toFixed(2), +g.y.toFixed(2), +g.r.toFixed(2)]);
-  return { pos, land, lot, islands };
+  const moved = isl.map((g) => Math.hypot(g.x - g.tx, g.y - g.ty));
+  console.log(`map: ${isl.length} districts, median shift ${moved.sort((a, b) => a - b)[moved.length >> 1].toFixed(1)} cells, max ${Math.max(...moved).toFixed(1)}`);
+  return { isl, placed: { pos, land, lot, town, abroad, islands, states: stateLines } };
 }
 const board = { modes: {} };
 const ISLAND_OF = new Map();
 {
-  const nationTopo = readJSON('node_modules/us-atlas/nation-10m.json');
-  const nation = topo.feature(nationTopo, nationTopo.objects.nation).features[0];
-  const conus = { type: 'MultiPolygon', coordinates: nation.geometry.coordinates.filter((p) => { const [lon, lat] = p[0][0]; return lon > -126 && lon < -65 && lat > 24 && lat < 50; }) };
-  const us = islandLayout(companies.filter((c) => c.country === 'US'), d3.geoConicEqualArea().parallels([29.5, 45.5]).rotate([96, 0]).fitExtent([[0, 0], [1, 1]], conus));
-  const world = islandLayout(companies, d3.geoNaturalEarth1().fitExtent([[0, 0], [1, 1]], { type: 'Sphere' }));
-  // Which island each company lives on (its US island, or its world island abroad).
-  [...us.isl, ...world.isl].forEach((g, i) => g.members.forEach((c) => ISLAND_OF.has(c.slug) || ISLAND_OF.set(c.slug, i)));
+  const us = usBoard(companies);
+  us.isl.forEach((g, i) => g.members.forEach((c) => ISLAND_OF.set(c.slug, i)));
   // The map's own grid; scan view lays a separate QR code (it scans to this site) over it.
-  board.n = Math.ceil(Math.max(us.size, world.size) + 10);
+  board.n = BOARD_N;
   board.qr = qrBits(SITE_URL);
-  for (const [id, layout] of Object.entries({ us, world })) {
-    const placed = placeIslands(layout, board.n);
-    const regionsAt = {};
-    for (const r of REGIONS) {
-      const ps = r.members.map((s) => placed.pos[s]).filter(Boolean);
-      if (!ps.length) continue;
-      const x = ps.reduce((a, p) => a + p[0], 0) / ps.length, y = ps.reduce((a, p) => a + p[1], 0) / ps.length;
-      regionsAt[r.id] = [+x.toFixed(2), +y.toFixed(2), +Math.max(...ps.map((p) => Math.hypot(p[0] - x, p[1] - y))).toFixed(2)];
-    }
-    board.modes[id] = { ...placed, regions: regionsAt };
+  const placed = us.placed;
+  const regionsAt = {};
+  for (const r of REGIONS) {
+    const ps = r.members.map((s) => placed.pos[s]).filter(Boolean);
+    if (!ps.length) continue;
+    const x = ps.reduce((a, p) => a + p[0], 0) / ps.length, y = ps.reduce((a, p) => a + p[1], 0) / ps.length;
+    regionsAt[r.id] = [+x.toFixed(2), +y.toFixed(2), +Math.max(...ps.map((p) => Math.hypot(p[0] - x, p[1] - y))).toFixed(2)];
   }
-  console.log(`board: ${board.n}×${board.n} map, ${board.qr.n}×${board.qr.n} QR; ${us.isl.length} US islands, ${world.isl.length} world islands`);
+  board.modes.us = { ...placed, regions: regionsAt };
+  console.log(`board: ${board.n}×${board.n} map, ${board.qr.n}×${board.qr.n} QR`);
 }
 
 // Which signature 3D model a company gets (see data/industries.json and src/models.js), and a
@@ -362,38 +400,16 @@ const head = ({ title, description, path, depth }) => {
 const topbar = (depth, extra = '') => {
   const up = '../'.repeat(depth);
   return `<header class="topbar">
-  <a class="brand" href="${up}index.html"><img src="${up}assets/icon.svg" alt="" width="22" height="22"><span>QR&nbsp;Atlas</span></a>
+  <a class="brand" href="${up}index.html"><img src="${up}assets/icon.svg" alt="" width="22" height="22"><span>QR&nbsp;Compass</span></a>
   ${extra}
   <nav class="nav"><a href="${up}index.html">QR world</a><a href="${up}map.html">Flat map</a><a href="${up}companies.html">Directory</a></nav>
 </header>`;
 };
 
 // ---------- dot-matrix logo ----------
-const GLYPHS = {
-  Q: ['.###.', '#...#', '#...#', '#...#', '#.#.#', '#..#.', '.##.#'],
-  R: ['####.', '#...#', '#...#', '####.', '#.#..', '#..#.', '#...#'],
-  A: ['.###.', '#...#', '#...#', '#####', '#...#', '#...#', '#...#'],
-  T: ['#####', '..#..', '..#..', '..#..', '..#..', '..#..', '..#..'],
-  L: ['#....', '#....', '#....', '#....', '#....', '#....', '#####'],
-  S: ['.####', '#....', '#....', '.###.', '....#', '....#', '####.'],
-  ' ': ['...', '...', '...', '...', '...', '...', '...'],
-};
-function dotLogo(text) {
-  let x = 0;
-  const dots = [];
-  for (const ch of text) {
-    const g = GLYPHS[ch];
-    g.forEach((row, y) => [...row].forEach((v, i) => v === '#' && dots.push(`<circle cx="${(x + i) * 4 + 2}" cy="${y * 4 + 2}" r="1.35"/>`)));
-    x += g[0].length + 1;
-  }
-  const w = x * 4 - 4, h = 28;
-  const b = 7; // bracket arm
-  const pad = 6, W2 = w + pad * 2, H2 = h + pad * 2;
-  return `<svg class="qw-dots" viewBox="${-pad} ${-pad} ${W2} ${H2}" width="${W2 * 1.6}" height="${H2 * 1.6}" aria-hidden="true">
-<g fill="none" stroke="#ffcf33" stroke-width="2.2" stroke-linecap="round"><path d="M${-pad + 1} ${-pad + 1 + b}V${-pad + 1}H${-pad + 1 + b}"/><path d="M${w + pad - 1 - b} ${-pad + 1}H${w + pad - 1}V${-pad + 1 + b}"/><path d="M${-pad + 1} ${h + pad - 1 - b}V${h + pad - 1}H${-pad + 1 + b}"/><path d="M${w + pad - 1 - b} ${h + pad - 1}H${w + pad - 1}V${h + pad - 1 - b}"/></g>
-<g fill="currentColor">${dots.join('')}</g></svg>`;
-}
-const LOGO = dotLogo('QR ATLAS');
+// The mark: a compass whose dial is a ring of QR modules.
+const MARK = `<svg class="qw-mark" viewBox="0 0 40 40" width="38" height="38" aria-hidden="true"><rect width="40" height="40" rx="11" fill="#2a2520"/>${Array.from({ length: 16 }, (_, i) => { const a = (i / 16) * Math.PI * 2, r = 14.2, x = 20 + Math.sin(a) * r, y = 20 - Math.cos(a) * r, big = i % 4 === 0; const s = big ? 3.4 : 1.9; return `<rect x="${(x - s / 2).toFixed(2)}" y="${(y - s / 2).toFixed(2)}" width="${s}" height="${s}" rx="${big ? 0.7 : 0.4}" fill="${i === 0 ? '#ff6a3d' : '#f6f1e7'}" opacity="${big ? 1 : 0.55}"/>`; }).join('')}<g transform="rotate(32 20 20)"><path d="M20 7.5 24 20h-8z" fill="#ff6a3d"/><path d="M16 20h8l-4 12.5z" fill="#f6f1e7"/></g><circle cx="20" cy="20" r="2" fill="#2a2520" stroke="#f6f1e7" stroke-width="1.2"/></svg>`;
+const LOGO = `${MARK}<span class="qw-word"><b>QR</b> Compass</span>`;
 const qwHead = ({ title, description, path, depth }) => {
   const up = '../'.repeat(depth);
   return `<!doctype html>
@@ -415,13 +431,12 @@ const qwHead = ({ title, description, path, depth }) => {
 <script type="importmap">{"imports":{"three":"${up || './'}assets/three.module.min.js"}}</script>
 </head>`;
 };
-const qwTop = (depth, eyeLabel = 'I see QR') => {
+const qwTop = (depth) => {
   const up = '../'.repeat(depth);
   return `<div class="qw-brand">
-    <a class="qw-logo" href="${up}index.html" aria-label="QR Atlas home">${LOGO}</a>
-    <button class="qw-pill" id="see" aria-pressed="false"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M12 5C6.5 5 2.7 9.3 1.5 12c1.2 2.7 5 7 10.5 7s9.3-4.3 10.5-7C21.3 9.3 17.5 5 12 5Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-2.2a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6Z"/></svg>${eyeLabel}</button>
+    <a class="qw-logo" href="${up}index.html" aria-label="QR Compass home">${LOGO}</a>
   </div>
-  <nav class="qw-nav">${depth ? `<a href="${up}index.html">← World</a>` : ''}<a href="${up}about.html">About</a></nav>`;
+  <nav class="qw-nav">${depth ? `<a href="${up}index.html">← Map</a>` : ''}<a href="${up}about.html">About</a></nav>`;
 };
 const ICONS = {
   spring: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.6"/><path d="M12 9.4c-1.6-3.9 1.4-6.4 3.2-4.6 1.6 1.6-.4 4.6-3.2 4.6Zm2.6 2.6c3.9-1.6 6.4 1.4 4.6 3.2-1.6 1.6-4.6-.4-4.6-3.2ZM12 14.6c1.6 3.9-1.4 6.4-3.2 4.6-1.6-1.6.4-4.6 3.2-4.6ZM9.4 12c-3.9 1.6-6.4-1.4-4.6-3.2 1.6-1.6 4.6.4 4.6 3.2Z"/></svg>',
@@ -458,7 +473,7 @@ function companyPage(c, prev, next) {
   const sub = c.kind === 'f500' ? `Fortune 500 No. ${c.rank} · ${place(c)}` : `${c.sector} startup · ${place(c)}`;
   const data = { slug: c.slug, name: c.name, model, look: LOOKS.get(c.slug), qr: qrBits(pageUrl) };
 
-  return `${qwHead({ title: `${c.name} · QR Atlas`, description: describe(c), path, depth: 1 })}
+  return `${qwHead({ title: `${c.name} · QR Compass`, description: describe(c), path, depth: 1 })}
 <body class="qw qw-company">
 <section class="qw-stage" id="stage">
   ${qwTop(1)}
@@ -488,7 +503,7 @@ function companyPage(c, prev, next) {
   <dl class="qw-facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
   <div class="qw-actions">
     ${c.website ? `<a class="qw-btn" href="${esc(c.website)}" rel="noopener" target="_blank">${esc(host(c.website))} ↗</a>` : ''}
-    <a class="qw-btn primary" href="../index.html#${c.slug}">See it in the world</a>
+    <a class="qw-btn primary" href="../index.html#${c.slug}">See it on the map</a>
     <button class="qw-btn" id="download">Download QR</button>
   </div>
 
@@ -549,7 +564,7 @@ function indexPage() {
   const usView = { x: (Math.min(...us.map((c) => c.x)) + Math.max(...us.map((c) => c.x))) / 2, y: (Math.min(...us.map((c) => c.y)) + Math.max(...us.map((c) => c.y))) / 2, w: (Math.max(...us.map((c) => c.x)) - Math.min(...us.map((c) => c.x))) * 1.15 };
   const config = { W, H, listYear: LIST_YEAR, usView, regions, places };
   const description = `Every ${LIST_YEAR} Fortune 500 headquarters and ${startups.length} notable startups on one map, from Silicon Valley to Boston. Play the tour, search any company, and share its QR page.`;
-  return `${head({ title: 'Flat map · QR Atlas', description, path: 'map.html', depth: 0 })}
+  return `${head({ title: 'Flat map · QR Compass', description, path: 'map.html', depth: 0 })}
 <body class="atlas">
 ${topbar(0, `<div class="search" role="search">
     <input id="q" type="search" placeholder="Search a company or city…" autocomplete="off" spellcheck="false" aria-label="Search companies" aria-controls="results" aria-expanded="false">
@@ -642,8 +657,8 @@ function worldPage() {
     board,
     regions: REGIONS.map(({ id, name, short, note, members }) => ({ id, name, short, note: note || '', members })),
   };
-  const description = `A 3D world on a QR code: every ${LIST_YEAR} Fortune 500 headquarters and ${startups.length} startups, from Silicon Valley to Boston. Play the tour, search any company, and scan the board.`;
-  return `${qwHead({ title: 'QR Atlas · a world on a QR code', description, path: '', depth: 0 })}
+  const description = `A 3D map of the US on a QR code: every ${LIST_YEAR} Fortune 500 headquarters and ${startups.length} startups, from Silicon Valley to Boston. Play the tour, search any company, and scan the map.`;
+  return `${qwHead({ title: 'QR Compass · America’s companies on a QR code', description, path: '', depth: 0 })}
 <body class="qw qw-world">
 <section class="qw-stage" id="stage">
   ${qwTop(0)}
@@ -696,8 +711,7 @@ function worldPage() {
       <button class="qw-play" id="play" aria-label="Play tour"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 5.5v13l10.5-6.5z"/></svg></button>
     </div>
     <div class="qw-tabs" role="group" aria-label="Board">
-      <button data-mode="us" aria-pressed="true">${ICONS.city}USA</button>
-      <button data-mode="world" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z"/></svg>World</button>
+      <button id="scan-btn" class="sig" aria-pressed="false">${ICONS.signature}<span id="scan-label">Turn the map into a QR code</span></button>
       <button id="random"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Surprise me</button>
     </div>
   </div>
@@ -715,7 +729,7 @@ function worldPage() {
 function directoryPage() {
   const rows = [...companies].sort((a, b) => (a.kind === b.kind ? (a.rank || 0) - (b.rank || 0) || a.name.localeCompare(b.name) : a.kind === 'f500' ? -1 : 1));
   const description = `Directory of all ${f500.length} companies on the ${LIST_YEAR} Fortune 500 and ${startups.length} startups, each with a shareable QR page.`;
-  return `${head({ title: 'Directory · QR Atlas', description, path: 'companies.html', depth: 0 })}
+  return `${head({ title: 'Directory · QR Compass', description, path: 'companies.html', depth: 0 })}
 <body class="page">
 ${topbar(0)}
 <main class="directory">
@@ -745,12 +759,12 @@ ${rows.map((c) => `<tr data-k="${c.kind}" data-t="${c.tech ? 1 : 0}" data-q="${e
 
 function aboutPage() {
   const moved = companies.filter((c) => c.moved);
-  return `${head({ title: 'About the data · QR Atlas', description: 'Sources and caveats for the QR Atlas company map.', path: 'about.html', depth: 0 })}
+  return `${head({ title: 'About the data · QR Compass', description: 'Sources and caveats for the QR Compass company map.', path: 'about.html', depth: 0 })}
 <body class="page">
 ${topbar(0)}
 <main class="prose">
   <h1>About the data</h1>
-  <p>QR Atlas gives every company a page whose QR code is a small 3D world: a tree or a city growing out of the code. Tap it, or press “I see QR”, and it settles into a flat QR code that scans back to that page, so a post or slide about a company can point to one stable link.</p>
+  <p>QR Compass gives every company a page whose QR code is a small 3D world: a tree or a city growing out of the code. Tap it, or press “Turn into QR code”, and it settles into a flat QR code that scans back to that page, so a post or slide about a company can point to one stable link.</p>
   <p>The home page is the same idea at full scale: one large QR code that scans to this site, with the map laid across its tiles and every company standing at its headquarters. Towers grow with revenue; startups are trees, rockets (aerospace and defense) or glowing orbs (AI). The <a href="map.html">flat map</a> shows the same data in 2D.</p>
   <h2>Fortune 500</h2>
   <p>Ranks, names, revenue and profit come from the <strong>${LIST_YEAR} Fortune 500</strong> list (fiscal ${LIST_YEAR - 1} figures), as published in the open dataset at <a href="https://github.com/cmusam/fortune500">github.com/cmusam/fortune500</a>. Fortune publishes a new list every June; ranks here are not current.</p>

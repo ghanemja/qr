@@ -1,12 +1,12 @@
-# QR Atlas
+# QR Compass
 
-A static site where every company's QR code is a 3D world.
+A static site where every company's QR code is a 3D model, on a 3D map of the US.
 
-- `docs/index.html`: one large QR code (it scans to the site) where each city is an island of its companies, arranged west to east like the real map but packed close together, and every company stands as its own 3D model. ▶ plays a walkthrough of each tech city and its biggest tech company; searching a company opens its model next to its QR code.
+- `docs/index.html`: a 3D map of the US (real outline, state lines, Great Lakes, Canada and Mexico around it) with hot zones where companies cluster. Each metro is a district of city blocks at its real spot, every company stands as its own 3D model, and the whole map turns into a QR code that scans to the site. ▶ plays a walkthrough of each tech city and its biggest tech company; searching a company opens its model next to its QR code. On a company page, paste any link and the model turns into a QR code for that link.
 - `docs/c/<company>.html`: one page per company. Its 3D model stands on a plaza paved with its QR code; tap it and the model breaks into pixels that land on the code, giving a scannable QR that links back to the page.
 - `docs/map.html`: flat 2D map of the same data. `docs/companies.html`: searchable directory.
 
-Covers the 2019 Fortune 500 (latest list available as open data) plus a hand-picked set of startups. Sources and caveats are on `docs/about.html`.
+Covers the 2019 Fortune 500 (latest list available as open data) plus a hand-picked set of US startups (the site is US-only for now). Sources and caveats are on `docs/about.html`.
 
 ## Build
 

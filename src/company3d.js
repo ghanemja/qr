@@ -67,7 +67,7 @@ if (!webglAvailable()) {
   const setScan = (on) => {
     if (!world || world.busy) return;
     document.body.classList.toggle('scanning', on);
-    for (const id of ['see', 'toggle']) $(id).setAttribute('aria-pressed', String(on));
+    for (const id of ['toggle']) $(id).setAttribute('aria-pressed', String(on));
     $('toggle-label').textContent = on ? 'Back to the 3D model' : 'Turn into QR code';
     $('hint').textContent = on ? 'Scan me · tap to rebuild the model' : hint;
     return world.setScan(on);
@@ -94,7 +94,7 @@ if (!webglAvailable()) {
     return world;
   };
   mount(C.qr);
-  for (const id of ['see', 'toggle']) $(id).addEventListener('click', () => setScan(!world.scanning));
+  for (const id of ['toggle']) $(id).addEventListener('click', () => setScan(!world.scanning));
   // A new link rebuilds the model around its own QR, then turns it into the code to scan.
   applyLink = () => {
     const w = mount(qrOf(link));

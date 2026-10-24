@@ -1,4 +1,4 @@
-// QR drawing shared by the atlas and the company pages (needs qrcode-generator).
+// QR drawing shared by the map and the company pages (needs qrcode-generator).
 window.QRCard = (() => {
   const initials = (name) => name.replace(/\(.*?\)/g, '').split(/[\s&.-]+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
 
@@ -80,7 +80,7 @@ window.QRCard = (() => {
     ctx.fillText(text.replace(/^https?:\/\//, ''), w / 2, w + 100, w - pad * 2);
     ctx.fillStyle = '#2f6bff';
     ctx.font = '600 26px ui-sans-serif, system-ui, sans-serif';
-    ctx.fillText('QR ATLAS', w / 2, h - 60);
+    ctx.fillText('QR COMPASS', w / 2, h - 60);
     c.toBlob((blob) => {
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);

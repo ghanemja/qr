@@ -16,7 +16,7 @@ const pageUrl = (d) => QRCard.siteUrl(`c/${d.s}.html`);
 
 if (!webglAvailable()) {
   document.body.classList.add('no-webgl');
-  QRCard.draw($('fallback-qr'), QRCard.siteUrl(''), 'QR Atlas');
+  QRCard.draw($('fallback-qr'), QRCard.siteUrl(''), 'QR Compass');
 } else {
   start();
 }
@@ -51,20 +51,25 @@ function start() {
   ink.renderOrder = 5;
   scene.add(ink);
 
-  let mode = 'us';
-  const landOf = (m) => decodeBits(N, board.modes[m].land);
-  const lotOf = (m) => decodeBits(N, board.modes[m].lot);
-  let land = landOf(mode), lot = lotOf(mode);
+  const mode = 'us';
+  const map = board.modes.us;
+  const land = decodeBits(N, map.land), lot = decodeBits(N, map.lot), town = decodeBits(N, map.town), abroad = decodeBits(N, map.abroad);
   const col = new THREE.Color(), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), s = new THREE.Vector3(), eul = new THREE.Euler();
 
-  // The board reads as a map: water, and raised islands where the cities are, each a grid of
-  // green lots (one per company) with paved streets between them. The QR code only appears for
-  // scan view, when its squares pop up over the flattened map in a diagonal sweep.
+  // The board is a map of the US: raised land with state lines and hot zones on top, Canada and
+  // Mexico around it, water beyond. Each metro is a district of green lots (one per company)
+  // with paved streets between them. The QR code only appears for scan view, when its squares
+  // pop up over the flattened map in a diagonal sweep.
   const LAND_H = 0.42;
   const STAND = LAND_H; // models stand on the island surface
-  const TILE = { lotA: '#bcd59c', lotB: '#b3cf92', street: '#ece4d3', streetB: '#e4dac6', sand: '#eadcb6', rim: '#ebe5da', rimB: '#f3efe7', plain: '#f7f4ee', ink: '#1f2a24' };
-  const isLand = (r, c) => r >= 0 && c >= 0 && r < N && c < N && land(r, c);
-  const coast = (r, c) => isLand(r, c) && (!isLand(r - 1, c) || !isLand(r + 1, c) || !isLand(r, c - 1) || !isLand(r, c + 1));
+  const ABROAD_H = 0.3;
+  const TILE = { abroadA: '#ebe5d6', abroadB: '#e6dfcf', westA: '#e6dbb4', westB: '#e0d5ad', eastA: '#cfe0ab', eastB: '#c8daa3', lotA: '#bcd59c', lotB: '#b3cf92', street: '#ece4d3', streetB: '#e4dac6', sand: '#eadcb6', rim: '#ebe5da', rimB: '#f3efe7', plain: '#f7f4ee', ink: '#1f2a24' };
+  const inMap = (r, c) => r >= 0 && c >= 0 && r < N && c < N;
+  const isUS = (r, c) => inMap(r, c) && land(r, c);
+  const isLand = (r, c) => inMap(r, c) && (land(r, c) || abroad(r, c));
+  const coast = (r, c) => isUS(r, c) && (!isLand(r - 1, c) || !isLand(r + 1, c) || !isLand(r, c - 1) || !isLand(r, c + 1));
+  // Countryside shades from dry plains in the west to green in the east.
+  const rural = (r, c, out) => out.set((r + c) % 2 ? TILE.westA : TILE.westB).lerp(cB.set((r + c) % 2 ? TILE.eastA : TILE.eastB), Math.min(1, Math.max(0, (c / N - 0.38) / 0.22)));
   const cA = new THREE.Color(), cB = new THREE.Color();
 
   // ---------- water ----------
@@ -212,12 +217,15 @@ function start() {
         const mr = r - QUIET, mc = c - QUIET;
         const inside = mr >= 0 && mc >= 0 && mr < N && mc < N;
         const t = sweep((r + c) / (2 * S));
-        const onLand = inside && isLand(mr, mc);
+        const onLand = inside && isUS(mr, mc), foreign = inside && !onLand && abroad(mr, mc);
         if (!inside) cA.set((r + c) % 2 ? TILE.rimB : TILE.rim);
-        else if (onLand) cA.set(coast(mr, mc) ? TILE.sand : lot(mr, mc) ? ((mr + mc) % 2 ? TILE.lotA : TILE.lotB) : (mr + mc) % 2 ? TILE.street : TILE.streetB);
+        else if (foreign) cA.set((mr + mc) % 2 ? TILE.abroadA : TILE.abroadB);
+        else if (onLand && lot(mr, mc)) cA.set((mr + mc) % 2 ? TILE.lotA : TILE.lotB);
+        else if (onLand && town(mr, mc)) cA.set((mr + mc) % 2 ? TILE.street : TILE.streetB);
+        else if (onLand) coast(mr, mc) ? cA.set(TILE.sand) : rural(mr, mc, cA);
         else seabed(seaDist[mr * N + mc] + ((mr * 5 + mc * 11) % 7) * 0.08, cA);
         tiles.setColorAt(r * S + c, cA.lerp(cB.set(TILE.plain), t));
-        const h = onLand ? lerp(LAND_H / 0.14, 1, t) : inside ? lerp(SEA_FLOOR, 1, t) : 1;
+        const h = onLand ? lerp(LAND_H / 0.14, 1, t) : foreign ? lerp(ABROAD_H / 0.14, 1, t) : inside ? lerp(SEA_FLOOR, 1, t) : 1;
         tiles.setMatrixAt(r * S + c, m4.compose(p.set(c - S / 2 + 0.5, (0.14 * h) / 2, r - S / 2 + 0.5), q.identity(), s.set(1, h, 1)));
       }
     }
@@ -232,10 +240,82 @@ function start() {
     blocks.visible = flatten > 0;
     waterMat.uniforms.uFade.value = 1 - Math.min(1, flatten * 2.5);
     water.visible = flatten < 0.4;
+    overlayFade = 1 - Math.min(1, flatten * 2.5);
+    overlay.visible = flatten < 0.4;
     blocks.instanceMatrix.needsUpdate = true;
     blocks.instanceColor.needsUpdate = true;
   }
   measureSea();
+
+  // ---------- state lines and hot zones ----------
+  // One texture laid on the land: state borders so the country reads at a glance, and a heat
+  // map of where the companies (weighted by revenue) cluster.
+  const OVER = 2048, px = OVER / N;
+  const overCanvas = document.createElement('canvas');
+  overCanvas.width = overCanvas.height = OVER;
+  function paintOverlay(weightOf) {
+    const g = overCanvas.getContext('2d');
+    g.clearRect(0, 0, OVER, OVER);
+    // Heat: soft blobs summed in a small buffer, then coloured through a warm ramp.
+    const HS = 512, hs = HS / N;
+    const heat = new Float32Array(HS * HS);
+    for (const d of DATA) {
+      const pos = map.pos[d.s];
+      const w = weightOf(d);
+      if (!pos || !w) continue;
+      const cx = pos[0] * hs, cy = pos[1] * hs, rad = 9 * hs;
+      for (let y = Math.max(0, Math.floor(cy - rad * 2)); y < Math.min(HS, cy + rad * 2); y++) {
+        for (let x = Math.max(0, Math.floor(cx - rad * 2)); x < Math.min(HS, cx + rad * 2); x++) {
+          heat[y * HS + x] += w * Math.exp(-((x - cx) ** 2 + (y - cy) ** 2) / (rad * rad));
+        }
+      }
+    }
+    let max = 0;
+    for (const v of heat) max = Math.max(max, v);
+    const img = new ImageData(HS, HS);
+    const ramp = [[0, [255, 214, 92]], [0.45, [255, 150, 60]], [0.75, [240, 82, 52]], [1, [196, 36, 64]]];
+    for (let i = 0; i < heat.length; i++) {
+      const v = Math.pow(heat[i] / max, 0.55);
+      if (v < 0.06) continue;
+      let k = 1;
+      while (k < ramp.length - 1 && v > ramp[k][0]) k++;
+      const [t0, c0] = ramp[k - 1], [t1, c1] = ramp[k];
+      const f = Math.min(1, Math.max(0, (v - t0) / (t1 - t0)));
+      const r = Math.floor(i / HS), c = i % HS;
+      if (!land(Math.floor(r / hs), Math.floor(c / hs))) continue;
+      img.data.set([c0[0] + (c1[0] - c0[0]) * f, c0[1] + (c1[1] - c0[1]) * f, c0[2] + (c1[2] - c0[2]) * f, 255 * Math.min(0.62, (v - 0.06) * 1.1)], i * 4);
+    }
+    const hc = document.createElement('canvas');
+    hc.width = hc.height = HS;
+    hc.getContext('2d').putImageData(img, 0, 0);
+    g.imageSmoothingEnabled = true;
+    g.drawImage(hc, 0, 0, OVER, OVER);
+    // State lines.
+    g.strokeStyle = 'rgba(96, 82, 60, 0.5)';
+    g.lineWidth = 0.16 * px;
+    g.lineJoin = g.lineCap = 'round';
+    g.setLineDash([0.5 * px, 0.35 * px]);
+    g.beginPath();
+    for (const line of map.states) {
+      g.moveTo(line[0] * px, line[1] * px);
+      for (let i = 2; i < line.length; i += 2) g.lineTo(line[i] * px, line[i + 1] * px);
+    }
+    g.stroke();
+    overTex.needsUpdate = true;
+  }
+  const overTex = new THREE.CanvasTexture(overCanvas);
+  overTex.colorSpace = THREE.SRGBColorSpace;
+  overTex.anisotropy = 8;
+  const overlay = new THREE.Mesh(new THREE.PlaneGeometry(N, N).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: overTex, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
+  overlay.position.y = LAND_H + 0.004;
+  overlay.renderOrder = 3;
+  scene.add(overlay);
+  // Hot zones are for the big picture: they fade back as you zoom in on a city's blocks.
+  let overlayFade = 1;
+  stage.frame.add(() => {
+    const close = Math.min(1, Math.max(0, (camera.zoom - 1.6) / 2.4));
+    overlay.material.opacity = overlayFade * (1 - close * 0.7);
+  });
   layoutBoard();
 
   // ---------- company models ----------
@@ -323,6 +403,9 @@ function start() {
   const modeScale = () => 1;
   let filter = 'all';
   const matches = (d) => filter === 'all' || (filter === 'tech' ? d.t : filter === 'startup' ? d.k === 1 : d.k === 0);
+  // Hot zones follow the filter: revenue for Fortune 500 companies, a fixed weight per startup.
+  const heatOf = (d) => (matches(d) ? (d.k === 0 ? 0.35 + Math.sqrt((d.v || 0) / MAXV) : 0.45) : 0);
+  paintOverlay(heatOf);
   const targetOf = (d) => {
     const pos = board.modes[mode].pos[d.s];
     if (!pos) return null;
@@ -533,7 +616,7 @@ function start() {
     const d = bySlug.get(slug);
     if (!d) return;
     if (!fromTour && tour.active && !tour.paused) pauseTour();
-    if (!board.modes[mode].pos[slug]) return switchMode(mode === 'us' ? 'world' : 'us').then(() => select(slug, { fly, hash, fromTour }));
+    if (!map.pos[slug]) return;
     if (focus && !focus.has(slug)) focus = null;
     selected = d;
     ring.visible = true;
@@ -639,26 +722,12 @@ function start() {
   $('card-near').addEventListener('click', (e) => { const b = e.target.closest('button[data-s]'); if (b) select(b.dataset.s); });
   $('card-close').addEventListener('click', deselect);
 
-  // ---------- mode & filter ----------
-  async function switchMode(next) {
-    if (next === mode) return;
-    for (const b of document.querySelectorAll('[data-mode]')) b.setAttribute('aria-pressed', String(b.dataset.mode === next));
-    mode = next;
-    land = landOf(mode);
-    lot = lotOf(mode);
-    measureSea();
-    // Repaint the map in a sweep while the companies hop to their new places.
-    tween(stage, 1100, (e) => {
-      layoutBoard(Math.ceil(e * S));
-    }).then(() => layoutBoard());
-    flyCamera(stage, overview(), { duration: 1600, arc: 0.25 });
-    await settle(1600, 4);
-  }
-  for (const b of document.querySelectorAll('[data-mode]')) b.addEventListener('click', () => { if (tour.active) stopTour(); deselect(); switchMode(b.dataset.mode); });
+  // ---------- filter ----------
   for (const b of document.querySelectorAll('.qw-filters button')) {
     b.addEventListener('click', () => {
       filter = b.dataset.f;
       for (const o of document.querySelectorAll('.qw-filters button')) o.setAttribute('aria-pressed', String(o === b));
+      paintOverlay(heatOf);
       settle(700);
     });
   }
@@ -669,7 +738,8 @@ function start() {
     if (on === scanning) return;
     scanning = on;
     document.body.classList.toggle('scanning', on);
-    $('see').setAttribute('aria-pressed', String(on));
+    $('scan-btn').setAttribute('aria-pressed', String(on));
+    $('scan-label').textContent = on ? 'Back to the map' : 'Turn the map into a QR code';
     controls.enabled = !on;
     controls.autoRotate = false;
     if (on) {
@@ -700,7 +770,7 @@ function start() {
       ink.visible = false;
     }
   }
-  $('see').addEventListener('click', () => setScan(!scanning));
+  $('scan-btn').addEventListener('click', () => setScan(!scanning));
 
   // ---------- search ----------
   const qIn = $('q'), results = $('results');
@@ -740,8 +810,6 @@ function start() {
     if (h.region) {
       if (tour.active) stopTour();
       deselect();
-      const need = h.region.members.some((sl) => board.modes.us.pos[sl]) ? 'us' : 'world';
-      if (need !== mode) await switchMode(need);
       qIn.value = h.region.name;
       flyCamera(stage, regionView(h.region.id), { duration: 1800, arc: 0.5 });
     } else {
@@ -766,7 +834,7 @@ function start() {
     return { f500: f.length, tech: f.filter((d) => d.t).length, startups: ds.length - f.length, revenue: f.reduce((a, d) => a + (d.v || 0), 0), ds };
   };
   // The walkthrough: each tech hub, then a close-up of its biggest tech company.
-  const TECH_CITIES = ['bay-area', 'seattle', 'socal', 'austin', 'dfw', 'atlanta', 'dc', 'nyc', 'boston', 'europe', 'asia-pacific'];
+  const TECH_CITIES = ['bay-area', 'seattle', 'socal', 'austin', 'dfw', 'atlanta', 'dc', 'nyc', 'boston'];
   const usSlugs = DATA.filter((d) => board.modes.us.pos[d.s]).map((d) => d.s);
   const techStops = TECH_CITIES.map((id) => regions.find((r) => r.id === id)).filter(Boolean).map((r, i) => {
     const ds = r.members.map((sl) => bySlug.get(sl));
@@ -813,7 +881,6 @@ function start() {
     const st = steps[tour.i];
     showStep(tour.i);
     $('cap-bar').style.width = '0%';
-    if (st.mode !== mode) await switchMode(st.mode);
     if (!tour.active) return;
     const step = tour.i;
     const ok = await flyCamera(stage, st.view(), { duration: 2200, arc: 0.45 });
