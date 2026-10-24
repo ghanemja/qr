@@ -657,13 +657,33 @@ function start() {
     $('c-stage').innerHTML = '';
     setQRLabel(false);
     show = createQRWorld($('c-stage'), { slug: d.s, model: d.m, look: lookOf(d), qr: qrFor(d), viewScale: 1.35, insets: () => ({ top: 8, bottom: 8 }) });
+    startLoop(show);
   }
+  // The card keeps turning the model into its QR code and back until someone takes the controls.
+  let auto = null, autoTimer = 0;
+  function stopLoop() { auto = null; clearTimeout(autoTimer); }
+  function startLoop(s) {
+    stopLoop();
+    if (reduceMotion) return;
+    auto = s;
+    const wait = (ms) => { autoTimer = setTimeout(step, ms); };
+    async function step() {
+      if (auto !== s) return;
+      const on = !s.scanning;
+      setQRLabel(on);
+      await s.setScan(on);
+      if (auto === s) wait(on ? 5000 : 4000);
+    }
+    s.ready.then(() => { if (auto === s) wait(2500); });
+  }
+  $('c-stage').addEventListener('pointerdown', stopLoop);
   function setQRLabel(on) {
     $('c-toggle-label').textContent = on ? 'Back to the model' : 'Turn into QR code';
     $('c-toggle').setAttribute('aria-pressed', String(on));
   }
   $('c-toggle').addEventListener('click', () => {
     stopTour();
+    stopLoop();
     if (!show || show.busy) return;
     const on = !show.scanning;
     setQRLabel(on);
@@ -709,6 +729,7 @@ function start() {
   async function backToMap() {
     if (view === 'us') return;
     stopTour();
+    stopLoop();
     if (show) show.dispose();
     show = null;
     unfocus();
