@@ -4,7 +4,7 @@
 // top-down; setScan(false) plays it backwards and the pixels rebuild the model. With `loop` it
 // keeps going back and forth on its own until a tap, a drag or setScan() takes over.
 import { THREE, rng, createStage, buildSlab, buildInk, decodeBits, isFinder, setCamera, flyCamera, tween, lerp } from './qrworld.js';
-import { ARCHETYPES, centerpiece, modelMaterial, setBrands, vertexColor, propGeo, topperGeo, behave } from './models.js';
+import { ARCHETYPES, centerpiece, modelMaterial, setBrands, vertexColor, propGeo, topperGeo, motion, mountMovers, poseMovers, restMatrices } from './models.js';
 
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
@@ -105,7 +105,9 @@ export function createQRWorld(container, { slug, model, look = { v: 0, a: '#e553
     .filter(([geo]) => geo).map(([geo, at]) => ({ geo, matrix: new THREE.Matrix4().makeTranslation(...at) }));
   const bb = new THREE.Box3().setFromBufferAttribute(cp.geo.attributes.position);
   for (const a of accs) bb.union(new THREE.Box3().setFromBufferAttribute(a.geo.attributes.position).applyMatrix4(a.matrix));
-  for (const mv of cp.moving) bb.union(new THREE.Box3().setFromBufferAttribute(mv.geo.attributes.position).translate(new THREE.Vector3(...mv.pivot)));
+  const rest = restMatrices(cp);
+  const moverGeos = cp.moving.map((mv, i) => mv.geo && { geo: mv.geo, matrix: rest[i] }).filter(Boolean);
+  for (const a of moverGeos) bb.union(new THREE.Box3().setFromBufferAttribute(a.geo.attributes.position).applyMatrix4(a.matrix));
   const bsize = bb.getSize(new THREE.Vector3());
   const S = Math.min((n * 0.66) / Math.max(1, bb.max.y), (n * 1.0) / Math.max(bsize.x, bsize.z));
   const modelGroup = new THREE.Group();
@@ -119,21 +121,17 @@ export function createQRWorld(container, { slug, model, look = { v: 0, a: '#e553
     mesh.castShadow = mesh.receiveShadow = true;
     modelGroup.add(mesh);
   }
-  const movers = cp.moving.map((mv) => {
-    const g = new THREE.Group();
-    g.position.set(...mv.pivot);
-    const mesh = branded(mv.geo);
-    mesh.castShadow = true;
-    g.add(mesh);
-    modelGroup.add(g);
-    return { g, mv, axis: new THREE.Vector3(...mv.axis).normalize() };
+  const movers = mountMovers(cp, modelGroup, (geo) => {
+    const mesh = branded(geo);
+    mesh.castShadow = mesh.receiveShadow = true;
+    return mesh;
   });
   scene.add(modelGroup);
   const top = bb.max.y * S;
 
   // ---------- pixels ----------
   // One pixel per dark module, sampled from the model's surface and matched to a nearby square.
-  const sample = sampleSurface([{ geo: cp.geo, matrix: new THREE.Matrix4() }, ...accs, ...cp.moving.map((mv) => ({ geo: mv.geo, matrix: new THREE.Matrix4().makeTranslation(...mv.pivot) }))], cells.length, random, brand);
+  const sample = sampleSurface([{ geo: cp.geo, matrix: new THREE.Matrix4() }, ...accs, ...moverGeos], cells.length, random, brand);
   const voxel = THREE.MathUtils.clamp(Math.sqrt((sample.area * S * S) / cells.length) * 1.15, 0.45, 1.3);
   const footprint = Math.max(bsize.x, bsize.z) * S / 2;
   const spread = (n * 0.5) / Math.max(1, footprint);
@@ -224,20 +222,12 @@ export function createQRWorld(container, { slug, model, look = { v: 0, a: '#e553
   function animate(t) {
     if (reduceMotion()) return;
     hoverY = cp.hover ? Math.sin(t * 1.2) * cp.hover * S * 0.35 : 0;
-    // The model's own move (src/models.js behave); kept small enough to stay on its plaza.
-    const b = behave(arch.id, t);
+    // The model's own move (src/models.js motion); kept small enough to stay on its plaza.
+    const b = motion(arch.id, cp, t);
     modelGroup.position.set(b.x * top * 0.6, hoverY + b.y * top * 0.6, b.z * top * 0.6);
     modelGroup.rotation.set(b.rx, b.ry, b.rz);
-    for (const { g, mv, axis } of movers) {
-      if (mv.mode === 'spin') g.quaternion.setFromAxisAngle(axis, t * mv.speed);
-      else if (mv.mode === 'flap') g.quaternion.setFromAxisAngle(axis, Math.sin(t * mv.speed) * mv.amp);
-      else if (mv.mode === 'drop') {
-        const k = (t * mv.speed + (mv.phase || 0)) % 1;
-        g.position.set(mv.pivot[0], mv.pivot[1] - k * mv.drop, mv.pivot[2]);
-        g.quaternion.setFromAxisAngle(axis, k * 6);
-        g.scale.setScalar(Math.max(0.001, Math.min(1, k * 8, (1 - k) * 8)));
-      }
-    }
+    if (grow >= 1) modelGroup.scale.set(S * b.sx, S * b.sy, S * b.sz); // the intro owns the scale until it ends
+    poseMovers(movers, t);
   }
 
   let morph = 0, morphing = false, clock = 0;

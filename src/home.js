@@ -3,7 +3,7 @@
 // map and opens as a little moving world, where any company's card shows its model turning into
 // its QR code.
 import { THREE, createStage, setCamera, flyCamera, stopFlight, tween, lerp, toScreen, webglAvailable, rng, SLAB as SLAB_COLORS } from './qrworld.js';
-import { ARCHETYPES, centerpiece, modelMaterial, setBrands, propGeo, topperGeo, behave } from './models.js';
+import { ARCHETYPES, centerpiece, modelMaterial, setBrands, propGeo, topperGeo, motion, mountMovers, poseMovers, restMatrices } from './models.js';
 import { createQRWorld } from './qrsculpture.js';
 
 const HOME = window.HOME;
@@ -181,37 +181,22 @@ function start() {
     }
     const top = d.L[5] ? topperGeo(d.L[5]) : null;
     if (top) inner.add(branded(top, new THREE.Matrix4().makeTranslation(...cp.topAt)));
-    const movers = cp.moving.map((mv) => {
-      const pg = new THREE.Group();
-      pg.position.set(...mv.pivot);
-      pg.add(branded(mv.geo));
-      inner.add(pg);
-      bb.union(new THREE.Box3().setFromBufferAttribute(mv.geo.attributes.position).translate(new THREE.Vector3(...mv.pivot)));
-      return { pg, mv, axis: new THREE.Vector3(...mv.axis).normalize(), y: mv.pivot[1] };
-    });
+    const movers = mountMovers(cp, inner, (geo) => branded(geo));
+    const rest = restMatrices(cp);
+    cp.moving.forEach((mv, i) => mv.geo && bb.union(new THREE.Box3().setFromBufferAttribute(mv.geo.attributes.position).applyMatrix4(rest[i])));
     const size = bb.getSize(new THREE.Vector3());
     const s = Math.min(maxH / Math.max(3, bb.max.y), maxW / Math.max(size.x, size.z));
     inner.scale.setScalar(s);
-    g.userData = { d, arch, inner, movers, s, h: bb.max.y * s, hover: cp.hover || 0, phase: (d.s.length * 1.7) % 6.28, labelY: bb.max.y * s + 0.6 };
+    g.userData = { d, arch, cp, inner, movers, s, h: bb.max.y * s, hover: cp.hover || 0, phase: (d.s.length * 1.7) % 6.28, labelY: bb.max.y * s + 0.6 };
     return g;
   }
-  const q2 = new THREE.Quaternion();
   function animateModel(g, t) {
-    const { inner, movers, s, h, arch, hover, phase } = g.userData;
-    const b = behave(arch, t, phase);
+    const { inner, movers, s, h, arch, cp, hover, phase } = g.userData;
+    const b = motion(arch, cp, t, phase);
     inner.position.set(b.x * h, (hover ? Math.sin(t * 1.2 + phase) * hover * s * 0.35 : 0) + b.y * h, b.z * h);
     inner.rotation.set(b.rx, b.ry, b.rz);
     inner.scale.set(s * b.sx, s * b.sy, s * b.sz);
-    for (const { pg, mv, axis, y } of movers) {
-      if (mv.mode === 'spin') pg.quaternion.setFromAxisAngle(axis, t * mv.speed + phase);
-      else if (mv.mode === 'flap') pg.quaternion.setFromAxisAngle(axis, Math.sin(t * mv.speed + phase) * mv.amp);
-      else {
-        const f = (t * mv.speed + (mv.phase || 0) + phase * 0.13) % 1;
-        pg.position.y = y - f * mv.drop;
-        pg.scale.setScalar(Math.max(0.001, Math.min(1, f * 8, (1 - f) * 8)));
-        pg.quaternion.copy(q2.setFromAxisAngle(axis, f * 6));
-      }
-    }
+    poseMovers(movers, t + phase);
   }
 
   // ---------- region pieces ----------
