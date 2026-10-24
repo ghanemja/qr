@@ -490,7 +490,7 @@ function start() {
       const slug = hit ? hit.object.userData.slug : null;
       const rid = hit ? hit.object.userData.region || regionOf.get(slug)?.id : null;
       setHover(rid || null);
-      showTip(slug ? bySlug.get(slug).n : rid ? `${regionById.get(rid).name} · click to explore` : null, ev);
+      showTip(slug ? bySlug.get(slug).n : null, ev);
       renderer.domElement.style.cursor = rid ? 'pointer' : '';
     } else if (current) {
       const hit = pick(ev, current.pick);
