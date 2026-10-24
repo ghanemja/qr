@@ -232,12 +232,6 @@ body.hm-touring .qw-play .i-stop { display: block; }
 .hm-labels { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
 .hm-tag { position: absolute; left: 0; top: 0; padding: 1px 7px; border-radius: 999px; background: rgba(253, 248, 240, 0.8); border: 1px solid rgba(42, 37, 32, 0.12); font-size: 11px; font-weight: 650; white-space: nowrap; backdrop-filter: blur(4px); }
 .hm-tag.sel { background: #2a2520; color: var(--cream-2); }
-body.hm-no-labels .hm-labels { display: none; }
-.hm-toggle {
-  position: absolute; top: 20px; right: 100px; z-index: 6; display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px;
-  background: rgba(253, 248, 240, 0.85); border: 1px solid var(--line); font-size: 13px; font-weight: 600; cursor: pointer; backdrop-filter: blur(6px);
-}
-.hm-toggle input { width: 15px; height: 15px; margin: 0; accent-color: var(--brown); }
 .hm-tip { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none; padding: 4px 10px; border-radius: 8px; background: #2a2520; color: var(--cream-2); font-size: 13px; font-weight: 650; }
 .hm-fallback { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; }
 

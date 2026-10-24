@@ -312,15 +312,6 @@ function start() {
 
   // ---------- labels ----------
   const labelsEl = $('labels'), tip = $('tip');
-  // Labels can be switched off; the choice is remembered on this device.
-  const labelsBox = $('show-labels');
-  try { labelsBox.checked = localStorage.getItem('qc-labels') !== 'off'; } catch {}
-  const applyLabels = () => {
-    document.body.classList.toggle('hm-no-labels', !labelsBox.checked);
-    try { localStorage.setItem('qc-labels', labelsBox.checked ? 'on' : 'off'); } catch {}
-  };
-  labelsBox.addEventListener('change', applyLabels);
-  applyLabels();
   // Region names are painted onto each piece near its bottom edge, reading across the screen.
   const labelMeshes = [];
   const insidePoly = (polys, x, y) => polys.some((poly) => {
@@ -405,9 +396,6 @@ function start() {
     p.group.add(mesh);
     labelMeshes.push(mesh);
   }
-  const syncLabels = () => { for (const m of labelMeshes) m.visible = labelsBox.checked; };
-  labelsBox.addEventListener('change', syncLabels);
-  syncLabels();
   const tags = [];
   const v3 = new THREE.Vector3();
   stage.frame.add(() => {
