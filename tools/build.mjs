@@ -181,7 +181,7 @@ const board = { ...qrBits(SITE_URL, 25), modes: {} };
   const land = topo.feature(worldTopo, worldTopo.objects.land);
   const n = BOARD_N;
   const modes = {
-    us: { projection: d3.geoConicEqualArea().parallels([29.5, 45.5]).rotate([96, 0]).fitExtent([[5, 5], [n - 5, n - 5]], conus), geo: conus, min: 0.9, keep: (c) => c.country === 'US' },
+    us: { projection: d3.geoConicEqualArea().parallels([29.5, 45.5]).rotate([96, 0]).fitExtent([[5, 5], [n - 5, n - 5]], conus), geo: conus, min: 1.15, keep: (c) => c.country === 'US' },
     world: { projection: d3.geoNaturalEarth1().fitExtent([[3, 3], [n - 3, n - 3]], { type: 'Sphere' }), geo: land, min: 0.42, keep: () => true },
   };
   for (const [id, m] of Object.entries(modes)) {
@@ -202,9 +202,16 @@ const board = { ...qrBits(SITE_URL, 25), modes: {} };
   }
 }
 // 3D model for a company on the board.
-const modelOf = (c) => c.kind === 'f500'
-  ? (c.tech ? 'glass' : 'tower')
-  : /Aerospace|Defense/.test(c.sector) ? 'rocket' : /AI/.test(c.sector) ? 'orb' : 'tree';
+// Which signature 3D model a company gets (see data/industries.json and src/models.js).
+const industries = readJSON('data/industries.json');
+const MODEL_LABELS = industries._labels;
+const MODEL_OF = new Map();
+for (const [model, names] of Object.entries(industries)) if (!model.startsWith('_')) for (const nm of names) MODEL_OF.set(nm, model);
+const modelOf = (c) => MODEL_OF.get(c.listedName || c.name) || 'tree';
+{
+  const unmapped = companies.filter((c) => !MODEL_OF.has(c.listedName || c.name)).map((c) => c.name);
+  if (unmapped.length) console.warn(`no model for: ${unmapped.join(', ')}`);
+}
 
 // ---------- helpers for pages ----------
 const fmtMoney = (m) => (m == null ? '—' : (m < 0 ? '−' : '') + (Math.abs(m) >= 1000 ? `$${(Math.abs(m) / 1000).toFixed(1)}B` : `$${Math.round(Math.abs(m))}M`));
@@ -305,6 +312,7 @@ const ICONS = {
   summer: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
   autumn: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 14a5 5 0 0 1 .7-9.9A6 6 0 0 1 17 5a4.5 4.5 0 0 1 2 8.6"/><path d="M8 15v2M12 15v4M16 15v2"/></svg>',
   city: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V9l5-3v15M10 21V4h7v17M17 21v-9h3v9"/></svg>',
+  signature: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>',
   share: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>',
 };
 
@@ -330,10 +338,10 @@ function companyPage(c, prev, next) {
       ];
   if (c.listedHq) facts.push(['HQ on the list', esc(c.listedHq)]);
   if (c.listedName !== c.name && c.listedName) facts.push(['Listed as', esc(c.listedName)]);
-  const theme = c.kind === 'f500' ? 'city' : 'summer';
+  const model = modelOf(c);
   const sub = c.kind === 'f500' ? `Fortune 500 No. ${c.rank} · ${place(c)}` : `${c.sector} startup · ${place(c)}`;
-  const data = { slug: c.slug, name: c.name, theme, qr: qrBits(pageUrl) };
-  const tabs = [['spring', 'Spring'], ['summer', 'Summer'], ['autumn', 'Autumn'], ['city', 'City']];
+  const data = { slug: c.slug, name: c.name, model, qr: qrBits(pageUrl) };
+  const tabs = [['signature', model === 'tree' ? 'Tree' : MODEL_LABELS[model]], ['spring', 'Spring'], ['summer', 'Summer'], ['autumn', 'Autumn'], ['city', 'City']];
   return `${qwHead({ title: `${c.name} · QR Atlas`, description: describe(c), path, depth: 1 })}
 <body class="qw qw-company">
 <section class="qw-stage" id="stage">
@@ -343,14 +351,14 @@ function companyPage(c, prev, next) {
     <p>${esc(sub)}</p>
   </header>
   <canvas class="qw-fallback" id="fallback-qr" width="320" height="320" aria-label="QR code for this page"></canvas>
-  <div class="qw-hint" id="hint">${theme === 'city' ? 'Tap the city to see the QR code' : 'Tap the tree to see the QR code'}</div>
+  <div class="qw-hint" id="hint">Tap the model to see the QR code</div>
   <div class="qw-dock">
     <div class="qw-url">
       <input id="page-url" readonly value="${pageUrl}" aria-label="Link to this page">
       <button class="qw-share" id="share" aria-label="Share link">${ICONS.share}<span id="share-label" class="sr">Share</span></button>
     </div>
     <div class="qw-tabs" role="group" aria-label="World style">
-      ${tabs.map(([id, label]) => `<button data-theme="${id}" aria-pressed="${id === theme}">${ICONS[id]}${label}</button>`).join('')}
+      ${tabs.map(([id, label]) => `<button data-theme="${id}" aria-pressed="${id === 'signature'}"${id === 'signature' ? ' class="sig"' : ''}>${ICONS[id]}<span>${esc(label)}</span></button>`).join('')}
     </div>
   </div>
   <a class="qw-scroll" href="#info" aria-label="Company details">Details ↓</a>
@@ -392,7 +400,7 @@ function companyPage(c, prev, next) {
 <script>window.COMPANY=${JSON.stringify(data)};</script>
 <script src="../assets/qrcode.js"></script>
 <script src="../assets/qr-card.js"></script>
-<script type="module" src="../assets/tree.js"></script>
+<script type="module" src="../assets/company3d.js"></script>
 </body>
 </html>
 `;
@@ -646,7 +654,8 @@ ${topbar(0)}
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(join(OUT, 'c'), { recursive: true });
 mkdirSync(join(OUT, 'assets'), { recursive: true });
-for (const f of ['site.css', 'qrworld.css', 'atlas.js', 'qr-card.js', 'directory.js', 'icon.svg', 'qrworld.js', 'tree.js', 'world.js']) copyFileSync(join(ROOT, 'src', f), join(OUT, 'assets', f));
+for (const f of ['site.css', 'qrworld.css', 'atlas.js', 'qr-card.js', 'directory.js', 'icon.svg', 'qrworld.js', 'models.js', 'company3d.js', 'world.js']) copyFileSync(join(ROOT, 'src', f), join(OUT, 'assets', f));
+copyFileSync(join(ROOT, 'node_modules/three/examples/jsm/utils/BufferGeometryUtils.js'), join(OUT, 'assets/BufferGeometryUtils.js'));
 copyFileSync(join(ROOT, 'node_modules/qrcode-generator/qrcode.js'), join(OUT, 'assets/qrcode.js'));
 copyFileSync(join(ROOT, 'node_modules/three/build/three.module.min.js'), join(OUT, 'assets/three.module.min.js'));
 copyFileSync(join(ROOT, 'node_modules/three/examples/jsm/controls/OrbitControls.js'), join(OUT, 'assets/OrbitControls.js'));

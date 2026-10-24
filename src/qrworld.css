@@ -48,7 +48,7 @@ small { color: var(--muted); font-size: 0.8em; }
 .qw-nav a:hover { background: var(--sand); text-decoration: none; }
 
 .qw-title { position: absolute; top: 96px; left: 0; right: 0; z-index: 3; text-align: center; pointer-events: none; padding: 0 16px; }
-.qw-title h1 { margin: 0; font-size: clamp(26px, 4.6vw, 46px); letter-spacing: -0.03em; line-height: 1.05; }
+.qw-title h1 { margin: 0; font-size: clamp(26px, 4.6vw, 46px); letter-spacing: -0.03em; line-height: 1.05; text-shadow: 0 0 12px var(--cream), 0 0 4px var(--cream); }
 .qw-title p { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
 body.scanning .qw-title { opacity: 0; transition: opacity 0.4s; }
 .qw-title { transition: opacity 0.4s; }
@@ -57,7 +57,7 @@ body.scanning .qw-title { opacity: 0; transition: opacity 0.4s; }
   position: absolute; left: 50%; bottom: 150px; transform: translateX(-50%); z-index: 4; white-space: nowrap;
   padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(253, 248, 240, 0.9); color: var(--muted); font-size: 13px;
 }
-.qw-dock { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 5; width: min(620px, calc(100% - 24px)); display: grid; gap: 8px; }
+.qw-dock { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 5; width: min(720px, calc(100% - 24px)); display: grid; gap: 8px; }
 .qw-url { display: flex; gap: 8px; }
 .qw-url input, .qw-search input {
   flex: 1; min-width: 0; height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--cream-2);
@@ -71,6 +71,8 @@ body.scanning .qw-title { opacity: 0; transition: opacity 0.4s; }
 .qw-share svg, .qw-tabs svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .qw-tabs svg circle { fill: none; }
 .qw-tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; }
+.qw-tabs .sig { grid-column: span 2; }
+.qw-tabs button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .qw-tabs button {
   height: 44px; border-radius: 12px; border: 0; background: var(--cream-2); color: var(--ink); display: inline-flex; align-items: center; justify-content: center; gap: 8px;
   font-size: 14px; cursor: pointer;
@@ -127,7 +129,8 @@ i.dot.startup { background: var(--startup); }
   .qw-nav a { padding: 5px 10px; font-size: 12px; }
   .qw-nav a:nth-child(3) { display: none; }
   .qw-title { top: 84px; }
-  .qw-tabs button { font-size: 12px; gap: 4px; flex-direction: column; height: 52px; }
+  .qw-tabs button { font-size: 11px; gap: 3px; flex-direction: column; height: 52px; padding: 0 4px; min-width: 0; }
+  .qw-tabs .sig { grid-column: span 1; }
   .qw-hint { bottom: 156px; }
   .qw-scroll { display: none; }
   .cite label { grid-template-columns: 1fr; gap: 4px; }

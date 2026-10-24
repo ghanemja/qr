@@ -1,6 +1,7 @@
 // The QR world: one giant QR code (it scans to this site) with the map laid on its tiles and
 // every company standing on it as a 3D model. Tour, search, USA/World, and scan view.
-import { THREE, SEASONS, createStage, buildSlab, buildInk, windowTexture, decodeBits, setCamera, cameraState, flyCamera, stopFlight, tween, lerp, toScreen, webglAvailable } from './qrworld.js';
+import { THREE, SEASONS, createStage, buildSlab, buildInk, decodeBits, setCamera, cameraState, flyCamera, stopFlight, tween, lerp, toScreen, webglAvailable } from './qrworld.js';
+import { ARCHETYPES, centerpiece, piece, modelMaterial } from './models.js';
 
 const { board, regions, listYear } = window.WORLD;
 const DATA = window.COMPANIES;
@@ -85,46 +86,74 @@ function start() {
   layoutBlocks();
 
   // ---------- company models ----------
+  // Every company stands on the board as its own signature model (src/models.js), sized by
+  // revenue, with two of its pieces circling overhead.
   const MAXV = Math.max(...DATA.map((d) => d.v || 0));
-  const facade = windowTexture();
-  const mat = (o) => new THREE.MeshStandardMaterial({ roughness: 0.75, ...o });
-  const parts = {
-    towerBody: { geo: new THREE.BoxGeometry(0.7, 1, 0.7).translate(0, 0.5, 0), mat: mat({ color: '#f3ebdf', map: facade }) },
-    towerRoof: { geo: new THREE.BoxGeometry(0.78, 0.14, 0.78).translate(0, 0.07, 0), mat: mat({ color: '#c47a3a' }) },
-    glassBody: { geo: new THREE.BoxGeometry(0.66, 1, 0.66).translate(0, 0.5, 0), mat: mat({ color: '#cfe0ff', map: facade, metalness: 0.15, roughness: 0.35 }) },
-    glassRoof: { geo: new THREE.BoxGeometry(0.72, 0.14, 0.72).translate(0, 0.07, 0), mat: mat({ color: '#2f6bff', emissive: '#1d3fa8', emissiveIntensity: 0.25 }) },
-    trunk: { geo: new THREE.CylinderGeometry(0.07, 0.12, 0.8, 6).translate(0, 0.4, 0), mat: mat({ color: '#7a5233', flatShading: true }) },
-    crown: { geo: new THREE.IcosahedronGeometry(0.5, 0), mat: mat({ color: '#ffffff', flatShading: true }) },
-    rocketBody: { geo: new THREE.CylinderGeometry(0.2, 0.22, 1.5, 10).translate(0, 0.75, 0), mat: mat({ color: '#f7f4ee', roughness: 0.4 }) },
-    rocketNose: { geo: new THREE.ConeGeometry(0.2, 0.5, 10).translate(0, 0.25, 0), mat: mat({ color: '#e8613c' }) },
-    pillar: { geo: new THREE.CylinderGeometry(0.06, 0.09, 1, 6).translate(0, 0.5, 0), mat: mat({ color: '#b9b0a2' }) },
-    orb: { geo: new THREE.IcosahedronGeometry(0.36, 1), mat: mat({ color: '#8f7bff', emissive: '#5b3fff', emissiveIntensity: 0.55, roughness: 0.3, flatShading: true }) },
+  const archOf = (d) => (ARCHETYPES[d.m] ? d.m : 'tree');
+  const materials = new Map();
+  const matFor = (a) => {
+    if (!materials.has(a)) materials.set(a, modelMaterial({ glow: ARCHETYPES[a].glow }));
+    return materials.get(a);
   };
-  const counts = {};
-  const plan = DATA.map((d) => {
-    const list = { tower: ['towerBody', 'towerRoof'], glass: ['glassBody', 'glassRoof'], tree: ['trunk', 'crown', 'crown'], rocket: ['rocketBody', 'rocketNose'], orb: ['pillar', 'orb'] }[d.m];
-    return list.map((part) => ({ part, i: (counts[part] = (counts[part] || 0) + 1) - 1 }));
+  // Model bounds (centerpiece plus its moving part), used to size each company.
+  const bounds = new Map();
+  const boundsOf = (a) => {
+    if (!bounds.has(a)) {
+      const cp = centerpiece(a);
+      const b = new THREE.Box3().setFromBufferAttribute(cp.geo.attributes.position);
+      if (cp.spin) b.union(new THREE.Box3().setFromBufferAttribute(cp.spin.geo.attributes.position));
+      const size = b.getSize(new THREE.Vector3());
+      bounds.set(a, { h: Math.max(3, b.max.y), w: Math.max(size.x, size.z) });
+    }
+    return bounds.get(a);
+  };
+  const height = (d) => (d.k === 0 ? 1.3 + 6 * Math.sqrt((d.v || 0) / MAXV) : 1.9) * (d.m === 'tree' ? 0.9 : 1);
+  const modelScale = (d) => {
+    const b = boundsOf(archOf(d));
+    const maxW = d.k === 0 ? 1.1 + 1.8 * Math.sqrt((d.v || 0) / MAXV) : 1.25;
+    return Math.min(height(d) / b.h, maxW / b.w);
+  };
+  const meshes = {}; // name -> InstancedMesh (pickable)
+  const owner = new Map(); // `${name}:${i}` -> company index
+  const slots = DATA.map(() => ({}));
+  const byArch = new Map();
+  DATA.forEach((d, di) => {
+    const a = archOf(d);
+    if (!byArch.has(a)) byArch.set(a, []);
+    byArch.get(a).push(di);
   });
-  const meshes = {};
-  for (const [name, { geo, mat: material }] of Object.entries(parts)) {
-    const im = new THREE.InstancedMesh(geo, material, counts[name] || 1);
-    im.castShadow = true;
-    im.receiveShadow = true;
-    im.count = counts[name] || 0;
-    meshes[name] = im;
+  const halos = new Map(); // piece kind -> { im, list: [{ di, k }] }
+  for (const [a, list] of byArch) {
+    const cp = centerpiece(a);
+    const im = new THREE.InstancedMesh(cp.geo, matFor(a), list.length);
+    im.castShadow = im.receiveShadow = true;
+    meshes[`c:${a}`] = im;
     scene.add(im);
+    list.forEach((di, i) => { slots[di].c = i; owner.set(`c:${a}:${i}`, di); });
+    if (cp.spin) {
+      const sim = new THREE.InstancedMesh(cp.spin.geo.clone().translate(...cp.spin.pivot.map((v) => -v)), matFor(a), list.length);
+      sim.castShadow = true;
+      sim.userData.spin = cp.spin;
+      meshes[`s:${a}`] = sim;
+      scene.add(sim);
+      list.forEach((di, i) => { slots[di].s = i; owner.set(`s:${a}:${i}`, di); });
+    }
+    // Two pieces per company, in the model's first piece kind.
+    const kind = ARCHETYPES[a].pieces[0][0];
+    if (!halos.has(kind)) halos.set(kind, { list: [], tints: {} });
+    const h = halos.get(kind);
+    const ts = kind === 'leaf' ? SEASONS.summer.leaves : (ARCHETYPES[a].tints || {})[kind];
+    for (const di of list) for (let k = 0; k < 2; k++) h.list.push({ di, k, tint: ts ? ts[(di + k) % ts.length] : null });
   }
-  const owner = new Map(); // `${part}:${i}` -> company index
-  plan.forEach((ps, di) => ps.forEach(({ part, i }) => owner.set(`${part}:${i}`, di)));
-  const GREENS = SEASONS.summer.leaves;
-  DATA.forEach((d, di) => plan[di].forEach(({ part, i }, k) => {
-    if (part === 'crown') meshes.crown.setColorAt(i, col.set(GREENS[(di + k) % GREENS.length]));
-  }));
-  if (meshes.crown.instanceColor) meshes.crown.instanceColor.needsUpdate = true;
+  for (const [kind, h] of halos) {
+    h.im = new THREE.InstancedMesh(piece(kind), modelMaterial(), h.list.length);
+    h.im.castShadow = true;
+    h.list.forEach((e, i) => e.tint && h.im.setColorAt(i, col.set(e.tint)));
+    scene.add(h.im);
+  }
 
   // Per-company animated state: board position and visibility for the current mode/filter.
-  const state = DATA.map((d) => ({ x: 0, z: 0, vis: 0, height: 1 }));
-  const height = (d) => (d.k === 0 ? 0.9 + 11 * Math.sqrt((d.v || 0) / MAXV) : d.m === 'rocket' ? 2 : d.m === 'orb' ? 1.4 : 1.5);
+  const state = DATA.map(() => ({ x: 0, z: 0, vis: 0 }));
   const modeScale = () => (mode === 'world' ? 0.42 : 1);
   let filter = 'all';
   const matches = (d) => filter === 'all' || (filter === 'tech' ? d.t : filter === 'startup' ? d.k === 1 : d.k === 0);
@@ -139,39 +168,48 @@ function start() {
     if (t) Object.assign(state[di], t, { vis: 0 });
   });
 
-  function placeAll(hop = 0) {
+  let hopAmp = 0, clock = 0;
+  const pivot = new THREE.Vector3(), axis = new THREE.Vector3();
+  function placeAll() {
     const k = modeScale() * (1 - flatten);
+    const spinOn = !reduceMotion;
     DATA.forEach((d, di) => {
       const st = state[di];
       const v = Math.max(0, Math.min(1, st.vis)) * k;
-      const y0 = 0.14 + hop * Math.sin(Math.PI * Math.min(1, st.hopT || 0));
-      const h = height(d) * v;
-      const sc = Math.max(0.0001, v);
-      for (const { part, i } of plan[di]) {
-        const im = meshes[part];
-        p.set(st.x, y0, st.z);
-        q.identity();
-        s.set(sc, sc, sc);
-        switch (part) {
-          case 'towerBody': case 'glassBody': s.set(sc, Math.max(0.0001, h), sc); break;
-          case 'towerRoof': case 'glassRoof': p.y = y0 + h; break;
-          case 'crown': {
-            const second = plan[di][2] && plan[di][2].i === i;
-            p.y = y0 + (second ? 1.25 : 0.95) * sc;
-            p.x += second ? 0.12 * sc : 0;
-            s.multiplyScalar(second ? 0.75 : 1);
-            q.setFromEuler(eul.set(0, di, 0));
-            break;
-          }
-          case 'rocketNose': p.y = y0 + 1.5 * sc; break;
-          case 'orb': p.y = y0 + 1.25 * sc; break;
-        }
-        im.setMatrixAt(i, m4.compose(p, q, s));
+      const y0 = 0.14 + hopAmp * Math.sin(Math.PI * Math.min(1, st.hopT || 0));
+      const sc = Math.max(0.0001, v * modelScale(d));
+      const a = archOf(d);
+      const yaw = (di * 2.399) % (Math.PI * 2);
+      q.setFromEuler(eul.set(0, yaw, 0));
+      meshes[`c:${a}`].setMatrixAt(slots[di].c, m4.compose(p.set(st.x, y0, st.z), q, s.set(sc, sc, sc)));
+      const sim = meshes[`s:${a}`];
+      if (sim) {
+        const sp = sim.userData.spin;
+        pivot.set(...sp.pivot).multiplyScalar(sc).applyQuaternion(q);
+        const spinQ = new THREE.Quaternion().setFromAxisAngle(axis.set(...sp.axis), spinOn ? clock * sp.speed + di : di);
+        sim.setMatrixAt(slots[di].s, m4.compose(p.set(st.x + pivot.x, y0 + pivot.y, st.z + pivot.z), q.clone().multiply(spinQ), s.set(sc, sc, sc)));
       }
     });
+    for (const [, h] of halos) {
+      h.list.forEach((e, i) => {
+        const d = DATA[e.di], st = state[e.di];
+        const v = Math.max(0, Math.min(1, st.vis)) * k;
+        const H = height(d) * modeScale();
+        const ang = (spinOn ? clock * 0.6 : 0) + e.k * Math.PI + e.di;
+        const rad = Math.max(0.5, boundsOf(archOf(d)).w * modelScale(d) * modeScale() * 0.45);
+        const y = 0.14 + H * (0.75 + 0.12 * e.k) + (spinOn ? Math.sin(clock * 1.4 + e.di + e.k) * 0.15 : 0);
+        const ps = Math.max(0.0001, v * (0.25 + 0.05 * height(d)));
+        h.im.setMatrixAt(i, m4.compose(p.set(st.x + Math.cos(ang) * rad, y, st.z + Math.sin(ang) * rad), q.setFromEuler(eul.set(0.4, ang, 0.2)), s.set(ps, ps, ps)));
+      });
+      h.im.instanceMatrix.needsUpdate = true;
+    }
     for (const im of Object.values(meshes)) im.instanceMatrix.needsUpdate = true;
   }
   placeAll();
+  stage.frame.add((dt) => {
+    clock += dt;
+    placeAll();
+  });
 
   // Grow everything into place for the current mode and filter.
   async function settle(duration = 1200, hop = 0) {
@@ -190,7 +228,8 @@ function start() {
         st.vis = lerp(from[di].vis, to[di].vis, et);
         st.hopT = hop ? t : 0;
       });
-      placeAll(hop);
+      hopAmp = hop;
+      placeAll();
       placeLabels();
     });
   }
@@ -270,7 +309,7 @@ function start() {
   // ---------- picking ----------
   const ray = new THREE.Raycaster();
   const ndc = new THREE.Vector2();
-  const pickables = Object.entries(meshes).map(([name, im]) => Object.assign(im, { userData: { part: name } }));
+  const pickables = Object.entries(meshes).map(([name, im]) => { im.userData.part = name; return im; });
   function pick(ev) {
     const rect = stage.renderer.domElement.getBoundingClientRect();
     ndc.set(((ev.clientX - rect.left) / rect.width) * 2 - 1, -((ev.clientY - rect.top) / rect.height) * 2 + 1);
