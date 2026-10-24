@@ -62,10 +62,148 @@ function start() {
   // scan view, when its squares pop up over the flattened map in a diagonal sweep.
   const LAND_H = 0.42;
   const STAND = LAND_H; // models stand on the island surface
-  const TILE = { lotA: '#bcd59c', lotB: '#b3cf92', street: '#ece4d3', streetB: '#e4dac6', sand: '#eadcb6', seaA: '#bfd9e6', seaB: '#b6d3e2', rim: '#ebe5da', rimB: '#f3efe7', plain: '#f7f4ee', ink: '#1f2a24' };
+  const TILE = { lotA: '#bcd59c', lotB: '#b3cf92', street: '#ece4d3', streetB: '#e4dac6', sand: '#eadcb6', rim: '#ebe5da', rimB: '#f3efe7', plain: '#f7f4ee', ink: '#1f2a24' };
   const isLand = (r, c) => r >= 0 && c >= 0 && r < N && c < N && land(r, c);
   const coast = (r, c) => isLand(r, c) && (!isLand(r - 1, c) || !isLand(r + 1, c) || !isLand(r, c - 1) || !isLand(r, c + 1));
   const cA = new THREE.Color(), cB = new THREE.Color();
+
+  // ---------- water ----------
+  // The sea is a sandy seabed that shelves away from each coast, under one clear, moving water
+  // surface: depth tint, sun glints off the ripples, caustics in the shallows and foam lapping
+  // the shore. Distance to the nearest land drives all of it.
+  const SEA_FLOOR = 0.3, WATER_Y = 0.3;
+  let seaDist = new Float32Array(N * N);
+  const distTex = new THREE.DataTexture(new Uint8Array(N * N), N, N, THREE.RedFormat, THREE.UnsignedByteType);
+  distTex.magFilter = distTex.minFilter = THREE.LinearFilter;
+  function measureSea() {
+    // Chamfer distance (in cells) from every sea cell to the nearest land.
+    const d = seaDist;
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) d[r * N + c] = isLand(r, c) ? 0 : 1e9;
+    const D = Math.SQRT2;
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      let v = d[r * N + c];
+      if (c > 0) v = Math.min(v, d[r * N + c - 1] + 1);
+      if (r > 0) {
+        v = Math.min(v, d[(r - 1) * N + c] + 1);
+        if (c > 0) v = Math.min(v, d[(r - 1) * N + c - 1] + D);
+        if (c < N - 1) v = Math.min(v, d[(r - 1) * N + c + 1] + D);
+      }
+      d[r * N + c] = v;
+    }
+    for (let r = N - 1; r >= 0; r--) for (let c = N - 1; c >= 0; c--) {
+      let v = d[r * N + c];
+      if (c < N - 1) v = Math.min(v, d[r * N + c + 1] + 1);
+      if (r < N - 1) {
+        v = Math.min(v, d[(r + 1) * N + c] + 1);
+        if (c < N - 1) v = Math.min(v, d[(r + 1) * N + c + 1] + D);
+        if (c > 0) v = Math.min(v, d[(r + 1) * N + c - 1] + D);
+      }
+      d[r * N + c] = v;
+    }
+    for (let i = 0; i < N * N; i++) distTex.image.data[i] = Math.min(255, Math.round(Math.min(d[i], 1e3) * 16));
+    distTex.needsUpdate = true;
+  }
+  const SEABED = [[0, '#efe3bd'], [1.2, '#e3dcb8'], [3, '#bfdccf'], [7, '#8cc2c9'], [14, '#6aa7bf']];
+  const seabed = (dist, out) => {
+    for (let i = 1; i < SEABED.length; i++) if (dist <= SEABED[i][0] || i === SEABED.length - 1) {
+      const [d0, c0] = SEABED[i - 1], [d1, c1] = SEABED[i];
+      return out.set(c0).lerp(cB.set(c1), Math.min(1, Math.max(0, (dist - d0) / (d1 - d0))));
+    }
+  };
+  const waterMat = new THREE.ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    uniforms: {
+      uTime: { value: 0 },
+      uDist: { value: distTex },
+      uN: { value: N },
+      uFade: { value: 1 },
+      uSun: { value: new THREE.Vector3() },
+      uView: { value: new THREE.Vector3() },
+    },
+    vertexShader: `
+      varying vec3 vPos;
+      void main() {
+        vec4 w = modelMatrix * vec4(position, 1.0);
+        vPos = w.xyz;
+        gl_Position = projectionMatrix * viewMatrix * w;
+      }`,
+    fragmentShader: `
+      uniform float uTime, uN, uFade;
+      uniform sampler2D uDist;
+      uniform vec3 uSun, uView;
+      varying vec3 vPos;
+      float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      float noise(vec2 p) {
+        vec2 i = floor(p), f = fract(p);
+        f = f * f * (3.0 - 2.0 * f);
+        return mix(mix(hash(i), hash(i + vec2(1, 0)), f.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), f.x), f.y);
+      }
+      // Rolling swell plus a fine chop; returns height.
+      float waves(vec2 p, float t) {
+        float h = 0.0;
+        h += 0.50 * sin(dot(p, vec2(0.38, 0.21)) + t * 1.1);
+        h += 0.35 * sin(dot(p, vec2(-0.27, 0.43)) + t * 1.4);
+        h += 0.22 * sin(dot(p, vec2(0.71, -0.52)) + t * 2.1);
+        h += 0.30 * noise(p * 0.9 + vec2(t * 0.35, t * 0.2));
+        h += 0.18 * noise(p * 2.1 - vec2(t * 0.5, -t * 0.3));
+        return h;
+      }
+      // Bright web of caustic lines, the light pattern on a shallow seabed.
+      float caustic(vec2 p, float t) {
+        float c = 0.0;
+        for (int i = 0; i < 2; i++) {
+          vec2 q = p * (1.3 + float(i) * 0.9) + vec2(t * 0.25, -t * 0.18) * (1.0 + float(i));
+          float n = noise(q) + 0.5 * noise(q * 2.3 + 4.0);
+          c += pow(1.0 - abs(n - 0.75) * 2.2, 6.0);
+        }
+        return clamp(c, 0.0, 1.0);
+      }
+      void main() {
+        vec2 uv = (vPos.xz + uN * 0.5) / uN;
+        float d = texture2D(uDist, uv).r * 255.0 / 16.0; // cells to the nearest land
+        if (d < 0.45) discard;
+        float t = uTime;
+        vec2 p = vPos.xz;
+        float e = 0.15;
+        float h = waves(p, t);
+        vec3 n = normalize(vec3(-(waves(p + vec2(e, 0.0), t) - h) / e * 0.35, 1.0, -(waves(p + vec2(0.0, e), t) - h) / e * 0.35));
+        float depth = smoothstep(0.5, 9.0, d);
+        vec3 shallow = vec3(0.47, 0.86, 0.84), deep = vec3(0.10, 0.42, 0.62);
+        vec3 col = mix(shallow, deep, depth);
+        float alpha = mix(0.22, 0.82, pow(depth, 0.7));
+        // Caustics light the seabed through clear shallow water.
+        float cs = caustic(p, t) * (1.0 - depth) * 0.55;
+        col += vec3(cs);
+        alpha = max(alpha, cs * 0.6);
+        // Sky reflection and sun glints off the ripples.
+        vec3 V = normalize(uView), L = normalize(uSun);
+        float fres = pow(1.0 - max(dot(n, V), 0.0), 3.0);
+        col = mix(col, vec3(0.93, 0.97, 1.0), fres * 0.5);
+        float spec = pow(max(dot(reflect(-L, n), V), 0.0), 120.0);
+        float glint = spec * 2.2;
+        col += vec3(1.0, 0.97, 0.88) * glint;
+        alpha = max(alpha, min(1.0, glint));
+        // Foam: a band hugging the shore, plus lapping lines running in toward it.
+        float edge = 1.0 - smoothstep(0.5, 1.15, d + (noise(p * 3.0 + t * 0.6) - 0.5) * 0.35);
+        float lap = smoothstep(0.82, 1.0, sin(d * 5.0 - t * 2.2 + noise(p * 1.5) * 2.0)) * (1.0 - smoothstep(0.8, 2.6, d));
+        float foam = clamp(edge + lap * 0.75, 0.0, 1.0);
+        col = mix(col, vec3(1.0), foam * 0.9);
+        alpha = mix(alpha, 0.95, foam);
+        gl_FragColor = vec4(col, alpha * uFade);
+        #include <colorspace_fragment>
+      }`,
+  });
+  const water = new THREE.Mesh(new THREE.PlaneGeometry(N, N).rotateX(-Math.PI / 2), waterMat);
+  water.position.y = WATER_Y;
+  water.renderOrder = 2;
+  scene.add(water);
+  const waterView = new THREE.Vector3();
+  stage.frame.add((dt) => {
+    if (!reduceMotion) waterMat.uniforms.uTime.value += dt;
+    waterMat.uniforms.uSun.value.copy(stage.sun.position).sub(stage.sun.target.position);
+    waterMat.uniforms.uView.value.copy(camera.getWorldDirection(waterView)).negate();
+  });
   let flatten = 0; // 0 = map, 1 = flat QR for scan view
   const sweep = (u) => Math.min(1, Math.max(0, (flatten - u * 0.5) / 0.4));
   function layoutBoard(rowsDone = S) {
@@ -77,9 +215,9 @@ function start() {
         const onLand = inside && isLand(mr, mc);
         if (!inside) cA.set((r + c) % 2 ? TILE.rimB : TILE.rim);
         else if (onLand) cA.set(coast(mr, mc) ? TILE.sand : lot(mr, mc) ? ((mr + mc) % 2 ? TILE.lotA : TILE.lotB) : (mr + mc) % 2 ? TILE.street : TILE.streetB);
-        else cA.set((mr * 5 + mc * 11) % 7 < 3 ? TILE.seaB : TILE.seaA);
+        else seabed(seaDist[mr * N + mc] + ((mr * 5 + mc * 11) % 7) * 0.08, cA);
         tiles.setColorAt(r * S + c, cA.lerp(cB.set(TILE.plain), t));
-        const h = onLand ? lerp(LAND_H / 0.14, 1, t) : 1;
+        const h = onLand ? lerp(LAND_H / 0.14, 1, t) : inside ? lerp(SEA_FLOOR, 1, t) : 1;
         tiles.setMatrixAt(r * S + c, m4.compose(p.set(c - S / 2 + 0.5, (0.14 * h) / 2, r - S / 2 + 0.5), q.identity(), s.set(1, h, 1)));
       }
     }
@@ -92,9 +230,12 @@ function start() {
       blocks.setColorAt(i, col.set(TILE.ink));
     });
     blocks.visible = flatten > 0;
+    waterMat.uniforms.uFade.value = 1 - Math.min(1, flatten * 2.5);
+    water.visible = flatten < 0.4;
     blocks.instanceMatrix.needsUpdate = true;
     blocks.instanceColor.needsUpdate = true;
   }
+  measureSea();
   layoutBoard();
 
   // ---------- company models ----------
@@ -505,6 +646,7 @@ function start() {
     mode = next;
     land = landOf(mode);
     lot = lotOf(mode);
+    measureSea();
     // Repaint the map in a sweep while the companies hop to their new places.
     tween(stage, 1100, (e) => {
       layoutBoard(Math.ceil(e * S));

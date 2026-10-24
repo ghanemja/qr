@@ -470,7 +470,7 @@ function companyPage(c, prev, next) {
   <div class="qw-hint" id="hint">${esc(((industries._variantLabels || {})[model] || [])[LOOKS.get(c.slug).v] || MODEL_LABELS[model] || '')} · tap to turn it into its QR code</div>
   <div class="qw-dock">
     <div class="qw-url">
-      <input id="page-url" readonly value="${pageUrl}" aria-label="Link to this page">
+      <input id="page-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste your link to make it the QR" aria-label="Your link: the QR code will open it">
       <button class="qw-share" id="share" aria-label="Share link">${ICONS.share}<span id="share-label" class="sr">Share</span></button>
     </div>
     <div class="qw-tabs" role="group" aria-label="View">
