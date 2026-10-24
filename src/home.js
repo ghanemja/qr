@@ -672,9 +672,9 @@ function start() {
       const on = !s.scanning;
       setQRLabel(on);
       await s.setScan(on);
-      if (auto === s) wait(on ? 5000 : 4000);
+      if (auto === s) wait(on ? 4000 : 1800);
     }
-    s.ready.then(() => { if (auto === s) wait(2500); });
+    s.ready.then(() => { if (auto === s) wait(400); });
   }
   $('c-stage').addEventListener('pointerdown', stopLoop);
   function setQRLabel(on) {
