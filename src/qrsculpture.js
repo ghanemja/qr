@@ -1,7 +1,8 @@
 // A company's QR world, mountable anywhere: its signature model stands on a plaza whose tiles
 // faintly carry the QR code. setScan(true) breaks the model into cube pixels that arc down onto
 // the QR's dark squares and darken to a scannable shade of their own colour, in a diagonal sweep, while the camera tilts to
-// top-down; setScan(false) plays it backwards and the pixels rebuild the model.
+// top-down; setScan(false) plays it backwards and the pixels rebuild the model. With `loop` it
+// keeps going back and forth on its own until a tap, a drag or setScan() takes over.
 import { THREE, rng, createStage, buildSlab, buildInk, decodeBits, isFinder, setCamera, flyCamera, tween, lerp } from './qrworld.js';
 import { ARCHETYPES, centerpiece, modelMaterial, setBrands, vertexColor, propGeo, topperGeo, behave } from './models.js';
 
@@ -11,13 +12,18 @@ const smooth = (t) => t * t * (3 - 2 * t);
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const easeOutBack = (t) => 1 + 2.2 * Math.pow(t - 1, 3) + 1.2 * Math.pow(t - 1, 2);
 const PLAZA = '#ddd3c2';
-// A pixel's colour, darkened (same hue) until it stands out from the paving enough to scan.
+// Timings (ms): model growing in, each morph, the holds on either side of a loop, and the pause before it starts.
+const GROW_MS = 1500, MORPH_MS = 1700, HOLD_QR_MS = 3000, HOLD_MODEL_MS = 1200, START_MS = 200;
+// A pixel's colour, saturated and darkened (same hue) only as far as it takes to stand out from
+// the paving enough to scan (about 4.5:1 contrast), so the code keeps the model's colours.
 function inkOf(color) {
   const out = color.clone(), hsl = {};
   const lum = (c) => 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b; // colours are linear in three.js
-  for (let k = 0; k < 30 && lum(out) > 0.04; k++) {
+  out.getHSL(hsl);
+  if (hsl.s > 0.12) out.setHSL(hsl.h, Math.min(1, hsl.s * 1.3 + 0.15), hsl.l);
+  for (let k = 0; k < 30 && lum(out) > 0.1; k++) {
     out.getHSL(hsl);
-    out.setHSL(hsl.h, Math.min(1, hsl.s * 1.03), hsl.l * 0.9);
+    out.setHSL(hsl.h, hsl.s, hsl.l * 0.92);
   }
   return out;
 }
@@ -52,7 +58,7 @@ function sampleSurface(geos, count, random, brand) {
   return { points: out, area: total };
 }
 
-export function createQRWorld(container, { slug, model, look = { v: 0, a: '#e5533d', b: '#2b2f36', base: 0 }, qr, insets = () => ({ top: 110, bottom: 175 }), viewScale = 1.55, autoRotate = true } = {}) {
+export function createQRWorld(container, { slug, model, look = { v: 0, a: '#e5533d', b: '#2b2f36', base: 0 }, qr, insets = () => ({ top: 110, bottom: 175 }), viewScale = 1.55, autoRotate = true, loop = false, onScan = () => {} } = {}) {
   const { n, bits } = qr;
   const dark = decodeBits(n, bits);
   const finder = isFinder(n);
@@ -256,41 +262,82 @@ export function createQRWorld(container, { slug, model, look = { v: 0, a: '#e553
   };
   setCamera(stage, { ...home(), az: ISO.az - 0.9, zoom: 0.8, radius: 400 });
 
+  // Morph to `to` (0 model, 1 QR) from wherever it is now; a newer morph cancels this one mid-way.
+  let run = 0;
+  function morphTo(to) {
+    const token = ++run;
+    const from = morph;
+    const duration = reduceMotion() ? 1 : Math.max(1, MORPH_MS * Math.abs(to - from));
+    morphing = true;
+    flyCamera(stage, to ? topView() : home(), { duration: duration * 0.85 });
+    return new Promise((resolve) => {
+      const start = performance.now();
+      const tick = () => {
+        if (token !== run) { stage.frame.delete(tick); return resolve(false); }
+        const t = Math.min(1, (performance.now() - start) / duration);
+        morph = lerp(from, to, t); // each pixel eases on its own; the sweep itself stays linear
+        poseMorph(morph);
+        if (t >= 1) {
+          stage.frame.delete(tick);
+          morphing = false;
+          resolve(true);
+        }
+      };
+      stage.frame.add(tick);
+    });
+  }
+
   let scanning = false;
-  async function setScan(on) {
-    if (on === scanning) return;
+  function go(on) {
     scanning = on;
     stage.controls.enabled = !on;
     stage.controls.autoRotate = false;
-    morphing = true;
-    const from = morph, to = on ? 1 : 0;
-    const duration = reduceMotion() ? 1 : 2600;
-    flyCamera(stage, on ? topView() : home(), { duration: duration * 0.85 });
-    await tween(stage, duration, (e, raw) => {
-      morph = lerp(from, to, raw); // each pixel eases on its own; the sweep itself stays linear
-      poseMorph(morph);
-    });
-    morphing = false;
+    onScan(on);
+    return morphTo(on ? 1 : 0);
+  }
+  // With `loop`, the model keeps turning into its QR code and back until stopLoop() or setScan().
+  let looping = 0;
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  async function startLoop() {
+    if (reduceMotion()) return;
+    const id = ++looping;
+    await ready;
+    await wait(START_MS);
+    while (id === looping) {
+      if (!(await go(!scanning))) return;
+      await wait(scanning ? HOLD_QR_MS : HOLD_MODEL_MS);
+    }
+  }
+  const stopLoop = () => looping++;
+  // A person's choice: ends the loop and goes straight there, even mid-morph.
+  function setScan(on) {
+    stopLoop();
+    if (on !== scanning) return go(on);
   }
 
   poseGrow(0);
   poseMorph(0);
-  flyCamera(stage, home(), { duration: 2200 });
-  const ready = tween(stage, 2200, (t) => poseGrow(t)).then(() => {
+  flyCamera(stage, home(), { duration: GROW_MS });
+  const ready = tween(stage, GROW_MS, (t) => poseGrow(t)).then(() => {
     if (autoRotate && !scanning && !reduceMotion()) {
       stage.controls.autoRotate = true;
       stage.controls.autoRotateSpeed = 0.6;
     }
   });
   stage.controls.addEventListener('start', () => (stage.controls.autoRotate = false));
+  // Grabbing the scene ends the loop.
+  stage.renderer.domElement.addEventListener('pointerdown', stopLoop);
+  if (loop) startLoop();
 
   return {
     stage,
     ready,
     setScan,
+    startLoop,
+    stopLoop,
     colors,
     get scanning() { return scanning; },
     get busy() { return morphing; },
-    dispose: () => stage.dispose(),
+    dispose: () => { stopLoop(); run++; stage.dispose(); },
   };
 }

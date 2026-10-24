@@ -656,38 +656,16 @@ function start() {
     if (show) show.dispose();
     $('c-stage').innerHTML = '';
     setQRLabel(false);
-    show = createQRWorld($('c-stage'), { slug: d.s, model: d.m, look: lookOf(d), qr: qrFor(d), viewScale: 1.35, insets: () => ({ top: 8, bottom: 8 }) });
-    startLoop(show);
+    // The card keeps turning the model into its QR code and back until someone takes the controls.
+    show = createQRWorld($('c-stage'), { slug: d.s, model: d.m, look: lookOf(d), qr: qrFor(d), viewScale: 1.35, insets: () => ({ top: 8, bottom: 8 }), loop: true, onScan: setQRLabel });
   }
-  // The card keeps turning the model into its QR code and back until someone takes the controls.
-  let auto = null, autoTimer = 0;
-  function stopLoop() { auto = null; clearTimeout(autoTimer); }
-  function startLoop(s) {
-    stopLoop();
-    if (reduceMotion) return;
-    auto = s;
-    const wait = (ms) => { autoTimer = setTimeout(step, ms); };
-    async function step() {
-      if (auto !== s) return;
-      const on = !s.scanning;
-      setQRLabel(on);
-      await s.setScan(on);
-      if (auto === s) wait(on ? 4000 : 1800);
-    }
-    s.ready.then(() => { if (auto === s) wait(400); });
-  }
-  $('c-stage').addEventListener('pointerdown', stopLoop);
   function setQRLabel(on) {
     $('c-toggle-label').textContent = on ? 'Back to the model' : 'Turn into QR code';
     $('c-toggle').setAttribute('aria-pressed', String(on));
   }
   $('c-toggle').addEventListener('click', () => {
     stopTour();
-    stopLoop();
-    if (!show || show.busy) return;
-    const on = !show.scanning;
-    setQRLabel(on);
-    show.setScan(on);
+    if (show) show.setScan(!show.scanning);
   });
   $('r-list').addEventListener('click', (ev) => {
     const b = ev.target.closest('button[data-slug]');
@@ -729,7 +707,6 @@ function start() {
   async function backToMap() {
     if (view === 'us') return;
     stopTour();
-    stopLoop();
     if (show) show.dispose();
     show = null;
     unfocus();
@@ -816,10 +793,8 @@ function start() {
     playBtn.setAttribute('aria-label', 'Stop the tour');
     for (let i = 0; tour.on && token === tour.token; i = (i + 1) % ORDER.length) {
       await openRegion(ORDER[i]);
-      await wait(2800);
-      if (!tour.on || token !== tour.token) return;
-      if (show && !show.busy) { setQRLabel(true); show.setScan(true); }
-      await wait(3800);
+      // The card's own loop turns the model into its QR code meanwhile.
+      await wait(6600);
     }
   }
   playBtn.addEventListener('click', () => (tour.on ? stopTour() : runTour()));
