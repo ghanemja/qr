@@ -425,6 +425,8 @@ function companyPage(c, prev, next) {
   <div class="qw-dock">
     <div class="qw-url">
       <input id="page-url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste your link to make it the QR" aria-label="Your link: the QR code will open it">
+      <input id="qr-title" class="qw-title-in" type="text" autocomplete="off" placeholder="Title (none)" aria-label="Title printed under the downloaded QR code">
+      <input id="qr-center" class="qw-center-in" type="text" autocomplete="off" maxlength="3" placeholder="—" aria-label="Letters in the middle of the QR code (up to 3; empty for none)">
       <button class="qw-share" id="share" aria-label="Share link">${ICONS.share}<span id="share-label" class="sr">Share</span></button>
     </div>
     <div class="qw-tabs" role="group" aria-label="View">

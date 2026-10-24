@@ -1,6 +1,6 @@
 // A company's QR world, mountable anywhere: its signature model stands on a plaza whose tiles
 // faintly carry the QR code. setScan(true) breaks the model into cube pixels that arc down onto
-// the QR's dark squares and darken to ink, in a diagonal sweep, while the camera tilts to
+// the QR's dark squares and darken to a scannable shade of their own colour, in a diagonal sweep, while the camera tilts to
 // top-down; setScan(false) plays it backwards and the pixels rebuild the model.
 import { THREE, rng, createStage, buildSlab, buildInk, decodeBits, isFinder, setCamera, flyCamera, tween, lerp } from './qrworld.js';
 import { ARCHETYPES, centerpiece, modelMaterial, setBrands, vertexColor, propGeo, topperGeo, behave } from './models.js';
@@ -10,8 +10,17 @@ const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const smooth = (t) => t * t * (3 - 2 * t);
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const easeOutBack = (t) => 1 + 2.2 * Math.pow(t - 1, 3) + 1.2 * Math.pow(t - 1, 2);
-const INK = '#1d232b';
 const PLAZA = '#ddd3c2';
+// A pixel's colour, darkened (same hue) until it stands out from the paving enough to scan.
+function inkOf(color) {
+  const out = color.clone(), hsl = {};
+  const lum = (c) => 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b; // colours are linear in three.js
+  for (let k = 0; k < 30 && lum(out) > 0.04; k++) {
+    out.getHSL(hsl);
+    out.setHSL(hsl.h, Math.min(1, hsl.s * 1.03), hsl.l * 0.9);
+  }
+  return out;
+}
 
 // Random points on a mesh's surface (area-weighted), each with the colour of its triangle.
 function sampleSurface(geos, count, random, brand) {
@@ -62,7 +71,7 @@ export function createQRWorld(container, { slug, model, look = { v: 0, a: '#e553
   // The QR's dark modules, each with the moment in the morph its pixel lands (a diagonal sweep).
   const cells = [];
   for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (dark(r, c)) cells.push({ r, c, finder: finder(r, c), sweep: (r + c) / (2 * (n - 1)) });
-  const ink = buildInk(cells.map(({ r, c }) => [r + QUIET, c + QUIET]), size, INK);
+  const ink = buildInk(cells.map(({ r, c }) => [r + QUIET, c + QUIET]), size, '#ffffff');
   scene.add(ink);
 
   // Plaza tiles: the code shows faintly in the paving; the corner squares are raised in the model's colour.
@@ -138,14 +147,21 @@ export function createQRWorld(container, { slug, model, look = { v: 0, a: '#e553
       const cell = free[best];
       free.splice(best, 1);
       const [tx, tz] = pos(cells[cell].r, cells[cell].c);
-      return { ...px, cell, dst: new THREE.Vector3(tx, ground, tz), delay: 0.04 + cells[cell].sweep * 0.5 + random() * 0.06, arc: 1.5 + random() * 3, spin: new THREE.Vector3(random() - 0.5, random() - 0.5, random() - 0.5).normalize(), turns: 1 + random() * 2 };
+      return { ...px, ink: inkOf(px.color), cell, dst: new THREE.Vector3(tx, ground, tz), delay: 0.04 + cells[cell].sweep * 0.5 + random() * 0.06, arc: 1.5 + random() * 3, spin: new THREE.Vector3(random() - 0.5, random() - 0.5, random() - 0.5).normalize(), turns: 1 + random() * 2 };
     });
   const pixels = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1).translate(0, 0.5, 0), new THREE.MeshStandardMaterial({ roughness: 0.6, flatShading: true }), pixelsData.length);
   pixels.castShadow = true;
   pixels.receiveShadow = true;
   pixels.visible = false;
   scene.add(pixels);
-  const inkColor = new THREE.Color(INK), col = new THREE.Color();
+  const col = new THREE.Color();
+  // Each square of the finished code is painted the colour of the pixel that lands on it.
+  const colors = new Array(n * n).fill(null);
+  for (const px of pixelsData) {
+    ink.setColorAt(px.cell, px.ink);
+    colors[cells[px.cell].r * n + cells[px.cell].c] = '#' + px.ink.getHexString();
+  }
+  ink.instanceColor.needsUpdate = true;
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), s = new THREE.Vector3();
 
   let hoverY = 0;
@@ -166,7 +182,7 @@ export function createQRWorld(container, { slug, model, look = { v: 0, a: '#e553
         const w = lerp(voxel, 0.98, e) * (m < 0.035 ? appear : 1);
         s.set(w, Math.max(0.001, lerp(voxel, 0.24, land) * (m < 0.035 ? appear : 1)), w);
         pixels.setMatrixAt(i, m4.compose(p, q, s));
-        pixels.setColorAt(i, col.copy(px.color).lerp(inkColor, smooth(clamp01((t - 0.55) / 0.45))));
+        pixels.setColorAt(i, col.copy(px.color).lerp(px.ink, smooth(clamp01((t - 0.55) / 0.45))));
       });
       pixels.instanceMatrix.needsUpdate = true;
       pixels.instanceColor.needsUpdate = true;
@@ -272,6 +288,7 @@ export function createQRWorld(container, { slug, model, look = { v: 0, a: '#e553
     stage,
     ready,
     setScan,
+    colors,
     get scanning() { return scanning; },
     get busy() { return morphing; },
     dispose: () => stage.dispose(),

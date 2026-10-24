@@ -58,6 +58,9 @@ body.scanning .qw-title { opacity: 0; transition: opacity 0.4s; }
 }
 .qw-dock { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 5; width: min(720px, calc(100% - 24px)); display: grid; gap: 8px; }
 .qw-url { display: flex; gap: 8px; }
+.qw-url #page-url { flex: 2; }
+.qw-url .qw-title-in { flex: 1; }
+.qw-url .qw-center-in { flex: none; width: 64px; padding: 0; text-align: center; text-transform: uppercase; font-weight: 700; }
 .qw-url input, .qw-search input {
   flex: 1; min-width: 0; height: 48px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--cream-2);
   font: 16px var(--font); color: var(--ink);
@@ -131,7 +134,9 @@ i.dot.startup { background: var(--startup); }
   .qw-title { top: 84px; }
   .qw-tabs button { font-size: 11px; gap: 3px; flex-direction: column; height: 52px; padding: 0 4px; min-width: 0; }
   .qw-tabs .sig { grid-column: span 1; }
-  .qw-hint { bottom: 156px; }
+  .qw-hint { bottom: 212px; }
+  .qw-url { flex-wrap: wrap; }
+  .qw-url #page-url { flex-basis: 100%; }
   .qw-scroll { display: none; }
   .cite label { grid-template-columns: 1fr; gap: 4px; }
 }

@@ -13,7 +13,7 @@ const normalize = (text) => {
   if (!t) return '';
   return /^[a-z][a-z0-9+.-]*:/i.test(t) ? t : `https://${t}`;
 };
-// QR modules for a link: highest error correction that fits.
+// QR modules for a link: highest error correction that fits (the level decides if a monogram fits).
 function qrOf(text) {
   for (const level of ['H', 'Q', 'M', 'L']) {
     try {
@@ -23,7 +23,7 @@ function qrOf(text) {
       const n = q.getModuleCount();
       let bits = '';
       for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) bits += q.isDark(r, c) ? '1' : '0';
-      return { n, bits };
+      return { n, bits, level };
     } catch {}
   }
   return null;
@@ -31,11 +31,18 @@ function qrOf(text) {
 
 // Page chrome that works without WebGL.
 const field = $('page-url');
+// Title under the downloaded code and the letters in its middle; the company's own by default.
+const titleIn = $('qr-title'), centerIn = $('qr-center');
+titleIn.value = C.name;
+centerIn.value = QRCard.initials(C.name);
+// The code being shown, so the download matches it square for square (colours included).
+let shownQR = C.qr, world = null;
+const cardOpts = () => ({ title: titleIn.value.trim(), center: centerIn.value.trim().toUpperCase(), ...(world ? { qr: shownQR, colors: world.colors } : {}) });
 $('share').addEventListener('click', async () => {
   if (navigator.share) return navigator.share({ title: C.name, url: pageUrl }).catch(() => {});
   QRCard.copy(pageUrl, $('share-label'));
 });
-for (const id of ['download', 'dock-download']) $(id).addEventListener('click', () => QRCard.download(link, C.name, `${C.slug}-qr.png`));
+for (const id of ['download', 'dock-download']) $(id).addEventListener('click', () => QRCard.download(link, C.name, `${C.slug}-qr.png`, cardOpts()));
 for (const input of document.querySelectorAll('.cite input')) input.addEventListener('focus', () => input.select());
 
 let applyLink = () => {};
@@ -58,12 +65,13 @@ field.addEventListener('input', () => field.setCustomValidity(''));
 
 if (!webglAvailable()) {
   document.body.classList.add('no-webgl');
-  QRCard.draw($('fallback-qr'), link, C.name);
-  applyLink = () => QRCard.draw($('fallback-qr'), link, C.name);
+  const redraw = () => QRCard.draw($('fallback-qr'), link, C.name, cardOpts());
+  redraw();
+  applyLink = redraw;
+  for (const input of [titleIn, centerIn]) input.addEventListener('input', redraw);
 } else {
   const stageEl = $('stage');
   const hint = $('hint').textContent;
-  let world = null;
   const setScan = (on) => {
     if (!world || world.busy) return;
     document.body.classList.toggle('scanning', on);
@@ -81,7 +89,7 @@ if (!webglAvailable()) {
       look: C.look,
       qr,
       viewScale: stageEl.clientWidth < 640 ? 1.38 : 1.55,
-      insets: (W) => (W < 640 ? { top: 100, bottom: 190 } : { top: 110, bottom: 175 }),
+      insets: (W) => (W < 640 ? { top: 100, bottom: 246 } : { top: 110, bottom: 175 }),
     });
     // A tap (not a drag) anywhere on the scene toggles scan view.
     let down = null;
@@ -97,7 +105,8 @@ if (!webglAvailable()) {
   for (const id of ['toggle']) $(id).addEventListener('click', () => setScan(!world.scanning));
   // A new link rebuilds the model around its own QR, then turns it into the code to scan.
   applyLink = () => {
-    const w = mount(qrOf(link));
+    shownQR = qrOf(link);
+    const w = mount(shownQR);
     setScan(false);
     w.ready.then(() => w === world && setScan(true));
   };
