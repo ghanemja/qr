@@ -871,6 +871,103 @@ export function centerpiece(id, variant = 0, base = 0) {
   return cache.get(key);
 }
 
+// Each kind of business moves its own way: cars drive, planes bank, rockets launch, oil pumps
+// rock, phones ring, hearts beat, presses thump. Returns offsets as fractions of the model's
+// height and angles in radians, about the model's base; s* are scale factors.
+export function behave(id, t, phase = 0) {
+  const b = { x: 0, y: 0, z: 0, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 };
+  const T = t + phase;
+  const cycle = (period) => ((T / period) % 1 + 1) % 1;
+  switch (id) {
+    case 'car': {
+      b.x = Math.sin(T * 0.8) * 0.28;
+      b.rz = -Math.cos(T * 0.8) * 0.035;
+      b.y = Math.abs(Math.sin(T * 11)) * 0.012;
+      break;
+    }
+    case 'plane': {
+      b.y = 0.1 + Math.sin(T * 0.9) * 0.08;
+      b.rz = Math.sin(T * 0.9) * 0.22;
+      b.rx = Math.cos(T * 0.9) * 0.05;
+      b.x = Math.sin(T * 0.45) * 0.12;
+      break;
+    }
+    case 'rocket': {
+      const f = cycle(5.5);
+      if (f < 0.12) b.x = Math.sin(T * 60) * 0.012;
+      else if (f < 0.45) { const k = (f - 0.12) / 0.33; b.y = k * k * 0.7; }
+      else if (f < 0.75) { const k = (f - 0.45) / 0.3; b.y = 0.7 * (1 - k * (2 - k)); }
+      else if (f < 0.8) b.sy = 1 - Math.sin(((f - 0.75) / 0.05) * Math.PI) * 0.08;
+      break;
+    }
+    case 'parcel': {
+      const h = Math.abs(Math.sin(T * 2.2));
+      b.y = h * 0.12;
+      b.ry = Math.sin(T * 1.1) * 0.15;
+      const land = Math.pow(1 - h, 6);
+      b.sy = 1 - land * 0.1; b.sx = b.sz = 1 + land * 0.06;
+      break;
+    }
+    case 'oil': b.rx = Math.sin(T * 1.8) * 0.09; break;
+    case 'comms': case 'social': {
+      const f = cycle(3.2);
+      if (f < 0.25) { const k = 1 - f / 0.25; b.rz = Math.sin(T * 45) * 0.07 * k; b.y = 0.03 * k; }
+      break;
+    }
+    case 'health': {
+      const f = cycle(1.3);
+      const beat = Math.exp(-Math.pow((f - 0.1) / 0.05, 2)) + 0.6 * Math.exp(-Math.pow((f - 0.3) / 0.05, 2));
+      b.sx = b.sy = b.sz = 1 + beat * 0.07;
+      break;
+    }
+    case 'bank': case 'payments': {
+      b.y = 0.04 + Math.sin(T * 1.6) * 0.04;
+      b.ry = Math.sin(T * 0.7) * 0.2;
+      break;
+    }
+    case 'insurance': b.rz = Math.sin(T * 1.2) * 0.06; break;
+    case 'retail': {
+      const h = Math.abs(Math.sin(T * 2.6));
+      b.y = h * 0.06;
+      b.sy = 1 - Math.pow(1 - h, 5) * 0.08;
+      break;
+    }
+    case 'chip': case 'computer': {
+      b.x = Math.sin(T * 31) * 0.003;
+      const p = 1 + Math.max(0, Math.sin(T * 3)) * 0.035;
+      b.sx = b.sz = p;
+      break;
+    }
+    case 'media': {
+      const f = cycle(2.6);
+      if (f < 0.18) b.rz = Math.sin((f / 0.18) * Math.PI * 4) * 0.08;
+      break;
+    }
+    case 'food': case 'drink': case 'care': {
+      const w = Math.sin(T * 5) * Math.max(0, Math.sin(T * 0.9));
+      b.sx = b.sz = 1 + w * 0.05; b.sy = 1 - w * 0.05;
+      break;
+    }
+    case 'power': {
+      b.y = 0.02 + Math.sin(T * 1.4) * 0.02;
+      b.sx = b.sy = b.sz = 1 + Math.sin(T * 3) * 0.025;
+      break;
+    }
+    case 'industrial': case 'metal': {
+      const f = cycle(1.6);
+      if (f > 0.78 && f < 0.92) { const k = Math.sin(((f - 0.78) / 0.14) * Math.PI); b.sy = 1 - k * 0.12; b.sx = b.sz = 1 + k * 0.05; }
+      break;
+    }
+    case 'chem': b.rz = Math.sin(T * 3) * 0.04; b.rx = Math.cos(T * 2.3) * 0.04; break;
+    case 'farm': case 'tree': b.rz = Math.sin(T * 1.5) * 0.07; b.rx = Math.sin(T * 1.1) * 0.03; break;
+    case 'casino': b.ry = T * 0.8; b.y = Math.abs(Math.sin(T * 1.6)) * 0.05; break;
+    case 'robot': b.ry = Math.sin(T * 2) * 0.4; b.y = Math.abs(Math.sin(T * 4)) * 0.04; break;
+    case 'house': b.y = Math.max(0, Math.sin(T * 0.9)) * 0.02; break;
+    default: b.y = 0.05 + Math.sin(T * 1.3) * 0.05; b.ry = Math.sin(T * 0.5) * 0.3;
+  }
+  return b;
+}
+
 // Shared material: vertex colours, with brand slots filled from per-instance brandA / brandB.
 export function modelMaterial() {
   const m = new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, roughness: 0.72, metalness: 0.02 });

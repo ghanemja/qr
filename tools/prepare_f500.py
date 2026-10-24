@@ -88,6 +88,19 @@ INDUSTRY_MODEL = [
     ("Apparel", "retail"), ("Toys", "retail"),
 ]
 
+# Newcomers whose Fortune industry says little about what they are known for.
+MODEL_PICK = {
+    "Uber Technologies": "car", "Carvana": "car", "Coupang": "parcel", "DoorDash": "food", "Chipotle Mexican Grill": "food",
+    "Campbell's": "food", "Airbnb": "house", "Welltower": "house", "Chewy": "retail", "Lululemon athletica": "retail",
+    "Sprouts Farmers Market": "retail", "QVC Group": "media", "Sirius XM Holdings": "media", "Palo Alto Networks": "software",
+    "Arista Networks": "comms", "Super Micro Computer": "computer", "Equinix": "computer", "Intuitive Surgical": "robot",
+    "Monster Beverage": "drink", "Galaxy Digital": "payments", "Bitgo Holdings": "payments", "Nasdaq": "bank", "Moody's": "bank",
+    "TransDigm Group": "plane", "Howmet Aerospace": "plane", "Corteva": "farm", "Andersons": "farm", "Prologis": "parcel",
+    "Gold.com": "metal", "Kenvue": "care", "International Flavors & Fragrances": "chem", "GE Vernova": "power",
+    "Constellation Energy": "power", "Vistra": "power", "Vertiv Holdings": "power", "XPO": "parcel", "GXO Logistics": "parcel",
+    "Otis Worldwide": "industrial", "Medline": "health",
+}
+
 # Tech companies Fortune files under another sector.
 TECH_TOO = {"Amazon", "Tesla", "Netflix", "Uber Technologies", "Airbnb", "DoorDash", "Booking Holdings", "Coupang", "eBay", "Block"}
 
@@ -155,10 +168,11 @@ def main():
             "website": (prior.get(key) or prior.get(r["name"]) or {}).get("website", ""),
             "sector": "tech" if r["sector"] == "Technology" or r["name"] in TECH_TOO else "other",
             "industry": r["industry"],
+            "employees": int(r["employees"].replace(",", "")) if r.get("employees") else None,
             "slug": (prior.get(key) or prior.get(r["name"]) or {}).get("slug") or slugify(r["name"]),
         }
         if key not in known:
-            rec["model"] = next((m for word, m in INDUSTRY_MODEL if word.lower() in (r["industry"] or "").lower()), "industrial")
+            rec["model"] = MODEL_PICK.get(r["name"]) or next((m for word, m in INDUSTRY_MODEL if word.lower() in (r["industry"] or "").lower()), "industrial")
         out.append(rec)
     if missing:
         raise SystemExit("no coordinates for: " + "; ".join(missing))

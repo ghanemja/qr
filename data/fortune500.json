@@ -12,6 +12,7 @@
   "website": "https://www.amazon.com",
   "sector": "tech",
   "industry": "Internet Services and Retailing",
+  "employees": 1576000,
   "slug": "amazon"
  },
  {
@@ -27,6 +28,7 @@
   "website": "https://www.walmart.com",
   "sector": "other",
   "industry": "General Merchandisers",
+  "employees": 2100000,
   "slug": "walmart"
  },
  {
@@ -42,6 +44,7 @@
   "website": "http://www.unitedhealthgroup.com",
   "sector": "other",
   "industry": "Health Care: Insurance and Managed Care",
+  "employees": 390000,
   "slug": "unitedhealth-group"
  },
  {
@@ -57,6 +60,7 @@
   "website": "https://www.apple.com",
   "sector": "tech",
   "industry": "Computers, Office Equipment",
+  "employees": 166000,
   "slug": "apple"
  },
  {
@@ -72,6 +76,7 @@
   "website": "https://abc.xyz",
   "sector": "tech",
   "industry": "Internet Services and Retailing",
+  "employees": 190820,
   "slug": "alphabet"
  },
  {
@@ -87,6 +92,7 @@
   "website": "https://cvshealth.com",
   "sector": "other",
   "industry": "Health Care: Pharmacy and Other Services",
+  "employees": 259500,
   "slug": "cvs-health"
  },
  {
@@ -102,6 +108,7 @@
   "website": "http://www.berkshirehathaway.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Stock)",
+  "employees": 387800,
   "slug": "berkshire-hathaway"
  },
  {
@@ -117,6 +124,7 @@
   "website": "http://www.mckesson.com",
   "sector": "other",
   "industry": "Wholesalers: Health Care",
+  "employees": 44000,
   "slug": "mckesson"
  },
  {
@@ -132,6 +140,7 @@
   "website": "http://corporate.exxonmobil.com",
   "sector": "other",
   "industry": "Petroleum Refining",
+  "employees": 57900,
   "slug": "exxon-mobil"
  },
  {
@@ -147,6 +156,7 @@
   "website": "https://www.amerisourcebergen.com",
   "sector": "other",
   "industry": "Wholesalers: Health Care",
+  "employees": 49000,
   "slug": "cencora"
  },
  {
@@ -162,6 +172,7 @@
   "website": "https://www.microsoft.com",
   "sector": "tech",
   "industry": "Computer Software",
+  "employees": 228000,
   "slug": "microsoft"
  },
  {
@@ -177,6 +188,7 @@
   "website": "https://www.jpmorganchase.com",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 318512,
   "slug": "jpmorgan-chase"
  },
  {
@@ -192,6 +204,7 @@
   "website": "https://www.costco.com",
   "sector": "other",
   "industry": "General Merchandisers",
+  "employees": 341000,
   "slug": "costco-wholesale"
  },
  {
@@ -207,6 +220,7 @@
   "website": "https://www.cigna.com",
   "sector": "other",
   "industry": "Health Care: Pharmacy and Other Services",
+  "employees": 66685,
   "slug": "cigna"
  },
  {
@@ -222,6 +236,7 @@
   "website": "https://www.cardinalhealth.com",
   "sector": "other",
   "industry": "Wholesalers: Health Care",
+  "employees": 55392,
   "slug": "cardinal-health"
  },
  {
@@ -237,6 +252,7 @@
   "website": "http://www.nvidia.com",
   "sector": "tech",
   "industry": "Semiconductors and Other Electronic Components",
+  "employees": 42000,
   "slug": "nvidia"
  },
  {
@@ -252,6 +268,7 @@
   "website": "https://www.facebook.com",
   "sector": "tech",
   "industry": "Internet Services and Retailing",
+  "employees": 78865,
   "slug": "meta-platforms"
  },
  {
@@ -267,6 +284,7 @@
   "website": "https://www.anthem.com",
   "sector": "other",
   "industry": "Health Care: Insurance and Managed Care",
+  "employees": 96615,
   "slug": "elevance-health"
  },
  {
@@ -282,6 +300,7 @@
   "website": "https://www.centene.com",
   "sector": "other",
   "industry": "Health Care: Insurance and Managed Care",
+  "employees": 61100,
   "slug": "centene"
  },
  {
@@ -297,6 +316,7 @@
   "website": "https://www.bankofamerica.com",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 213207,
   "slug": "bank-of-america"
  },
  {
@@ -312,6 +332,7 @@
   "website": "https://www.chevron.com",
   "sector": "other",
   "industry": "Petroleum Refining",
+  "employees": 43039,
   "slug": "chevron"
  },
  {
@@ -327,6 +348,7 @@
   "website": "https://www.ford.com",
   "sector": "other",
   "industry": "Motor Vehicles & Parts",
+  "employees": 169000,
   "slug": "ford-motor"
  },
  {
@@ -342,6 +364,7 @@
   "website": "https://www.gm.com",
   "sector": "other",
   "industry": "Motor Vehicles & Parts",
+  "employees": 156000,
   "slug": "general-motors"
  },
  {
@@ -357,6 +380,7 @@
   "website": "https://www.citigroup.com",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 226000,
   "slug": "citigroup"
  },
  {
@@ -372,6 +396,7 @@
   "website": "https://www.homedepot.com",
   "sector": "other",
   "industry": "Specialty Retailers: Other",
+  "employees": 472400,
   "slug": "home-depot"
  },
  {
@@ -387,6 +412,7 @@
   "website": "http://www.fanniemae.com",
   "sector": "other",
   "industry": "Diversified Financials",
+  "employees": 7000,
   "slug": "fannie-mae"
  },
  {
@@ -402,6 +428,7 @@
   "website": "https://www.kroger.com",
   "sector": "other",
   "industry": "Food and Drug Stores",
+  "employees": 403000,
   "slug": "kroger"
  },
  {
@@ -417,6 +444,7 @@
   "website": "https://www.verizon.com",
   "sector": "other",
   "industry": "Telecommunications",
+  "employees": 89900,
   "slug": "verizon-communications"
  },
  {
@@ -432,6 +460,7 @@
   "website": "http://www.phillips66.com",
   "sector": "other",
   "industry": "Petroleum Refining",
+  "employees": 12600,
   "slug": "phillips-66"
  },
  {
@@ -447,6 +476,7 @@
   "website": "http://www.marathonpetroleum.com",
   "sector": "other",
   "industry": "Petroleum Refining",
+  "employees": 18500,
   "slug": "marathon-petroleum"
  },
  {
@@ -462,6 +492,7 @@
   "website": "https://www.intlfcstone.com",
   "sector": "other",
   "industry": "Diversified Financials",
+  "employees": 5430,
   "slug": "intl-fcstone"
  },
  {
@@ -477,6 +508,7 @@
   "website": "https://www.statefarm.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Mutual)",
+  "employees": 64273,
   "slug": "state-farm-insurance"
  },
  {
@@ -492,6 +524,7 @@
   "website": "http://www.freddiemac.com",
   "sector": "other",
   "industry": "Diversified Financials",
+  "employees": 7345,
   "slug": "freddie-mac"
  },
  {
@@ -507,6 +540,7 @@
   "website": "https://www.humana.com",
   "sector": "other",
   "industry": "Health Care: Insurance and Managed Care",
+  "employees": 67060,
   "slug": "humana"
  },
  {
@@ -522,6 +556,7 @@
   "website": "https://www.att.com",
   "sector": "other",
   "industry": "Telecommunications",
+  "employees": 133030,
   "slug": "at-and-t"
  },
  {
@@ -537,6 +572,7 @@
   "website": "http://www.goldmansachs.com",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 47400,
   "slug": "goldman-sachs-group"
  },
  {
@@ -552,6 +588,7 @@
   "website": "https://corporate.comcast.com",
   "sector": "other",
   "industry": "Telecommunications",
+  "employees": 179000,
   "slug": "comcast"
  },
  {
@@ -567,6 +604,7 @@
   "website": "https://www.wellsfargo.com",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 205198,
   "slug": "wells-fargo"
  },
  {
@@ -582,6 +620,7 @@
   "website": "https://www.morganstanley.com",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 82992,
   "slug": "morgan-stanley"
  },
  {
@@ -597,6 +636,7 @@
   "website": "https://www.valero.com",
   "sector": "other",
   "industry": "Petroleum Refining",
+  "employees": 9798,
   "slug": "valero-energy"
  },
  {
@@ -612,6 +652,7 @@
   "website": "http://www.dell.com",
   "sector": "tech",
   "industry": "Computers, Office Equipment",
+  "employees": 97000,
   "slug": "dell-technologies"
  },
  {
@@ -627,6 +668,7 @@
   "website": "https://www.target.com",
   "sector": "other",
   "industry": "General Merchandisers",
+  "employees": 415000,
   "slug": "target"
  },
  {
@@ -642,6 +684,7 @@
   "website": "https://www.tesla.com",
   "sector": "tech",
   "industry": "Motor Vehicles & Parts",
+  "employees": 134785,
   "slug": "tesla"
  },
  {
@@ -657,6 +700,7 @@
   "website": "https://www.disney.com",
   "sector": "other",
   "industry": "Entertainment",
+  "employees": 203280,
   "slug": "walt-disney"
  },
  {
@@ -672,6 +716,7 @@
   "website": "https://www.jnj.com",
   "sector": "other",
   "industry": "Pharmaceuticals",
+  "employees": 138200,
   "slug": "johnson-and-johnson"
  },
  {
@@ -687,6 +732,7 @@
   "website": "https://www.pepsi.com",
   "sector": "other",
   "industry": "Food Consumer Products",
+  "employees": 306000,
   "slug": "pepsico"
  },
  {
@@ -702,6 +748,7 @@
   "website": "http://www.boeing.com",
   "sector": "other",
   "industry": "Aerospace & Defense",
+  "employees": 182000,
   "slug": "boeing"
  },
  {
@@ -717,6 +764,7 @@
   "website": "https://www.ups.com",
   "sector": "other",
   "industry": "Mail, Package, and Freight Delivery",
+  "employees": 350625,
   "slug": "united-parcel-service"
  },
  {
@@ -732,6 +780,7 @@
   "website": "http://www.utc.com",
   "sector": "other",
   "industry": "Aerospace & Defense",
+  "employees": 180000,
   "slug": "rtx"
  },
  {
@@ -747,6 +796,7 @@
   "website": "https://www.fedex.com",
   "sector": "other",
   "industry": "Mail, Package, and Freight Delivery",
+  "employees": 408200,
   "slug": "fedex"
  },
  {
@@ -762,6 +812,7 @@
   "website": "https://www.progressive.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Stock)",
+  "employees": 70053,
   "slug": "progressive"
  },
  {
@@ -777,6 +828,7 @@
   "website": "https://www.lowes.com",
   "sector": "other",
   "industry": "Specialty Retailers: Other",
+  "employees": 221500,
   "slug": "lowes"
  },
  {
@@ -792,6 +844,7 @@
   "website": "https://www.energytransfer.com",
   "sector": "other",
   "industry": "Pipelines",
+  "employees": 22311,
   "slug": "energy-transfer"
  },
  {
@@ -807,6 +860,7 @@
   "website": "https://us.pg.com",
   "sector": "other",
   "industry": "Household and Personal Products",
+  "employees": 109000,
   "slug": "procter-and-gamble"
  },
  {
@@ -822,6 +876,7 @@
   "website": "https://www.sysco.com",
   "sector": "other",
   "industry": "Wholesalers: Food and Grocery",
+  "employees": 75000,
   "slug": "sysco"
  },
  {
@@ -837,6 +892,7 @@
   "website": "https://www.americanexpress.com",
   "sector": "other",
   "industry": "Diversified Financials",
+  "employees": 76800,
   "slug": "american-express"
  },
  {
@@ -852,6 +908,7 @@
   "website": "https://www.albertsons.com",
   "sector": "other",
   "industry": "Food and Drug Stores",
+  "employees": 196650,
   "slug": "albertsons"
  },
  {
@@ -867,6 +924,7 @@
   "website": "https://www.adm.com",
   "sector": "other",
   "industry": "Food Production",
+  "employees": 41147,
   "slug": "archer-daniels-midland"
  },
  {
@@ -882,6 +940,7 @@
   "website": "https://www.metlife.com",
   "sector": "other",
   "industry": "Insurance: Life, Health (stock)",
+  "employees": 46000,
   "slug": "metlife"
  },
  {
@@ -897,6 +956,7 @@
   "website": "https://hcahealthcare.com",
   "sector": "other",
   "industry": "Health Care: Medical Facilities",
+  "employees": 275000,
   "slug": "hca-healthcare"
  },
  {
@@ -912,6 +972,7 @@
   "website": "https://www.lockheedmartin.com",
   "sector": "other",
   "industry": "Aerospace & Defense",
+  "employees": 123000,
   "slug": "lockheed-martin"
  },
  {
@@ -927,6 +988,7 @@
   "website": "https://www.newyorklife.com",
   "sector": "other",
   "industry": "Insurance: Life, Health (Mutual)",
+  "employees": 14713,
   "slug": "new-york-life-insurance"
  },
  {
@@ -942,6 +1004,7 @@
   "website": "https://www.capitalone.com",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 76300,
   "slug": "capital-one-financial"
  },
  {
@@ -957,6 +1020,7 @@
   "website": "https://www.allstate.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Stock)",
+  "employees": 53150,
   "slug": "allstate"
  },
  {
@@ -972,6 +1036,7 @@
   "website": "https://www.caterpillar.com",
   "sector": "other",
   "industry": "Construction and Farm Machinery",
+  "employees": 118000,
   "slug": "caterpillar"
  },
  {
@@ -987,6 +1052,7 @@
   "website": "https://www.ibm.com",
   "sector": "tech",
   "industry": "Information Technology Services",
+  "employees": 278100,
   "slug": "ibm"
  },
  {
@@ -1002,6 +1068,7 @@
   "website": "https://www.lilly.com",
   "sector": "other",
   "industry": "Pharmaceuticals",
+  "employees": 50000,
   "slug": "eli-lilly"
  },
  {
@@ -1017,6 +1084,7 @@
   "website": "http://www.merck.com",
   "sector": "other",
   "industry": "Pharmaceuticals",
+  "employees": 74000,
   "slug": "merck"
  },
  {
@@ -1032,6 +1100,7 @@
   "website": "https://www.nationwide.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Mutual)",
+  "employees": 21716,
   "slug": "nationwide"
  },
  {
@@ -1047,6 +1116,7 @@
   "website": "https://www.broadcom.com",
   "sector": "tech",
   "industry": "Semiconductors and Other Electronic Components",
+  "employees": 33000,
   "slug": "broadcom"
  },
  {
@@ -1062,6 +1132,7 @@
   "website": "https://www.delta.com",
   "sector": "other",
   "industry": "Airlines",
+  "employees": 103000,
   "slug": "delta-air-lines"
  },
  {
@@ -1077,6 +1148,7 @@
   "website": "http://www.publix.com",
   "sector": "other",
   "industry": "Food and Drug Stores",
+  "employees": 260000,
   "slug": "publix-super-markets"
  },
  {
@@ -1092,6 +1164,7 @@
   "website": "https://www.pfizer.com",
   "sector": "other",
   "industry": "Pharmaceuticals",
+  "employees": 75000,
   "slug": "pfizer"
  },
  {
@@ -1107,6 +1180,7 @@
   "website": "https://www.techdata.com",
   "sector": "other",
   "industry": "Wholesalers: Electronics and Office Equipment",
+  "employees": 27000,
   "slug": "tech-data"
  },
  {
@@ -1122,6 +1196,7 @@
   "website": "http://www.conocophillips.com",
   "sector": "other",
   "industry": "Mining, Crude-Oil Production",
+  "employees": 9900,
   "slug": "conocophillips"
  },
  {
@@ -1137,8 +1212,9 @@
   "website": "",
   "sector": "other",
   "industry": "Securities",
+  "employees": 700,
   "slug": "galaxy-digital",
-  "model": "bank"
+  "model": "payments"
  },
  {
   "rank": 77,
@@ -1153,6 +1229,7 @@
   "website": "https://www.abbvie.com",
   "sector": "other",
   "industry": "Pharmaceuticals",
+  "employees": 57000,
   "slug": "abbvie"
  },
  {
@@ -1168,6 +1245,7 @@
   "website": "https://www.prudential.com",
   "sector": "other",
   "industry": "Insurance: Life, Health (stock)",
+  "employees": 36607,
   "slug": "prudential-financial"
  },
  {
@@ -1183,6 +1261,7 @@
   "website": "https://www.tjx.com",
   "sector": "other",
   "industry": "Specialty Retailers: Apparel",
+  "employees": 377000,
   "slug": "tjx"
  },
  {
@@ -1198,6 +1277,7 @@
   "website": "http://www.pfgc.com",
   "sector": "other",
   "industry": "Wholesalers: Food and Grocery",
+  "employees": 42785,
   "slug": "performance-food-group"
  },
  {
@@ -1213,6 +1293,7 @@
   "website": "https://www.united.com",
   "sector": "other",
   "industry": "Airlines",
+  "employees": 113200,
   "slug": "united-continental-holdings"
  },
  {
@@ -1228,6 +1309,7 @@
   "website": "https://www.oracle.com",
   "sector": "tech",
   "industry": "Computer Software",
+  "employees": 162000,
   "slug": "oracle"
  },
  {
@@ -1243,6 +1325,7 @@
   "website": "https://www.cisco.com",
   "sector": "tech",
   "industry": "Network and Other Communications Equipment",
+  "employees": 86200,
   "slug": "cisco-systems"
  },
  {
@@ -1258,6 +1341,7 @@
   "website": "https://www8.hp.com",
   "sector": "tech",
   "industry": "Computers, Office Equipment",
+  "employees": 55000,
   "slug": "hp"
  },
  {
@@ -1273,6 +1357,7 @@
   "website": "http://ir.charter.com",
   "sector": "other",
   "industry": "Telecommunications",
+  "employees": 91900,
   "slug": "charter-communications"
  },
  {
@@ -1288,6 +1373,7 @@
   "website": "https://www.aa.com",
   "sector": "other",
   "industry": "Airlines",
+  "employees": 139100,
   "slug": "american-airlines-group"
  },
  {
@@ -1303,6 +1389,7 @@
   "website": "https://www.tyson.com",
   "sector": "other",
   "industry": "Food Production",
+  "employees": 133000,
   "slug": "tyson-foods"
  },
  {
@@ -1318,6 +1405,7 @@
   "website": "https://www.intel.com",
   "sector": "tech",
   "industry": "Semiconductors and Other Electronic Components",
+  "employees": 85100,
   "slug": "intel"
  },
  {
@@ -1333,6 +1421,7 @@
   "website": "https://www.enterpriseproducts.com",
   "sector": "other",
   "industry": "Pipelines",
+  "employees": 8000,
   "slug": "enterprise-products-partners"
  },
  {
@@ -1348,6 +1437,7 @@
   "website": "",
   "sector": "other",
   "industry": "Wholesalers: Electronics and Office Equipment",
+  "employees": 25100,
   "slug": "ingram-micro-holding",
   "model": "industrial"
  },
@@ -1364,6 +1454,7 @@
   "website": "https://www.gd.com",
   "sector": "other",
   "industry": "Aerospace & Defense",
+  "employees": 117000,
   "slug": "general-dynamics"
  },
  {
@@ -1379,8 +1470,9 @@
   "website": "",
   "sector": "tech",
   "industry": "Internet Services and Retailing",
+  "employees": 34000,
   "slug": "uber-technologies",
-  "model": "software"
+  "model": "car"
  },
  {
   "rank": 93,
@@ -1395,6 +1487,7 @@
   "website": "https://www.usaa.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Stock)",
+  "employees": 37380,
   "slug": "usaa"
  },
  {
@@ -1410,6 +1503,7 @@
   "website": "https://www.tiaa.org",
   "sector": "other",
   "industry": "Insurance: Life, Health (Mutual)",
+  "employees": 13676,
   "slug": "tiaa"
  },
  {
@@ -1425,6 +1519,7 @@
   "website": "https://www.libertymutual.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Stock)",
+  "employees": 40000,
   "slug": "liberty-mutual-insurance-group"
  },
  {
@@ -1440,6 +1535,7 @@
   "website": "https://www.travelers.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Stock)",
+  "employees": 34000,
   "slug": "travelers"
  },
  {
@@ -1455,6 +1551,7 @@
   "website": "https://www.bms.com",
   "sector": "other",
   "industry": "Pharmaceuticals",
+  "employees": 32500,
   "slug": "bristol-myers-squibb"
  },
  {
@@ -1470,6 +1567,7 @@
   "website": "http://www.coca-cola.com",
   "sector": "other",
   "industry": "Beverages",
+  "employees": 65900,
   "slug": "coca-cola"
  },
  {
@@ -1485,6 +1583,7 @@
   "website": "https://www.nike.com",
   "sector": "other",
   "industry": "Apparel",
+  "employees": 77800,
   "slug": "nike"
  },
  {
@@ -1500,6 +1599,7 @@
   "website": "https://www.massmutual.com",
   "sector": "other",
   "industry": "Insurance: Life, Health (Mutual)",
+  "employees": 11329,
   "slug": "massachusetts-mutual-life-insurance"
  },
  {
@@ -1515,6 +1615,7 @@
   "website": "https://www.ge.com",
   "sector": "other",
   "industry": "Aerospace & Defense",
+  "employees": 57000,
   "slug": "general-electric"
  },
  {
@@ -1530,6 +1631,7 @@
   "website": "https://www.deere.com",
   "sector": "other",
   "industry": "Construction and Farm Machinery",
+  "employees": 52800,
   "slug": "deere"
  },
  {
@@ -1545,6 +1647,7 @@
   "website": "http://ir.pagp.com",
   "sector": "other",
   "industry": "Pipelines",
+  "employees": 3900,
   "slug": "plains-gp-holdings"
  },
  {
@@ -1560,6 +1663,7 @@
   "website": "http://www.molinahealthcare.com",
   "sector": "other",
   "industry": "Health Care: Insurance and Managed Care",
+  "employees": 19000,
   "slug": "molina-healthcare"
  },
  {
@@ -1575,6 +1679,7 @@
   "website": "https://www.netflix.com",
   "sector": "tech",
   "industry": "Entertainment",
+  "employees": 16000,
   "slug": "netflix"
  },
  {
@@ -1590,6 +1695,7 @@
   "website": "https://www.thermofisher.com",
   "sector": "other",
   "industry": "Medical Products and Equipment",
+  "employees": 125000,
   "slug": "thermo-fisher-scientific"
  },
  {
@@ -1605,6 +1711,7 @@
   "website": "https://www.abbott.com",
   "sector": "other",
   "industry": "Medical Products and Equipment",
+  "employees": 115000,
   "slug": "abbott-laboratories"
  },
  {
@@ -1620,6 +1727,7 @@
   "website": "https://www.qualcomm.com",
   "sector": "tech",
   "industry": "Semiconductors and Other Electronic Components",
+  "employees": 52000,
   "slug": "qualcomm"
  },
  {
@@ -1635,6 +1743,7 @@
   "website": "https://www.northwesternmutual.com",
   "sector": "other",
   "industry": "Insurance: Life, Health (Mutual)",
+  "employees": 8311,
   "slug": "northwestern-mutual"
  },
  {
@@ -1650,6 +1759,7 @@
   "website": "https://www.usbank.com",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 68520,
   "slug": "u-s-bancorp"
  },
  {
@@ -1665,6 +1775,7 @@
   "website": "https://www.dollargeneral.com",
   "sector": "other",
   "industry": "Specialty Retailers: Other",
+  "employees": 194000,
   "slug": "dollar-general"
  },
  {
@@ -1680,6 +1791,7 @@
   "website": "http://www.northropgrumman.com",
   "sector": "other",
   "industry": "Aerospace & Defense",
+  "employees": 95000,
   "slug": "northrop-grumman"
  },
  {
@@ -1695,6 +1807,7 @@
   "website": "https://www.bestbuy.com",
   "sector": "other",
   "industry": "Specialty Retailers: Other",
+  "employees": 82000,
   "slug": "best-buy"
  },
  {
@@ -1710,6 +1823,7 @@
   "website": "https://www.salesforce.com",
   "sector": "tech",
   "industry": "Computer Software",
+  "employees": 83334,
   "slug": "salesforce"
  },
  {
@@ -1725,6 +1839,7 @@
   "website": "https://www.bnymellon.com",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 48100,
   "slug": "bank-of-new-york-mellon"
  },
  {
@@ -1740,6 +1855,7 @@
   "website": "https://www.honeywell.com",
   "sector": "other",
   "industry": "Industrial Machinery",
+  "employees": 101000,
   "slug": "honeywell-international"
  },
  {
@@ -1755,6 +1871,7 @@
   "website": "https://www.pmi.com",
   "sector": "other",
   "industry": "Tobacco",
+  "employees": 84900,
   "slug": "philip-morris-international"
  },
  {
@@ -1770,6 +1887,7 @@
   "website": "https://www.cbre.us",
   "sector": "other",
   "industry": "Real estate",
+  "employees": 155000,
   "slug": "cbre-group"
  },
  {
@@ -1785,6 +1903,7 @@
   "website": "https://usa.visa.com",
   "sector": "other",
   "industry": "Financial Data Services",
+  "employees": 34100,
   "slug": "visa"
  },
  {
@@ -1800,6 +1919,7 @@
   "website": "",
   "sector": "other",
   "industry": "Chemicals",
+  "employees": 34600,
   "slug": "dow",
   "model": "chem"
  },
@@ -1816,6 +1936,7 @@
   "website": "https://www.usfoods.com",
   "sector": "other",
   "industry": "Wholesalers: Food and Grocery",
+  "employees": 30000,
   "slug": "us-foods-holding"
  },
  {
@@ -1831,6 +1952,7 @@
   "website": "https://www.mondelezinternational.com",
   "sector": "other",
   "industry": "Food Consumer Products",
+  "employees": 91000,
   "slug": "mondelez-international"
  },
  {
@@ -1846,6 +1968,7 @@
   "website": "https://www.lithiamotors.com",
   "sector": "other",
   "industry": "Automotive Retailing, Services",
+  "employees": 30847,
   "slug": "lithia-motors"
  },
  {
@@ -1861,6 +1984,7 @@
   "website": "",
   "sector": "other",
   "industry": "Energy",
+  "employees": 78000,
   "slug": "ge-vernova",
   "model": "power"
  },
@@ -1877,6 +2001,7 @@
   "website": "https://www.micron.com",
   "sector": "tech",
   "industry": "Semiconductors and Other Electronic Components",
+  "employees": 53000,
   "slug": "micron-technology"
  },
  {
@@ -1892,6 +2017,7 @@
   "website": "https://corporate.discovery.com",
   "sector": "other",
   "industry": "Entertainment",
+  "employees": 35500,
   "slug": "discovery"
  },
  {
@@ -1907,6 +2033,7 @@
   "website": "https://www.starbucks.com",
   "sector": "other",
   "industry": "Food Services",
+  "employees": 381000,
   "slug": "starbucks"
  },
  {
@@ -1922,6 +2049,7 @@
   "website": "https://www.wfscorp.com",
   "sector": "other",
   "industry": "Energy",
+  "employees": 4003,
   "slug": "world-fuel-services"
  },
  {
@@ -1937,6 +2065,7 @@
   "website": "https://www.amgen.com",
   "sector": "other",
   "industry": "Pharmaceuticals",
+  "employees": 31500,
   "slug": "amgen"
  },
  {
@@ -1952,6 +2081,7 @@
   "website": "http://www.chsinc.com",
   "sector": "other",
   "industry": "Food Production",
+  "employees": 10683,
   "slug": "chs"
  },
  {
@@ -1967,6 +2097,7 @@
   "website": "https://www.amd.com",
   "sector": "tech",
   "industry": "Semiconductors and Other Electronic Components",
+  "employees": 31000,
   "slug": "advanced-micro-devices"
  },
  {
@@ -1982,8 +2113,9 @@
   "website": "",
   "sector": "tech",
   "industry": "Internet Services and Retailing",
+  "employees": 108000,
   "slug": "coupang",
-  "model": "software"
+  "model": "parcel"
  },
  {
   "rank": 133,
@@ -1998,6 +2130,7 @@
   "website": "https://www.hpe.com",
   "sector": "tech",
   "industry": "Computers, Office Equipment",
+  "employees": 67000,
   "slug": "hewlett-packard-enterprise"
  },
  {
@@ -2013,6 +2146,7 @@
   "website": "http://www.drhorton.com",
   "sector": "other",
   "industry": "Homebuilders",
+  "employees": 14341,
   "slug": "d-r-horton"
  },
  {
@@ -2028,6 +2162,7 @@
   "website": "https://www.lennar.com",
   "sector": "other",
   "industry": "Homebuilders",
+  "employees": 12532,
   "slug": "lennar"
  },
  {
@@ -2043,6 +2178,7 @@
   "website": "https://www.pnc.com",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 54596,
   "slug": "pnc-financial-services"
  },
  {
@@ -2058,6 +2194,7 @@
   "website": "https://www.cummins.com",
   "sector": "other",
   "industry": "Industrial Machinery",
+  "employees": 67400,
   "slug": "cummins"
  },
  {
@@ -2073,6 +2210,7 @@
   "website": "http://www.oneok.com",
   "sector": "other",
   "industry": "Pipelines",
+  "employees": 6326,
   "slug": "oneok"
  },
  {
@@ -2088,6 +2226,7 @@
   "website": "https://investor.paypal-corp.com",
   "sector": "other",
   "industry": "Financial Data Services",
+  "employees": 23800,
   "slug": "paypal-holdings"
  },
  {
@@ -2103,6 +2242,7 @@
   "website": "",
   "sector": "other",
   "industry": "Insurance: Life, Health (stock)",
+  "employees": 15431,
   "slug": "guidewell-mutual-holding",
   "model": "insurance"
  },
@@ -2119,6 +2259,7 @@
   "website": "https://www.mastercard.us",
   "sector": "other",
   "industry": "Financial Data Services",
+  "employees": 39800,
   "slug": "mastercard"
  },
  {
@@ -2134,6 +2275,7 @@
   "website": "http://www.nucor.com",
   "sector": "other",
   "industry": "Metals",
+  "employees": 33000,
   "slug": "nucor"
  },
  {
@@ -2149,6 +2291,7 @@
   "website": "",
   "sector": "other",
   "industry": "Securities",
+  "employees": 6140,
   "slug": "apollo-global-management",
   "model": "bank"
  },
@@ -2165,6 +2308,7 @@
   "website": "http://www.penskeautomotive.com",
   "sector": "other",
   "industry": "Automotive Retailing, Services",
+  "employees": 27700,
   "slug": "penske-automotive-group"
  },
  {
@@ -2180,6 +2324,7 @@
   "website": "https://www.duke-energy.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 26441,
   "slug": "duke-energy"
  },
  {
@@ -2195,6 +2340,7 @@
   "website": "https://www.unfi.com",
   "sector": "other",
   "industry": "Wholesalers: Food and Grocery",
+  "employees": 25600,
   "slug": "united-natural-foods"
  },
  {
@@ -2210,6 +2356,7 @@
   "website": "",
   "sector": "other",
   "industry": "Wholesalers: Diversified",
+  "employees": 35000,
   "slug": "ferguson-enterprises",
   "model": "retail"
  },
@@ -2226,6 +2373,7 @@
   "website": "https://www.arrow.com",
   "sector": "other",
   "industry": "Wholesalers: Electronics and Office Equipment",
+  "employees": 22230,
   "slug": "arrow-electronics"
  },
  {
@@ -2241,6 +2389,7 @@
   "website": "https://www.nrg.com",
   "sector": "other",
   "industry": "Energy",
+  "employees": 16702,
   "slug": "nrg-energy"
  },
  {
@@ -2256,6 +2405,7 @@
   "website": "https://www.bbt.com",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 37898,
   "slug": "truist-financial"
  },
  {
@@ -2271,6 +2421,7 @@
   "website": "https://www.jabil.com",
   "sector": "tech",
   "industry": "Semiconductors and Other Electronic Components",
+  "employees": 135000,
   "slug": "jabil"
  },
  {
@@ -2286,6 +2437,7 @@
   "website": "https://www.southerncompany.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 29651,
   "slug": "southern"
  },
  {
@@ -2301,6 +2453,7 @@
   "website": "https://www.gilead.com",
   "sector": "other",
   "industry": "Pharmaceuticals",
+  "employees": 17000,
   "slug": "gilead-sciences"
  },
  {
@@ -2316,6 +2469,7 @@
   "website": "http://www.pbfenergy.com",
   "sector": "other",
   "industry": "Petroleum Refining",
+  "employees": 3678,
   "slug": "pbf-energy"
  },
  {
@@ -2331,6 +2485,7 @@
   "website": "http://www.viacom.com",
   "sector": "other",
   "industry": "Entertainment",
+  "employees": 19400,
   "slug": "viacom"
  },
  {
@@ -2346,6 +2501,7 @@
   "website": "",
   "sector": "other",
   "industry": "Securities",
+  "employees": 5043,
   "slug": "kkr",
   "model": "bank"
  },
@@ -2362,6 +2518,7 @@
   "website": "http://www.quantaservices.com",
   "sector": "other",
   "industry": "Engineering & Construction",
+  "employees": 69500,
   "slug": "quanta-services"
  },
  {
@@ -2377,6 +2534,7 @@
   "website": "http://www.paccar.com",
   "sector": "other",
   "industry": "Motor Vehicles & Parts",
+  "employees": 25900,
   "slug": "paccar"
  },
  {
@@ -2392,6 +2550,7 @@
   "website": "",
   "sector": "other",
   "industry": "Medical Products and Equipment",
+  "employees": 45000,
   "slug": "medline",
   "model": "health"
  },
@@ -2408,6 +2567,7 @@
   "website": "http://www.appliedmaterials.com",
   "sector": "tech",
   "industry": "Semiconductors and Other Electronic Components",
+  "employees": 36500,
   "slug": "applied-materials"
  },
  {
@@ -2423,6 +2583,7 @@
   "website": "",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Stock)",
+  "employees": 19200,
   "slug": "hartford-insurance-group",
   "model": "insurance"
  },
@@ -2439,6 +2600,7 @@
   "website": "https://www.carmax.com",
   "sector": "other",
   "industry": "Automotive Retailing, Services",
+  "employees": 30048,
   "slug": "carmax"
  },
  {
@@ -2454,6 +2616,7 @@
   "website": "https://www.southwest.com",
   "sector": "other",
   "industry": "Airlines",
+  "employees": 72790,
   "slug": "southwest-airlines"
  },
  {
@@ -2469,6 +2632,7 @@
   "website": "",
   "sector": "other",
   "industry": "Oil and Gas Equipment, Services",
+  "employees": 56000,
   "slug": "baker-hughes",
   "model": "oil"
  },
@@ -2485,6 +2649,7 @@
   "website": "https://www.schwab.com",
   "sector": "other",
   "industry": "Securities",
+  "employees": 33000,
   "slug": "charles-schwab"
  },
  {
@@ -2500,6 +2665,7 @@
   "website": "https://www.autonation.com",
   "sector": "other",
   "industry": "Automotive Retailing, Services",
+  "employees": 24800,
   "slug": "autonation"
  },
  {
@@ -2515,6 +2681,7 @@
   "website": "http://www.nexteraenergy.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 17400,
   "slug": "nextera-energy"
  },
  {
@@ -2530,6 +2697,7 @@
   "website": "http://www.mmc.com",
   "sector": "other",
   "industry": "Diversified Financials",
+  "employees": 95000,
   "slug": "marsh-and-mclennan"
  },
  {
@@ -2545,6 +2713,7 @@
   "website": "https://www.bookingholdings.com",
   "sector": "tech",
   "industry": "Internet Services and Retailing",
+  "employees": 23936,
   "slug": "booking-holdings"
  },
  {
@@ -2560,6 +2729,7 @@
   "website": "https://www.mcdonalds.com",
   "sector": "other",
   "industry": "Food Services",
+  "employees": 150000,
   "slug": "mcdonalds"
  },
  {
@@ -2575,6 +2745,7 @@
   "website": "",
   "sector": "other",
   "industry": "Petroleum Refining",
+  "employees": 5165,
   "slug": "hf-sinclair",
   "model": "oil"
  },
@@ -2591,6 +2762,7 @@
   "website": "http://www.aig.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Stock)",
+  "employees": 22100,
   "slug": "aig"
  },
  {
@@ -2606,6 +2778,7 @@
   "website": "https://www.oxy.com",
   "sector": "other",
   "industry": "Mining, Crude-Oil Production",
+  "employees": 10412,
   "slug": "occidental-petroleum"
  },
  {
@@ -2621,6 +2794,7 @@
   "website": "https://www.marriott.com",
   "sector": "other",
   "industry": "Hotels, Casinos, Resorts",
+  "employees": 148000,
   "slug": "marriott-international"
  },
  {
@@ -2636,6 +2810,7 @@
   "website": "http://www.us.jll.com",
   "sector": "other",
   "industry": "Real estate",
+  "employees": 113200,
   "slug": "jones-lang-lasalle"
  },
  {
@@ -2651,6 +2826,7 @@
   "website": "http://www.internationalpaper.com",
   "sector": "other",
   "industry": "Packaging, Containers",
+  "employees": 62602,
   "slug": "international-paper"
  },
  {
@@ -2666,6 +2842,7 @@
   "website": "https://www.fcx.com",
   "sector": "other",
   "industry": "Mining, Crude-Oil Production",
+  "employees": 29000,
   "slug": "freeport-mcmoran"
  },
  {
@@ -2681,6 +2858,7 @@
   "website": "",
   "sector": "other",
   "industry": "Energy",
+  "employees": 15315,
   "slug": "constellation-energy",
   "model": "power"
  },
@@ -2697,6 +2875,7 @@
   "website": "https://www.wm.com",
   "sector": "other",
   "industry": "Waste Management",
+  "employees": 60500,
   "slug": "waste-management"
  },
  {
@@ -2712,6 +2891,7 @@
   "website": "http://www.livenationentertainment.com",
   "sector": "other",
   "industry": "Entertainment",
+  "employees": 26200,
   "slug": "live-nation-entertainment"
  },
  {
@@ -2727,6 +2907,7 @@
   "website": "https://www.stryker.com",
   "sector": "other",
   "industry": "Medical Products and Equipment",
+  "employees": 56000,
   "slug": "stryker"
  },
  {
@@ -2742,6 +2923,7 @@
   "website": "https://www.dollartree.com",
   "sector": "other",
   "industry": "Specialty Retailers: Other",
+  "employees": 94107,
   "slug": "dollar-tree"
  },
  {
@@ -2757,6 +2939,7 @@
   "website": "https://www.3m.com",
   "sector": "other",
   "industry": "Chemicals",
+  "employees": 60500,
   "slug": "3m"
  },
  {
@@ -2772,6 +2955,7 @@
   "website": "http://www.kraftheinzcompany.com",
   "sector": "other",
   "industry": "Food Consumer Products",
+  "employees": 35000,
   "slug": "kraft-heinz"
  },
  {
@@ -2787,6 +2971,7 @@
   "website": "http://www.pgecorp.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 29010,
   "slug": "pg-and-e"
  },
  {
@@ -2802,6 +2987,7 @@
   "website": "http://www.danaher.com",
   "sector": "other",
   "industry": "Medical Products and Equipment",
+  "employees": 59000,
   "slug": "danaher"
  },
  {
@@ -2817,6 +3003,7 @@
   "website": "https://www.up.com",
   "sector": "other",
   "industry": "Railroads",
+  "employees": 29287,
   "slug": "union-pacific"
  },
  {
@@ -2832,6 +3019,7 @@
   "website": "https://www.genpt.com",
   "sector": "other",
   "industry": "Wholesalers: Diversified",
+  "employees": 65000,
   "slug": "genuine-parts"
  },
  {
@@ -2847,6 +3035,7 @@
   "website": "http://www.exeloncorp.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 20571,
   "slug": "exelon"
  },
  {
@@ -2862,6 +3051,7 @@
   "website": "https://www.blackrock.com",
   "sector": "other",
   "industry": "Securities",
+  "employees": 24900,
   "slug": "blackrock"
  },
  {
@@ -2877,6 +3067,7 @@
   "website": "",
   "sector": "tech",
   "industry": "Financial Data Services",
+  "employees": 10205,
   "slug": "block",
   "model": "payments"
  },
@@ -2893,6 +3084,7 @@
   "website": "https://www.adobe.com",
   "sector": "tech",
   "industry": "Computer Software",
+  "employees": 31360,
   "slug": "adobe"
  },
  {
@@ -2908,6 +3100,7 @@
   "website": "https://www.rgare.com",
   "sector": "other",
   "industry": "Insurance: Life, Health (stock)",
+  "employees": 4300,
   "slug": "reinsurance-group-of-america"
  },
  {
@@ -2923,6 +3116,7 @@
   "website": "https://www.sherwin-williams.com",
   "sector": "other",
   "industry": "Chemicals",
+  "employees": 64249,
   "slug": "sherwin-williams"
  },
  {
@@ -2938,6 +3132,7 @@
   "website": "https://www.wesco.com",
   "sector": "other",
   "industry": "Wholesalers: Diversified",
+  "employees": 21000,
   "slug": "wesco-international"
  },
  {
@@ -2953,6 +3148,7 @@
   "website": "http://www.lear.com",
   "sector": "other",
   "industry": "Motor Vehicles & Parts",
+  "employees": 164300,
   "slug": "lear"
  },
  {
@@ -2968,6 +3164,7 @@
   "website": "https://www.synchrony.com",
   "sector": "other",
   "industry": "Diversified Financials",
+  "employees": 20000,
   "slug": "synchrony-financial"
  },
  {
@@ -2983,6 +3180,7 @@
   "website": "https://www.amphenol.com",
   "sector": "tech",
   "industry": "Network and Other Communications Equipment",
+  "employees": 170000,
   "slug": "amphenol"
  },
  {
@@ -2998,6 +3196,7 @@
   "website": "https://www.rossstores.com",
   "sector": "other",
   "industry": "Specialty Retailers: Apparel",
+  "employees": 111000,
   "slug": "ross-stores"
  },
  {
@@ -3013,6 +3212,7 @@
   "website": "https://www.newmont.com",
   "sector": "other",
   "industry": "Mining, Crude-Oil Production",
+  "employees": 17500,
   "slug": "newmont-goldcorp"
  },
  {
@@ -3028,6 +3228,7 @@
   "website": "http://www.eogresources.com",
   "sector": "other",
   "industry": "Mining, Crude-Oil Production",
+  "employees": 3400,
   "slug": "eog-resources"
  },
  {
@@ -3043,6 +3244,7 @@
   "website": "http://www.statestreet.com",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 51503,
   "slug": "state-street-corp"
  },
  {
@@ -3058,6 +3260,7 @@
   "website": "https://www.macys.com",
   "sector": "other",
   "industry": "General Merchandisers",
+  "employees": 90134,
   "slug": "macys"
  },
  {
@@ -3073,6 +3276,7 @@
   "website": "https://www.group1auto.com",
   "sector": "other",
   "industry": "Automotive Retailing, Services",
+  "employees": 20452,
   "slug": "group-1-automotive"
  },
  {
@@ -3088,6 +3292,7 @@
   "website": "https://www.cdw.com",
   "sector": "tech",
   "industry": "Information Technology Services",
+  "employees": 14800,
   "slug": "cdw"
  },
  {
@@ -3103,6 +3308,7 @@
   "website": "https://www.avnet.com",
   "sector": "other",
   "industry": "Wholesalers: Electronics and Office Equipment",
+  "employees": 14869,
   "slug": "avnet"
  },
  {
@@ -3118,6 +3324,7 @@
   "website": "http://www.halliburton.com",
   "sector": "other",
   "industry": "Oil and Gas Equipment, Services",
+  "employees": 46000,
   "slug": "halliburton"
  },
  {
@@ -3133,6 +3340,7 @@
   "website": "",
   "sector": "tech",
   "industry": "Computers, Office Equipment",
+  "employees": 6238,
   "slug": "super-micro-computer",
   "model": "computer"
  },
@@ -3149,6 +3357,7 @@
   "website": "https://www.aep.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 17581,
   "slug": "american-electric-power"
  },
  {
@@ -3164,6 +3373,7 @@
   "website": "https://www.harris.com",
   "sector": "other",
   "industry": "Aerospace & Defense",
+  "employees": 45000,
   "slug": "l3harris-technologies"
  },
  {
@@ -3179,6 +3389,7 @@
   "website": "http://www.bd.com",
   "sector": "other",
   "industry": "Medical Products and Equipment",
+  "employees": 72000,
   "slug": "becton-dickinson"
  },
  {
@@ -3194,6 +3405,7 @@
   "website": "",
   "sector": "other",
   "industry": "Industrial Machinery",
+  "employees": 47000,
   "slug": "carrier-global",
   "model": "industrial"
  },
@@ -3210,6 +3422,7 @@
   "website": "https://www.bjs.com",
   "sector": "other",
   "industry": "General Merchandisers",
+  "employees": 35000,
   "slug": "bjs-wholesale-club"
  },
  {
@@ -3225,6 +3438,7 @@
   "website": "https://www.tenethealth.com",
   "sector": "other",
   "industry": "Health Care: Medical Facilities",
+  "employees": 87615,
   "slug": "tenet-healthcare"
  },
  {
@@ -3240,6 +3454,7 @@
   "website": "https://www.fiserv.com",
   "sector": "other",
   "industry": "Financial Data Services",
+  "employees": 38000,
   "slug": "fiserv"
  },
  {
@@ -3255,6 +3470,7 @@
   "website": "https://www.cognizant.com",
   "sector": "tech",
   "industry": "Information Technology Services",
+  "employees": 351600,
   "slug": "cognizant-technology-solutions"
  },
  {
@@ -3270,6 +3486,7 @@
   "website": "",
   "sector": "other",
   "industry": "Medical Products and Equipment",
+  "employees": 54000,
   "slug": "ge-healthcare",
   "model": "health"
  },
@@ -3286,6 +3503,7 @@
   "website": "https://www.adp.com",
   "sector": "other",
   "industry": "Diversified Outsourcing Services",
+  "employees": 67000,
   "slug": "adp"
  },
  {
@@ -3301,6 +3519,7 @@
   "website": "https://www.colgatepalmolive.com",
   "sector": "other",
   "industry": "Household and Personal Products",
+  "employees": 33600,
   "slug": "colgate-palmolive"
  },
  {
@@ -3316,6 +3535,7 @@
   "website": "",
   "sector": "other",
   "industry": "Automotive Retailing, Services",
+  "employees": 23100,
   "slug": "carvana",
   "model": "car"
  },
@@ -3332,6 +3552,7 @@
   "website": "http://www.altria.com",
   "sector": "other",
   "industry": "Tobacco",
+  "employees": 5900,
   "slug": "altria-group"
  },
  {
@@ -3347,6 +3568,7 @@
   "website": "https://www.bostonscientific.com",
   "sector": "other",
   "industry": "Medical Products and Equipment",
+  "employees": 59000,
   "slug": "boston-scientific"
  },
  {
@@ -3362,6 +3584,7 @@
   "website": "https://www.cheniere.com",
   "sector": "other",
   "industry": "Pipelines",
+  "employees": 1717,
   "slug": "cheniere-energy"
  },
  {
@@ -3377,6 +3600,7 @@
   "website": "http://www.parker.com",
   "sector": "other",
   "industry": "Industrial Machinery",
+  "employees": 57950,
   "slug": "parker-hannifin"
  },
  {
@@ -3392,6 +3616,7 @@
   "website": "https://www.kimberly-clark.com",
   "sector": "other",
   "industry": "Household and Personal Products",
+  "employees": 36000,
   "slug": "kimberly-clark"
  },
  {
@@ -3407,6 +3632,7 @@
   "website": "https://www.amfam.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Stock)",
+  "employees": 10435,
   "slug": "american-family-insurance-group"
  },
  {
@@ -3422,6 +3648,7 @@
   "website": "https://www.generalmills.com",
   "sector": "other",
   "industry": "Food Consumer Products",
+  "employees": 33000,
   "slug": "general-mills"
  },
  {
@@ -3437,6 +3664,7 @@
   "website": "https://www.edison.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 13725,
   "slug": "edison-international"
  },
  {
@@ -3452,6 +3680,7 @@
   "website": "https://www.autozone.com",
   "sector": "other",
   "industry": "Specialty Retailers: Other",
+  "employees": 104000,
   "slug": "autozone"
  },
  {
@@ -3467,6 +3696,7 @@
   "website": "https://www.ameriprise.com",
   "sector": "other",
   "industry": "Diversified Financials",
+  "employees": 13600,
   "slug": "ameriprise-financial"
  },
  {
@@ -3482,6 +3712,7 @@
   "website": "https://www.intuit.com",
   "sector": "tech",
   "industry": "Computer Software",
+  "employees": 24350,
   "slug": "intuit"
  },
  {
@@ -3497,6 +3728,7 @@
   "website": "https://www.guardianlife.com",
   "sector": "other",
   "industry": "Insurance: Life, Health (Mutual)",
+  "employees": 7645,
   "slug": "guardian-life-ins-co-of-america"
  },
  {
@@ -3512,6 +3744,7 @@
   "website": "",
   "sector": "other",
   "industry": "Metals",
+  "employees": 25000,
   "slug": "cleveland-cliffs",
   "model": "metal"
  },
@@ -3528,6 +3761,7 @@
   "website": "http://www.globalp.com",
   "sector": "other",
   "industry": "Energy",
+  "employees": 3982,
   "slug": "global-partners"
  },
  {
@@ -3543,6 +3777,7 @@
   "website": "https://www.aramark.com",
   "sector": "other",
   "industry": "Diversified Outsourcing Services",
+  "employees": 278390,
   "slug": "aramark"
  },
  {
@@ -3558,6 +3793,7 @@
   "website": "",
   "sector": "other",
   "industry": "Diversified Financials",
+  "employees": 4800,
   "slug": "corebridge-financial",
   "model": "bank"
  },
@@ -3574,6 +3810,7 @@
   "website": "https://loews.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Stock)",
+  "employees": 13100,
   "slug": "loews"
  },
  {
@@ -3589,6 +3826,7 @@
   "website": "https://www.lamresearch.com",
   "sector": "tech",
   "industry": "Semiconductors and Other Electronic Components",
+  "employees": 19000,
   "slug": "lam-research"
  },
  {
@@ -3604,6 +3842,7 @@
   "website": "https://www.goodyear.com",
   "sector": "other",
   "industry": "Motor Vehicles & Parts",
+  "employees": 63000,
   "slug": "goodyear-tire-and-rubber"
  },
  {
@@ -3619,6 +3858,7 @@
   "website": "https://www.pacificlife.com",
   "sector": "other",
   "industry": "Insurance: Life, Health (stock)",
+  "employees": 4664,
   "slug": "pacific-life"
  },
  {
@@ -3634,6 +3874,7 @@
   "website": "https://www.auto-owners.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Mutual)",
+  "employees": 7556,
   "slug": "auto-owners-insurance"
  },
  {
@@ -3649,6 +3890,7 @@
   "website": "https://www.kiewit.com",
   "sector": "other",
   "industry": "Engineering & Construction",
+  "employees": 34500,
   "slug": "peter-kiewit-sons"
  },
  {
@@ -3664,6 +3906,7 @@
   "website": "https://www.lfg.com",
   "sector": "other",
   "industry": "Insurance: Life, Health (stock)",
+  "employees": 9423,
   "slug": "lincoln-national"
  },
  {
@@ -3679,6 +3922,7 @@
   "website": "http://www.steeldynamics.com",
   "sector": "other",
   "industry": "Metals",
+  "employees": 14400,
   "slug": "steel-dynamics"
  },
  {
@@ -3694,6 +3938,7 @@
   "website": "http://www.emerson.com",
   "sector": "other",
   "industry": "Industrial Machinery",
+  "employees": 71000,
   "slug": "emerson-electric"
  },
  {
@@ -3709,6 +3954,7 @@
   "website": "https://www.asburyauto.com",
   "sector": "other",
   "industry": "Automotive Retailing, Services",
+  "employees": 15000,
   "slug": "asbury-automotive-group"
  },
  {
@@ -3724,6 +3970,7 @@
   "website": "https://www.manpowergroup.com",
   "sector": "other",
   "industry": "Diversified Outsourcing Services",
+  "employees": 25400,
   "slug": "manpowergroup"
  },
  {
@@ -3739,6 +3986,7 @@
   "website": "https://www.grainger.com",
   "sector": "other",
   "industry": "Wholesalers: Diversified",
+  "employees": 23550,
   "slug": "w-w-grainger"
  },
  {
@@ -3754,6 +4002,7 @@
   "website": "https://www.edwardjones.com",
   "sector": "other",
   "industry": "Securities",
+  "employees": 55000,
   "slug": "jones-financial-edward-jones"
  },
  {
@@ -3769,6 +4018,7 @@
   "website": "https://mohawkind.com",
   "sector": "other",
   "industry": "Specialty Retailers: Other",
+  "employees": 85591,
   "slug": "oreilly-automotive"
  },
  {
@@ -3784,6 +4034,7 @@
   "website": "",
   "sector": "other",
   "industry": "Energy",
+  "employees": 6390,
   "slug": "vistra",
   "model": "power"
  },
@@ -3800,6 +4051,7 @@
   "website": "http://www.ti.com",
   "sector": "tech",
   "industry": "Semiconductors and Other Electronic Components",
+  "employees": 33000,
   "slug": "texas-instruments"
  },
  {
@@ -3815,6 +4067,7 @@
   "website": "https://www.mgmresorts.com",
   "sector": "other",
   "industry": "Hotels, Casinos, Resorts",
+  "employees": 69000,
   "slug": "mgm-resorts-international"
  },
  {
@@ -3830,8 +4083,9 @@
   "website": "",
   "sector": "other",
   "industry": "Food Production",
+  "employees": 21500,
   "slug": "corteva",
-  "model": "food"
+  "model": "farm"
  },
  {
   "rank": 255,
@@ -3846,6 +4100,7 @@
   "website": "https://www.uhsinc.com",
   "sector": "other",
   "industry": "Health Care: Medical Facilities",
+  "employees": 89950,
   "slug": "universal-health-services"
  },
  {
@@ -3861,6 +4116,7 @@
   "website": "http://www.pultegroupinc.com",
   "sector": "other",
   "industry": "Homebuilders",
+  "employees": 6506,
   "slug": "pultegroup"
  },
  {
@@ -3876,6 +4132,7 @@
   "website": "http://www.omnicomgroup.com",
   "sector": "other",
   "industry": "Advertising, marketing",
+  "employees": 120000,
   "slug": "omnicom-group"
  },
  {
@@ -3891,6 +4148,7 @@
   "website": "https://www.dickssportinggoods.com",
   "sector": "other",
   "industry": "Specialty Retailers: Other",
+  "employees": 68400,
   "slug": "dicks-sporting-goods"
  },
  {
@@ -3906,6 +4164,7 @@
   "website": "http://www.devonenergy.com",
   "sector": "other",
   "industry": "Mining, Crude-Oil Production",
+  "employees": 2200,
   "slug": "devon-energy"
  },
  {
@@ -3921,6 +4180,7 @@
   "website": "https://www.leidos.com",
   "sector": "tech",
   "industry": "Information Technology Services",
+  "employees": 47000,
   "slug": "leidos-holdings"
  },
  {
@@ -3936,6 +4196,7 @@
   "website": "https://www.aflac.com",
   "sector": "other",
   "industry": "Insurance: Life, Health (stock)",
+  "employees": 12716,
   "slug": "aflac"
  },
  {
@@ -3951,6 +4212,7 @@
   "website": "http://www.targaresources.com",
   "sector": "other",
   "industry": "Pipelines",
+  "employees": 3570,
   "slug": "targa-resources"
  },
  {
@@ -3966,6 +4228,7 @@
   "website": "https://www.murphyusa.com",
   "sector": "other",
   "industry": "Specialty Retailers: Other",
+  "employees": 11400,
   "slug": "murphy-usa"
  },
  {
@@ -3981,6 +4244,7 @@
   "website": "",
   "sector": "other",
   "industry": "Securities",
+  "employees": 10099,
   "slug": "lpl-financial-holdings",
   "model": "bank"
  },
@@ -3997,6 +4261,7 @@
   "website": "https://emcorgroup.com",
   "sector": "other",
   "industry": "Engineering & Construction",
+  "employees": 44000,
   "slug": "emcor-group"
  },
  {
@@ -4012,6 +4277,7 @@
   "website": "https://www.kindermorgan.com",
   "sector": "other",
   "industry": "Pipelines",
+  "employees": 11028,
   "slug": "kinder-morgan"
  },
  {
@@ -4027,6 +4293,7 @@
   "website": "https://www.coned.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 15407,
   "slug": "consolidated-edison"
  },
  {
@@ -4042,6 +4309,7 @@
   "website": "https://www.keurigdrpepper.com",
   "sector": "other",
   "industry": "Beverages",
+  "employees": 30600,
   "slug": "keurig-dr-pepper"
  },
  {
@@ -4057,6 +4325,7 @@
   "website": "https://www.republicservices.com",
   "sector": "other",
   "industry": "Waste Management",
+  "employees": 42000,
   "slug": "republic-services"
  },
  {
@@ -4072,6 +4341,7 @@
   "website": "http://www.markelcorp.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Stock)",
+  "employees": 22900,
   "slug": "markel"
  },
  {
@@ -4087,6 +4357,7 @@
   "website": "https://www.farmers.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Mutual)",
+  "employees": 8909,
   "slug": "farmers-insurance-exchange"
  },
  {
@@ -4102,6 +4373,7 @@
   "website": "https://www.dominionenergy.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 15200,
   "slug": "dominion-energy"
  },
  {
@@ -4117,6 +4389,7 @@
   "website": "https://www.landolakesinc.com",
   "sector": "other",
   "industry": "Food Consumer Products",
+  "employees": 9000,
   "slug": "land-olakes"
  },
  {
@@ -4132,6 +4405,7 @@
   "website": "https://www.iqvia.com",
   "sector": "other",
   "industry": "Health Care: Pharmacy and Other Services",
+  "employees": 93000,
   "slug": "iqvia-holdings"
  },
  {
@@ -4147,6 +4421,7 @@
   "website": "https://www.21cf.com",
   "sector": "other",
   "industry": "Entertainment",
+  "employees": 10400,
   "slug": "twenty-first-century-fox"
  },
  {
@@ -4162,6 +4437,7 @@
   "website": "https://www.aecom.com",
   "sector": "other",
   "industry": "Engineering & Construction",
+  "employees": 51000,
   "slug": "aecom"
  },
  {
@@ -4177,6 +4453,7 @@
   "website": "https://www.chrobinson.com",
   "sector": "other",
   "industry": "Transportation and Logistics",
+  "employees": 11796,
   "slug": "c-h-robinson-worldwide"
  },
  {
@@ -4192,8 +4469,9 @@
   "website": "",
   "sector": "other",
   "industry": "Securities",
+  "employees": 603,
   "slug": "bitgo-holdings",
-  "model": "bank"
+  "model": "payments"
  },
  {
   "rank": 279,
@@ -4208,6 +4486,7 @@
   "website": "https://www.unitedrentals.com",
   "sector": "other",
   "industry": "Specialty Retailers: Other",
+  "employees": 28500,
   "slug": "united-rentals"
  },
  {
@@ -4223,6 +4502,7 @@
   "website": "https://www.ecolab.com",
   "sector": "other",
   "industry": "Chemicals",
+  "employees": 48000,
   "slug": "ecolab"
  },
  {
@@ -4238,6 +4518,7 @@
   "website": "http://www.itw.com",
   "sector": "other",
   "industry": "Industrial Machinery",
+  "employees": 43000,
   "slug": "illinois-tool-works"
  },
  {
@@ -4253,6 +4534,7 @@
   "website": "https://www.caseys.com",
   "sector": "other",
   "industry": "Specialty Retailers: Other",
+  "employees": 36305,
   "slug": "caseys-general-stores"
  },
  {
@@ -4268,6 +4550,7 @@
   "website": "https://www.raymondjames.com",
   "sector": "other",
   "industry": "Securities",
+  "employees": 19500,
   "slug": "raymond-james-financial"
  },
  {
@@ -4283,6 +4566,7 @@
   "website": "http://corporate.ppg.com",
   "sector": "other",
   "industry": "Chemicals",
+  "employees": 43500,
   "slug": "ppg-industries"
  },
  {
@@ -4298,6 +4582,7 @@
   "website": "https://www.newlook.dteenergy.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 9650,
   "slug": "dte-energy"
  },
  {
@@ -4313,6 +4598,7 @@
   "website": "https://www.corning.com",
   "sector": "other",
   "industry": "Electronics, Electrical Equip.",
+  "employees": 67200,
   "slug": "corning"
  },
  {
@@ -4328,6 +4614,7 @@
   "website": "https://www.principal.com",
   "sector": "other",
   "industry": "Insurance: Life, Health (stock)",
+  "employees": 19700,
   "slug": "principal-financial"
  },
  {
@@ -4343,6 +4630,7 @@
   "website": "",
   "sector": "other",
   "industry": "Insurance: Life, Health (Mutual)",
+  "employees": 6584,
   "slug": "mutual-of-omaha",
   "model": "insurance"
  },
@@ -4359,6 +4647,7 @@
   "website": "https://www.kohls.com",
   "sector": "other",
   "industry": "General Merchandisers",
+  "employees": 56500,
   "slug": "kohls"
  },
  {
@@ -4374,6 +4663,7 @@
   "website": "https://www.tractorsupply.com",
   "sector": "other",
   "industry": "Specialty Retailers: Other",
+  "employees": 39000,
   "slug": "tractor-supply"
  },
  {
@@ -4389,6 +4679,7 @@
   "website": "https://www.whirlpool.com",
   "sector": "other",
   "industry": "Electronics, Electrical Equip.",
+  "employees": 41000,
   "slug": "whirlpool"
  },
  {
@@ -4404,6 +4695,7 @@
   "website": "http://www.fluor.com",
   "sector": "other",
   "industry": "Engineering & Construction",
+  "employees": 22995,
   "slug": "fluor"
  },
  {
@@ -4419,6 +4711,7 @@
   "website": "https://www.gap.com",
   "sector": "other",
   "industry": "Specialty Retailers: Apparel",
+  "employees": 79000,
   "slug": "gap"
  },
  {
@@ -4434,6 +4727,7 @@
   "website": "https://www.spglobal.com",
   "sector": "other",
   "industry": "Financial Data Services",
+  "employees": 44500,
   "slug": "s-and-p-global"
  },
  {
@@ -4449,6 +4743,7 @@
   "website": "https://www.ally.com",
   "sector": "other",
   "industry": "Diversified Financials",
+  "employees": 10300,
   "slug": "ally-financial"
  },
  {
@@ -4464,6 +4759,7 @@
   "website": "https://www.bldr.com",
   "sector": "other",
   "industry": "Building Materials, Glass",
+  "employees": 28000,
   "slug": "builders-firstsource"
  },
  {
@@ -4479,6 +4775,7 @@
   "website": "https://www.sonicautomotive.com",
   "sector": "other",
   "industry": "Automotive Retailing, Services",
+  "employees": 11000,
   "slug": "sonic-automotive"
  },
  {
@@ -4494,6 +4791,7 @@
   "website": "http://www.stanleyblackanddecker.com",
   "sector": "other",
   "industry": "Industrial Machinery",
+  "employees": 43500,
   "slug": "stanley-black-and-decker"
  },
  {
@@ -4509,6 +4807,7 @@
   "website": "",
   "sector": "other",
   "industry": "Household and Personal Products",
+  "employees": 21890,
   "slug": "kenvue",
   "model": "care"
  },
@@ -4525,6 +4824,7 @@
   "website": "",
   "sector": "tech",
   "industry": "Information Technology Services",
+  "employees": 73000,
   "slug": "kyndryl-holdings",
   "model": "software"
  },
@@ -4541,6 +4841,7 @@
   "website": "",
   "sector": "other",
   "industry": "Mining, Crude-Oil Production",
+  "employees": 1762,
   "slug": "diamondback-energy",
   "model": "oil"
  },
@@ -4557,6 +4858,7 @@
   "website": "",
   "sector": "other",
   "industry": "Telecommunications",
+  "employees": 12100,
   "slug": "echostar",
   "model": "comms"
  },
@@ -4573,6 +4875,7 @@
   "website": "https://www.textron.com",
   "sector": "other",
   "industry": "Aerospace & Defense",
+  "employees": 34000,
   "slug": "textron"
  },
  {
@@ -4588,6 +4891,7 @@
   "website": "https://www.expedia.com",
   "sector": "tech",
   "industry": "Internet Services and Retailing",
+  "employees": 16000,
   "slug": "expedia-group"
  },
  {
@@ -4603,6 +4907,7 @@
   "website": "https://www.wrberkley.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Stock)",
+  "employees": 8804,
   "slug": "w-r-berkley"
  },
  {
@@ -4618,6 +4923,7 @@
   "website": "https://www.xcelenergy.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 11534,
   "slug": "xcel-energy"
  },
  {
@@ -4633,6 +4939,7 @@
   "website": "https://www.firstenergycorp.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 11186,
   "slug": "firstenergy"
  },
  {
@@ -4648,6 +4955,7 @@
   "website": "https://www.erieinsurance.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Mutual)",
+  "employees": 6700,
   "slug": "erie-insurance-group"
  },
  {
@@ -4663,6 +4971,7 @@
   "website": "",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 18008,
   "slug": "first-citizens-bancshares",
   "model": "bank"
  },
@@ -4679,6 +4988,7 @@
   "website": "https://www.blackstone.com",
   "sector": "other",
   "industry": "Diversified Financials",
+  "employees": 5285,
   "slug": "blackstone-group"
  },
  {
@@ -4694,6 +5004,7 @@
   "website": "http://www.fnf.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Stock)",
+  "employees": 24535,
   "slug": "fidelity-national-financial"
  },
  {
@@ -4709,6 +5020,7 @@
   "website": "",
   "sector": "other",
   "industry": "Industrial Machinery",
+  "employees": 72000,
   "slug": "otis-worldwide",
   "model": "industrial"
  },
@@ -4725,6 +5037,7 @@
   "website": "",
   "sector": "tech",
   "industry": "Information Technology Services",
+  "employees": 50000,
   "slug": "amentum-holdings",
   "model": "software"
  },
@@ -4741,6 +5054,7 @@
   "website": "https://www.regeneron.com",
   "sector": "other",
   "industry": "Pharmaceuticals",
+  "employees": 15410,
   "slug": "regeneron-pharmaceuticals"
  },
  {
@@ -4756,6 +5070,7 @@
   "website": "https://www.esteelauder.com",
   "sector": "other",
   "industry": "Household and Personal Products",
+  "employees": 48735,
   "slug": "estee-lauder"
  },
  {
@@ -4771,6 +5086,7 @@
   "website": "https://www.borgwarner.com",
   "sector": "other",
   "industry": "Motor Vehicles & Parts",
+  "employees": 37500,
   "slug": "borgwarner"
  },
  {
@@ -4786,6 +5102,7 @@
   "website": "https://www.northerntrust.com",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 23800,
   "slug": "northern-trust"
  },
  {
@@ -4801,6 +5118,7 @@
   "website": "",
   "sector": "other",
   "industry": "Pharmaceuticals",
+  "employees": 30000,
   "slug": "viatris",
   "model": "health"
  },
@@ -4817,6 +5135,7 @@
   "website": "https://www.mastec.com",
   "sector": "other",
   "industry": "Engineering & Construction",
+  "employees": 36000,
   "slug": "mastec"
  },
  {
@@ -4832,6 +5151,7 @@
   "website": "https://www.rsac.com",
   "sector": "other",
   "industry": "Metals",
+  "employees": 15900,
   "slug": "reliance-steel-and-aluminum"
  },
  {
@@ -4847,6 +5167,7 @@
   "website": "https://www.westernsouthern.com",
   "sector": "other",
   "industry": "Insurance: Life, Health (Mutual)",
+  "employees": 2733,
   "slug": "western-and-southern-financial-group"
  },
  {
@@ -4862,6 +5183,7 @@
   "website": "https://www.alaskaair.com",
   "sector": "other",
   "industry": "Airlines",
+  "employees": 33973,
   "slug": "alaska-air-group"
  },
  {
@@ -4877,6 +5199,7 @@
   "website": "",
   "sector": "other",
   "industry": "Health Care: Pharmacy and Other Services",
+  "employees": 23500,
   "slug": "brightspring-health-services",
   "model": "health"
  },
@@ -4893,6 +5216,7 @@
   "website": "https://www.csx.com",
   "sector": "other",
   "industry": "Railroads",
+  "employees": 22935,
   "slug": "csx"
  },
  {
@@ -4908,6 +5232,7 @@
   "website": "http://www.lkqcorp.com",
   "sector": "other",
   "industry": "Wholesalers: Diversified",
+  "employees": 44000,
   "slug": "lkq"
  },
  {
@@ -4923,6 +5248,7 @@
   "website": "https://www.labcorp.com",
   "sector": "other",
   "industry": "Health Care: Pharmacy and Other Services",
+  "employees": 66385,
   "slug": "laboratory-corp-of-america"
  },
  {
@@ -4938,6 +5264,7 @@
   "website": "https://www.ajg.com",
   "sector": "other",
   "industry": "Diversified Financials",
+  "employees": 71776,
   "slug": "arthur-j-gallagher"
  },
  {
@@ -4953,6 +5280,7 @@
   "website": "",
   "sector": "other",
   "industry": "Pipelines",
+  "employees": 2000,
   "slug": "venture-global",
   "model": "oil"
  },
@@ -4969,8 +5297,9 @@
   "website": "",
   "sector": "tech",
   "industry": "Internet Services and Retailing",
+  "employees": 31400,
   "slug": "doordash",
-  "model": "software"
+  "model": "food"
  },
  {
   "rank": 330,
@@ -4985,6 +5314,7 @@
   "website": "",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 15938,
   "slug": "sempra",
   "model": "power"
  },
@@ -5001,6 +5331,7 @@
   "website": "https://www.davita.com",
   "sector": "other",
   "industry": "Health Care: Medical Facilities",
+  "employees": 78000,
   "slug": "davita"
  },
  {
@@ -5016,6 +5347,7 @@
   "website": "https://www.eversource.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 10731,
   "slug": "eversource-energy"
  },
  {
@@ -5031,6 +5363,7 @@
   "website": "",
   "sector": "tech",
   "industry": "Computer Software",
+  "employees": 29187,
   "slug": "servicenow",
   "model": "software"
  },
@@ -5047,6 +5380,7 @@
   "website": "https://www.mtb.com",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 22058,
   "slug": "m-and-t-bank-corp"
  },
  {
@@ -5062,6 +5396,7 @@
   "website": "https://www.henryschein.com",
   "sector": "other",
   "industry": "Wholesalers: Health Care",
+  "employees": 25000,
   "slug": "henry-schein"
  },
  {
@@ -5077,6 +5412,7 @@
   "website": "",
   "sector": "other",
   "industry": "Transportation and Logistics",
+  "employees": 129500,
   "slug": "gxo-logistics",
   "model": "parcel"
  },
@@ -5093,6 +5429,7 @@
   "website": "http://www.ball.com",
   "sector": "other",
   "industry": "Packaging, Containers",
+  "employees": 16000,
   "slug": "ball"
  },
  {
@@ -5108,6 +5445,7 @@
   "website": "https://www.unum.com",
   "sector": "other",
   "industry": "Insurance: Life, Health (stock)",
+  "employees": 10797,
   "slug": "unum-group"
  },
  {
@@ -5123,6 +5461,7 @@
   "website": "https://www.sands.com",
   "sector": "other",
   "industry": "Hotels, Casinos, Resorts",
+  "employees": 41250,
   "slug": "las-vegas-sands"
  },
  {
@@ -5138,6 +5477,7 @@
   "website": "http://www.entergy.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 12233,
   "slug": "entergy"
  },
  {
@@ -5153,6 +5493,7 @@
   "website": "https://www.53.com",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 18676,
   "slug": "fifth-third-bancorp"
  },
  {
@@ -5168,6 +5509,7 @@
   "website": "https://www.graybar.com",
   "sector": "other",
   "industry": "Wholesalers: Diversified",
+  "employees": 10000,
   "slug": "graybar-electric"
  },
  {
@@ -5183,6 +5525,7 @@
   "website": "http://www.dxc.technology",
   "sector": "tech",
   "industry": "Information Technology Services",
+  "employees": 120000,
   "slug": "dxc-technology"
  },
  {
@@ -5198,6 +5541,7 @@
   "website": "https://www.alcoa.com",
   "sector": "other",
   "industry": "Metals",
+  "employees": 14900,
   "slug": "alcoa"
  },
  {
@@ -5213,6 +5557,7 @@
   "website": "https://www.assurant.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Stock)",
+  "employees": 14800,
   "slug": "assurant"
  },
  {
@@ -5228,6 +5573,7 @@
   "website": "https://ryder.com",
   "sector": "other",
   "industry": "Transportation and Logistics",
+  "employees": 51600,
   "slug": "ryder-system"
  },
  {
@@ -5243,6 +5589,7 @@
   "website": "https://www.intercontinentalexchange.com",
   "sector": "other",
   "industry": "Securities",
+  "employees": 12844,
   "slug": "intercontinental-exchange"
  },
  {
@@ -5258,6 +5605,7 @@
   "website": "",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Stock)",
+  "employees": 5705,
   "slug": "cincinnati-financial",
   "model": "insurance"
  },
@@ -5274,8 +5622,9 @@
   "website": "",
   "sector": "other",
   "industry": "Internet Services and Retailing",
+  "employees": 18000,
   "slug": "chewy",
-  "model": "software"
+  "model": "retail"
  },
  {
   "rank": 350,
@@ -5290,6 +5639,7 @@
   "website": "http://www.chs.net",
   "sector": "other",
   "industry": "Health Care: Medical Facilities",
+  "employees": 50500,
   "slug": "community-health-systems"
  },
  {
@@ -5305,6 +5655,7 @@
   "website": "",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 20424,
   "slug": "huntington-bancshares",
   "model": "bank"
  },
@@ -5321,6 +5672,7 @@
   "website": "http://www.huntingtoningalls.com",
   "sector": "other",
   "industry": "Aerospace & Defense",
+  "employees": 44000,
   "slug": "huntington-ingalls-industries"
  },
  {
@@ -5336,6 +5688,7 @@
   "website": "https://www.wayfair.com",
   "sector": "other",
   "industry": "Internet Services and Retailing",
+  "employees": 11800,
   "slug": "wayfair"
  },
  {
@@ -5351,6 +5704,7 @@
   "website": "https://www.centurylink.com",
   "sector": "other",
   "industry": "Telecommunications",
+  "employees": 24000,
   "slug": "centurylink"
  },
  {
@@ -5366,6 +5720,7 @@
   "website": "https://www.ulta.com",
   "sector": "other",
   "industry": "Specialty Retailers: Other",
+  "employees": 44101,
   "slug": "ulta-beauty"
  },
  {
@@ -5381,6 +5736,7 @@
   "website": "https://www.crowncork.com",
   "sector": "other",
   "industry": "Packaging, Containers",
+  "employees": 23000,
   "slug": "crown-holdings"
  },
  {
@@ -5396,8 +5752,9 @@
   "website": "",
   "sector": "tech",
   "industry": "Internet Services and Retailing",
+  "employees": 8200,
   "slug": "airbnb",
-  "model": "software"
+  "model": "house"
  },
  {
   "rank": 358,
@@ -5412,6 +5769,7 @@
   "website": "http://aes.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 8336,
   "slug": "aes"
  },
  {
@@ -5427,6 +5785,7 @@
   "website": "http://www.nscorp.com",
   "sector": "other",
   "industry": "Railroads",
+  "employees": 19300,
   "slug": "norfolk-southern"
  },
  {
@@ -5442,6 +5801,7 @@
   "website": "https://www.pseg.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 13189,
   "slug": "public-service-enterprise-group"
  },
  {
@@ -5457,6 +5817,7 @@
   "website": "",
   "sector": "tech",
   "industry": "Semiconductors and Other Electronic Components",
+  "employees": 15100,
   "slug": "kla",
   "model": "chip"
  },
@@ -5473,6 +5834,7 @@
   "website": "",
   "sector": "other",
   "industry": "Mining, Crude-Oil Production",
+  "employees": 1600,
   "slug": "expand-energy",
   "model": "oil"
  },
@@ -5489,6 +5851,7 @@
   "website": "https://www.hormelfoods.com",
   "sector": "other",
   "industry": "Food Consumer Products",
+  "employees": 20000,
   "slug": "hormel-foods"
  },
  {
@@ -5504,6 +5867,7 @@
   "website": "https://www.darden.com",
   "sector": "other",
   "industry": "Food Services",
+  "employees": 197924,
   "slug": "darden-restaurants"
  },
  {
@@ -5519,6 +5883,7 @@
   "website": "https://www.citizensbank.com",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 17398,
   "slug": "citizens-financial-group"
  },
  {
@@ -5534,6 +5899,7 @@
   "website": "https://www.mosaicco.com",
   "sector": "other",
   "industry": "Chemicals",
+  "employees": 13249,
   "slug": "mosaic"
  },
  {
@@ -5549,6 +5915,7 @@
   "website": "https://www.hilton.com",
   "sector": "other",
   "industry": "Hotels, Casinos, Resorts",
+  "employees": 182000,
   "slug": "hilton-worldwide-holdings"
  },
  {
@@ -5564,6 +5931,7 @@
   "website": "http://www.airproducts.com",
   "sector": "other",
   "industry": "Chemicals",
+  "employees": 21194,
   "slug": "air-products-and-chemicals"
  },
  {
@@ -5579,6 +5947,7 @@
   "website": "http://www.jacobs.com",
   "sector": "other",
   "industry": "Diversified Outsourcing Services",
+  "employees": 42100,
   "slug": "jacobs-engineering-group"
  },
  {
@@ -5594,6 +5963,7 @@
   "website": "",
   "sector": "other",
   "industry": "Pharmaceuticals",
+  "employees": 6400,
   "slug": "vertex-pharmaceuticals",
   "model": "health"
  },
@@ -5610,6 +5980,7 @@
   "website": "https://www.jbhunt.com",
   "sector": "other",
   "industry": "Trucking, Truck Leasing",
+  "employees": 31750,
   "slug": "j-b-hunt-transport-services"
  },
  {
@@ -5625,6 +5996,7 @@
   "website": "https://www.boozallen.com",
   "sector": "tech",
   "industry": "Information Technology Services",
+  "employees": 35800,
   "slug": "booz-allen-hamilton"
  },
  {
@@ -5640,6 +6012,7 @@
   "website": "http://co.williams.com",
   "sector": "other",
   "industry": "Pipelines",
+  "employees": 5987,
   "slug": "williams"
  },
  {
@@ -5655,6 +6028,7 @@
   "website": "",
   "sector": "other",
   "industry": "Food Services",
+  "employees": 130301,
   "slug": "chipotle-mexican-grill",
   "model": "food"
  },
@@ -5671,6 +6045,7 @@
   "website": "http://www.yum.com",
   "sector": "other",
   "industry": "Food Services",
+  "employees": 210000,
   "slug": "yum-china-holdings"
  },
  {
@@ -5686,6 +6061,7 @@
   "website": "",
   "sector": "other",
   "industry": "Health Care: Insurance and Managed Care",
+  "employees": 2305,
   "slug": "oscar-health",
   "model": "insurance"
  },
@@ -5702,6 +6078,7 @@
   "website": "https://www.hersheys.com",
   "sector": "other",
   "industry": "Food Consumer Products",
+  "employees": 18573,
   "slug": "hershey"
  },
  {
@@ -5717,6 +6094,7 @@
   "website": "https://www.motorolasolutions.com",
   "sector": "tech",
   "industry": "Network and Other Communications Equipment",
+  "employees": 23000,
   "slug": "motorola-solutions"
  },
  {
@@ -5732,6 +6110,7 @@
   "website": "",
   "sector": "other",
   "industry": "Insurance: Life, Health (stock)",
+  "employees": 8000,
   "slug": "equitable-holdings",
   "model": "insurance"
  },
@@ -5748,6 +6127,7 @@
   "website": "http://www.avisbudgetgroup.com",
   "sector": "other",
   "industry": "Automotive Retailing, Services",
+  "employees": 21000,
   "slug": "avis-budget-group"
  },
  {
@@ -5763,6 +6143,7 @@
   "website": "https://www.conagrabrands.com",
   "sector": "other",
   "industry": "Food Consumer Products",
+  "employees": 18300,
   "slug": "conagra-brands"
  },
  {
@@ -5778,6 +6159,7 @@
   "website": "https://www.baxter.com",
   "sector": "other",
   "industry": "Medical Products and Equipment",
+  "employees": 37500,
   "slug": "baxter-international"
  },
  {
@@ -5793,6 +6175,7 @@
   "website": "https://www.burlington.com",
   "sector": "other",
   "industry": "Specialty Retailers: Apparel",
+  "employees": 50402,
   "slug": "burlington-stores"
  },
  {
@@ -5808,6 +6191,7 @@
   "website": "https://www.caesars.com",
   "sector": "other",
   "industry": "Hotels, Casinos, Resorts",
+  "employees": 50000,
   "slug": "caesars-entertainment"
  },
  {
@@ -5823,6 +6207,7 @@
   "website": "https://www.owenscorning.com",
   "sector": "other",
   "industry": "Building Materials, Glass",
+  "employees": 25000,
   "slug": "owens-corning"
  },
  {
@@ -5838,6 +6223,7 @@
   "website": "https://www.key.com",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 17226,
   "slug": "keycorp"
  },
  {
@@ -5853,6 +6239,7 @@
   "website": "",
   "sector": "other",
   "industry": "Insurance: Life, Health (Mutual)",
+  "employees": 4498,
   "slug": "thrivent-financial",
   "model": "insurance"
  },
@@ -5869,6 +6256,7 @@
   "website": "https://www.westlake.com",
   "sector": "other",
   "industry": "Chemicals",
+  "employees": 14600,
   "slug": "westlake-chemical"
  },
  {
@@ -5884,6 +6272,7 @@
   "website": "",
   "sector": "other",
   "industry": "Industrial Machinery",
+  "employees": 31000,
   "slug": "westinghouse-air-brake",
   "model": "industrial"
  },
@@ -5900,6 +6289,7 @@
   "website": "https://www.molsoncoors.com",
   "sector": "other",
   "industry": "Beverages",
+  "employees": 16200,
   "slug": "molson-coors-brewing"
  },
  {
@@ -5915,6 +6305,7 @@
   "website": "",
   "sector": "other",
   "industry": "Specialty Retailers: Apparel",
+  "employees": 39000,
   "slug": "lululemon-athletica",
   "model": "retail"
  },
@@ -5931,6 +6322,7 @@
   "website": "",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Stock)",
+  "employees": 5897,
   "slug": "fm",
   "model": "insurance"
  },
@@ -5947,6 +6339,7 @@
   "website": "https://www.ebay.com",
   "sector": "tech",
   "industry": "Internet Services and Retailing",
+  "employees": 12300,
   "slug": "ebay"
  },
  {
@@ -5962,6 +6355,7 @@
   "website": "https://www.expeditors.com",
   "sector": "other",
   "industry": "Transportation and Logistics",
+  "employees": 20359,
   "slug": "expeditors-intl-of-washington"
  },
  {
@@ -5977,6 +6371,7 @@
   "website": "https://www.questdiagnostics.com",
   "sector": "other",
   "industry": "Health Care: Pharmacy and Other Services",
+  "employees": 51500,
   "slug": "quest-diagnostics"
  },
  {
@@ -5992,6 +6387,7 @@
   "website": "https://www.analog.com",
   "sector": "tech",
   "industry": "Semiconductors and Other Electronic Components",
+  "employees": 24500,
   "slug": "analog-devices"
  },
  {
@@ -6007,8 +6403,9 @@
   "website": "",
   "sector": "other",
   "industry": "Food Production",
+  "employees": 2083,
   "slug": "andersons",
-  "model": "food"
+  "model": "farm"
  },
  {
   "rank": 398,
@@ -6023,8 +6420,9 @@
   "website": "",
   "sector": "other",
   "industry": "Wholesalers: Diversified",
+  "employees": 975,
   "slug": "goldcom",
-  "model": "retail"
+  "model": "metal"
  },
  {
   "rank": 399,
@@ -6039,6 +6437,7 @@
   "website": "https://www.tollbrothers.com",
   "sector": "other",
   "industry": "Homebuilders",
+  "employees": 4900,
   "slug": "toll-brothers"
  },
  {
@@ -6054,6 +6453,7 @@
   "website": "",
   "sector": "other",
   "industry": "Chemicals",
+  "employees": 21500,
   "slug": "international-flavors-and-fragrances",
   "model": "chem"
  },
@@ -6070,6 +6470,7 @@
   "website": "",
   "sector": "other",
   "industry": "Real estate",
+  "employees": 712,
   "slug": "welltower",
   "model": "house"
  },
@@ -6086,6 +6487,7 @@
   "website": "http://www.jefferies.com",
   "sector": "other",
   "industry": "Diversified Financials",
+  "employees": 7787,
   "slug": "jefferies-financial-group"
  },
  {
@@ -6101,6 +6503,7 @@
   "website": "https://www.autoliv.com",
   "sector": "other",
   "industry": "Motor Vehicles & Parts",
+  "employees": 61085,
   "slug": "autoliv"
  },
  {
@@ -6116,6 +6519,7 @@
   "website": "https://mohawkind.com",
   "sector": "other",
   "industry": "Home Equipment, Furnishings",
+  "employees": 40500,
   "slug": "mohawk-industries"
  },
  {
@@ -6131,6 +6535,7 @@
   "website": "http://www.delekus.com",
   "sector": "other",
   "industry": "Petroleum Refining",
+  "employees": 1902,
   "slug": "delek-us-holdings"
  },
  {
@@ -6146,6 +6551,7 @@
   "website": "",
   "sector": "other",
   "industry": "Financial Data Services",
+  "employees": 44000,
   "slug": "fidelity-national-information-fis",
   "model": "payments"
  },
@@ -6162,6 +6568,7 @@
   "website": "",
   "sector": "other",
   "industry": "Wholesalers: Health Care",
+  "employees": 6500,
   "slug": "accendra-health",
   "model": "health"
  },
@@ -6178,6 +6585,7 @@
   "website": "http://www.americantower.com",
   "sector": "other",
   "industry": "Real estate",
+  "employees": 4866,
   "slug": "american-tower"
  },
  {
@@ -6193,6 +6601,7 @@
   "website": "http://www.nvrinc.com",
   "sector": "other",
   "industry": "Homebuilders",
+  "employees": 6300,
   "slug": "nvr"
  },
  {
@@ -6208,6 +6617,7 @@
   "website": "",
   "sector": "other",
   "industry": "Securities",
+  "employees": 3182,
   "slug": "interactive-brokers-group",
   "model": "bank"
  },
@@ -6224,6 +6634,7 @@
   "website": "https://www.oshkosh.com",
   "sector": "other",
   "industry": "Construction and Farm Machinery",
+  "employees": 18400,
   "slug": "oshkosh"
  },
  {
@@ -6239,6 +6650,7 @@
   "website": "https://www.cintas.com",
   "sector": "other",
   "industry": "Diversified Outsourcing Services",
+  "employees": 48300,
   "slug": "cintas"
  },
  {
@@ -6254,6 +6666,7 @@
   "website": "",
   "sector": "other",
   "industry": "Food Consumer Products",
+  "employees": 13700,
   "slug": "campbells",
   "model": "food"
  },
@@ -6270,8 +6683,9 @@
   "website": "",
   "sector": "other",
   "industry": "Electronics, Electrical Equip.",
+  "employees": 34000,
   "slug": "vertiv-holdings",
-  "model": "industrial"
+  "model": "power"
  },
  {
   "rank": 415,
@@ -6286,6 +6700,7 @@
   "website": "",
   "sector": "other",
   "industry": "Financial Data Services",
+  "employees": 26000,
   "slug": "global-payments",
   "model": "payments"
  },
@@ -6302,6 +6717,7 @@
   "website": "https://www.cbrands.com",
   "sector": "other",
   "industry": "Beverages",
+  "employees": 9300,
   "slug": "constellation-brands"
  },
  {
@@ -6317,6 +6733,7 @@
   "website": "http://www.agcocorp.com",
   "sector": "other",
   "industry": "Construction and Farm Machinery",
+  "employees": 22000,
   "slug": "agco"
  },
  {
@@ -6332,8 +6749,9 @@
   "website": "",
   "sector": "other",
   "industry": "Medical Products and Equipment",
+  "employees": 17021,
   "slug": "intuitive-surgical",
-  "model": "health"
+  "model": "robot"
  },
  {
   "rank": 419,
@@ -6348,6 +6766,7 @@
   "website": "",
   "sector": "other",
   "industry": "Wholesalers: Diversified",
+  "employees": 14000,
   "slug": "ace-hardware",
   "model": "retail"
  },
@@ -6364,6 +6783,7 @@
   "website": "http://www.dana.com",
   "sector": "other",
   "industry": "Motor Vehicles & Parts",
+  "employees": 26900,
   "slug": "dana"
  },
  {
@@ -6379,6 +6799,7 @@
   "website": "https://www.biogen.com",
   "sector": "other",
   "industry": "Pharmaceuticals",
+  "employees": 7500,
   "slug": "biogen"
  },
  {
@@ -6394,6 +6815,7 @@
   "website": "https://newscorp.com",
   "sector": "other",
   "industry": "Entertainment",
+  "employees": 22300,
   "slug": "news-corp"
  },
  {
@@ -6409,6 +6831,7 @@
   "website": "",
   "sector": "tech",
   "industry": "Information Technology Services",
+  "employees": 455000,
   "slug": "concentrix",
   "model": "software"
  },
@@ -6425,6 +6848,7 @@
   "website": "https://www.wecenergygroup.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 7151,
   "slug": "wec-energy-group"
  },
  {
@@ -6440,6 +6864,7 @@
   "website": "https://www.vfc.com",
   "sector": "other",
   "industry": "Apparel",
+  "employees": 21600,
   "slug": "vf"
  },
  {
@@ -6455,6 +6880,7 @@
   "website": "https://www.seaboardcorp.com",
   "sector": "other",
   "industry": "Food Production",
+  "employees": 14000,
   "slug": "seaboard"
  },
  {
@@ -6470,6 +6896,7 @@
   "website": "http://www.ielp.com",
   "sector": "other",
   "industry": "Diversified Financials",
+  "employees": 13547,
   "slug": "icahn-enterprises"
  },
  {
@@ -6485,6 +6912,7 @@
   "website": "http://ir.regions.com",
   "sector": "other",
   "industry": "Commercial Banks",
+  "employees": 19969,
   "slug": "regions-financial"
  },
  {
@@ -6500,6 +6928,7 @@
   "website": "https://www.thorindustries.com",
   "sector": "other",
   "industry": "Motor Vehicles & Parts",
+  "employees": 20900,
   "slug": "thor-industries"
  },
  {
@@ -6515,6 +6944,7 @@
   "website": "",
   "sector": "tech",
   "industry": "Computer Software",
+  "employees": 21070,
   "slug": "workday",
   "model": "software"
  },
@@ -6531,6 +6961,7 @@
   "website": "https://www.celanese.com",
   "sector": "other",
   "industry": "Chemicals",
+  "employees": 11434,
   "slug": "celanese"
  },
  {
@@ -6546,6 +6977,7 @@
   "website": "https://www.westerndigital.com",
   "sector": "tech",
   "industry": "Computers, Office Equipment",
+  "employees": 40000,
   "slug": "western-digital"
  },
  {
@@ -6561,8 +6993,9 @@
   "website": "",
   "sector": "other",
   "industry": "Internet Services and Retailing",
+  "employees": 18984,
   "slug": "qvc-group",
-  "model": "software"
+  "model": "media"
  },
  {
   "rank": 434,
@@ -6577,6 +7010,7 @@
   "website": "https://www.zoetis.com",
   "sector": "other",
   "industry": "Pharmaceuticals",
+  "employees": 14500,
   "slug": "zoetis"
  },
  {
@@ -6592,6 +7026,7 @@
   "website": "https://www.centerpointenergy.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 8794,
   "slug": "centerpoint-energy"
  },
  {
@@ -6607,8 +7042,9 @@
   "website": "",
   "sector": "other",
   "industry": "Real estate",
+  "employees": 13716,
   "slug": "equinix",
-  "model": "house"
+  "model": "computer"
  },
  {
   "rank": 437,
@@ -6623,8 +7059,9 @@
   "website": "",
   "sector": "tech",
   "industry": "Network and Other Communications Equipment",
+  "employees": 16068,
   "slug": "palo-alto-networks",
-  "model": "comms"
+  "model": "software"
  },
  {
   "rank": 438,
@@ -6639,6 +7076,7 @@
   "website": "",
   "sector": "other",
   "industry": "Mining, Crude-Oil Production",
+  "employees": 1791,
   "slug": "apa",
   "model": "oil"
  },
@@ -6655,6 +7093,7 @@
   "website": "http://www.oldrepublic.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Stock)",
+  "employees": 9500,
   "slug": "old-republic-international"
  },
  {
@@ -6670,6 +7109,7 @@
   "website": "",
   "sector": "other",
   "industry": "Engineering & Construction",
+  "employees": 22700,
   "slug": "comfort-systems-usa",
   "model": "industrial"
  },
@@ -6686,6 +7126,7 @@
   "website": "https://www.jetblue.com",
   "sector": "other",
   "industry": "Airlines",
+  "employees": 19259,
   "slug": "jetblue-airways"
  },
  {
@@ -6701,6 +7142,7 @@
   "website": "https://www.pplweb.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 6546,
   "slug": "ppl"
  },
  {
@@ -6716,6 +7158,7 @@
   "website": "",
   "sector": "other",
   "industry": "Industrial Machinery",
+  "employees": 22000,
   "slug": "xylem",
   "model": "industrial"
  },
@@ -6732,6 +7175,7 @@
   "website": "",
   "sector": "tech",
   "industry": "Network and Other Communications Equipment",
+  "employees": 5115,
   "slug": "arista-networks",
   "model": "comms"
  },
@@ -6748,6 +7192,7 @@
   "website": "https://www.packagingcorp.com",
   "sector": "other",
   "industry": "Packaging, Containers",
+  "employees": 16800,
   "slug": "packaging-corp-of-america"
  },
  {
@@ -6763,6 +7208,7 @@
   "website": "https://www.pvh.com",
   "sector": "other",
   "industry": "Apparel",
+  "employees": 20500,
   "slug": "pvh"
  },
  {
@@ -6778,6 +7224,7 @@
   "website": "",
   "sector": "other",
   "industry": "Mining, Crude-Oil Production",
+  "employees": 1465,
   "slug": "ovintiv",
   "model": "oil"
  },
@@ -6794,6 +7241,7 @@
   "website": "https://www.averydennison.com",
   "sector": "other",
   "industry": "Packaging, Containers",
+  "employees": 35000,
   "slug": "avery-dennison"
  },
  {
@@ -6809,8 +7257,9 @@
   "website": "",
   "sector": "other",
   "industry": "Aerospace & Defense",
+  "employees": 16500,
   "slug": "transdigm-group",
-  "model": "rocket"
+  "model": "plane"
  },
  {
   "rank": 450,
@@ -6825,6 +7274,7 @@
   "website": "",
   "sector": "other",
   "industry": "Food and Drug Stores",
+  "employees": 36000,
   "slug": "sprouts-farmers-market",
   "model": "retail"
  },
@@ -6841,8 +7291,9 @@
   "website": "",
   "sector": "other",
   "industry": "Real estate",
+  "employees": 2802,
   "slug": "prologis",
-  "model": "house"
+  "model": "parcel"
  },
  {
   "rank": 452,
@@ -6857,6 +7308,7 @@
   "website": "",
   "sector": "other",
   "industry": "Securities",
+  "employees": 9800,
   "slug": "franklin-templeton",
   "model": "bank"
  },
@@ -6873,6 +7325,7 @@
   "website": "https://www.eastman.com",
   "sector": "other",
   "industry": "Chemicals",
+  "employees": 13000,
   "slug": "eastman-chemical"
  },
  {
@@ -6888,6 +7341,7 @@
   "website": "https://www.abm.com",
   "sector": "other",
   "industry": "Diversified Outsourcing Services",
+  "employees": 113000,
   "slug": "abm-industries"
  },
  {
@@ -6903,6 +7357,7 @@
   "website": "",
   "sector": "other",
   "industry": "Oil and Gas Equipment, Services",
+  "employees": 31605,
   "slug": "nov",
   "model": "oil"
  },
@@ -6919,6 +7374,7 @@
   "website": "http://www.jmsmucker.com",
   "sector": "other",
   "industry": "Food Consumer Products",
+  "employees": 8000,
   "slug": "j-m-smucker"
  },
  {
@@ -6934,6 +7390,7 @@
   "website": "",
   "sector": "other",
   "industry": "Insurance: Life, Health (stock)",
+  "employees": 5708,
   "slug": "securian-financial-group",
   "model": "insurance"
  },
@@ -6950,6 +7407,7 @@
   "website": "",
   "sector": "other",
   "industry": "Energy",
+  "employees": 1523,
   "slug": "eqt",
   "model": "power"
  },
@@ -6966,6 +7424,7 @@
   "website": "",
   "sector": "tech",
   "industry": "Information Technology Services",
+  "employees": 25000,
   "slug": "caci-international",
   "model": "software"
  },
@@ -6982,6 +7441,7 @@
   "website": "https://www.graphicpkg.com",
   "sector": "other",
   "industry": "Packaging, Containers",
+  "employees": 23000,
   "slug": "graphic-packaging-holding"
  },
  {
@@ -6997,6 +7457,7 @@
   "website": "https://shop.advanceautoparts.com",
   "sector": "other",
   "industry": "Specialty Retailers: Other",
+  "employees": 41141,
   "slug": "advance-auto-parts"
  },
  {
@@ -7012,6 +7473,7 @@
   "website": "",
   "sector": "other",
   "industry": "Telecommunications",
+  "employees": 9500,
   "slug": "optimum-communications",
   "model": "comms"
  },
@@ -7028,6 +7490,7 @@
   "website": "",
   "sector": "other",
   "industry": "Entertainment",
+  "employees": 5119,
   "slug": "sirius-xm-holdings",
   "model": "media"
  },
@@ -7044,6 +7507,7 @@
   "website": "https://www.cmsenergy.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 8350,
   "slug": "cms-energy"
  },
  {
@@ -7059,6 +7523,7 @@
   "website": "https://ir.hertz.com",
   "sector": "other",
   "industry": "Automotive Retailing, Services",
+  "employees": 26000,
   "slug": "hertz-global-holdings"
  },
  {
@@ -7074,6 +7539,7 @@
   "website": "https://www.ameren.com",
   "sector": "other",
   "industry": "Utilities: Gas and Electric",
+  "employees": 8913,
   "slug": "ameren"
  },
  {
@@ -7089,6 +7555,7 @@
   "website": "https://www.rockwellautomation.com",
   "sector": "other",
   "industry": "Electronics, Electrical Equip.",
+  "employees": 26000,
   "slug": "rockwell-automation"
  },
  {
@@ -7104,6 +7571,7 @@
   "website": "",
   "sector": "other",
   "industry": "Medical Products and Equipment",
+  "employees": 20584,
   "slug": "solventum",
   "model": "health"
  },
@@ -7120,6 +7588,7 @@
   "website": "",
   "sector": "other",
   "industry": "Beverages",
+  "employees": 6332,
   "slug": "monster-beverage",
   "model": "drink"
  },
@@ -7136,6 +7605,7 @@
   "website": "",
   "sector": "other",
   "industry": "Securities",
+  "employees": 9525,
   "slug": "nasdaq",
   "model": "bank"
  },
@@ -7152,8 +7622,9 @@
   "website": "",
   "sector": "other",
   "industry": "Aerospace & Defense",
+  "employees": 25430,
   "slug": "howmet-aerospace",
-  "model": "rocket"
+  "model": "plane"
  },
  {
   "rank": 472,
@@ -7168,6 +7639,7 @@
   "website": "https://www.insight.com",
   "sector": "tech",
   "industry": "Information Technology Services",
+  "employees": 14505,
   "slug": "insight-enterprises"
  },
  {
@@ -7183,6 +7655,7 @@
   "website": "https://www.zimmerbiomet.com",
   "sector": "other",
   "industry": "Medical Products and Equipment",
+  "employees": 17000,
   "slug": "zimmer-biomet-holdings"
  },
  {
@@ -7198,6 +7671,7 @@
   "website": "http://www.yum.com",
   "sector": "other",
   "industry": "Food Services",
+  "employees": 37660,
   "slug": "yum-brands"
  },
  {
@@ -7213,6 +7687,7 @@
   "website": "",
   "sector": "other",
   "industry": "Wholesalers: Diversified",
+  "employees": 24489,
   "slug": "fastenal",
   "model": "retail"
  },
@@ -7229,6 +7704,7 @@
   "website": "",
   "sector": "tech",
   "industry": "Semiconductors and Other Electronic Components",
+  "employees": 7480,
   "slug": "marvell-technology",
   "model": "chip"
  },
@@ -7245,6 +7721,7 @@
   "website": "https://www.voya.com",
   "sector": "other",
   "industry": "Diversified Financials",
+  "employees": 11000,
   "slug": "voya-financial"
  },
  {
@@ -7260,6 +7737,7 @@
   "website": "https://www.afginc.com",
   "sector": "other",
   "industry": "Insurance: Property and Casualty (Stock)",
+  "employees": 8500,
   "slug": "american-financial-group"
  },
  {
@@ -7275,6 +7753,7 @@
   "website": "https://www.postholdings.com",
   "sector": "other",
   "industry": "Food Consumer Products",
+  "employees": 13180,
   "slug": "post-holdings"
  },
  {
@@ -7290,6 +7769,7 @@
   "website": "",
   "sector": "other",
   "industry": "Transportation and Logistics",
+  "employees": 38800,
   "slug": "xpo",
   "model": "parcel"
  },
@@ -7306,6 +7786,7 @@
   "website": "",
   "sector": "other",
   "industry": "Chemicals",
+  "employees": 15000,
   "slug": "dupont",
   "model": "chem"
  },
@@ -7322,6 +7803,7 @@
   "website": "http://www.sanmina.com",
   "sector": "tech",
   "industry": "Semiconductors and Other Electronic Components",
+  "employees": 37000,
   "slug": "sanmina"
  },
  {
@@ -7337,6 +7819,7 @@
   "website": "",
   "sector": "other",
   "industry": "Homebuilders",
+  "employees": 3000,
   "slug": "taylor-morrison-home",
   "model": "house"
  },
@@ -7353,6 +7836,7 @@
   "website": "https://www.dovercorporation.com",
   "sector": "other",
   "industry": "Industrial Machinery",
+  "employees": 24000,
   "slug": "dover"
  },
  {
@@ -7368,6 +7852,7 @@
   "website": "",
   "sector": "other",
   "industry": "Building Materials, Glass",
+  "employees": 11548,
   "slug": "vulcan-materials",
   "model": "house"
  },
@@ -7384,6 +7869,7 @@
   "website": "",
   "sector": "other",
   "industry": "Engineering & Construction",
+  "employees": 29000,
   "slug": "api-group",
   "model": "industrial"
  },
@@ -7400,6 +7886,7 @@
   "website": "",
   "sector": "tech",
   "industry": "Computer Software",
+  "employees": 19400,
   "slug": "roper-technologies",
   "model": "software"
  },
@@ -7416,6 +7903,7 @@
   "website": "",
   "sector": "tech",
   "industry": "Information Technology Services",
+  "employees": 36000,
   "slug": "kbr",
   "model": "software"
  },
@@ -7432,6 +7920,7 @@
   "website": "",
   "sector": "other",
   "industry": "Packaging, Containers",
+  "employees": 22000,
   "slug": "sonoco-products",
   "model": "industrial"
  },
@@ -7448,6 +7937,7 @@
   "website": "https://www.williams-sonomainc.com",
   "sector": "other",
   "industry": "Specialty Retailers: Other",
+  "employees": 19800,
   "slug": "williams-sonoma"
  },
  {
@@ -7463,6 +7953,7 @@
   "website": "",
   "sector": "other",
   "industry": "Metals",
+  "employees": 12690,
   "slug": "commercial-metals",
   "model": "metal"
  },
@@ -7479,8 +7970,9 @@
   "website": "",
   "sector": "other",
   "industry": "Financial Data Services",
+  "employees": 16076,
   "slug": "moodys",
-  "model": "payments"
+  "model": "bank"
  },
  {
   "rank": 493,
@@ -7495,6 +7987,7 @@
   "website": "",
   "sector": "other",
   "industry": "Mining, Crude-Oil Production",
+  "employees": 1378,
   "slug": "continental-resources",
   "model": "oil"
  },
@@ -7511,6 +8004,7 @@
   "website": "",
   "sector": "other",
   "industry": "Industrial Machinery",
+  "employees": 21000,
   "slug": "ingersoll-rand",
   "model": "industrial"
  },
@@ -7527,6 +8021,7 @@
   "website": "",
   "sector": "other",
   "industry": "Wholesalers: Diversified",
+  "employees": 5600,
   "slug": "core-and-main",
   "model": "retail"
  },
@@ -7543,6 +8038,7 @@
   "website": "",
   "sector": "other",
   "industry": "Mining, Crude-Oil Production",
+  "employees": 1075,
   "slug": "coterra-energy",
   "model": "oil"
  },
@@ -7559,6 +8055,7 @@
   "website": "",
   "sector": "other",
   "industry": "Engineering & Construction",
+  "employees": 18526,
   "slug": "primoris-services",
   "model": "industrial"
  },
@@ -7575,6 +8072,7 @@
   "website": "https://www.masco.com",
   "sector": "other",
   "industry": "Home Equipment, Furnishings",
+  "employees": 18000,
   "slug": "masco"
  },
  {
@@ -7590,6 +8088,7 @@
   "website": "",
   "sector": "other",
   "industry": "Home Equipment, Furnishings",
+  "employees": 19000,
   "slug": "somnigroup-international",
   "model": "house"
  },
@@ -7606,6 +8105,7 @@
   "website": "",
   "sector": "other",
   "industry": "Building Materials, Glass",
+  "employees": 14800,
   "slug": "resideo-technologies",
   "model": "house"
  }

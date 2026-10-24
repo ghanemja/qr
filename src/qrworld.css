@@ -207,8 +207,6 @@ i.dot.startup { background: var(--startup); }
 }
 .lbl.region { background: none; border: 0; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #5b5146; text-shadow: 0 0 4px var(--cream), 0 0 4px var(--cream); font-weight: 750; }
 .lbl.sel { background: var(--ink); color: var(--cream); border-color: var(--ink); }
-#tip { position: absolute; left: 0; top: 0; z-index: 7; pointer-events: none; padding: 6px 10px; border-radius: 10px; background: var(--cream-2); border: 1px solid var(--line); box-shadow: var(--shadow); font-size: 13px; display: grid; }
-#tip span { color: var(--muted); font-size: 12px; }
 
 @media (max-width: 760px) {
   .qw-filters { top: 64px; }
@@ -264,7 +262,14 @@ body.hm-no-labels .hm-labels { display: none; }
 }
 .hm-card h2 { margin: 0; font-size: 26px; letter-spacing: -0.02em; line-height: 1.1; }
 .hm-place { margin: -6px 0 0; color: var(--muted); font-size: 14px; }
-.hm-card-stage { position: relative; flex: none; height: 250px; border-radius: 14px; border: 2px solid #2a2520; background: var(--region-soft, var(--cream)); overflow: hidden; }
+.hm-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px 10px; margin: 0; }
+.hm-facts div { min-width: 0; }
+.hm-facts .wide { grid-column: 1 / -1; }
+.hm-facts dt { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.hm-facts dd { margin: 0; font-size: 14px; font-weight: 700; }
+.hm-facts dd small { font-weight: 500; }
+.hm-facts .wide dd { font-weight: 550; font-size: 13px; }
+.hm-card-stage { position: relative; flex: none; height: 210px; border-radius: 14px; border: 2px solid #2a2520; background: var(--region-soft, var(--cream)); overflow: hidden; }
 .hm-card-stage > canvas { position: absolute; inset: 0; display: block; touch-action: none; }
 .hm-card-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .hm-card h3 { margin: 4px 0 0; font-size: 14px; }
@@ -287,13 +292,34 @@ body.hm-touring #r-stop { display: inline-flex; }
 @media (max-width: 760px) {
   .hm-intro { top: 70px; left: 16px; right: 16px; }
   .hm-intro p { font-size: 13px; }
-  .hm-region { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr auto; padding: 68px 12px 12px; }
-  .hm-card { grid-column: 1; grid-row: 3; box-shadow: none; max-height: 50vh; padding: 12px; gap: 8px; }
-  .hm-card h2 { font-size: 21px; }
-  .hm-card-stage { height: 170px; }
-  .hm-list { display: none; }
-  .hm-card h3 { display: none; }
-  .hm-r-bar { grid-row: 2; align-self: start; }
+  .hm-region { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr auto; padding: 62px 10px 10px; gap: 8px; }
+  .hm-r-head { grid-row: 1; padding: 7px 12px; gap: 0; max-width: calc(100% - 128px); }
+  .hm-stats { flex-wrap: wrap; row-gap: 0; }
+  .hm-r-head nav { font-size: 12px; }
+  .hm-r-head h1 { font-size: 21px; }
+  .hm-stats { gap: 12px; }
+  .hm-stats div { display: flex; gap: 4px; align-items: baseline; }
+  .hm-stats b { font-size: 14px; }
+  .hm-stats span { font-size: 11px; }
+  .hm-r-bar { grid-row: 1; justify-self: end; align-self: start; }
+  .hm-r-bar .hm-btn { min-height: 38px; }
   .hm-pills { display: none; }
+  /* Card: name on top, quick facts and the model side by side, actions below. */
+  .hm-card {
+    grid-column: 1; grid-row: 3; box-shadow: none; padding: 10px 12px; gap: 6px 12px;
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "name name" "place place" "facts stage" "actions actions";
+  }
+  .hm-card .qw-badges { display: none; }
+  .hm-card h2 { grid-area: name; font-size: 19px; }
+  .hm-card .hm-place { grid-area: place; margin: -6px 0 0; font-size: 12px; }
+  .hm-facts { grid-area: facts; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: 4px 8px; }
+  .hm-facts dt { font-size: 10px; }
+  .hm-facts dd { font-size: 12.5px; }
+  .hm-facts .wide dd { font-size: 12px; }
+  .hm-card-stage { grid-area: stage; height: 128px; }
+  .hm-card-actions { grid-area: actions; }
+  .hm-card-actions .hm-btn { min-height: 38px; }
+  .hm-list, .hm-card h3 { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .hm-region { animation: none; } }

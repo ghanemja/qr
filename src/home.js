@@ -3,7 +3,7 @@
 // map and opens as a little moving world, where any company's card shows its model turning into
 // its QR code.
 import { THREE, createStage, setCamera, flyCamera, stopFlight, tween, lerp, toScreen, webglAvailable, rng, SLAB as SLAB_COLORS } from './qrworld.js';
-import { ARCHETYPES, centerpiece, modelMaterial, setBrands, propGeo, topperGeo } from './models.js';
+import { ARCHETYPES, centerpiece, modelMaterial, setBrands, propGeo, topperGeo, behave } from './models.js';
 import { createQRWorld } from './qrsculpture.js';
 
 const HOME = window.HOME;
@@ -192,13 +192,16 @@ function start() {
     const size = bb.getSize(new THREE.Vector3());
     const s = Math.min(maxH / Math.max(3, bb.max.y), maxW / Math.max(size.x, size.z));
     inner.scale.setScalar(s);
-    g.userData = { d, inner, movers, s, hover: cp.hover || 0, phase: (d.s.length * 1.7) % 6.28, labelY: bb.max.y * s + 0.6 };
+    g.userData = { d, arch, inner, movers, s, h: bb.max.y * s, hover: cp.hover || 0, phase: (d.s.length * 1.7) % 6.28, labelY: bb.max.y * s + 0.6 };
     return g;
   }
   const q2 = new THREE.Quaternion();
   function animateModel(g, t) {
-    const { inner, movers, s, hover, phase } = g.userData;
-    inner.position.y = hover ? Math.sin(t * 1.2 + phase) * hover * s * 0.35 : 0;
+    const { inner, movers, s, h, arch, hover, phase } = g.userData;
+    const b = behave(arch, t, phase);
+    inner.position.set(b.x * h, (hover ? Math.sin(t * 1.2 + phase) * hover * s * 0.35 : 0) + b.y * h, b.z * h);
+    inner.rotation.set(b.rx, b.ry, b.rz);
+    inner.scale.set(s * b.sx, s * b.sy, s * b.sz);
     for (const { pg, mv, axis, y } of movers) {
       if (mv.mode === 'spin') pg.quaternion.setFromAxisAngle(axis, t * mv.speed + phase);
       else if (mv.mode === 'flap') pg.quaternion.setFromAxisAngle(axis, Math.sin(t * mv.speed + phase) * mv.amp);
@@ -613,9 +616,19 @@ function start() {
     if (current.ring.visible) current.ring.rotation.y += dt * 0.8;
   });
   function regionFraming() {
-    const box = new THREE.Box3().setFromObject(current.p.group);
+    // Frame the companies rather than the whole piece, so they read up close.
+    const box = new THREE.Box3();
+    for (const g of current.models) box.expandByObject(g);
+    if (box.isEmpty()) box.setFromObject(current.p.group);
+    box.expandByVector(new THREE.Vector3(2.5, 0, 2.5));
     const size = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3());
-    const pad = narrow() ? { top: 190, bottom: stageEl.clientHeight * 0.48, left: 10, right: 10 } : { top: 170, bottom: 90, left: 30, right: 420 };
+    // Frame it in the space the header, card and buttons leave free.
+    const W = stageEl.clientWidth, H = stageEl.clientHeight;
+    const card = document.querySelector('.hm-card').getBoundingClientRect(), head = document.querySelector('.hm-r-head').getBoundingClientRect();
+    const bar = document.querySelector('.hm-r-bar').getBoundingClientRect(), top = stageEl.getBoundingClientRect().top;
+    const pad = narrow()
+      ? { top: Math.max(head.bottom, bar.bottom) - top + 8, bottom: H - (card.top - top) + 8, left: 8, right: 8 }
+      : { top: 120, bottom: H - (bar.top - top) + 10, left: 30, right: W - (card.left - stageEl.getBoundingClientRect().left) + 16 };
     return framing(center, across(size.x, size.z) * 1.06, deep(size.x, size.z) + size.y * Math.sin(ISO.polar), pad);
   }
 
@@ -640,6 +653,12 @@ function start() {
     $('c-kind').textContent = MODEL_LABELS[d.m] || 'Company';
     $('c-name').textContent = d.n;
     $('c-place').textContent = d.c;
+    const money = (m) => (m == null ? '—' : `${m < 0 ? '−' : ''}$${Math.abs(m) >= 1000 ? `${(Math.abs(m) / 1000).toFixed(1)}B` : `${Math.round(Math.abs(m))}M`}`);
+    const fy = `FY${HOME.listYear - 1}`;
+    const facts = d.k === 0
+      ? [['Revenue', `${money(d.v)} <small>${fy}</small>`], ['Profit', `${money(d.p)} <small>${fy}</small>`], ['Employees', d.e ? d.e.toLocaleString('en-US') : '—'], ['Industry', esc(d.i || '—')]]
+      : [['Sector', esc(d.sec || '—')], ['Founded', esc(String(d.f || '—'))], ['About', esc(d.b || '')]];
+    $('c-facts').innerHTML = facts.map(([k, v]) => `<div${k === 'About' || k === 'Industry' ? ' class="wide"' : ''}><dt>${k}</dt><dd>${v}</dd></div>`).join('');
     $('c-open').href = `c/${d.s}.html`;
     for (const b of document.querySelectorAll('#r-list button')) b.setAttribute('aria-current', String(b.dataset.slug === slug));
     const g = current.models.find((m) => m.userData.d === d);

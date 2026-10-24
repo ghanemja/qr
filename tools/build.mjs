@@ -75,7 +75,7 @@ const startups = readJSON('data/startups.json').filter((s) => s.country === 'US'
 const companies = [];
 for (const c of f500) {
   companies.push({
-    kind: 'f500', slug: c.slug, name: SHORT_NAMES[c.name] || SHORT_NAMES[c.key] || c.name, listedName: c.name, key: c.key, model: c.model, industry: c.industry, rank: c.rank,
+    kind: 'f500', slug: c.slug, name: SHORT_NAMES[c.name] || SHORT_NAMES[c.key] || c.name, listedName: c.name, key: c.key, model: c.model, industry: c.industry, employees: c.employees, rank: c.rank,
     revenue: c.revenue, profit: c.profit, city: c.city, region: c.state, country: 'US',
     lat: c.lat, lon: c.lon, website: c.website, tech: c.sector === 'tech',
     sector: c.sector === 'tech' ? 'Technology' : c.industry || '',
@@ -585,6 +585,12 @@ function worldPage() {
     const o = { s: c.slug, n: c.name, k: c.kind === 'f500' ? 0 : 1, t: c.tech ? 1 : 0, c: place(c), m: modelOf(c), L: [lk.v, lk.a, lk.b, lk.base, lk.prop, lk.topper] };
     if (c.rank) o.r = c.rank;
     if (c.listedName && c.listedName !== c.name) o.ln = c.listedName;
+    // Quick facts for the company card.
+    if (c.revenue != null) o.v = c.revenue;
+    if (c.profit != null) o.p = c.profit;
+    if (c.employees) o.e = c.employees;
+    if (c.industry) o.i = c.industry;
+    if (c.kind === 'startup') Object.assign(o, { sec: c.sector, f: c.founded, b: c.blurb });
     return o;
   });
   const description = `America’s biggest companies on a 3D map: every ${LIST_YEAR} Fortune 500 headquarters and ${startups.length} startups in seven regions. Open a region, find a company, and turn its 3D model into its QR code.`;
@@ -613,6 +619,7 @@ function worldPage() {
       <div class="qw-badges"><span class="qw-badge" id="c-badge"></span><span class="qw-badge" id="c-kind"></span></div>
       <h2 id="c-name"></h2>
       <p class="hm-place" id="c-place"></p>
+      <dl class="hm-facts" id="c-facts"></dl>
       <div class="hm-card-stage" id="c-stage" aria-label="3D model that turns into this company's QR code"></div>
       <div class="hm-card-actions">
         <button class="hm-btn dark" id="c-toggle" aria-pressed="false">${ICONS.signature}<span id="c-toggle-label">Turn into QR code</span></button>
@@ -636,7 +643,7 @@ function worldPage() {
     </div>
   </div>
 </section>
-<script>window.HOME=${JSON.stringify({ ...homeMap, labels: MODEL_LABELS })};window.COMPANIES=${JSON.stringify(slim)};</script>
+<script>window.HOME=${JSON.stringify({ ...homeMap, labels: MODEL_LABELS, listYear: LIST_YEAR })};window.COMPANIES=${JSON.stringify(slim)};</script>
 <script src="assets/qrcode.js"></script>
 <script src="assets/qr-card.js"></script>
 <script type="module" src="assets/home.js"></script>

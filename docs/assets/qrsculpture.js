@@ -3,7 +3,7 @@
 // the QR's dark squares and darken to ink, in a diagonal sweep, while the camera tilts to
 // top-down; setScan(false) plays it backwards and the pixels rebuild the model.
 import { THREE, rng, createStage, buildSlab, buildInk, decodeBits, isFinder, setCamera, flyCamera, tween, lerp } from './qrworld.js';
-import { ARCHETYPES, centerpiece, modelMaterial, setBrands, vertexColor, propGeo, topperGeo } from './models.js';
+import { ARCHETYPES, centerpiece, modelMaterial, setBrands, vertexColor, propGeo, topperGeo, behave } from './models.js';
 
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
@@ -202,7 +202,10 @@ export function createQRWorld(container, { slug, model, look = { v: 0, a: '#e553
   function animate(t) {
     if (reduceMotion()) return;
     hoverY = cp.hover ? Math.sin(t * 1.2) * cp.hover * S * 0.35 : 0;
-    modelGroup.position.y = hoverY;
+    // The model's own move (src/models.js behave); kept small enough to stay on its plaza.
+    const b = behave(arch.id, t);
+    modelGroup.position.set(b.x * top * 0.6, hoverY + b.y * top * 0.6, b.z * top * 0.6);
+    modelGroup.rotation.set(b.rx, b.ry, b.rz);
     for (const { g, mv, axis } of movers) {
       if (mv.mode === 'spin') g.quaternion.setFromAxisAngle(axis, t * mv.speed);
       else if (mv.mode === 'flap') g.quaternion.setFromAxisAngle(axis, Math.sin(t * mv.speed) * mv.amp);
