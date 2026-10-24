@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Apptronik · QR Atlas</title>
 <meta name="description" content="Apptronik — Robotics startup founded in 2016, based in Austin, TX. Humanoid robots.">
+<meta name="theme-color" content="#f6f1e7">
 <link rel="canonical" href="https://ghanemja.github.io/qr/c/apptronik.html">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Apptronik · QR Atlas">
@@ -12,78 +13,70 @@
 <meta property="og:url" content="https://ghanemja.github.io/qr/c/apptronik.html">
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../assets/site.css">
+<link rel="stylesheet" href="../assets/qrworld.css">
+<script type="importmap">{"imports":{"three":"../assets/three.module.min.js"}}</script>
 </head>
-<body class="page">
-<header class="topbar">
-  <a class="brand" href="../index.html"><img src="../assets/icon.svg" alt="" width="22" height="22"><span>QR&nbsp;Atlas</span></a>
-  
-  <nav class="nav"><a href="../index.html">Map</a><a href="../companies.html">Directory</a></nav>
-</header>
-<main class="company">
-  <section class="hero">
-    <div class="hero-text">
-      <div class="badges"><span class="badge startup">Startup</span><span class="badge">Robotics</span></div>
-      <h1>Apptronik</h1>
-      <p class="lede">Humanoid robots.</p>
-      <dl class="facts"><div><dt>Type</dt><dd>Startup / private company</dd></div><div><dt>Sector</dt><dd>Robotics</dd></div><div><dt>Founded</dt><dd>2016</dd></div><div><dt>Headquarters</dt><dd>Austin, TX</dd></div></dl>
-      <div class="actions">
-        <a class="btn" href="https://apptronik.com" rel="noopener" target="_blank">apptronik.com ↗</a>
-        <a class="btn primary" href="../index.html#apptronik">Fly there on the map</a>
-      </div>
+<body class="qw qw-company">
+<section class="qw-stage" id="stage">
+  <div class="qw-brand">
+    <a class="qw-logo" href="../index.html" aria-label="QR Atlas home"><svg class="qw-dots" viewBox="-6 -6 192 40" width="307.20000000000005" height="64" aria-hidden="true">
+<g fill="none" stroke="#ffcf33" stroke-width="2.2" stroke-linecap="round"><path d="M-5 2V-5H2"/><path d="M178 -5H185V2"/><path d="M-5 26V33H2"/><path d="M178 33H185V26"/></g>
+<g fill="currentColor"><circle cx="6" cy="2" r="1.35"/><circle cx="10" cy="2" r="1.35"/><circle cx="14" cy="2" r="1.35"/><circle cx="2" cy="6" r="1.35"/><circle cx="18" cy="6" r="1.35"/><circle cx="2" cy="10" r="1.35"/><circle cx="18" cy="10" r="1.35"/><circle cx="2" cy="14" r="1.35"/><circle cx="18" cy="14" r="1.35"/><circle cx="2" cy="18" r="1.35"/><circle cx="10" cy="18" r="1.35"/><circle cx="18" cy="18" r="1.35"/><circle cx="2" cy="22" r="1.35"/><circle cx="14" cy="22" r="1.35"/><circle cx="6" cy="26" r="1.35"/><circle cx="10" cy="26" r="1.35"/><circle cx="18" cy="26" r="1.35"/><circle cx="26" cy="2" r="1.35"/><circle cx="30" cy="2" r="1.35"/><circle cx="34" cy="2" r="1.35"/><circle cx="38" cy="2" r="1.35"/><circle cx="26" cy="6" r="1.35"/><circle cx="42" cy="6" r="1.35"/><circle cx="26" cy="10" r="1.35"/><circle cx="42" cy="10" r="1.35"/><circle cx="26" cy="14" r="1.35"/><circle cx="30" cy="14" r="1.35"/><circle cx="34" cy="14" r="1.35"/><circle cx="38" cy="14" r="1.35"/><circle cx="26" cy="18" r="1.35"/><circle cx="34" cy="18" r="1.35"/><circle cx="26" cy="22" r="1.35"/><circle cx="38" cy="22" r="1.35"/><circle cx="26" cy="26" r="1.35"/><circle cx="42" cy="26" r="1.35"/><circle cx="70" cy="2" r="1.35"/><circle cx="74" cy="2" r="1.35"/><circle cx="78" cy="2" r="1.35"/><circle cx="66" cy="6" r="1.35"/><circle cx="82" cy="6" r="1.35"/><circle cx="66" cy="10" r="1.35"/><circle cx="82" cy="10" r="1.35"/><circle cx="66" cy="14" r="1.35"/><circle cx="70" cy="14" r="1.35"/><circle cx="74" cy="14" r="1.35"/><circle cx="78" cy="14" r="1.35"/><circle cx="82" cy="14" r="1.35"/><circle cx="66" cy="18" r="1.35"/><circle cx="82" cy="18" r="1.35"/><circle cx="66" cy="22" r="1.35"/><circle cx="82" cy="22" r="1.35"/><circle cx="66" cy="26" r="1.35"/><circle cx="82" cy="26" r="1.35"/><circle cx="90" cy="2" r="1.35"/><circle cx="94" cy="2" r="1.35"/><circle cx="98" cy="2" r="1.35"/><circle cx="102" cy="2" r="1.35"/><circle cx="106" cy="2" r="1.35"/><circle cx="98" cy="6" r="1.35"/><circle cx="98" cy="10" r="1.35"/><circle cx="98" cy="14" r="1.35"/><circle cx="98" cy="18" r="1.35"/><circle cx="98" cy="22" r="1.35"/><circle cx="98" cy="26" r="1.35"/><circle cx="114" cy="2" r="1.35"/><circle cx="114" cy="6" r="1.35"/><circle cx="114" cy="10" r="1.35"/><circle cx="114" cy="14" r="1.35"/><circle cx="114" cy="18" r="1.35"/><circle cx="114" cy="22" r="1.35"/><circle cx="114" cy="26" r="1.35"/><circle cx="118" cy="26" r="1.35"/><circle cx="122" cy="26" r="1.35"/><circle cx="126" cy="26" r="1.35"/><circle cx="130" cy="26" r="1.35"/><circle cx="142" cy="2" r="1.35"/><circle cx="146" cy="2" r="1.35"/><circle cx="150" cy="2" r="1.35"/><circle cx="138" cy="6" r="1.35"/><circle cx="154" cy="6" r="1.35"/><circle cx="138" cy="10" r="1.35"/><circle cx="154" cy="10" r="1.35"/><circle cx="138" cy="14" r="1.35"/><circle cx="142" cy="14" r="1.35"/><circle cx="146" cy="14" r="1.35"/><circle cx="150" cy="14" r="1.35"/><circle cx="154" cy="14" r="1.35"/><circle cx="138" cy="18" r="1.35"/><circle cx="154" cy="18" r="1.35"/><circle cx="138" cy="22" r="1.35"/><circle cx="154" cy="22" r="1.35"/><circle cx="138" cy="26" r="1.35"/><circle cx="154" cy="26" r="1.35"/><circle cx="166" cy="2" r="1.35"/><circle cx="170" cy="2" r="1.35"/><circle cx="174" cy="2" r="1.35"/><circle cx="178" cy="2" r="1.35"/><circle cx="162" cy="6" r="1.35"/><circle cx="162" cy="10" r="1.35"/><circle cx="166" cy="14" r="1.35"/><circle cx="170" cy="14" r="1.35"/><circle cx="174" cy="14" r="1.35"/><circle cx="178" cy="18" r="1.35"/><circle cx="178" cy="22" r="1.35"/><circle cx="162" cy="26" r="1.35"/><circle cx="166" cy="26" r="1.35"/><circle cx="170" cy="26" r="1.35"/><circle cx="174" cy="26" r="1.35"/></g></svg></a>
+    <button class="qw-pill" id="see" aria-pressed="false"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M12 5C6.5 5 2.7 9.3 1.5 12c1.2 2.7 5 7 10.5 7s9.3-4.3 10.5-7C21.3 9.3 17.5 5 12 5Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-2.2a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6Z"/></svg>I see QR</button>
+  </div>
+  <nav class="qw-nav"><a href="../index.html">World</a><a href="../companies.html">Directory</a><a href="../about.html">About</a></nav>
+  <header class="qw-title">
+    <h1>Apptronik</h1>
+    <p>Robotics startup · Austin, TX</p>
+  </header>
+  <canvas class="qw-fallback" id="fallback-qr" width="320" height="320" aria-label="QR code for this page"></canvas>
+  <div class="qw-hint" id="hint">Tap the tree to see the QR code</div>
+  <div class="qw-dock">
+    <div class="qw-url">
+      <input id="page-url" readonly value="https://ghanemja.github.io/qr/c/apptronik.html" aria-label="Link to this page">
+      <button class="qw-share" id="share" aria-label="Share link"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg><span id="share-label" class="sr">Share</span></button>
     </div>
-    <figure class="qr-card" id="qr-card">
-      <canvas id="qr" width="240" height="240" aria-label="QR code linking to this page"></canvas>
-      <figcaption><strong>Apptronik</strong><span id="qr-url">https://ghanemja.github.io/qr/c/apptronik.html</span></figcaption>
-      <div class="qr-actions">
-        <button class="btn" id="copy">Copy link</button>
-        <button class="btn" id="dl">Download QR</button>
-        <button class="btn" id="share" hidden>Share</button>
-      </div>
-    </figure>
-  </section>
-
-  <section class="panel">
-    <h2>On the map</h2>
-    <a class="minimap" href="../index.html#apptronik" aria-label="Open Apptronik on the map">
-      <svg viewBox="469.94 318.53 22 11" preserveAspectRatio="xMidYMid slice">
-        <image href="../assets/map.svg" width="2000" height="1040"/>
-        <circle class="dot f500 tech" cx="481.333" cy="323.402" r="0.09"/><circle class="dot startup tech" cx="480.639" cy="324.803" r="0.09"/><circle class="dot f500 tech" cx="480.681" cy="324.997" r="0.09"/><circle class="dot f500 tech" cx="481.214" cy="325.112" r="0.09"/>
-        <circle class="pulse" cx="480.938" cy="324.026" r="0.25"/>
-        <circle class="dot me" cx="480.938" cy="324.026" r="0.14"/>
-        <text class="me-label" x="481.258" y="324.186" font-size="0.45">Apptronik</text>
-      </svg>
-    </a>
-  </section>
-
-  <section class="panel">
-    <h2>Nearby headquarters</h2>
-    <ul class="chips"><li><a href="dell-technologies.html"><span class="dot-i f500 tech"></span>Dell Technologies</a></li><li><a href="saronic.html"><span class="dot-i startup tech"></span>Saronic</a></li><li><a href="oracle.html"><span class="dot-i f500 tech"></span>Oracle</a></li><li><a href="tesla.html"><span class="dot-i f500 tech"></span>Tesla</a></li></ul>
-  </section>
-
-  <section class="panel">
-    <h2>Reference this page</h2>
-    <div class="cite">
-      <label>Link<input readonly value="https://ghanemja.github.io/qr/c/apptronik.html"></label>
-      <label>Markdown<input readonly value="[Apptronik](https://ghanemja.github.io/qr/c/apptronik.html)"></label>
-      <label>HTML<input readonly value="&lt;a href=&quot;https://ghanemja.github.io/qr/c/apptronik.html&quot;&gt;Apptronik&lt;/a&gt;"></label>
+    <div class="qw-tabs" role="group" aria-label="World style">
+      <button data-theme="spring" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.6"/><path d="M12 9.4c-1.6-3.9 1.4-6.4 3.2-4.6 1.6 1.6-.4 4.6-3.2 4.6Zm2.6 2.6c3.9-1.6 6.4 1.4 4.6 3.2-1.6 1.6-4.6-.4-4.6-3.2ZM12 14.6c1.6 3.9-1.4 6.4-3.2 4.6-1.6-1.6.4-4.6 3.2-4.6ZM9.4 12c-3.9 1.6-6.4-1.4-4.6-3.2 1.6-1.6 4.6.4 4.6 3.2Z"/></svg>Spring</button><button data-theme="summer" aria-pressed="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Summer</button><button data-theme="autumn" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 14a5 5 0 0 1 .7-9.9A6 6 0 0 1 17 5a4.5 4.5 0 0 1 2 8.6"/><path d="M8 15v2M12 15v4M16 15v2"/></svg>Autumn</button><button data-theme="city" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V9l5-3v15M10 21V4h7v17M17 21v-9h3v9"/></svg>City</button>
     </div>
-    <p class="share-row">
-      <a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fghanemja.github.io%2Fqr%2Fc%2Fapptronik.html&text=Apptronik" target="_blank" rel="noopener">Post on X</a>
-      <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fghanemja.github.io%2Fqr%2Fc%2Fapptronik.html" target="_blank" rel="noopener">Share on LinkedIn</a>
-      <a href="mailto:?subject=Apptronik&body=https%3A%2F%2Fghanemja.github.io%2Fqr%2Fc%2Fapptronik.html">Email</a>
-    </p>
-  </section>
+  </div>
+  <a class="qw-scroll" href="#info" aria-label="Company details">Details ↓</a>
+</section>
 
-  <nav class="pager">
+<main class="qw-info" id="info">
+  <div class="qw-badges"><span class="qw-badge startup">Startup</span><span class="qw-badge">Robotics</span></div>
+  <h2>Apptronik</h2>
+  <p class="qw-lede">Humanoid robots.</p>
+  <dl class="qw-facts"><div><dt>Type</dt><dd>Startup / private company</dd></div><div><dt>Sector</dt><dd>Robotics</dd></div><div><dt>Founded</dt><dd>2016</dd></div><div><dt>Headquarters</dt><dd>Austin, TX</dd></div></dl>
+  <div class="qw-actions">
+    <a class="qw-btn" href="https://apptronik.com" rel="noopener" target="_blank">apptronik.com ↗</a>
+    <a class="qw-btn primary" href="../index.html#apptronik">See it in the world</a>
+    <button class="qw-btn" id="download">Download QR</button>
+  </div>
+
+  <h3>Neighbors</h3>
+  <ul class="qw-chips"><li><a href="dell-technologies.html"><i class="dot f500 tech"></i>Dell Technologies</a></li><li><a href="saronic.html"><i class="dot startup tech"></i>Saronic</a></li><li><a href="oracle.html"><i class="dot f500 tech"></i>Oracle</a></li><li><a href="tesla.html"><i class="dot f500 tech"></i>Tesla</a></li></ul>
+
+  <h3>Reference this page</h3>
+  <div class="cite">
+    <label>Link<input readonly value="https://ghanemja.github.io/qr/c/apptronik.html"></label>
+    <label>Markdown<input readonly value="[Apptronik](https://ghanemja.github.io/qr/c/apptronik.html)"></label>
+    <label>HTML<input readonly value="&lt;a href=&quot;https://ghanemja.github.io/qr/c/apptronik.html&quot;&gt;Apptronik&lt;/a&gt;"></label>
+  </div>
+  <p class="qw-share-row">
+    <a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fghanemja.github.io%2Fqr%2Fc%2Fapptronik.html&text=Apptronik" target="_blank" rel="noopener">Post on X</a>
+    <a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fghanemja.github.io%2Fqr%2Fc%2Fapptronik.html" target="_blank" rel="noopener">Share on LinkedIn</a>
+    <a href="mailto:?subject=Apptronik&body=https%3A%2F%2Fghanemja.github.io%2Fqr%2Fc%2Fapptronik.html">Email</a>
+  </p>
+  <nav class="qw-pager">
     <a href="spacex.html">← SpaceX</a>
     <a href="saronic.html">Saronic →</a>
   </nav>
-  <p class="source">Startup entries are curated by hand; check the company’s own site for current details. <a href="../about.html">About the data</a>.</p>
+  <p class="qw-source">Startup entries are curated by hand; check the company’s own site for current details. <a href="../about.html">About the data</a>.</p>
 </main>
-<script>window.COMPANY={"slug":"apptronik","name":"Apptronik"};</script>
+<script>window.COMPANY={"slug":"apptronik","name":"Apptronik","theme":"summer","qr":{"n":41,"bits":"1111111010101100110111011100001000111111110000010000110000100010100000100101000001101110101011011001101111001101111010111011011101001101010001100101011000110101110110111010111101011011111001101011001011101100000100110100110010110111011000010000011111111010101010101010101010101010111111100000000111010011010100111100001000000000000001100111010001000110111101000010101011100110011100101010110110101011101011000010011111110001010001110011111100101010000111110010110010011101111001010111010110100000111110001110000010110111100000000000011001000110010101010000000001110000110001110011110101100110011000110001001101110001111000101000010110110000101001011000011000010010011010100001101010100100010100101110101010010100000010100000110111111100010000001010100010010010100001111110111000100111001001010110110111110111001000010001011011110000101100101010010010100001101110001010100111000001100000111010100001100010101011010110011100111111111010110110000110011010010001101100001000110101000100011011111010110000111111010110100110100110010001001000000000110001010011111011111001101101100001000100000000110100101101100001010110011100111011010001101000101101110100100010000100100100011001101101010001100100010001111010111000001001001101101111011110011000111000001100001101011011000101110001000110100111010110111000001101111001100101111001110000011100010101011111101100000000010100000110110010011111110001100011111110010000010110100100111101101011100100000101010010011011110110101111000110101011101000001110110100101010110111111100010111010010111000101111111010010000101101101110100001100111100101001110110111101101000001000010110011000000101000100001100111111110001110110110011101000101010110000"}};</script>
 <script src="../assets/qrcode.js"></script>
 <script src="../assets/qr-card.js"></script>
-<script src="../assets/company.js"></script>
+<script type="module" src="../assets/tree.js"></script>
 </body>
 </html>

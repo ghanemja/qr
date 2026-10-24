@@ -4,6 +4,7 @@
 import { readFileSync, writeFileSync, mkdirSync, rmSync, copyFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 import * as d3 from 'd3-geo';
 import * as topo from 'topojson-client';
 import * as simp from 'topojson-simplify';
@@ -113,6 +114,98 @@ for (const r of REGIONS) {
   for (const c of members) if (!c.area) c.area = r.id;
 }
 
+// ---------- QR board (3D world) ----------
+const qrcode = createRequire(import.meta.url)('qrcode-generator');
+function qrBits(text, type = 0) {
+  const q = qrcode(type, 'H');
+  q.addData(text);
+  q.make();
+  const n = q.getModuleCount();
+  let bits = '';
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) bits += q.isDark(r, c) ? '1' : '0';
+  return { n, bits };
+}
+// Rings of a geometry in projected (grid) coordinates.
+function projectedRings(projection, geo) {
+  const rings = [];
+  let cur;
+  const sink = { point(x, y) { cur.push([x, y]); }, lineStart() { cur = []; }, lineEnd() { if (cur.length > 2) rings.push(cur); }, polygonStart() {}, polygonEnd() {}, sphere() {} };
+  d3.geoStream(geo, projection.stream(sink));
+  return rings;
+}
+// One bit per grid cell: is the cell centre on land (even-odd rule)?
+function landBits(n, rings) {
+  let out = '';
+  for (let r = 0; r < n; r++) {
+    for (let c = 0; c < n; c++) {
+      const x = c + 0.5, y = r + 0.5;
+      let inside = false;
+      for (const ring of rings) {
+        for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+          const [xi, yi] = ring[i], [xj, yj] = ring[j];
+          if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+        }
+      }
+      out += inside ? '1' : '0';
+    }
+  }
+  return out;
+}
+// Push apart points closer than `min` so every model on the board has its own footing.
+function relax(points, min, iterations = 80) {
+  for (let it = 0; it < iterations; it++) {
+    let moved = false;
+    for (let i = 0; i < points.length; i++) {
+      for (let j = i + 1; j < points.length; j++) {
+        const a = points[i], b = points[j];
+        let dx = b[0] - a[0], dy = b[1] - a[1];
+        let d = Math.hypot(dx, dy);
+        if (d >= min) continue;
+        if (d < 1e-6) { dx = Math.cos(i + j); dy = Math.sin(i + j); d = 1; }
+        const push = (min - d) / 2;
+        a[0] -= (dx / d) * push; a[1] -= (dy / d) * push;
+        b[0] += (dx / d) * push; b[1] += (dy / d) * push;
+        moved = true;
+      }
+    }
+    if (!moved) break;
+  }
+}
+const BOARD_N = 117; // QR version 25
+const board = { ...qrBits(SITE_URL, 25), modes: {} };
+{
+  const nationTopo = readJSON('node_modules/us-atlas/nation-10m.json');
+  const nation = topo.feature(nationTopo, nationTopo.objects.nation).features[0];
+  const conus = { type: 'MultiPolygon', coordinates: nation.geometry.coordinates.filter((p) => { const [lon, lat] = p[0][0]; return lon > -126 && lon < -65 && lat > 24 && lat < 50; }) };
+  const worldTopo = readJSON('node_modules/world-atlas/land-110m.json');
+  const land = topo.feature(worldTopo, worldTopo.objects.land);
+  const n = BOARD_N;
+  const modes = {
+    us: { projection: d3.geoConicEqualArea().parallels([29.5, 45.5]).rotate([96, 0]).fitExtent([[5, 5], [n - 5, n - 5]], conus), geo: conus, min: 0.9, keep: (c) => c.country === 'US' },
+    world: { projection: d3.geoNaturalEarth1().fitExtent([[3, 3], [n - 3, n - 3]], { type: 'Sphere' }), geo: land, min: 0.42, keep: () => true },
+  };
+  for (const [id, m] of Object.entries(modes)) {
+    const kept = companies.filter(m.keep);
+    const pts = kept.map((c) => m.projection([c.lon, c.lat]));
+    relax(pts, m.min);
+    const pos = {};
+    kept.forEach((c, i) => (pos[c.slug] = [+pts[i][0].toFixed(2), +pts[i][1].toFixed(2)]));
+    const regionsAt = {};
+    for (const r of REGIONS) {
+      const ps = r.members.map((s) => pos[s]).filter(Boolean);
+      if (!ps.length) continue;
+      const x = ps.reduce((a, p) => a + p[0], 0) / ps.length, y = ps.reduce((a, p) => a + p[1], 0) / ps.length;
+      const spread = Math.max(...ps.map((p) => Math.hypot(p[0] - x, p[1] - y)));
+      regionsAt[r.id] = [+x.toFixed(2), +y.toFixed(2), +spread.toFixed(2)];
+    }
+    board.modes[id] = { land: landBits(n, projectedRings(m.projection, m.geo)), pos, regions: regionsAt };
+  }
+}
+// 3D model for a company on the board.
+const modelOf = (c) => c.kind === 'f500'
+  ? (c.tech ? 'glass' : 'tower')
+  : /Aerospace|Defense/.test(c.sector) ? 'rocket' : /AI/.test(c.sector) ? 'orb' : 'tree';
+
 // ---------- helpers for pages ----------
 const fmtMoney = (m) => (m == null ? '—' : (m < 0 ? '−' : '') + (Math.abs(m) >= 1000 ? `$${(Math.abs(m) / 1000).toFixed(1)}B` : `$${Math.round(Math.abs(m))}M`));
 const place = (c) => `${c.city}, ${c.country === 'US' ? c.region : countryName(c.country)}`;
@@ -152,9 +245,73 @@ const topbar = (depth, extra = '') => {
 </header>`;
 };
 
+// ---------- dot-matrix logo ----------
+const GLYPHS = {
+  Q: ['.###.', '#...#', '#...#', '#...#', '#.#.#', '#..#.', '.##.#'],
+  R: ['####.', '#...#', '#...#', '####.', '#.#..', '#..#.', '#...#'],
+  A: ['.###.', '#...#', '#...#', '#####', '#...#', '#...#', '#...#'],
+  T: ['#####', '..#..', '..#..', '..#..', '..#..', '..#..', '..#..'],
+  L: ['#....', '#....', '#....', '#....', '#....', '#....', '#####'],
+  S: ['.####', '#....', '#....', '.###.', '....#', '....#', '####.'],
+  ' ': ['...', '...', '...', '...', '...', '...', '...'],
+};
+function dotLogo(text) {
+  let x = 0;
+  const dots = [];
+  for (const ch of text) {
+    const g = GLYPHS[ch];
+    g.forEach((row, y) => [...row].forEach((v, i) => v === '#' && dots.push(`<circle cx="${(x + i) * 4 + 2}" cy="${y * 4 + 2}" r="1.35"/>`)));
+    x += g[0].length + 1;
+  }
+  const w = x * 4 - 4, h = 28;
+  const b = 7; // bracket arm
+  const pad = 6, W2 = w + pad * 2, H2 = h + pad * 2;
+  return `<svg class="qw-dots" viewBox="${-pad} ${-pad} ${W2} ${H2}" width="${W2 * 1.6}" height="${H2 * 1.6}" aria-hidden="true">
+<g fill="none" stroke="#ffcf33" stroke-width="2.2" stroke-linecap="round"><path d="M${-pad + 1} ${-pad + 1 + b}V${-pad + 1}H${-pad + 1 + b}"/><path d="M${w + pad - 1 - b} ${-pad + 1}H${w + pad - 1}V${-pad + 1 + b}"/><path d="M${-pad + 1} ${h + pad - 1 - b}V${h + pad - 1}H${-pad + 1 + b}"/><path d="M${w + pad - 1 - b} ${h + pad - 1}H${w + pad - 1}V${h + pad - 1 - b}"/></g>
+<g fill="currentColor">${dots.join('')}</g></svg>`;
+}
+const LOGO = dotLogo('QR ATLAS');
+const qwHead = ({ title, description, path, depth }) => {
+  const up = '../'.repeat(depth);
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>${esc(title)}</title>
+<meta name="description" content="${esc(description)}">
+<meta name="theme-color" content="#f6f1e7">
+<link rel="canonical" href="${SITE_URL}${path}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="${esc(title)}">
+<meta property="og:description" content="${esc(description)}">
+<meta property="og:url" content="${SITE_URL}${path}">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="${up}assets/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="${up}assets/qrworld.css">
+<script type="importmap">{"imports":{"three":"${up}assets/three.module.min.js"}}</script>
+</head>`;
+};
+const qwTop = (depth, eyeLabel = 'I see QR') => {
+  const up = '../'.repeat(depth);
+  return `<div class="qw-brand">
+    <a class="qw-logo" href="${up}index.html" aria-label="QR Atlas home">${LOGO}</a>
+    <button class="qw-pill" id="see" aria-pressed="false"><svg viewBox="0 0 24 24" width="13" height="13" aria-hidden="true"><path fill="currentColor" d="M12 5C6.5 5 2.7 9.3 1.5 12c1.2 2.7 5 7 10.5 7s9.3-4.3 10.5-7C21.3 9.3 17.5 5 12 5Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-2.2a1.8 1.8 0 1 0 0-3.6 1.8 1.8 0 0 0 0 3.6Z"/></svg>${eyeLabel}</button>
+  </div>
+  <nav class="qw-nav"><a href="${up}index.html">World</a><a href="${up}companies.html">Directory</a><a href="${up}about.html">About</a></nav>`;
+};
+const ICONS = {
+  spring: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.6"/><path d="M12 9.4c-1.6-3.9 1.4-6.4 3.2-4.6 1.6 1.6-.4 4.6-3.2 4.6Zm2.6 2.6c3.9-1.6 6.4 1.4 4.6 3.2-1.6 1.6-4.6-.4-4.6-3.2ZM12 14.6c1.6 3.9-1.4 6.4-3.2 4.6-1.6-1.6.4-4.6 3.2-4.6ZM9.4 12c-3.9 1.6-6.4-1.4-4.6-3.2 1.6-1.6 4.6.4 4.6 3.2Z"/></svg>',
+  summer: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  autumn: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 14a5 5 0 0 1 .7-9.9A6 6 0 0 1 17 5a4.5 4.5 0 0 1 2 8.6"/><path d="M8 15v2M12 15v4M16 15v2"/></svg>',
+  city: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18M5 21V9l5-3v15M10 21V4h7v17M17 21v-9h3v9"/></svg>',
+  share: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>',
+};
+
 // ---------- company pages ----------
 function companyPage(c, prev, next) {
   const path = `c/${c.slug}.html`;
+  const pageUrl = SITE_URL + path;
   const nearby = companies
     .filter((o) => o !== c && km(c, o) < (c.country === 'US' ? 60 : 400))
     .sort((a, b) => km(c, a) - km(c, b)).slice(0, 8);
@@ -173,82 +330,69 @@ function companyPage(c, prev, next) {
       ];
   if (c.listedHq) facts.push(['HQ on the list', esc(c.listedHq)]);
   if (c.listedName !== c.name && c.listedName) facts.push(['Listed as', esc(c.listedName)]);
-  const vw = 22, vh = 11;
-  const title = `${c.name} · QR Atlas`;
-  const badge = c.kind === 'f500'
-    ? `<span class="badge ${c.tech ? 'tech' : ''}">Fortune 500 · No. ${c.rank}</span>${c.tech ? '<span class="badge tech">Tech</span>' : ''}`
-    : `<span class="badge startup">Startup</span><span class="badge">${esc(c.sector)}</span>`;
-  const data = { slug: c.slug, name: c.name };
-  return `${head({ title, description: describe(c), path, depth: 1 })}
-<body class="page">
-${topbar(1)}
-<main class="company">
-  <section class="hero">
-    <div class="hero-text">
-      <div class="badges">${badge}</div>
-      <h1>${esc(c.name)}</h1>
-      <p class="lede">${esc(c.kind === 'startup' ? c.blurb : `Headquartered in ${place(c)}.`)}</p>
-      <dl class="facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
-      <div class="actions">
-        ${c.website ? `<a class="btn" href="${esc(c.website)}" rel="noopener" target="_blank">${esc(host(c.website))} ↗</a>` : ''}
-        <a class="btn primary" href="../index.html#${c.slug}">Fly there on the map</a>
-      </div>
+  const theme = c.kind === 'f500' ? 'city' : 'summer';
+  const sub = c.kind === 'f500' ? `Fortune 500 No. ${c.rank} · ${place(c)}` : `${c.sector} startup · ${place(c)}`;
+  const data = { slug: c.slug, name: c.name, theme, qr: qrBits(pageUrl) };
+  const tabs = [['spring', 'Spring'], ['summer', 'Summer'], ['autumn', 'Autumn'], ['city', 'City']];
+  return `${qwHead({ title: `${c.name} · QR Atlas`, description: describe(c), path, depth: 1 })}
+<body class="qw qw-company">
+<section class="qw-stage" id="stage">
+  ${qwTop(1)}
+  <header class="qw-title">
+    <h1>${esc(c.name)}</h1>
+    <p>${esc(sub)}</p>
+  </header>
+  <canvas class="qw-fallback" id="fallback-qr" width="320" height="320" aria-label="QR code for this page"></canvas>
+  <div class="qw-hint" id="hint">${theme === 'city' ? 'Tap the city to see the QR code' : 'Tap the tree to see the QR code'}</div>
+  <div class="qw-dock">
+    <div class="qw-url">
+      <input id="page-url" readonly value="${pageUrl}" aria-label="Link to this page">
+      <button class="qw-share" id="share" aria-label="Share link">${ICONS.share}<span id="share-label" class="sr">Share</span></button>
     </div>
-    <figure class="qr-card" id="qr-card">
-      <canvas id="qr" width="240" height="240" aria-label="QR code linking to this page"></canvas>
-      <figcaption><strong>${esc(c.name)}</strong><span id="qr-url">${SITE_URL}${path}</span></figcaption>
-      <div class="qr-actions">
-        <button class="btn" id="copy">Copy link</button>
-        <button class="btn" id="dl">Download QR</button>
-        <button class="btn" id="share" hidden>Share</button>
-      </div>
-    </figure>
-  </section>
-
-  <section class="panel">
-    <h2>On the map</h2>
-    <a class="minimap" href="../index.html#${c.slug}" aria-label="Open ${esc(c.name)} on the map">
-      <svg viewBox="${(c.x - vw / 2).toFixed(2)} ${(c.y - vh / 2).toFixed(2)} ${vw} ${vh}" preserveAspectRatio="xMidYMid slice">
-        <image href="../assets/map.svg" width="${W}" height="${H}"/>
-        ${nearby.map((o) => `<circle class="dot ${o.kind} ${o.tech ? 'tech' : ''}" cx="${o.x}" cy="${o.y}" r="0.09"/>`).join('')}
-        <circle class="pulse" cx="${c.x}" cy="${c.y}" r="0.25"/>
-        <circle class="dot me" cx="${c.x}" cy="${c.y}" r="0.14"/>
-        <text class="me-label" x="${(c.x + 0.32).toFixed(3)}" y="${(c.y + 0.16).toFixed(3)}" font-size="0.45">${esc(c.name)}</text>
-      </svg>
-    </a>
-  </section>
-
-  ${nearby.length ? `<section class="panel">
-    <h2>Nearby headquarters</h2>
-    <ul class="chips">${nearby.map((o) => `<li><a href="${o.slug}.html"><span class="dot-i ${o.kind} ${o.tech ? 'tech' : ''}"></span>${esc(o.name)}</a></li>`).join('')}</ul>
-  </section>` : ''}
-
-  <section class="panel">
-    <h2>Reference this page</h2>
-    <div class="cite">
-      <label>Link<input readonly value="${SITE_URL}${path}"></label>
-      <label>Markdown<input readonly value="[${esc(c.name)}](${SITE_URL}${path})"></label>
-      <label>HTML<input readonly value="${esc(`<a href="${SITE_URL}${path}">${c.name}</a>`)}"></label>
+    <div class="qw-tabs" role="group" aria-label="World style">
+      ${tabs.map(([id, label]) => `<button data-theme="${id}" aria-pressed="${id === theme}">${ICONS[id]}${label}</button>`).join('')}
     </div>
-    <p class="share-row">
-      <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(SITE_URL + path)}&text=${encodeURIComponent(c.name)}" target="_blank" rel="noopener">Post on X</a>
-      <a href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(SITE_URL + path)}" target="_blank" rel="noopener">Share on LinkedIn</a>
-      <a href="mailto:?subject=${encodeURIComponent(c.name)}&body=${encodeURIComponent(SITE_URL + path)}">Email</a>
-    </p>
-  </section>
+  </div>
+  <a class="qw-scroll" href="#info" aria-label="Company details">Details ↓</a>
+</section>
 
-  <nav class="pager">
+<main class="qw-info" id="info">
+  <div class="qw-badges">${c.kind === 'f500' ? `<span class="qw-badge">Fortune 500 · No. ${c.rank}</span>${c.tech ? '<span class="qw-badge tech">Tech</span>' : ''}` : `<span class="qw-badge startup">Startup</span><span class="qw-badge">${esc(c.sector)}</span>`}</div>
+  <h2>${esc(c.name)}</h2>
+  <p class="qw-lede">${esc(c.kind === 'startup' ? c.blurb : `Headquartered in ${place(c)}.`)}</p>
+  <dl class="qw-facts">${facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
+  <div class="qw-actions">
+    ${c.website ? `<a class="qw-btn" href="${esc(c.website)}" rel="noopener" target="_blank">${esc(host(c.website))} ↗</a>` : ''}
+    <a class="qw-btn primary" href="../index.html#${c.slug}">See it in the world</a>
+    <button class="qw-btn" id="download">Download QR</button>
+  </div>
+
+  ${nearby.length ? `<h3>Neighbors</h3>
+  <ul class="qw-chips">${nearby.map((o) => `<li><a href="${o.slug}.html"><i class="dot ${o.kind} ${o.tech ? 'tech' : ''}"></i>${esc(o.name)}</a></li>`).join('')}</ul>` : ''}
+
+  <h3>Reference this page</h3>
+  <div class="cite">
+    <label>Link<input readonly value="${pageUrl}"></label>
+    <label>Markdown<input readonly value="[${esc(c.name)}](${pageUrl})"></label>
+    <label>HTML<input readonly value="${esc(`<a href="${pageUrl}">${c.name}</a>`)}"></label>
+  </div>
+  <p class="qw-share-row">
+    <a href="https://twitter.com/intent/tweet?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(c.name)}" target="_blank" rel="noopener">Post on X</a>
+    <a href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(pageUrl)}" target="_blank" rel="noopener">Share on LinkedIn</a>
+    <a href="mailto:?subject=${encodeURIComponent(c.name)}&body=${encodeURIComponent(pageUrl)}">Email</a>
+  </p>
+  <nav class="qw-pager">
     ${prev ? `<a href="${prev.slug}.html">← ${esc(prev.name)}</a>` : '<span></span>'}
     ${next ? `<a href="${next.slug}.html">${esc(next.name)} →</a>` : '<span></span>'}
   </nav>
-  <p class="source">${c.kind === 'f500'
+  <p class="qw-source">${c.kind === 'f500'
     ? `Rank and financials: Fortune 500, ${LIST_YEAR} list (fiscal ${LIST_YEAR - 1}). HQ locations: HIFLD Fortune 500 Corporate Headquarters, with corrections and later moves noted.`
     : 'Startup entries are curated by hand; check the company’s own site for current details.'} <a href="../about.html">About the data</a>.</p>
 </main>
 <script>window.COMPANY=${JSON.stringify(data)};</script>
 <script src="../assets/qrcode.js"></script>
 <script src="../assets/qr-card.js"></script>
-<script src="../assets/company.js"></script>
+<script type="module" src="../assets/tree.js"></script>
 </body>
 </html>
 `;
@@ -415,8 +559,10 @@ ${topbar(0)}
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(join(OUT, 'c'), { recursive: true });
 mkdirSync(join(OUT, 'assets'), { recursive: true });
-for (const f of ['site.css', 'atlas.js', 'company.js', 'qr-card.js', 'directory.js', 'icon.svg']) copyFileSync(join(ROOT, 'src', f), join(OUT, 'assets', f));
+for (const f of ['site.css', 'qrworld.css', 'atlas.js', 'qr-card.js', 'directory.js', 'icon.svg', 'qrworld.js', 'tree.js', 'world.js']) copyFileSync(join(ROOT, 'src', f), join(OUT, 'assets', f));
 copyFileSync(join(ROOT, 'node_modules/qrcode-generator/qrcode.js'), join(OUT, 'assets/qrcode.js'));
+copyFileSync(join(ROOT, 'node_modules/three/build/three.module.min.js'), join(OUT, 'assets/three.module.min.js'));
+copyFileSync(join(ROOT, 'node_modules/three/examples/jsm/controls/OrbitControls.js'), join(OUT, 'assets/OrbitControls.js'));
 writeFileSync(join(OUT, 'assets/map.svg'), MAP_SVG);
 writeFileSync(join(OUT, 'index.html'), indexPage());
 writeFileSync(join(OUT, 'companies.html'), directoryPage());
