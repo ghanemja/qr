@@ -5,7 +5,7 @@ import { readFileSync, writeFileSync, mkdirSync, rmSync, copyFileSync } from 'no
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
-import { variantCount } from '../src/models.js';
+import { variantCount, PROP_COUNT, TOPPER_COUNT } from '../src/models.js';
 import * as d3 from 'd3-geo';
 import * as topo from 'topojson-client';
 import * as simp from 'topojson-simplify';
@@ -40,13 +40,33 @@ const MAP_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}"
 @media (prefers-color-scheme:dark){.sea{fill:#0b1118}.land{fill:#1a2430;stroke:#33414f}}</style>
 <rect class="sea" width="${W}" height="${H}"/>${mapInner}</svg>`;
 
+// Names people actually use, where the list's name is long or formal.
+const SHORT_NAMES = {
+  'Advanced Micro Devices': 'AMD', 'Amazon.com': 'Amazon', 'salesforce.com': 'Salesforce', 'Jones Financial (Edward Jones)': 'Edward Jones',
+  'Bank of New York Mellon': 'BNY Mellon', 'Laboratory Corp. of America': 'Labcorp', 'C.H. Robinson Worldwide': 'C.H. Robinson',
+  'Expeditors Intl. of Washington': 'Expeditors', 'Guardian Life Ins. Co. of America': 'Guardian Life', 'United Continental Holdings': 'United Airlines',
+  'INTL FCStone': 'StoneX', 'Goldman Sachs Group': 'Goldman Sachs', 'Hewlett Packard Enterprise': 'HPE', 'Cognizant Technology Solutions': 'Cognizant',
+  'Fidelity National Information Services': 'FIS', 'Liberty Mutual Insurance Group': 'Liberty Mutual', 'Massachusetts Mutual Life Insurance': 'MassMutual',
+  'New York Life Insurance': 'New York Life', 'Northwestern Mutual': 'Northwestern Mutual', 'State Farm Insurance': 'State Farm',
+  'American Family Insurance Group': 'American Family Insurance', 'Mutual of Omaha Insurance': 'Mutual of Omaha', 'Thrivent Financial for Lutherans': 'Thrivent',
+  'Western & Southern Financial Group': 'Western & Southern', 'Publix Super Markets': 'Publix', 'Costco Wholesale': 'Costco', 'Walt Disney': 'Disney',
+  'Ford Motor': 'Ford', 'Verizon Communications': 'Verizon', 'Cisco Systems': 'Cisco', 'Micron Technology': 'Micron', 'Walgreens Boots Alliance': 'Walgreens',
+  'Archer Daniels Midland': 'ADM', 'Enterprise Products Partners': 'Enterprise Products', 'Philip Morris International': 'Philip Morris',
+  'Honeywell International': 'Honeywell', 'Mondelez International': 'Mondelez', 'Marriott International': 'Marriott', 'Hilton Worldwide Holdings': 'Hilton',
+  'Goodyear Tire & Rubber': 'Goodyear', 'Booz Allen Hamilton': 'Booz Allen', 'Leidos Holdings': 'Leidos', 'L3Harris Technologies': 'L3Harris',
+  'Spirit AeroSystems Holdings': 'Spirit AeroSystems', 'Huntington Ingalls Industries': 'Huntington Ingalls', 'Thermo Fisher Scientific': 'Thermo Fisher',
+  'Zimmer Biomet Holdings': 'Zimmer Biomet', 'Regeneron Pharmaceuticals': 'Regeneron', 'IQVIA Holdings': 'IQVIA', 'US Foods Holding': 'US Foods',
+  'Hertz Global Holdings': 'Hertz', 'Penske Automotive Group': 'Penske Automotive', 'American Axle & Manufacturing': 'American Axle',
+  'MGM Resorts International': 'MGM Resorts', 'Twenty-First Century Fox': '21st Century Fox', 'Anysphere (Cursor)': 'Cursor',
+};
+
 // ---------- companies ----------
 const f500 = readJSON('data/fortune500.json');
 const startups = readJSON('data/startups.json');
 const companies = [];
 for (const c of f500) {
   companies.push({
-    kind: 'f500', slug: c.slug, name: c.now || c.name, listedName: c.name, rank: c.rank,
+    kind: 'f500', slug: c.slug, name: SHORT_NAMES[c.now || c.name] || c.now || c.name, listedName: c.name, rank: c.rank,
     revenue: c.revenue, profit: c.profit, city: c.city, region: c.state, country: 'US',
     lat: c.lat, lon: c.lon, website: c.website, tech: c.sector === 'tech',
     sector: c.sector === 'tech' ? 'Technology' : '', listedHq: c.listed_hq || '', moved: c.moved || null,
@@ -58,7 +78,7 @@ for (const s of startups) {
   if (taken.has(slug)) slug += '-startup';
   taken.add(slug);
   companies.push({
-    kind: 'startup', slug, name: s.name, city: s.city, region: s.region, country: s.country,
+    kind: 'startup', slug, name: SHORT_NAMES[s.name] || s.name, listedName: s.name, city: s.city, region: s.region, country: s.country,
     lat: s.lat, lon: s.lon, website: s.website, tech: true, sector: s.sector, founded: s.founded, blurb: s.blurb,
   });
 }
@@ -126,10 +146,10 @@ function qrBits(text, type = 0) {
   for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) bits += q.isDark(r, c) ? '1' : '0';
   return { n, bits };
 }
-// City islands: companies are grouped by metro (or by city), and each group becomes an island on
-// the QR board. Islands keep their real west-to-east, north-to-south arrangement but are packed
-// close together, so the board shows cities rather than empty country.
-const SPACING = 1.5; // board cells between neighbouring companies
+// City islands: companies are grouped by metro (or by city), and each group becomes an island.
+// Islands keep their real west-to-east, north-to-south arrangement but sit close together, and
+// inside each island companies stand on city blocks with streets between them.
+const SPACING = 2.8; // board cells from one company's lot to the next
 const priorityOf = (c) => (c.kind === 'f500' ? c.rank : 1000);
 function islandLayout(kept, project) {
   const groups = new Map();
@@ -155,7 +175,7 @@ function islandLayout(kept, project) {
     const pts = g.members.map((c) => project([c.lon, c.lat]));
     g.ox = pts.reduce((a, p) => a + p[0], 0) / pts.length;
     g.oy = pts.reduce((a, p) => a + p[1], 0) / pts.length;
-    g.r = 0.62 * SPACING * Math.sqrt(g.members.length) + 0.8;
+    g.r = SPACING * Math.sqrt(g.members.length / Math.PI) * 1.08 + SPACING * 0.55;
   }
   // Scale geography so the islands' total area fits about a third of the spread, then push
   // overlapping islands apart while a weak spring keeps each near its real place.
@@ -164,7 +184,7 @@ function islandLayout(kept, project) {
   const area = isl.reduce((a, g) => a + Math.PI * (g.r + 0.8) ** 2, 0);
   const L = Math.sqrt(area * 1.9) / span;
   for (const g of isl) { g.tx = g.ox * L; g.ty = g.oy * L; g.x = g.tx; g.y = g.ty; }
-  const gap = 1.0;
+  const gap = 2.2;
   for (let it = 0; it < 600; it++) {
     for (let i = 0; i < isl.length; i++) {
       for (let j = i + 1; j < isl.length; j++) {
@@ -185,34 +205,48 @@ function islandLayout(kept, project) {
   for (const g of isl) { g.x -= x0 + w / 2; g.y -= y0 + h / 2; }
   return { isl, size: Math.max(w, h) };
 }
-// Lay the islands onto an n-cell board: positions per company, land bits, island labels.
+// Lay the islands onto an n-cell board: positions per company, land and lot bits, island labels.
 function placeIslands({ isl }, n) {
   const pos = {};
+  const lots = [];
   for (const g of isl) {
     g.x += n / 2; g.y += n / 2;
-    // Biggest company in the middle, the rest on a sunflower spiral.
+    // City blocks: grid points nearest the island's centre, biggest company in the middle.
+    const span = Math.ceil(Math.sqrt(g.members.length)) + 2;
+    const grid = [];
+    for (let i = -span; i <= span; i++) for (let j = -span; j <= span; j++) grid.push([i, j, Math.hypot(i, j * 1.02) + (i + j) * 1e-3]);
+    grid.sort((a, b) => a[2] - b[2]);
     [...g.members].sort((a, b) => priorityOf(a) - priorityOf(b)).forEach((c, k) => {
-      const r = 0.58 * SPACING * Math.sqrt(k), a = k * 2.39996;
-      pos[c.slug] = [+(g.x + r * Math.cos(a)).toFixed(2), +(g.y + r * Math.sin(a)).toFixed(2)];
+      const x = Math.round(g.x) + grid[k][0] * SPACING, y = Math.round(g.y) + grid[k][1] * SPACING;
+      pos[c.slug] = [+x.toFixed(2), +y.toFixed(2)];
+      lots.push([x, y]);
     });
   }
-  let land = '';
-  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) land += isl.some((g) => Math.hypot(c + 0.5 - g.x, r + 0.5 - g.y) <= g.r + 0.7) ? '1' : '0';
+  // Land: inside an island. Lots: the grass square each company stands on; the rest is street.
+  let land = '', lot = '';
+  for (let r = 0; r < n; r++) {
+    for (let c = 0; c < n; c++) {
+      const x = c + 0.5, y = r + 0.5;
+      land += isl.some((g) => Math.hypot(x - g.x, y - g.y) <= g.r) ? '1' : '0';
+      lot += lots.some(([lx, ly]) => Math.abs(x - lx) < SPACING * 0.36 && Math.abs(y - ly) < SPACING * 0.36) ? '1' : '0';
+    }
+  }
   const islands = isl.filter((g) => g.members.length >= 2).map((g) => [g.name, +g.x.toFixed(2), +g.y.toFixed(2), +g.r.toFixed(2)]);
-  return { pos, land, islands };
+  return { pos, land, lot, islands };
 }
 const board = { modes: {} };
+const ISLAND_OF = new Map();
 {
   const nationTopo = readJSON('node_modules/us-atlas/nation-10m.json');
   const nation = topo.feature(nationTopo, nationTopo.objects.nation).features[0];
   const conus = { type: 'MultiPolygon', coordinates: nation.geometry.coordinates.filter((p) => { const [lon, lat] = p[0][0]; return lon > -126 && lon < -65 && lat > 24 && lat < 50; }) };
   const us = islandLayout(companies.filter((c) => c.country === 'US'), d3.geoConicEqualArea().parallels([29.5, 45.5]).rotate([96, 0]).fitExtent([[0, 0], [1, 1]], conus));
   const world = islandLayout(companies, d3.geoNaturalEarth1().fitExtent([[0, 0], [1, 1]], { type: 'Sphere' }));
-  // Smallest QR version whose grid fits both layouts with a margin.
-  const need = Math.max(us.size, world.size) + 8;
-  let version = 10;
-  while (17 + 4 * version < need) version++;
-  Object.assign(board, qrBits(SITE_URL, version));
+  // Which island each company lives on (its US island, or its world island abroad).
+  [...us.isl, ...world.isl].forEach((g, i) => g.members.forEach((c) => ISLAND_OF.has(c.slug) || ISLAND_OF.set(c.slug, i)));
+  // The map's own grid; scan view lays a separate QR code (it scans to this site) over it.
+  board.n = Math.ceil(Math.max(us.size, world.size) + 10);
+  board.qr = qrBits(SITE_URL);
   for (const [id, layout] of Object.entries({ us, world })) {
     const placed = placeIslands(layout, board.n);
     const regionsAt = {};
@@ -224,7 +258,7 @@ const board = { modes: {} };
     }
     board.modes[id] = { ...placed, regions: regionsAt };
   }
-  console.log(`board: QR version ${version}, ${board.n}×${board.n}; ${us.isl.length} US islands, ${world.isl.length} world islands`);
+  console.log(`board: ${board.n}×${board.n} map, ${board.qr.n}×${board.qr.n} QR; ${us.isl.length} US islands, ${world.isl.length} world islands`);
 }
 
 // Which signature 3D model a company gets (see data/industries.json and src/models.js), and a
@@ -244,40 +278,54 @@ const PALETTES = [
 ];
 const LOOKS = new Map();
 {
+  // A company's look: hero shape (v), brand colours (a, b), base, companion prop and topper.
+  // Heroes come from what the company does (_heroes); no hero repeats on an island where it can
+  // be helped; and no two companies anywhere share the same hero + prop + topper.
   const overrides = industries._looks || {};
+  const heroes = industries._heroes || {};
   const byModel = new Map();
   for (const c of companies) {
     const m = modelOf(c);
     if (!byModel.has(m)) byModel.set(m, []);
     byModel.get(m).push(c);
   }
+  const shapes = new Set();
+  const islandHeroes = new Map(), islandProps = new Map();
+  const seen = (map, island, k) => (map.get(island) || new Set()).has(k);
+  const mark = (map, island, k) => (map.has(island) || map.set(island, new Set()), map.get(island).add(k));
+  const hash = (str) => [...str].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7);
   for (const [m, list] of byModel) {
     const V = variantCount(m);
-    const used = new Set();
-    const key = (l) => `${l.v}|${l.a}|${l.b}|${l.base}`;
+    const heroCount = new Array(V).fill(0);
     const sorted = [...list].sort((a, b) => priorityOf(a) - priorityOf(b));
-    for (const c of sorted) {
-      const o = overrides[c.listedName || c.name];
-      if (!o) continue;
-      const look = { v: o.v % V, a: o.a, b: o.b, base: o.base ?? 0 };
-      if (used.has(key(look))) throw new Error(`duplicate look override for ${c.name}`);
-      used.add(key(look));
-      LOOKS.set(c.slug, look);
-    }
-    // Everyone else: shapes first, then bases, then palettes, skipping anything taken.
-    let i = 0;
-    for (const c of sorted) {
-      if (LOOKS.has(c.slug)) continue;
-      let look;
-      do {
-        const v = i % V, base = Math.floor(i / V) % 3, p = PALETTES[(Math.floor(i / (V * 3)) + m.length) % PALETTES.length];
-        look = { v, a: p[0], b: p[1], base };
-        i++;
-      } while (used.has(key(look)));
-      if (i > V * 3 * PALETTES.length + 50) throw new Error(`ran out of looks for ${m}`);
-      used.add(key(look));
-      LOOKS.set(c.slug, look);
-    }
+    sorted.forEach((c, idx) => {
+      const name = c.listedName || c.name, island = ISLAND_OF.get(c.slug);
+      const o = overrides[name] || {};
+      let v = o.v ?? heroes[name];
+      if (v == null) {
+        // Least-used hero that isn't already on this island.
+        v = [...Array(V).keys()].sort((x, y) => (seen(islandHeroes, island, `${m}:${x}`) - seen(islandHeroes, island, `${m}:${y}`)) || heroCount[x] - heroCount[y] || x - y)[0];
+      }
+      v %= V;
+      heroCount[v]++;
+      mark(islandHeroes, island, `${m}:${v}`);
+      // Prop and topper: first free combination, preferring a prop not yet on this island.
+      const start = hash(c.slug);
+      let pick = null;
+      for (const strict of [true, false]) {
+        for (let k = 0; k < PROP_COUNT * TOPPER_COUNT && !pick; k++) {
+          const prop = (start + k) % PROP_COUNT, topper = (Math.floor((start + k) / PROP_COUNT) + idx) % TOPPER_COUNT;
+          if (shapes.has(`${m}:${v}:${prop}:${topper}`) || (strict && seen(islandProps, island, prop))) continue;
+          pick = { prop, topper };
+        }
+        if (pick) break;
+      }
+      if (!pick) throw new Error(`ran out of shapes for ${c.name}`);
+      shapes.add(`${m}:${v}:${pick.prop}:${pick.topper}`);
+      mark(islandProps, island, pick.prop);
+      const pal = PALETTES[(idx + m.length) % PALETTES.length];
+      LOOKS.set(c.slug, { v, a: o.a || pal[0], b: o.b || pal[1], base: o.base ?? (heroCount[v] - 1) % 3, prop: pick.prop, topper: pick.topper });
+    });
   }
 }
 
@@ -580,7 +628,7 @@ ${topbar(0, `<div class="search" role="search">
 function worldPage() {
   const slim = companies.map((c) => {
     const lk = LOOKS.get(c.slug);
-    const o = { s: c.slug, n: c.name, k: c.kind === 'f500' ? 0 : 1, t: c.tech ? 1 : 0, c: place(c), m: modelOf(c), L: [lk.v, lk.a, lk.b, lk.base] };
+    const o = { s: c.slug, n: c.name, k: c.kind === 'f500' ? 0 : 1, t: c.tech ? 1 : 0, c: place(c), m: modelOf(c), L: [lk.v, lk.a, lk.b, lk.base, lk.prop, lk.topper] };
     if (c.rank) o.r = c.rank;
     if (c.revenue != null) o.v = c.revenue;
     if (c.sector) o.sec = c.sector;

@@ -613,6 +613,210 @@ const EXTRA = {
       part(box(6.4, 1.4, 0.4), 'A', { p: [0, 9.6, 0.8] }), part(box(2, 1.6, 0.1), 'B', { p: [0, 0.8, 2.03] }), part(cyl(3, 3, 0.3, 24), '#7cc0ff', { p: [5, 0.15, 3] })) }),
   ],
 };
+// ---------- heroes by what a company actually does ----------
+// Appended to EXTRA so their indices follow the shapes above (see data/industries.json _heroes).
+const roundBox = (w, h, d, r, color, p = [0, 0, 0]) => [part(box(w - 2 * r, h, d), color, { p }), part(box(w, h, d - 2 * r), color, { p }), ...[[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([sx, sz]) => part(cyl(r, r, h, 12), color, { p: [p[0] + sx * (w / 2 - r), p[1], p[2] + sz * (d / 2 - r)] }))];
+EXTRA.retail.push(
+  // 3 grocery basket with produce
+  () => ({ geo: merge(part(cyl(3.6, 2.8, 3, 8), 'A', { p: [0, 1.5, 0], r: [0, Math.PI / 8, 0] }), part(cyl(3.65, 3.65, 0.3, 8), 'Ad', { p: [0, 3, 0], r: [0, Math.PI / 8, 0] }), part(torus(3, 0.18, Math.PI, 16), K.ink, { p: [0, 3, 0], r: [0, Math.PI / 2, 0] }),
+    part(ball(1.1, 1), '#e5533d', { p: [-1.2, 3.5, 0.8] }), part(ball(1, 1), '#f29a3a', { p: [1, 3.5, -0.6] }), part(cone(0.5, 2.6, 8), '#f29a3a', { p: [0.4, 4, 1.2], r: [0.5, 0, 0.6] }), part(ball(0.9, 1), '#5fae5b', { p: [-0.4, 3.9, -1.3] }), part(cyl(0.7, 0.8, 2.6, 10), '#f6f2e8', { p: [1.6, 4.2, 1] })) }),
+  // 4 dress form
+  () => ({ geo: merge(...plinth(2.4), part(cyl(0.12, 0.12, 2.6, 8), K.woodDk, { p: [0, 2, 0] }), part(cyl(1.6, 2.4, 4.2, 14), 'A', { p: [0, 5.4, 0] }), part(cyl(1.5, 1.2, 1.6, 14), 'A', { p: [0, 8.2, 0] }), part(cyl(0.3, 0.3, 0.8, 8), K.woodDk, { p: [0, 9.3, 0] }), part(cyl(1.65, 1.65, 0.25, 14), 'B', { p: [0, 7.4, 0] }), part(torus(1.3, 0.1, Math.PI * 2, 18), K.gold, { p: [0, 8.8, 0], r: [Math.PI / 2, 0, 0] })) }),
+  // 5 warehouse pallet stack
+  () => ({ geo: merge(part(box(7, 0.6, 5), K.wood, { p: [0, 0.3, 0] }), ring(3, (a, i) => part(box(7, 0.2, 0.6), K.woodDk, { p: [0, 0.7, -2 + i * 2] })),
+    ...[0, 1, 2].flatMap((y) => [-1, 1].flatMap((x) => [-1, 1].map((z) => part(box(3.3, 2, 2.3), (y + x + z) % 2 ? '#c99a62' : '#d4a76d', { p: [x * 1.7, 1.8 + y * 2.05, z * 1.2] })))), part(box(7.1, 0.6, 0.2), 'A', { p: [0, 5, 2.4] }), part(box(4, 1.2, 0.1), 'B', { p: [0, 3.2, 2.42] })) }),
+  // 6 toolbox
+  () => ({ geo: merge(part(box(7, 3.4, 3.4), 'A', { p: [0, 1.7, 0] }), part(box(7.1, 0.3, 3.5), 'Ad', { p: [0, 3.2, 0] }), part(torus(1.4, 0.2, Math.PI, 12), K.ink, { p: [0, 3.5, 0] }),
+    part(box(0.5, 4, 0.5), K.wood, { p: [-1.6, 4.8, 0.4], r: [0, 0, 0.5] }), part(box(2, 0.9, 0.9), K.steel, { p: [-2.6, 6.4, 0.4], r: [0, 0, 0.5] }), part(box(0.3, 3.6, 0.3), K.steel, { p: [1.8, 4.6, -0.4], r: [0, 0, -0.4] }), part(cyl(0.45, 0.45, 1.6, 10), 'B', { p: [1.2, 3.6, -0.4], r: [0, 0, -0.4] })) }),
+  // 7 TV on a stand
+  () => ({ geo: merge(part(box(3, 0.3, 2), K.ink, { p: [0, 0.15, 0] }), part(box(0.6, 2, 0.4), K.ink, { p: [0, 1.2, 0] }), part(box(9, 5.4, 0.4), K.ink, { p: [0, 4.6, 0] }), part(box(8.4, 4.8, 0.05), (x, y) => (y > 5.2 ? '#7cc0ff' : y > 3.8 ? 'B' : '#5fae5b'), { p: [0, 4.6, 0.23] }), part(box(1.2, 0.5, 0.1), 'A', { p: [3.6, 2.2, 0.25] })) }),
+  // 8 sneaker
+  () => ({ geo: merge(...plinth(3.4), part(box(7.4, 0.8, 2.8), K.white, { p: [0.2, 1.1, 0] }), part(box(5.6, 1.8, 2.6), 'A', { p: [-0.6, 2.3, 0] }), part(box(2.8, 2.8, 2.4), 'A', { p: [-2.2, 3, 0] }), part(box(2.6, 1.2, 2.5), 'Ad', { p: [2.6, 1.9, 0], r: [0, 0, -0.3] }),
+    part(box(3.6, 0.5, 0.1), 'B', { p: [0, 2.4, 1.32], r: [0, 0, 0.3] }), ring(4, (a, i) => part(box(0.12, 0.12, 2.2), K.white, { p: [0.2 + i * 0.6, 3.1 - i * 0.15, 0] }))) }),
+  // 9 lipstick
+  () => ({ geo: merge(...plinth(2.6), part(cyl(1.5, 1.5, 3.6, 18), K.gold, { p: [0, 2.6, 0] }), part(cyl(1.2, 1.2, 2.2, 18), K.goldDk, { p: [0, 5.5, 0] }), part(cyl(1.05, 1.05, 2.4, 18), 'A', { p: [0, 7.3, 0] }), part(cone(1.05, 1.4, 18), 'A', { p: [0.2, 9.1, 0], r: [0, 0, -0.35] }), part(cyl(1.5, 1.5, 4, 18), 'B', { p: [3, 2, 1.4], r: [0.2, 0, 0.3] })) }),
+  // 10 car battery
+  () => ({ geo: merge(part(box(7, 4.6, 4.4), K.ink, { p: [0, 2.3, 0] }), part(box(7.05, 0.8, 4.45), 'A', { p: [0, 4.2, 0] }), part(cyl(0.6, 0.6, 0.9, 12), K.red, { p: [-2.2, 5, 0] }), part(cyl(0.6, 0.6, 0.9, 12), K.steel, { p: [2.2, 5, 0] }), part(box(2.4, 0.3, 0.1), 'B', { p: [0, 2.4, 2.22] }),
+    part(extrude([[0, 0], [1, 1.4], [0.4, 1.4], [1.2, 3], [-0.2, 1.2], [0.4, 1.2]], 0.2), K.yellow, { p: [-0.4, 0.8, 2.3] })) }),
+  // 11 price tag
+  () => ({ geo: merge(...plinth(2.8), part(cyl(0.12, 0.12, 4, 8), K.ink, { p: [0, 2.4, 0] }), part(extrude([[-2.6, -1.8], [2, -1.8], [3.4, 0], [2, 1.8], [-2.6, 1.8]], 0.4), 'A', { p: [0, 6.4, 0] }), part(cyl(0.35, 0.35, 0.5, 12), K.white, { p: [2.2, 6.4, 0], r: [Math.PI / 2, 0, 0] }),
+    part(box(0.5, 2.4, 0.1), K.white, { p: [-0.8, 6.4, 0.25] }), part(box(1.4, 0.4, 0.1), K.white, { p: [-0.8, 7.2, 0.25] }), part(box(1.4, 0.4, 0.1), K.white, { p: [-0.8, 5.6, 0.25] })) }),
+  // 12 game controller
+  () => ({ geo: merge(...plinth(3), ...roundBox(6.4, 1.4, 3.4, 1.2, 'A', [0, 4.6, 0]), part(cyl(1, 1, 1.4, 12), 'A', { p: [-2.4, 4.6, 1.4] }), part(cyl(1, 1, 1.4, 12), 'A', { p: [2.4, 4.6, 1.4] }),
+    part(box(1.4, 0.3, 0.45), K.ink, { p: [-1.8, 5.4, -0.2] }), part(box(0.45, 0.3, 1.4), K.ink, { p: [-1.8, 5.4, -0.2] }), ring(4, (a, i) => part(cyl(0.3, 0.3, 0.3, 10), ['B', '#5fae5b', '#ffd23f', '#3d7be0'][i], { p: [1.8 + Math.cos(a) * 0.6, 5.4, -0.2 + Math.sin(a) * 0.6] })), beam([0, 3.9, -1.7], [0, 1, -3], 0.15, K.ink)) }),
+);
+EXTRA.health.push(
+  // 3 hospital
+  () => ({ geo: merge(part(box(7, 6, 4.4), K.white, { p: [0, 3, 0] }), part(box(3, 8, 3), K.white, { p: [0, 4, 0.2] }), part(box(2, 0.6, 0.1), 'A', { p: [0, 6.6, 1.72] }), part(box(0.6, 2, 0.1), 'A', { p: [0, 6.6, 1.72] }),
+    ring(4, (a, i) => part(box(5.6, 0.6, 0.06), '#9dd0f2', { p: [0, 1.2 + i * 1.3, 2.22] })), part(box(1.6, 1.4, 0.1), 'B', { p: [0, 0.7, 2.25] }), part(cyl(1.4, 1.4, 0.15, 20), '#5fae5b', { p: [0, 8.1, 0.2] })) }),
+  // 4 stethoscope
+  () => ({ geo: merge(...plinth(3.2), part(torus(2.2, 0.28, Math.PI * 1.5, 24), 'A', { p: [0, 5.6, 0], r: [0, 0, Math.PI * 0.75] }), part(cyl(0.9, 0.9, 0.6, 18), K.steel, { p: [0, 2.2, 1.6], r: [Math.PI / 2, 0, 0] }), part(cyl(0.7, 0.7, 0.62, 18), 'B', { p: [0, 2.2, 1.6], r: [Math.PI / 2, 0, 0] }), beam([0, 3.4, 0], [0, 2.4, 1.4], 0.24, 'A'), part(ball(0.35, 0), K.steel, { p: [-1.6, 7.2, 0] }), part(ball(0.35, 0), K.steel, { p: [1.6, 7.2, 0] })) }),
+  // 5 syringe
+  () => ({ geo: merge(...plinth(2.4), part(cyl(1, 1, 5.4, 16), '#e6f4f8', { p: [0, 4.6, 0] }), part(cyl(0.9, 0.9, 3, 16), 'A', { p: [0, 3.6, 0] }), part(cyl(1.6, 1.6, 0.3, 16), K.white, { p: [0, 7.4, 0] }), part(cyl(0.3, 0.3, 2.2, 8), K.white, { p: [0, 8.6, 0] }), part(cyl(1, 1, 0.3, 16), 'B', { p: [0, 9.8, 0] }), part(cone(0.3, 0.9, 8), K.steel, { p: [0, 1.4, 0], r: [Math.PI, 0, 0] }), part(cyl(0.05, 0.05, 1.2, 6), K.steel, { p: [0, 0.6, 0] })) }),
+  // 6 DNA helix
+  () => ({ geo: merge(...plinth(2.6), ...Array.from({ length: 14 }, (_, i) => { const y = 1.4 + i * 0.6, a = i * 0.55; return [part(ball(0.42, 1), 'A', { p: [Math.cos(a) * 1.8, y, Math.sin(a) * 1.8] }), part(ball(0.42, 1), 'B', { p: [-Math.cos(a) * 1.8, y, -Math.sin(a) * 1.8] }), beam([Math.cos(a) * 1.6, y, Math.sin(a) * 1.6], [-Math.cos(a) * 1.6, y, -Math.sin(a) * 1.6], 0.14, i % 2 ? '#c3c9d0' : K.white)]; })) }),
+  // 7 microscope
+  () => ({ geo: merge(part(box(5, 0.6, 3.4), K.ink, { p: [0, 0.3, 0] }), beam([1.4, 0.6, 0], [1, 6.4, 0], 0.9, 'A'), part(box(3, 0.4, 2.4), K.dark, { p: [-0.6, 2.8, 0] }), part(cyl(0.7, 0.8, 4.4, 14), K.white, { p: [-0.6, 6.4, 0], r: [0, 0, -0.35] }), part(cyl(0.45, 0.45, 1.2, 12), K.dark, { p: [-1.2, 4.4, 0] }), part(cyl(0.5, 0.5, 1.4, 12), 'B', { p: [0.4, 8.8, 0], r: [0, 0, -0.35] })) }),
+  // 8 pharmacy storefront
+  () => ({ geo: merge(part(box(8, 5, 4), K.white, { p: [0, 2.5, 0] }), part(box(8.2, 1.2, 0.3), 'A', { p: [0, 5.6, 2.05] }), part(box(2.6, 0.7, 0.4), 'B', { p: [0, 7.2, 0.5] }), part(box(0.7, 2.6, 0.4), 'B', { p: [0, 7.2, 0.5] }), part(box(0.2, 2.4, 0.2), K.steel, { p: [0, 5.6, 0.5] }), part(box(2.6, 2.4, 0.1), '#9dd0f2', { p: [-2.2, 2, 2.02] }), part(box(2.6, 2.4, 0.1), '#9dd0f2', { p: [2.2, 2, 2.02] }), part(box(1.2, 3, 0.1), K.wood, { p: [0, 1.5, 2.03] })) }),
+  // 9 medical supply truck
+  () => ({ geo: merge(part(box(6.4, 3.6, 3.2), K.white, { p: [-0.8, 2.6, 0] }), part(box(1.6, 0.5, 0.1), 'A', { p: [-0.8, 2.8, 1.62] }), part(box(0.5, 1.6, 0.1), 'A', { p: [-0.8, 2.8, 1.62] }), part(box(2, 2.6, 3), 'B', { p: [3.4, 2, 0] }), part(box(0.1, 1, 2.4), '#9dd0f2', { p: [4.42, 2.6, 0] }), tire([2.8, 0.85, 1.6], 0.8), tire([2.8, 0.85, -1.6], 0.8), tire([-2.8, 0.85, 1.6], 0.8), tire([-2.8, 0.85, -1.6], 0.8)) }),
+);
+EXTRA.bank.push(
+  // 7 money bag
+  () => ({ geo: merge(part(ball(3, 2), 'A', { p: [0, 3.2, 0], s: [1, 0.95, 1] }), part(cyl(0.9, 1.4, 1.2, 14), 'A', { p: [0, 6.2, 0] }), part(torus(1, 0.22, Math.PI * 2, 16), K.gold, { p: [0, 6, 0], r: [Math.PI / 2, 0, 0] }), part(cone(1.4, 1.4, 6), 'Ad', { p: [0, 7.4, 0] }), part(box(0.4, 2.4, 0.2), 'B', { p: [0, 3.4, 2.9] }), part(box(1.6, 0.4, 0.2), 'B', { p: [0, 3.8, 2.92] }), part(box(1.6, 0.4, 0.2), 'B', { p: [0, 2.9, 2.92] })) }),
+  // 8 rising chart
+  () => ({ geo: merge(part(box(8, 0.5, 3), K.white, { p: [0, 0.25, 0] }), ring(5, (a, i) => part(box(1.1, 1.2 + i * 1.3, 1.1), i === 4 ? 'A' : 'Ad', { p: [-2.8 + i * 1.4, 0.5 + (1.2 + i * 1.3) / 2, 0] })), beam([-3.4, 2.6, 1], [-0.6, 4.4, 1], 0.3, 'B'), beam([-0.6, 4.4, 1], [1, 3.8, 1], 0.3, 'B'), beam([1, 3.8, 1], [3.6, 8, 1], 0.3, 'B'), part(cone(0.7, 1.2, 4), 'B', { p: [3.9, 8.5, 1], r: [0, 0, -0.55] })) }),
+  // 9 briefcase
+  () => ({ geo: merge(...plinth(3.4), ...roundBox(7, 4.6, 2.2, 0.5, 'A', [0, 3.2, 0]), part(torus(1, 0.25, Math.PI, 12), K.ink, { p: [0, 5.5, 0] }), part(box(7.1, 0.4, 2.25), 'Ad', { p: [0, 4, 0] }), part(box(0.8, 0.6, 0.2), K.gold, { p: [-1.6, 4.4, 1.15] }), part(box(0.8, 0.6, 0.2), K.gold, { p: [1.6, 4.4, 1.15] })) }),
+  // 10 coin tower
+  () => ({ geo: merge(...plinth(3.2), ...Array.from({ length: 14 }, (_, i) => part(cyl(1.6, 1.6, 0.42, 22), i % 2 ? K.gold : K.goldDk, { p: [Math.sin(i * 0.9) * 0.25, 0.9 + i * 0.44, Math.cos(i * 1.3) * 0.25] })), part(cyl(1.7, 1.7, 0.3, 22), 'A', { p: [0, 7.2, 0] }), ring(3, (a, i) => part(cyl(1, 1, 0.3, 18), K.gold, { p: [Math.cos(a) * 2.9, 0.8 + i * 0.3, Math.sin(a) * 2.9] }))) }),
+);
+EXTRA.insurance.push(
+  // 3 hourglass
+  () => ({ geo: merge(part(cyl(2.6, 2.6, 0.6, 6), 'A', { p: [0, 0.3, 0] }), part(cyl(2.6, 2.6, 0.6, 6), 'A', { p: [0, 8.3, 0] }), ring(3, (a) => part(cyl(0.2, 0.2, 7.4, 8), K.woodDk, { p: [Math.cos(a) * 2.2, 4.3, Math.sin(a) * 2.2] })), part(cone(2, 3.4, 16), '#e6f4f8', { p: [0, 2.4, 0] }), part(cone(2, 3.4, 16), '#e6f4f8', { p: [0, 6.2, 0], r: [Math.PI, 0, 0] }), part(cone(1.6, 1.6, 16), 'B', { p: [0, 1.4, 0] }), part(cone(1, 1, 16), 'B', { p: [0, 6.8, 0], r: [Math.PI, 0, 0] })) }),
+  // 4 padlock
+  () => ({ geo: merge(...plinth(3), ...roundBox(5.4, 4.4, 2, 0.6, 'A', [0, 3.2, 0]), part(torus(1.8, 0.45, Math.PI, 18), K.steel, { p: [0, 5.4, 0] }), part(cyl(0.5, 0.5, 0.3, 12), K.ink, { p: [0, 3.4, 1.05], r: [Math.PI / 2, 0, 0] }), part(box(0.3, 1, 0.2), K.ink, { p: [0, 2.8, 1.05] }), part(box(5.5, 0.4, 2.05), 'B', { p: [0, 1.6, 0] })) }),
+  // 5 anchor
+  () => ({ geo: merge(part(cyl(4, 4.2, 0.6, 28), '#5aa9e6', { p: [0, 0.3, 0] }), part(box(0.7, 7, 0.7), 'A', { p: [0, 4.2, 0] }), part(box(3.6, 0.6, 0.6), 'A', { p: [0, 6.6, 0] }), part(torus(0.8, 0.25, Math.PI * 2, 14), 'A', { p: [0, 8.2, 0] }), part(torus(2.8, 0.35, Math.PI, 20), 'A', { p: [0, 3.2, 0], r: [0, 0, Math.PI] }), part(cone(0.7, 1.2, 4), 'A', { p: [-2.8, 3.4, 0] }), part(cone(0.7, 1.2, 4), 'A', { p: [2.8, 3.4, 0] }), part(torus(1.2, 0.12, Math.PI * 1.6, 14), '#d9c39a', { p: [0, 7, 0.5] })) }),
+);
+EXTRA.oil.push(
+  // 3 gas pump
+  () => ({ geo: merge(part(box(4, 0.5, 3), K.stoneDk, { p: [0, 0.25, 0] }), part(box(2.8, 6.4, 2), 'A', { p: [0, 3.7, 0] }), part(box(2.2, 1.4, 0.1), '#2c3e55', { p: [0, 5.6, 1.02] }), part(box(2.9, 1, 2.1), 'B', { p: [0, 7.2, 0] }), part(box(0.6, 1.4, 0.6), K.ink, { p: [1.7, 4, 0.6] }), part(torus(1.2, 0.12, Math.PI, 12), K.ink, { p: [1.9, 2.8, 0.8], r: [0, Math.PI / 2, 0] })) }),
+  // 4 refinery towers
+  () => ({ geo: merge(part(box(8, 0.5, 4), K.stoneDk, { p: [0, 0.25, 0] }), part(cyl(1.2, 1.2, 8, 16), K.white, { p: [-2, 4.4, 0] }), part(cyl(1, 1, 6, 16), K.white, { p: [0.6, 3.4, -0.4] }), part(cyl(0.5, 0.5, 9.4, 12), K.steelDk, { p: [2.8, 5.2, 0.6] }), ring(3, (a, i) => part(cyl(1.25, 1.25, 0.4, 16), 'A', { p: [-2, 2 + i * 2.4, 0] })), part(cone(0.6, 1.4, 10), K.orange, { p: [2.8, 10.4, 0.6] }), beam([-0.8, 6, 0], [0.6, 5.6, -0.4], 0.3, K.steel), part(cyl(1.05, 1.05, 0.3, 16), 'B', { p: [0.6, 6.5, -0.4] })) }),
+  // 5 tanker ship
+  () => ({ geo: merge(part(cyl(4.8, 5, 0.6, 28), '#5aa9e6', { p: [0, 0.3, 0] }), part(box(8.4, 1.8, 2.8), 'A', { p: [0, 1.5, 0] }), part(box(8.4, 0.4, 2.8), 'Ad', { p: [0, 2.6, 0] }), part(box(2, 2.6, 2.4), K.white, { p: [-3, 4, 0] }), part(cyl(0.4, 0.5, 1.6, 10), 'B', { p: [-3.4, 6, 0] }), ring(3, (a, i) => part(cyl(0.8, 0.8, 0.6, 14), K.white, { p: [-0.2 + i * 1.8, 3.1, 0] }))) }),
+);
+EXTRA.power.push(
+  // 3 solar array
+  () => ({ geo: merge(part(box(8, 0.4, 5.6), K.stoneDk, { p: [0, 0.2, 0] }), ...[-1.8, 1.8].flatMap((z) => [-2.7, 0, 2.7].map((x) => [part(box(2.5, 0.12, 2.2), 'B', { p: [x, 2, z], r: [-0.6, 0, 0] }), part(box(0.15, 1.6, 0.15), K.steel, { p: [x, 1, z] })])), part(ball(1.2, 1), K.yellow, { p: [3, 7, -2] }), ring(8, (a) => beam([3 + Math.cos(a) * 1.6, 7 + Math.sin(a) * 1.6, -2], [3 + Math.cos(a) * 2.3, 7 + Math.sin(a) * 2.3, -2], 0.18, K.yellow)), part(box(0.2, 0.2, 5.6), 'A', { p: [0, 0.5, 0] })) }),
+  // 4 cooling towers
+  () => ({ geo: merge(part(box(9, 0.4, 5), K.stoneDk, { p: [0, 0.2, 0] }), part(cyl(1.8, 2.6, 6.4, 20), '#e4dccd', { p: [-2, 3.6, 0] }), part(cyl(1.5, 2.2, 5.2, 20), '#e4dccd', { p: [2.4, 3, 0.4] }), part(cyl(1.82, 1.82, 0.4, 20), 'A', { p: [-2, 6.4, 0] }), ring(4, (a, i) => part(ball(1 + i * 0.25, 1), K.white, { p: [-2 + i * 0.4, 7.6 + i * 0.9, 0] })), part(box(2, 1.6, 2), 'B', { p: [0.2, 0.9, -1.8] })) }),
+  // 5 plug and socket
+  () => ({ geo: merge(...plinth(3.2), ...roundBox(4, 5, 1.4, 0.6, K.white, [-1.2, 3.6, 0]), part(cyl(0.3, 0.3, 0.2, 10), K.ink, { p: [-1.8, 4, 0.72], r: [Math.PI / 2, 0, 0] }), part(cyl(0.3, 0.3, 0.2, 10), K.ink, { p: [-0.6, 4, 0.72], r: [Math.PI / 2, 0, 0] }),
+    part(box(2.4, 2.6, 2), 'A', { p: [2.4, 4.4, 0.8] }), part(box(0.25, 1, 0.25), K.steel, { p: [1.9, 2.7, 0.8] }), part(box(0.25, 1, 0.25), K.steel, { p: [2.9, 2.7, 0.8] }), beam([2.4, 5.7, 0.8], [3.6, 8, 0], 0.35, 'Ad')) }),
+);
+EXTRA.industrial.push(
+  // 3 excavator
+  () => ({ geo: merge(part(box(5.4, 1.2, 3.6), K.ink, { p: [0, 0.6, 0] }), part(box(4, 2.4, 3), 'A', { p: [-0.4, 2.4, 0] }), part(box(1.6, 1.8, 1.6), '#2c3e55', { p: [-1.2, 4.2, 0.6] }), beam([1.2, 3, 0], [3.6, 6.4, 0], 0.7, 'A'), beam([3.6, 6.4, 0], [5, 3, 0], 0.6, 'A'), part(box(1.6, 1.2, 1.8), K.steelDk, { p: [5, 2.4, 0], r: [0, 0, 0.5] })) }),
+  // 4 paint can and brush
+  () => ({ geo: merge(part(cyl(2.6, 2.6, 4.6, 24), K.steel, { p: [0, 2.3, 0] }), part(cyl(2.65, 2.65, 2.6, 24), 'A', { p: [0, 2.3, 0] }), part(cyl(2.5, 2.5, 0.3, 24), 'A', { p: [0, 4.7, 0] }), part(torus(2.6, 0.08, Math.PI, 16), K.ink, { p: [0, 4.6, 0], r: [0, Math.PI / 2, 0] }),
+    part(box(2, 0.5, 2.4), K.wood, { p: [3.2, 3.6, 1.2], r: [0, 0, -0.5] }), part(box(2, 1.4, 2.4), 'Ad', { p: [2.4, 2.4, 1.2], r: [0, 0, -0.5] }), part(cyl(0.3, 0.3, 3, 8), K.wood, { p: [4.4, 5, 1.2], r: [0, 0, -0.5] })) }),
+  // 5 garbage truck
+  () => ({ geo: merge(part(box(5.4, 3.4, 3.2), 'A', { p: [-1, 2.6, 0] }), part(box(2, 2.6, 3), K.white, { p: [3.2, 2.2, 0] }), part(box(0.1, 1, 2.4), '#9dd0f2', { p: [4.22, 2.8, 0] }), part(box(5.5, 0.5, 3.25), 'Ad', { p: [-1, 3, 0] }), tire([2.8, 0.85, 1.6], 0.8), tire([2.8, 0.85, -1.6], 0.8), tire([-2.6, 0.85, 1.6], 0.8), tire([-2.6, 0.85, -1.6], 0.8), part(box(1.2, 1.6, 1.2), 'B', { p: [-4, 1.4, 0.8] })) }),
+  // 6 cardboard carton line
+  () => ({ geo: merge(part(box(9, 0.5, 3), K.dark, { p: [0, 1.6, 0] }), ring(5, (a, i) => part(cyl(0.3, 0.3, 3.1, 10), K.steel, { p: [-3.6 + i * 1.8, 1.2, 0], r: [Math.PI / 2, 0, 0] })), [[-3, 1], [0, 0.8], [3, 1.2]].map(([x, sc]) => part(box(1.8 * sc, 1.6 * sc, 1.8 * sc), '#c99a62', { p: [x, 1.85 + 0.8 * sc, 0] })), part(box(1.2, 0.15, 1.6), 'A', { p: [0, 3.2, 0] }), beam([-4.2, 0, 1.2], [-4.2, 1.4, 1.2], 0.3, K.steelDk), beam([4.2, 0, 1.2], [4.2, 1.4, 1.2], 0.3, K.steelDk)) }),
+);
+EXTRA.software.push(
+  // 3 terminal window
+  () => ({ geo: merge(part(box(8.6, 6, 0.6), K.ink, { p: [0, 4.6, 0] }), part(box(8.6, 0.8, 0.65), 'A', { p: [0, 7.3, 0] }), [[3, 'B'], [5, '#5fd08f'], [2, '#c3c9d0'], [4, '#5fd08f']].map(([w, c], i) => part(box(w, 0.4, 0.1), c, { p: [-3.6 + w / 2, 6.2 - i * 0.9, 0.32] })), part(box(0.5, 0.5, 0.1), K.white, { p: [-3.2, 2.6, 0.32] }), part(box(2.4, 1.6, 1.6), K.steelDk, { p: [0, 0.8, 0] })) }),
+  // 4 dashboard chart
+  () => ({ geo: merge(part(box(8.6, 6, 0.5), K.white, { p: [0, 4.6, 0] }), part(cyl(1.6, 1.6, 0.2, 24, 1), (x) => (x > -2.4 ? 'A' : 'B'), { p: [-2.4, 5, 0.3], r: [Math.PI / 2, 0, 0] }), ring(4, (a, i) => part(box(0.8, 1 + i * 0.8, 0.2), i % 2 ? 'A' : 'B', { p: [0.8 + i * 1, 2.6 + (1 + i * 0.8) / 2, 0.3] })), part(box(2.4, 1.6, 1.6), K.steelDk, { p: [0, 0.8, 0] })) }),
+  // 5 envelope
+  () => ({ geo: merge(...plinth(3.4), part(box(7, 4.6, 0.6), K.white, { p: [0, 4.4, 0] }), part(extrude([[-3.5, 2.3], [3.5, 2.3], [0, -0.4]], 0.2), 'A', { p: [0, 4.4, 0.35] }), part(extrude([[-3.5, -2.3], [0, 0.2], [3.5, -2.3]], 0.2), '#eef0ec', { p: [0, 4.4, 0.32] }), part(cyl(0.6, 0.6, 0.2, 16), 'B', { p: [0, 4.2, 0.5], r: [Math.PI / 2, 0, 0] })) }),
+  // 6 puzzle pieces
+  () => ({ geo: merge(...plinth(3.6), part(box(3.2, 3.2, 1), 'A', { p: [-1.6, 3, 0] }), part(cyl(0.7, 0.7, 1, 14), 'A', { p: [0.1, 3, 0], r: [Math.PI / 2, 0, 0] }), part(box(3.2, 3.2, 1), 'B', { p: [1.8, 3.2, 0.3], r: [0, 0, 0.15] }), part(box(3.2, 3.2, 1), 'Ad', { p: [-1.4, 6.4, 0.2], r: [0, 0, -0.1] }), part(cyl(0.7, 0.7, 1, 14), 'Ad', { p: [-1.4, 4.7, 0.2], r: [Math.PI / 2, 0, 0] })) }),
+);
+EXTRA.car.push(
+  // 3 motorcycle
+  () => ({ geo: merge(...plinth(3.6), tire([-2.4, 2, 0], 1.3, 0.6), tire([2.6, 2, 0], 1.3, 0.6), part(box(3.4, 1.2, 1.2), 'A', { p: [0, 3.4, 0], r: [0, 0, -0.1] }), part(box(2.2, 0.6, 1.1), K.ink, { p: [-1.2, 4.2, 0] }), part(box(1.4, 1.2, 1), K.steel, { p: [0.2, 2.4, 0] }), beam([2.6, 2, 0], [1.8, 5, 0], 0.25, K.steel), part(box(0.25, 0.25, 2.4), K.ink, { p: [1.8, 5, 0] }), part(cyl(0.3, 0.3, 0.3, 10), K.yellow, { p: [2.2, 4.4, 0], r: [0, 0, Math.PI / 2] })) }),
+  // 4 camper van
+  () => ({ geo: merge(part(box(7.6, 4, 3.4), K.white, { p: [0, 3, 0] }), part(box(7.65, 0.8, 3.45), 'A', { p: [0, 2.2, 0] }), part(box(2.6, 1, 0.1), '#9dd0f2', { p: [-1.6, 3.8, 1.72] }), part(box(1.4, 1.2, 0.1), '#9dd0f2', { p: [2.8, 3.8, 1.72] }), part(box(3.4, 0.5, 2.4), 'B', { p: [-0.4, 5.25, 0] }), tire([2.4, 0.9, 1.7], 0.85), tire([2.4, 0.9, -1.7], 0.85), tire([-2.4, 0.9, 1.7], 0.85), tire([-2.4, 0.9, -1.7], 0.85)) }),
+  // 5 semi truck cab
+  () => ({ geo: merge(part(box(3.4, 4.6, 3.2), 'A', { p: [1.4, 3.1, 0] }), part(box(0.1, 1.4, 2.6), '#9dd0f2', { p: [3.12, 4, 0] }), part(box(2.4, 0.8, 3.2), K.steel, { p: [3.6, 1.6, 0] }), part(box(4, 1, 3), K.ink, { p: [-2.4, 1.6, 0] }), part(cyl(0.2, 0.2, 3.6, 8), K.steel, { p: [-0.6, 5.4, 1.4] }), tire([2.6, 0.9, 1.6], 0.9), tire([2.6, 0.9, -1.6], 0.9), tire([-2.6, 0.9, 1.6], 0.9), tire([-2.6, 0.9, -1.6], 0.9), part(box(3.5, 0.6, 3.25), 'B', { p: [1.4, 5.1, 0] })) }),
+  // 6 engine block
+  () => ({ geo: merge(...plinth(3.6), part(box(5.4, 3, 3), K.steelDk, { p: [0, 2.4, 0] }), ring(4, (a, i) => part(cyl(0.5, 0.5, 1.2, 12), 'A', { p: [-1.8 + i * 1.2, 4.4, 0] })), part(box(5.6, 0.5, 1.2), 'B', { p: [0, 5.2, 0] }), part(cyl(1.2, 1.2, 0.5, 18), K.ink, { p: [3, 2.4, 0], r: [0, 0, Math.PI / 2] }), ring(6, (a, i) => part(box(0.12, 2.6, 0.2), K.steel, { p: [-2.2 + i * 0.9, 2.4, 1.52] }))) }),
+);
+EXTRA.ai.push(
+  // 3 magic wand
+  () => ({ geo: merge(...plinth(2.6), beam([-1.6, 1, 0], [1.8, 8, 0], 0.5, K.ink), part(cyl(0.3, 0.3, 1, 10), K.white, { p: [1.6, 7.6, 0], r: [0, 0, -0.45] }), part(star(1.8, 0.6), 'A', { p: [2.2, 9, 0] }), ring(5, (a, i) => part(star(0.5, 0.2), 'B', { p: [2.2 + Math.cos(a) * 2.6, 9 + Math.sin(a) * 2.2, 0.3] }))) }),
+  // 4 open book with sparks
+  () => ({ geo: merge(...plinth(3.4), part(box(3.4, 0.4, 4.4), 'A', { p: [-1.75, 2.2, 0], r: [0, 0, 0.18] }), part(box(3.4, 0.4, 4.4), 'A', { p: [1.75, 2.2, 0], r: [0, 0, -0.18] }), part(box(3.2, 0.3, 4.2), K.white, { p: [-1.7, 2.55, 0], r: [0, 0, 0.18] }), part(box(3.2, 0.3, 4.2), K.white, { p: [1.7, 2.55, 0], r: [0, 0, -0.18] }), ring(3, (a, i) => part(star(0.7 - i * 0.12, 0.25), 'B', { p: [-1 + i * 1.2, 5 + i * 1.1, (i - 1) * 0.6], r: [0, i, 0] }))) }),
+  // 5 lightbulb idea with gears
+  () => ({ geo: merge(...plinth(2.8), part(cyl(1, 1.1, 2, 14), K.steel, { p: [0, 1.6, 0] }), part(ball(2.6, 2), 'A', { p: [0, 4.8, 0] }), part(torus(0.8, 0.2, Math.PI * 2, 14), 'B', { p: [0, 4.8, 0] }), part(torus(0.5, 0.15, Math.PI * 2, 12), K.white, { p: [0.6, 5.4, 0.3] })) }),
+  // 6 translation bubbles
+  () => ({ geo: merge(...plinth(3.4), ...roundBox(4.6, 3, 1, 0.8, 'A', [-1.4, 4, 0]).map((g) => g.rotateX(Math.PI / 2).translate(0, 4, -4 + 4)), ...roundBox(4.6, 3, 1, 0.8, 'B', [1.6, 6.6, 0.8]).map((g) => g.rotateX(Math.PI / 2).translate(0, 6.6 - 0.8, 0.8 + 6.6 - 0.8)), part(cone(0.5, 1, 4), 'A', { p: [-2.6, 2.2, 0] }), part(cone(0.5, 1, 4), 'B', { p: [2.8, 4.8, 0.8] })) }),
+);
+EXTRA.payments.push(
+  // 3 crypto coin
+  () => ({ geo: merge(...plinth(3), part(cyl(3, 3, 0.8, 32), 'A', { p: [0, 5, 0], r: [Math.PI / 2, 0, 0] }), part(cyl(2.4, 2.4, 0.85, 32), 'Ad', { p: [0, 5, 0], r: [Math.PI / 2, 0, 0] }), part(box(0.5, 2.6, 0.2), 'B', { p: [-0.3, 5, 0.5] }), part(extrude([[0, 1.3], [1.3, 0.6], [0, 0], [1.3, -0.6], [0, -1.3]], 0.2), 'B', { p: [0, 5, 0.5] }), part(box(0.4, 1.4, 0.4), K.steel, { p: [0, 1.4, 0] })) }),
+  // 4 tap-to-pay phone
+  () => ({ geo: merge(...plinth(3), ...roundBox(3.6, 7, 0.5, 0.5, K.ink, [0, 4.8, 0]).map((g) => g.rotateX(Math.PI / 2).translate(0, 4.8, -4.8)), part(box(3, 6, 0.06), 'A', { p: [0, 4.8, 0.28] }), ring(3, (a, i) => part(torus(1 + i * 0.6, 0.12, Math.PI / 2, 12), 'B', { p: [2.2, 6.6, 0.4], r: [0, 0, -Math.PI / 4] }))) }),
+  // 5 ATM
+  () => ({ geo: merge(part(box(4.4, 7.6, 3), 'A', { p: [0, 3.8, 0] }), part(box(3.4, 2, 0.1), '#7cc0ff', { p: [0, 5.6, 1.52] }), ring(9, (a, i) => part(box(0.5, 0.3, 0.2), K.white, { p: [-0.7 + (i % 3) * 0.7, 3.8 - Math.floor(i / 3) * 0.5, 1.6] })), part(box(2.4, 0.3, 0.3), K.ink, { p: [0, 2, 1.55] }), part(box(4.5, 1, 3.1), 'B', { p: [0, 7.3, 0] })) }),
+  // 6 gold bars on a cart
+  () => ({ geo: merge(part(box(6, 0.5, 3.6), K.steelDk, { p: [0, 1.2, 0] }), tire([-2.2, 0.6, 1.6], 0.55, 0.4), tire([2.2, 0.6, 1.6], 0.55, 0.4), tire([-2.2, 0.6, -1.6], 0.55, 0.4), tire([2.2, 0.6, -1.6], 0.55, 0.4), ...[[-1.5, 1.85, -0.8], [1.5, 1.85, -0.8], [-1.5, 1.85, 0.8], [1.5, 1.85, 0.8], [0, 2.65, 0]].map((p) => part(cyl(0.95, 1.3, 0.8, 4), K.gold, { p, r: [0, Math.PI / 4, 0], s: [1.6, 1, 0.9] })), beam([3, 1.4, 0], [4.6, 4, 0], 0.3, 'A')) }),
+);
+EXTRA.food.push(
+  // 3 cereal bowl
+  () => ({ geo: merge(part(new THREE.SphereGeometry(3.4, 24, 12, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), 'A', { p: [0, 3.6, 0] }), part(cyl(3.3, 3.3, 0.3, 24), K.white, { p: [0, 3.4, 0] }), ring(14, (a, i) => part(torus(0.35, 0.15, Math.PI * 2, 10), ['#f3c443', '#e5533d', '#5fae5b'][i % 3], { p: [Math.cos(a * 1.7) * 2.2 * ((i % 3) / 3 + 0.3), 3.65, Math.sin(a * 1.7) * 2.2 * ((i % 3) / 3 + 0.3)], r: [Math.PI / 2, 0, 0] })), part(box(0.5, 0.2, 4.8), K.steel, { p: [1.6, 4.4, 0.6], r: [0.4, 0.5, 0] }), part(cyl(1.4, 1.4, 0.4, 18), 'B', { p: [0, 0.2, 0] })) }),
+  // 4 chocolate bar
+  () => ({ geo: merge(...plinth(3.4), part(box(6, 0.8, 3.6), '#6b3b22', { p: [0, 1.6, 0], r: [0, 0, 0.1] }), ...[0, 1, 2].flatMap((i) => [0, 1].map((j) => part(box(1.7, 0.4, 1.5), '#7a4a2c', { p: [-2 + i * 2, 2.1 + (-2 + i * 2) * 0.1, -0.85 + j * 1.7], r: [0, 0, 0.1] }))), part(box(3.4, 1.2, 3.8), 'A', { p: [2.4, 3.2, 0], r: [0, 0, 0.6] }), part(box(3.42, 0.4, 3.82), 'B', { p: [2.4, 3.2, 0], r: [0, 0, 0.6] })) }),
+  // 5 cheese wedge
+  () => ({ geo: merge(...plinth(3.2), part(extrude([[-3, 0], [3, 0], [3, 3.6]], 3.2), '#f6c443', { p: [0, 0.7, 0] }), ...[[1.6, 1.6, 1.62], [0.4, 1.2, 1.62], [2.2, 2.6, 1.62]].map((p) => part(cyl(0.4, 0.4, 0.1, 12), '#e2a835', { p, r: [Math.PI / 2, 0, 0] })), part(box(0.3, 4, 0.3), K.steel, { p: [-1.6, 3, 0] }), part(box(1.6, 1, 0.1), 'A', { p: [-1.6, 4.6, 0] })) }),
+  // 6 soup can
+  () => ({ geo: merge(part(cyl(2.4, 2.4, 6, 24), 'A', { p: [0, 3, 0] }), part(cyl(2.42, 2.42, 2.6, 24), K.white, { p: [0, 2.4, 0] }), part(cyl(2.3, 2.3, 0.2, 24), K.steel, { p: [0, 6.05, 0] }), part(cyl(2.3, 2.3, 0.2, 24), K.steel, { p: [0, 0.05, 0] }), part(cyl(0.8, 0.8, 0.1, 16), 'B', { p: [0, 2.4, 2.42], r: [Math.PI / 2, 0, 0] }), part(new THREE.SphereGeometry(1.6, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), K.white, { p: [3.6, 0, 1.4] })) }),
+  // 7 drumstick
+  () => ({ geo: merge(...plinth(3), part(ball(2, 1), '#c9772e', { p: [-0.8, 4.4, 0], s: [1.4, 1, 1] }), part(cyl(0.45, 0.45, 3.4, 10), '#f3ead8', { p: [2.2, 5.2, 0], r: [0, 0, 1.1] }), part(ball(0.6, 0), '#f3ead8', { p: [3.6, 5.9, 0.3] }), part(ball(0.6, 0), '#f3ead8', { p: [3.6, 5.9, -0.3] }), part(cyl(3, 3, 0.25, 24), 'A', { p: [0, 0.85, 0] })) }),
+);
+EXTRA.retail.push(
+  // 13 clothing rack
+  () => ({ geo: merge(part(box(7, 0.4, 2.4), K.steelDk, { p: [0, 0.2, 0] }), beam([-3.2, 0.4, 0], [-3.2, 6, 0], 0.2, K.steel), beam([3.2, 0.4, 0], [3.2, 6, 0], 0.2, K.steel), beam([-3.2, 6, 0], [3.2, 6, 0], 0.15, K.steel),
+    ring(5, (a, i) => [part(torus(0.3, 0.05, Math.PI, 8), K.ink, { p: [-2.2 + i * 1.1, 5.7, 0] }), part(box(0.25, 3.2, 2), ['A', 'B', 'Ad', '#f6f2e8', 'Bd'][i], { p: [-2.2 + i * 1.1, 3.9, 0] })])) }),
+  // 14 jeans
+  () => ({ geo: merge(...plinth(2.8), part(box(3.6, 1.4, 1.2), 'A', { p: [0, 7.4, 0] }), part(box(1.6, 5.8, 1.1), 'A', { p: [-0.95, 4, 0], r: [0, 0, 0.05] }), part(box(1.6, 5.8, 1.1), 'A', { p: [0.95, 4, 0], r: [0, 0, -0.05] }), part(box(3.65, 0.3, 1.25), K.ink, { p: [0, 7.9, 0] }), part(box(0.4, 0.3, 0.1), 'B', { p: [1.2, 6.8, 0.6] }), ring(5, (a, i) => part(box(0.12, 0.12, 0.12), K.gold, { p: [-1.6 + i * 0.8, 7.6, 0.62] }))) }),
+  // 15 handbag
+  () => ({ geo: merge(...plinth(3), ...roundBox(6, 3.8, 2.2, 0.8, 'A', [0, 3, 0]), part(torus(1.8, 0.2, Math.PI, 16), 'Ad', { p: [0, 4.9, 0] }), part(box(6.05, 0.5, 2.25), 'B', { p: [0, 4.2, 0] }), part(box(0.8, 0.6, 0.2), K.gold, { p: [0, 4.2, 1.15] })) }),
+  // 16 T-shirt
+  () => ({ geo: merge(...plinth(3), part(box(3.8, 4.6, 0.8), 'A', { p: [0, 4.6, 0] }), part(box(2, 1.4, 0.8), 'A', { p: [-2.6, 6.2, 0], r: [0, 0, 0.6] }), part(box(2, 1.4, 0.8), 'A', { p: [2.6, 6.2, 0], r: [0, 0, -0.6] }), part(torus(0.7, 0.15, Math.PI, 12), 'B', { p: [0, 6.9, 0.3], r: [0, 0, Math.PI] }), part(star(0.8, 0.1), 'B', { p: [0, 4.6, 0.45] }), beam([0, 6.9, 0], [0, 8.4, 0], 0.1, K.steel), part(torus(0.4, 0.08, Math.PI, 8), K.steel, { p: [0, 8.4, 0] })) }),
+);
+EXTRA.bank.push(
+  // 11 ticker board
+  () => ({ geo: merge(part(box(1, 4, 1), K.steelDk, { p: [-3, 2, 0] }), part(box(1, 4, 1), K.steelDk, { p: [3, 2, 0] }), part(box(8.6, 3.6, 0.6), K.ink, { p: [0, 5.6, 0] }), ring(3, (a, i) => [part(box(4.6, 0.5, 0.1), i % 2 ? 'A' : '#5fd08f', { p: [-1.4, 6.6 - i * 1, 0.32] }), part(cone(0.3, 0.6, 3), i % 2 ? 'A' : '#5fd08f', { p: [2.4, 6.6 - i * 1, 0.32], r: i % 2 ? [Math.PI, 0, 0] : [0, 0, 0] })]), part(box(8.8, 0.4, 0.8), 'B', { p: [0, 7.6, 0] })) }),
+  // 12 trading bell
+  () => ({ geo: merge(part(box(5, 0.6, 3), K.stoneDk, { p: [0, 0.3, 0] }), beam([-2, 0.6, 0], [-2, 7, 0], 0.4, K.woodDk), beam([2, 0.6, 0], [2, 7, 0], 0.4, K.woodDk), part(box(4.6, 0.5, 0.6), K.woodDk, { p: [0, 7.2, 0] }), part(new THREE.CylinderGeometry(0.6, 1.8, 2.6, 18, 1, true), K.gold, { p: [0, 5.4, 0] }), part(cyl(0.6, 0.6, 0.3, 14), K.gold, { p: [0, 6.8, 0] }), part(ball(0.35, 0), K.goldDk, { p: [0, 4, 0] }), part(box(5.2, 0.4, 3.2), 'A', { p: [0, 0.75, 0] })) }),
+);
+EXTRA.comms = [
+  // 1 cell tower
+  () => ({ geo: merge(part(box(3.4, 0.5, 3.4), K.stoneDk, { p: [0, 0.25, 0] }), ...[[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([x, z]) => beam([x * 1.4, 0.5, z * 1.4], [x * 0.3, 10, z * 0.3], 0.2, K.steel)), ring(6, (a, i) => beam([Math.cos(a) * 0.8, 3 + i, Math.sin(a) * 0.8], [Math.cos(a + 1) * 0.7, 4 + i, Math.sin(a + 1) * 0.7], 0.08, K.steelDk)),
+    ring(3, (a) => part(box(0.4, 1.6, 0.8), K.white, { p: [Math.cos(a) * 0.8, 9, Math.sin(a) * 0.8], r: [0, -a, 0] })), ring(3, (a, i) => part(torus(1.6 + i * 1, 0.12, Math.PI / 2, 12), 'A', { p: [0, 9.6, 0], r: [0, 0, Math.PI / 4] }))) }),
+  // 2 satellite dish
+  () => ({ geo: merge(part(box(4, 0.6, 4), K.stoneDk, { p: [0, 0.3, 0] }), part(cyl(0.4, 0.6, 3.6, 10), K.steel, { p: [0, 2.4, 0] }), part(new THREE.SphereGeometry(3.4, 22, 10, 0, Math.PI * 2, 0, Math.PI / 3), 'A', { p: [0, 3.2, 0], r: [-0.7, 0, 0] }), beam([0, 4.4, 0.6], [0, 6.6, 2.4], 0.1, K.steelDk), part(ball(0.4, 1), 'B', { p: [0, 6.6, 2.4] })) }),
+  // 3 router with antennas
+  () => ({ geo: merge(...plinth(3.6), ...roundBox(6.4, 1.6, 4, 0.8, 'A', [0, 1.6, 0]), ring(4, (a, i) => part(cyl(0.18, 0.18, 0.2, 8), i % 2 ? '#5fd08f' : 'B', { p: [-1.8 + i * 1.2, 2, 2.02], r: [Math.PI / 2, 0, 0] })), beam([-2.4, 2.4, -1.4], [-3, 7, -1.4], 0.3, K.ink), beam([2.4, 2.4, -1.4], [3, 7, -1.4], 0.3, K.ink), ring(3, (a, i) => part(torus(1 + i * 0.8, 0.12, Math.PI / 2, 12), 'B', { p: [0, 3.6, 0], r: [0, 0, Math.PI / 4] }))) }),
+  // 4 walkie-talkie
+  () => ({ geo: merge(...plinth(2.6), ...roundBox(3, 6.4, 1.6, 0.6, 'A', [0, 4, 0]), part(box(2.2, 1.6, 0.1), '#7cc0ff', { p: [0, 5.6, 0.82] }), ring(6, (a, i) => part(box(0.5, 0.2, 0.1), K.ink, { p: [-0.6 + (i % 2) * 1.2, 3.6 - Math.floor(i / 2) * 0.5, 0.82] })), part(cyl(0.22, 0.22, 3.4, 8), K.ink, { p: [0.8, 8.8, 0] }), part(cyl(0.35, 0.35, 0.6, 10), 'B', { p: [-0.6, 7.5, 0] })) }),
+];
+
+// ---------- companion props (small, beside the model) and toppers (on top) ----------
+export const PROPS = [
+  () => merge(part(cyl(0.06, 0.06, 3.2, 6), K.steel, { p: [0, 1.6, 0] }), part(box(1.4, 0.9, 0.05), 'A', { p: [0.7, 2.7, 0] })),
+  () => merge(part(cyl(0.03, 0.03, 2.6, 4), K.ink, { p: [0, 1.3, 0] }), part(ball(0.5, 1), 'A', { p: [0, 2.9, 0] }), part(ball(0.45, 1), 'B', { p: [0.5, 2.6, 0.2] }), part(ball(0.45, 1), '#ffd23f', { p: [-0.4, 2.7, -0.2] })),
+  () => merge(part(cyl(1.2, 1.3, 0.5, 18), K.stone, { p: [0, 0.25, 0] }), part(cyl(1, 1, 0.1, 18), '#7cc0ff', { p: [0, 0.5, 0] }), part(cyl(0.2, 0.25, 1.2, 8), K.stone, { p: [0, 1, 0] }), part(ball(0.35, 1), '#bfe3ff', { p: [0, 1.7, 0] })),
+  () => merge(part(cyl(0.2, 0.3, 2, 6), K.wood, { p: [0, 1, 0] }), part(ball(1.1, 0), '#5fae5b', { p: [0, 2.6, 0] })),
+  () => merge(part(cyl(0.18, 0.25, 2.6, 6), '#a07a4e', { p: [0, 1.3, 0], r: [0, 0, 0.15] }), ring(5, (a) => part(box(1.6, 0.08, 0.5), '#5fae5b', { p: [0.2 + Math.cos(a) * 0.7, 2.7, Math.sin(a) * 0.7], r: [0, -a, -0.4] }))),
+  () => merge(part(box(0.9, 0.5, 0.9), K.stone, { p: [0, 0.25, 0] }), part(cyl(0.12, 0.12, 0.8, 8), K.gold, { p: [0, 0.9, 0] }), part(cyl(0.5, 0.25, 0.7, 12), K.gold, { p: [0, 1.6, 0] }), part(torus(0.25, 0.06, Math.PI, 8), K.gold, { p: [0.5, 1.6, 0], r: [0, 0, -Math.PI / 2] })),
+  () => merge(part(cyl(0.05, 0.05, 1.4, 6), K.steel, { p: [0, 0.7, 0] }), part(new THREE.SphereGeometry(0.8, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), K.white, { p: [0, 1.5, 0], r: [-0.8, 0, 0] })),
+  () => merge(part(box(1.6, 0.15, 0.5), K.wood, { p: [0, 0.5, 0] }), part(box(1.6, 0.6, 0.12), K.wood, { p: [0, 0.8, -0.25] }), part(cyl(0.05, 0.05, 2.2, 6), K.ink, { p: [1.1, 1.1, 0] }), part(ball(0.2, 0), K.yellow, { p: [1.1, 2.3, 0] })),
+  () => merge(part(cyl(0.08, 0.08, 1.2, 6), K.ink, { p: [0, 0.6, 0] }), part(box(0.7, 0.5, 0.9), 'A', { p: [0, 1.4, 0] })),
+  () => merge(part(new THREE.CapsuleGeometry(0.55, 1.8, 6, 12), 'A', { p: [0, 3, 0], r: [0, 0, Math.PI / 2] }), part(box(0.6, 0.3, 0.3), K.white, { p: [0, 2.4, 0] }), part(box(0.1, 0.5, 0.4), 'B', { p: [-1.3, 3, 0] })),
+  () => merge(part(ball(0.9, 1), 'A', { p: [0, 3, 0], s: [1, 1.15, 1] }), part(box(0.4, 0.3, 0.4), K.wood, { p: [0, 1.8, 0] }), beam([-0.25, 2, 0], [-0.4, 2.7, 0], 0.03, K.ink), beam([0.25, 2, 0], [0.4, 2.7, 0], 0.03, K.ink)),
+  () => merge(part(box(0.8, 0.8, 0.8), 'A', { p: [0, 0.4, 0] }), part(box(0.82, 0.2, 0.82), 'B', { p: [0, 0.6, 0] }), part(box(0.2, 0.82, 0.82), 'B', { p: [0, 0.4, 0] })),
+  () => merge(ring(3, (a, i) => part(cone(0.35, 0.9, 8), (x, y) => (y > 0.75 + i * 0.2 ? K.white : K.orange), { p: [Math.cos(a) * 0.5, 0.45, Math.sin(a) * 0.5] }))),
+  () => merge(part(cyl(0.6, 0.7, 0.6, 12), '#b0643c', { p: [0, 0.3, 0] }), ring(5, (a, i) => part(ball(0.25, 0), ['#f39ab8', '#ffd23f', '#e5533d', '#c3b4ff', '#ffffff'][i], { p: [Math.cos(a) * 0.35, 0.75, Math.sin(a) * 0.35] }))),
+  () => merge(ring(3, (a, i) => [part(cyl(0.15, 0.22, 0.7, 6), K.wood, { p: [Math.cos(a) * 0.8, 0.35, Math.sin(a) * 0.8] }), part(cone(0.55, 1.6 + i * 0.3, 7), '#3f7f43', { p: [Math.cos(a) * 0.8, 1.4 + i * 0.15, Math.sin(a) * 0.8] })])),
+  () => merge(part(box(0.15, 2.6, 0.15), K.steelDk, { p: [0, 1.3, 0] }), ring(3, (a, i) => part(box(0.9, 0.12, 0.12), K.steelDk, { p: [0, 1.6 + i * 0.4, 0] })), part(ball(0.15, 0), 'A', { p: [0, 2.7, 0] })),
+];
+export const TOPPERS = [
+  null,
+  () => merge(part(cyl(0.05, 0.05, 2, 6), K.steel, { p: [0, 1, 0] }), part(box(1.2, 0.7, 0.05), 'A', { p: [0.6, 1.6, 0] })),
+  () => merge(part(cyl(0.6, 0.7, 0.4, 5), K.gold, { p: [0, 0.2, 0] }), ring(5, (a) => part(cone(0.15, 0.5, 4), K.gold, { p: [Math.cos(a) * 0.55, 0.6, Math.sin(a) * 0.55] }))),
+  () => merge(part(cyl(0.04, 0.04, 1.6, 6), K.ink, { p: [0, 0.8, 0] }), part(ball(0.25, 1), 'B', { p: [0, 1.7, 0] })),
+  () => part(star(0.8, 0.25), K.yellow, { p: [0, 0.8, 0] }),
+  () => merge(part(cyl(0.03, 0.03, 1.2, 4), K.ink, { p: [0, 0.6, 0] }), part(ball(0.6, 1), 'A', { p: [0, 1.6, 0] }), part(ball(0.5, 1), 'B', { p: [0.55, 1.3, 0.2] })),
+];
+
 // Pedestals add variety and lift the model: 0 none, 1 round, 2 square steps.
 const BASES = [
   null,
@@ -630,6 +834,10 @@ const FINDER = {
 };
 export const ARCHETYPES = Object.fromEntries(Object.entries(FINDER).map(([id, finder]) => [id, { id, finder }]));
 
+const propCache = new Map(), topCache = new Map();
+export const propGeo = (i) => (propCache.has(i) ? propCache.get(i) : propCache.set(i, PROPS[i % PROPS.length]()).get(i));
+export const topperGeo = (i) => (!TOPPERS[i % TOPPERS.length] ? null : topCache.has(i) ? topCache.get(i) : topCache.set(i, TOPPERS[i % TOPPERS.length]()).get(i));
+export const PROP_COUNT = 16, TOPPER_COUNT = 6;
 // How many shapes each kind of company has.
 export const variantCount = (id) => 1 + ((EXTRA[id] || []).length);
 const cache = new Map();
@@ -650,6 +858,14 @@ export function centerpiece(id, variant = 0, base = 0) {
       c.geo = merge(make(r), c.geo.clone().translate(0, lift, 0));
       c.moving = c.moving.map((mv) => ({ ...mv, pivot: [mv.pivot[0], mv.pivot[1] + lift, mv.pivot[2]] }));
     }
+    // Where a company's companion prop and topper go: beside the model, and on its highest
+    // point near the middle.
+    const bb = new THREE.Box3().setFromBufferAttribute(c.geo.attributes.position);
+    const pos = c.geo.attributes.position;
+    let top = 0;
+    for (let i = 0; i < pos.count; i++) if (Math.abs(pos.getX(i)) < 1.5 && Math.abs(pos.getZ(i)) < 1.5) top = Math.max(top, pos.getY(i));
+    c.propAt = [bb.max.x + 1.3, 0, bb.max.z * 0.4 + 0.6];
+    c.topAt = [0, (top || bb.max.y) - 0.05, 0];
     cache.set(key, c);
   }
   return cache.get(key);

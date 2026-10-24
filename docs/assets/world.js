@@ -1,7 +1,7 @@
 // The QR world: one giant QR code (it scans to this site) with the map laid on its tiles and
 // every company standing on it as a 3D model. Tour, search, USA/World, and scan view.
-import { THREE, createStage, buildSlab, buildInk, decodeBits, setCamera, cameraState, flyCamera, stopFlight, tween, lerp, toScreen, webglAvailable } from './qrworld.js';
-import { ARCHETYPES, centerpiece, modelMaterial, setBrands } from './models.js';
+import { THREE, createStage, buildSlab, decodeBits, setCamera, cameraState, flyCamera, stopFlight, tween, lerp, toScreen, webglAvailable } from './qrworld.js';
+import { ARCHETYPES, centerpiece, modelMaterial, setBrands, propGeo, topperGeo } from './models.js';
 import { createQRWorld } from './qrsculpture.js';
 
 const { board, regions, listYear } = window.WORLD;
@@ -22,70 +22,80 @@ if (!webglAvailable()) {
 }
 
 function start() {
+  // N: the map grid. The site's QR code (board.qr) is only laid over it for scan view.
   const N = board.n, QUIET = 2, S = N + QUIET * 2;
-  const dark = decodeBits(N, board.bits);
+  const QN = board.qr.n, K = S / (QN + 4); // one QR module covers K map cells
+  const qrDark = decodeBits(QN, board.qr.bits);
   const stageEl = $('stage');
   const stage = createStage(stageEl, { viewSize: S * 0.78 });
   stage.setSun(S);
-  stage.sun.shadow.mapSize.set(3072, 3072);
+  stage.sun.shadow.mapSize.set(4096, 4096);
   const { scene, camera, controls } = stage;
-  controls.maxZoom = 30;
+  controls.maxZoom = 40;
   controls.minZoom = 0.5;
 
   // ---------- board ----------
   const slab = buildSlab(S, { depth: 2.4 });
   const tiles = slab.userData.tiles;
   scene.add(slab);
-  const cellX = (c) => c - N / 2 + 0.5;
   const toBoard = ([x, y]) => [x - N / 2, y - N / 2];
-  const darkCells = [];
-  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (dark(r, c)) darkCells.push([r, c]);
-  const blockGeo = new THREE.BoxGeometry(0.94, 1, 0.94).translate(0, 0.5, 0);
-  const blocks = new THREE.InstancedMesh(blockGeo, new THREE.MeshStandardMaterial({ roughness: 0.85, flatShading: true }), darkCells.length);
+  const qrCells = [];
+  for (let r = 0; r < QN; r++) for (let c = 0; c < QN; c++) if (qrDark(r, c)) qrCells.push([r, c]);
+  const qrX = (c) => (c - QN / 2 + 0.5) * K;
+  const blocks = new THREE.InstancedMesh(new THREE.BoxGeometry(0.97, 1, 0.97).translate(0, 0.5, 0), new THREE.MeshStandardMaterial({ roughness: 0.8 }), qrCells.length);
   blocks.castShadow = blocks.receiveShadow = true;
   scene.add(blocks);
-  const ink = buildInk(darkCells.map(([r, c]) => [r + QUIET, c + QUIET]), S, '#1f2a24');
+  const ink = new THREE.InstancedMesh(new THREE.BoxGeometry(K * 1.001, 0.03, K * 1.001), new THREE.MeshBasicMaterial({ color: '#1f2a24', transparent: true, opacity: 0, depthWrite: false }), qrCells.length);
+  qrCells.forEach(([r, c], i) => ink.setMatrixAt(i, new THREE.Matrix4().makeTranslation(qrX(c), 0.14 + 0.26 * K + 0.02, qrX(r))));
+  ink.visible = false;
+  ink.renderOrder = 5;
   scene.add(ink);
 
-  const COLORS = {
-    landA: '#e2ead0', landB: '#d9e3c4', seaA: '#e3edf1', seaB: '#d9e6ec',
-    hedge: ['#2f5b36', '#2a5331', '#35633b'], water: ['#2a4560', '#253f58', '#2e4b67'],
-  };
   let mode = 'us';
   const landOf = (m) => decodeBits(N, board.modes[m].land);
-  let land = landOf(mode);
+  const lotOf = (m) => decodeBits(N, board.modes[m].lot);
+  let land = landOf(mode), lot = lotOf(mode);
   const col = new THREE.Color(), m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), p = new THREE.Vector3(), s = new THREE.Vector3(), eul = new THREE.Euler();
 
-  let plain = false; // scan view: plain light tiles so only the QR shows
-  function paintTiles(rowsDone = S) {
+  // The board reads as a map: water, and raised islands where the cities are, each a grid of
+  // green lots (one per company) with paved streets between them. The QR code only appears for
+  // scan view, when its squares pop up over the flattened map in a diagonal sweep.
+  const LAND_H = 0.42;
+  const STAND = LAND_H; // models stand on the island surface
+  const TILE = { lotA: '#bcd59c', lotB: '#b3cf92', street: '#ece4d3', streetB: '#e4dac6', sand: '#eadcb6', seaA: '#bfd9e6', seaB: '#b6d3e2', rim: '#ebe5da', rimB: '#f3efe7', plain: '#f7f4ee', ink: '#1f2a24' };
+  const isLand = (r, c) => r >= 0 && c >= 0 && r < N && c < N && land(r, c);
+  const coast = (r, c) => isLand(r, c) && (!isLand(r - 1, c) || !isLand(r + 1, c) || !isLand(r, c - 1) || !isLand(r, c + 1));
+  const cA = new THREE.Color(), cB = new THREE.Color();
+  let flatten = 0; // 0 = map, 1 = flat QR for scan view
+  const sweep = (u) => Math.min(1, Math.max(0, (flatten - u * 0.5) / 0.4));
+  function layoutBoard(rowsDone = S) {
     for (let r = 0; r < Math.min(S, rowsDone); r++) {
       for (let c = 0; c < S; c++) {
-        const qr = r - QUIET, qc = c - QUIET;
-        const inside = qr >= 0 && qc >= 0 && qr < N && qc < N;
-        const alt = (r + c) % 2;
-        if (plain) col.set('#f7f4ee');
-        else if (!inside) col.set(alt ? '#f3efe7' : '#ebe5da');
-        else col.set(land(qr, qc) ? (alt ? COLORS.landA : COLORS.landB) : (alt ? COLORS.seaA : COLORS.seaB));
-        tiles.setColorAt(r * S + c, col);
+        const mr = r - QUIET, mc = c - QUIET;
+        const inside = mr >= 0 && mc >= 0 && mr < N && mc < N;
+        const t = sweep((r + c) / (2 * S));
+        const onLand = inside && isLand(mr, mc);
+        if (!inside) cA.set((r + c) % 2 ? TILE.rimB : TILE.rim);
+        else if (onLand) cA.set(coast(mr, mc) ? TILE.sand : lot(mr, mc) ? ((mr + mc) % 2 ? TILE.lotA : TILE.lotB) : (mr + mc) % 2 ? TILE.street : TILE.streetB);
+        else cA.set((mr * 5 + mc * 11) % 7 < 3 ? TILE.seaB : TILE.seaA);
+        tiles.setColorAt(r * S + c, cA.lerp(cB.set(TILE.plain), t));
+        const h = onLand ? lerp(LAND_H / 0.14, 1, t) : 1;
+        tiles.setMatrixAt(r * S + c, m4.compose(p.set(c - S / 2 + 0.5, (0.14 * h) / 2, r - S / 2 + 0.5), q.identity(), s.set(1, h, 1)));
       }
     }
     tiles.instanceColor.needsUpdate = true;
-  }
-  const blockH = (r, c) => (land(r, c) ? 0.2 + ((r * 7 + c * 13) % 3) * 0.03 : 0.12);
-  const STAND = 0.14 + 0.28; // models stand on top of the tallest tiles
-  let flatten = 0; // 0 = 3D, 1 = flat for scan view
-  function layoutBlocks() {
-    darkCells.forEach(([r, c], i) => {
-      const h = lerp(blockH(r, c), 0.02, Math.min(1, Math.max(0, (flatten - ((r + c) / (2 * N)) * 0.5) / 0.4)));
-      blocks.setMatrixAt(i, m4.compose(p.set(cellX(c), 0.14, cellX(r)), q.identity(), s.set(1, h, 1)));
-      const pal = land(r, c) ? COLORS.hedge : COLORS.water;
-      blocks.setColorAt(i, col.set(pal[(r + c) % 3]));
+    tiles.instanceMatrix.needsUpdate = true;
+    qrCells.forEach(([r, c], i) => {
+      const t = sweep((r + c) / (2 * QN));
+      const pop = t <= 0 ? 0 : Math.min(1.05, 1 + 2.2 * Math.pow(t - 1, 3) + 1.2 * Math.pow(t - 1, 2));
+      blocks.setMatrixAt(i, m4.compose(p.set(qrX(c), 0.14, qrX(r)), q.identity(), s.set(Math.max(0.001, pop * K), Math.max(0.001, 0.26 * K * pop), Math.max(0.001, pop * K))));
+      blocks.setColorAt(i, col.set(TILE.ink));
     });
+    blocks.visible = flatten > 0;
     blocks.instanceMatrix.needsUpdate = true;
     blocks.instanceColor.needsUpdate = true;
   }
-  paintTiles();
-  layoutBlocks();
+  layoutBoard();
 
   // ---------- company models ----------
   // Every company stands on the board as its own signature model (src/models.js), sized by
@@ -95,7 +105,7 @@ function start() {
   const mat = modelMaterial();
   // Each company's look: shape variant, brand colours, base. Companies sharing a shape and base
   // share one instanced mesh; their brand colours ride along per instance.
-  const lookOf = (d) => ({ v: d.L[0], a: d.L[1], b: d.L[2], base: d.L[3] });
+  const lookOf = (d) => ({ v: d.L[0], a: d.L[1], b: d.L[2], base: d.L[3], prop: d.L[4], topper: d.L[5] });
   const keyOf = (d) => `${archOf(d)}:${d.L[0]}:${d.L[3]}`;
   const cpOf = (d) => centerpiece(archOf(d), d.L[0], d.L[3]);
   // Model bounds (body plus moving parts), used to size each company.
@@ -106,15 +116,17 @@ function start() {
       const cp = cpOf(d);
       const b = new THREE.Box3().setFromBufferAttribute(cp.geo.attributes.position);
       for (const mv of cp.moving) b.union(new THREE.Box3().setFromBufferAttribute(mv.geo.attributes.position).translate(new THREE.Vector3(...mv.pivot)));
+      // Leave room for a companion prop beside the model.
+      b.expandByPoint(new THREE.Vector3(cp.propAt[0] + 1.6, 0, cp.propAt[2] + 1.6));
       const size = b.getSize(new THREE.Vector3());
       bounds.set(key, { h: Math.max(3, b.max.y), w: Math.max(size.x, size.z) });
     }
     return bounds.get(key);
   };
-  const height = (d) => (d.k === 0 ? 1.4 + 5 * Math.sqrt((d.v || 0) / MAXV) : 1.9);
+  const height = (d) => (d.k === 0 ? 1.9 + 4.5 * Math.sqrt((d.v || 0) / MAXV) : 2.2);
   const modelScale = (d) => {
     const b = boundsOf(d);
-    const maxW = d.k === 0 ? 1.1 + 1.4 * Math.sqrt((d.v || 0) / MAXV) : 1.25;
+    const maxW = d.k === 0 ? 1.7 + 0.9 * Math.sqrt((d.v || 0) / MAXV) : 1.8;
     return Math.min(height(d) / b.h, maxW / b.w);
   };
   const meshes = {}; // name -> InstancedMesh (pickable)
@@ -142,10 +154,32 @@ function start() {
     cp.moving.forEach((mv, j) => add(`m:${k}:${j}`, mv.geo));
     list.forEach((di, i) => (slots[di] = i));
   }
+  // Companion props and toppers: one instanced mesh per accessory, shared across companies.
+  const accSlots = DATA.map(() => []);
+  for (const [kind, idx, geoOf] of [['p', 4, propGeo], ['t', 5, topperGeo]]) {
+    const byAcc = new Map();
+    DATA.forEach((d, di) => {
+      if (!geoOf(d.L[idx] || 0)) return;
+      if (!byAcc.has(d.L[idx])) byAcc.set(d.L[idx], []);
+      byAcc.get(d.L[idx]).push(di);
+    });
+    for (const [acc, list] of byAcc) {
+      const im = new THREE.InstancedMesh(geoOf(acc), mat, list.length);
+      setBrands(im, list.map((di) => [DATA[di].L[1], DATA[di].L[2]]));
+      im.castShadow = im.receiveShadow = true;
+      const name = `${kind}:${acc}`;
+      meshes[name] = im;
+      scene.add(im);
+      list.forEach((di, i) => {
+        owner.set(`${name}:${i}`, di);
+        accSlots[di].push({ mesh: im, slot: i, at: kind === 'p' ? 'propAt' : 'topAt' });
+      });
+    }
+  }
 
   // Per-company animated state: board position and visibility for the current mode/filter.
   const state = DATA.map(() => ({ x: 0, z: 0, vis: 0 }));
-  const modeScale = () => (mode === 'world' ? 0.42 : 1);
+  const modeScale = () => 1;
   let filter = 'all';
   const matches = (d) => filter === 'all' || (filter === 'tech' ? d.t : filter === 'startup' ? d.k === 1 : d.k === 0);
   const targetOf = (d) => {
@@ -167,7 +201,7 @@ function start() {
     DATA.forEach((d, di) => {
       const st = state[di];
       // Scan view: models sink into the board in the same diagonal sweep as the squares.
-      const sink = 1 - Math.min(1, Math.max(0, (flatten - ((st.x + st.z) / (2 * N) + 0.5) * 0.5) / 0.4));
+      const sink = 1 - sweep((st.x + st.z) / (2 * N) + 0.5);
       const v = Math.max(0, Math.min(1, st.vis)) * k * sink;
       const sc = Math.max(0.0001, v * modelScale(d));
       const key = keyOf(d);
@@ -177,6 +211,10 @@ function start() {
       const yaw = (di * 2.399) % (Math.PI * 2);
       q.setFromEuler(eul.set(0, yaw, 0));
       meshes[`c:${key}`].setMatrixAt(slots[di], m4.compose(p.set(st.x, y0, st.z), q, s.set(sc, sc, sc)));
+      for (const a of accSlots[di]) {
+        pivot.set(...cp[a.at]).multiplyScalar(sc).applyQuaternion(q);
+        a.mesh.setMatrixAt(a.slot, m4.compose(p.set(st.x + pivot.x, y0 + pivot.y, st.z + pivot.z), q, s.set(sc, sc, sc)));
+      }
       cp.moving.forEach((mv, j) => {
         const t = moving ? clock : 0;
         let dy = 0, ps = sc;
@@ -466,11 +504,11 @@ function start() {
     for (const b of document.querySelectorAll('[data-mode]')) b.setAttribute('aria-pressed', String(b.dataset.mode === next));
     mode = next;
     land = landOf(mode);
+    lot = lotOf(mode);
     // Repaint the map in a sweep while the companies hop to their new places.
     tween(stage, 1100, (e) => {
-      paintTiles(Math.ceil(e * S));
-      if (e >= 1) layoutBlocks();
-    }).then(layoutBlocks);
+      layoutBoard(Math.ceil(e * S));
+    }).then(() => layoutBoard());
     flyCamera(stage, overview(), { duration: 1600, arc: 0.25 });
     await settle(1600, 4);
   }
@@ -496,8 +534,6 @@ function start() {
       if (tour.active) stopTour();
       deselect();
       ink.visible = true;
-      plain = true;
-      paintTiles();
       const H = stageEl.clientHeight, W = stageEl.clientWidth;
       const topPad = W < 760 ? 100 : 80, botPad = W < 760 ? 190 : 150;
       const fitPx = Math.min(H - topPad - botPad, W - 32);
@@ -506,18 +542,16 @@ function start() {
       flyCamera(stage, { target: new THREE.Vector3(0, 0, -delta * ((2 * halfH()) / zoom / H)), az: 0, polar: 0.0001, zoom }, { duration: 1600 });
       await tween(stage, 1600, (e) => {
         flatten = e;
-        layoutBlocks();
+        layoutBoard();
         placeAll();
         ink.material.opacity = Math.max(0, e * 1.5 - 0.5);
         placeLabels();
       });
     } else {
-      plain = false;
-      paintTiles();
       flyCamera(stage, overview(), { duration: 1600 });
       await tween(stage, 1600, (e) => {
         flatten = 1 - e;
-        layoutBlocks();
+        layoutBoard();
         placeAll();
         ink.material.opacity = 1 - e;
       });

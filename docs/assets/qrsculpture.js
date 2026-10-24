@@ -3,7 +3,7 @@
 // the QR's dark squares and darken to ink, in a diagonal sweep, while the camera tilts to
 // top-down; setScan(false) plays it backwards and the pixels rebuild the model.
 import { THREE, rng, createStage, buildSlab, buildInk, decodeBits, isFinder, setCamera, flyCamera, tween, lerp } from './qrworld.js';
-import { ARCHETYPES, centerpiece, modelMaterial, setBrands, vertexColor } from './models.js';
+import { ARCHETYPES, centerpiece, modelMaterial, setBrands, vertexColor, propGeo, topperGeo } from './models.js';
 
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
@@ -85,7 +85,11 @@ export function createQRWorld(container, { slug, model, look = { v: 0, a: '#e553
     m.frustumCulled = false;
     return m;
   };
+  // Companion prop beside the model and a topper on its crown, when the company has them.
+  const accs = [[look.prop != null ? propGeo(look.prop) : null, cp.propAt], [look.topper ? topperGeo(look.topper) : null, cp.topAt]]
+    .filter(([geo]) => geo).map(([geo, at]) => ({ geo, matrix: new THREE.Matrix4().makeTranslation(...at) }));
   const bb = new THREE.Box3().setFromBufferAttribute(cp.geo.attributes.position);
+  for (const a of accs) bb.union(new THREE.Box3().setFromBufferAttribute(a.geo.attributes.position).applyMatrix4(a.matrix));
   for (const mv of cp.moving) bb.union(new THREE.Box3().setFromBufferAttribute(mv.geo.attributes.position).translate(new THREE.Vector3(...mv.pivot)));
   const bsize = bb.getSize(new THREE.Vector3());
   const S = Math.min((n * 0.66) / Math.max(1, bb.max.y), (n * 1.0) / Math.max(bsize.x, bsize.z));
@@ -94,6 +98,12 @@ export function createQRWorld(container, { slug, model, look = { v: 0, a: '#e553
   const center = branded(cp.geo);
   center.castShadow = center.receiveShadow = true;
   modelGroup.add(center);
+  for (const a of accs) {
+    const mesh = branded(a.geo);
+    mesh.setMatrixAt(0, a.matrix);
+    mesh.castShadow = mesh.receiveShadow = true;
+    modelGroup.add(mesh);
+  }
   const movers = cp.moving.map((mv) => {
     const g = new THREE.Group();
     g.position.set(...mv.pivot);
@@ -108,7 +118,7 @@ export function createQRWorld(container, { slug, model, look = { v: 0, a: '#e553
 
   // ---------- pixels ----------
   // One pixel per dark module, sampled from the model's surface and matched to a nearby square.
-  const sample = sampleSurface([{ geo: cp.geo, matrix: new THREE.Matrix4() }, ...cp.moving.map((mv) => ({ geo: mv.geo, matrix: new THREE.Matrix4().makeTranslation(...mv.pivot) }))], cells.length, random, brand);
+  const sample = sampleSurface([{ geo: cp.geo, matrix: new THREE.Matrix4() }, ...accs, ...cp.moving.map((mv) => ({ geo: mv.geo, matrix: new THREE.Matrix4().makeTranslation(...mv.pivot) }))], cells.length, random, brand);
   const voxel = THREE.MathUtils.clamp(Math.sqrt((sample.area * S * S) / cells.length) * 1.15, 0.45, 1.3);
   const footprint = Math.max(bsize.x, bsize.z) * S / 2;
   const spread = (n * 0.5) / Math.max(1, footprint);
