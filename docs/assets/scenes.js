@@ -3078,4 +3078,45 @@ export const SCENES = {
     moving.push({ geo: van(K.white, K.orange), pivot: [0, y0, 2.2], anim: (t) => { const u = cyc(t, 9), x = -5.4 + u * 10.8; return { x, s: clamp01((5.0 - Math.abs(x)) / 0.6) * 0.85 + 0.001 }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.4, y0, 0.2], topAt: [-3.6, y0 + 1.4, -3.4] };
   },
+
+  // Rising chart (brokers, asset managers, retirement and wealth firms): time in the market,
+  // compounding. A saver drops a coin in at the foot of the chart and climbs it bar by bar while
+  // every bar grows a little more each step (the tall ones most); at the top an arrow points on
+  // up and a shower of dividend coins falls back onto the bars.
+  'bank:8': () => {
+    const R = rand(4501), out = [], moving = [];
+    out.push(slab('#cfe0c4'));
+    out.push(part(rbox(10.0, 0.03, 10.0, 0.04), '#e6efdf', { p: [0, y0 + 0.015, 0] }));
+    if (hi()) for (let i = 1; i < 6; i++) out.push(part(box(9.8, 0.012, 0.03), '#c9d8bf', { p: [0, y0 + 0.03, -4.9 + i * 1.6] }), part(box(0.03, 0.012, 9.8), '#c9d8bf', { p: [-4.9 + i * 1.6, y0 + 0.03, 0] }));
+    // ---- the chart: seven bars stepping up from the front left to the back right
+    const N = 7, A = new V(-3.5, 0, 3.0), B = new V(3.2, 0, -3.3), hs = [0.6, 0.95, 1.3, 1.75, 2.3, 2.95, 3.7], W = 1.1;
+    const barAt = (i) => A.clone().lerp(B, i / (N - 1)), ry = Math.atan2(-(B.z - A.z), B.x - A.x);
+    for (let i = 0; i < N; i++) { const p = barAt(i); out.push(part(rbox(W + 0.2, 0.12, W + 0.2, 0.04), K.white, { p: [p.x, y0 + 0.06, p.z], r: [0, ry, 0] })); }
+    // The base of the chart: a deposit box at the foot.
+    const D = new V(-4.4, 0, 4.2);
+    out.push(part(rbox(0.9, 1.0, 0.7, 0.08), 'Ad', { p: [D.x, y0 + 0.5, D.z] }), part(box(0.4, 0.05, 0.1), K.dark, { p: [D.x, y0 + 1.01, D.z] }), part(rbox(0.7, 0.3, 0.05, 0.03), K.white, { p: [D.x, y0 + 0.6, D.z + 0.36] }));
+    [[4.5, 4.4], [-4.4, -3.8], [0.6, 3.8], [4.2, 0.2]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.5 + R() * 0.15)));
+    out.push(part(rbox(1.4, 0.08, 0.45, 0.03), K.wood, { p: [-1.2, y0 + 0.45, -2.6] }), [-0.6, 0.6].map((x) => part(box(0.06, 0.45, 0.4), K.dark, { p: [-1.2 + x, y0 + 0.22, -2.6] })));
+    // A brokerage kiosk (front right) with its rising line on screen.
+    const KX = 3.2, KZ = 2.8;
+    out.push(part(rbox(1.6, 1.4, 1.2, 0.06), K.white, { p: [KX, y0 + 0.7, KZ] }), part(rbox(1.8, 0.12, 1.4, 0.04), 'A', { p: [KX, y0 + 1.46, KZ] }), part(rbox(1.2, 0.7, 0.05, 0.03), '#141a22', { p: [KX, y0 + 0.85, KZ + 0.61] }), part(tube([[KX - 0.5, y0 + 0.6, KZ + 0.64], [KX - 0.2, y0 + 0.75, KZ + 0.64], [KX + 0.1, y0 + 0.7, KZ + 0.64], [KX + 0.5, y0 + 1.1, KZ + 0.64]], 0.03), '#46d36b'));
+    // ---- moving parts (one 12 s cycle)
+    const P = 12, F = (t) => cyc(t, P), g = (f) => 1 + 0.18 * easeOut(win(f, 0.05, 0.85)) - 0.18 * win(f, 0.95, 1);
+    const top = (i, f) => y0 + 0.12 + hs[i] * (1 + (g(f) - 1) * (i / (N - 1) + 0.3));
+    for (let i = 0; i < N; i++) { const p = barAt(i); moving.push({ geo: merge(part(rbox(W, hs[i], W, 0.06), i % 2 ? 'A' : 'Ad', { p: [0, hs[i] / 2, 0] }), part(box(W - 0.1, 0.06, W - 0.1), K.white, { p: [0, hs[i] + 0.02, 0] })), pivot: [p.x, y0 + 0.12, p.z], anim: (t) => { const f = F(t); return { ry, sy: (top(i, f) - y0 - 0.12) / hs[i] }; } }); }
+    // The trend line over the tops and its arrowhead.
+    for (let i = 0; i < N - 1; i++) { const a = barAt(i), b = barAt(i + 1); moving.push({ geo: part(cyl(0.06, 0.06, 1, 8), '#2b2f36', { p: [0, 0.5, 0] }), pivot: [a.x, 0, a.z], anim: (t) => { const f = F(t), ya = top(i, f) + 0.25, yb = top(i + 1, f) + 0.25, d = new V(b.x - a.x, yb - ya, b.z - a.z); return { y: ya, q: new THREE.Quaternion().setFromUnitVectors(new V(0, 1, 0), d.clone().normalize()), sy: d.length() }; } }); }
+    const tip = barAt(N - 1);
+    moving.push({ geo: merge(part(cone(0.32, 0.6, 16), '#46d36b', { r: [0, 0, -Math.PI / 2 + 0.5] }), part(cyl(0.08, 0.08, 0.9, 8), '#46d36b', { p: [-0.45, -0.24, 0], r: [0, 0, -Math.PI / 2 + 0.5] })).rotateY(ry), pivot: [tip.x + 0.5, 0, tip.z - 0.45], anim: (t) => { const f = F(t); return { y: top(N - 1, f) + 0.75 + Math.sin(t * 3) * 0.06 }; } });
+    // The saver: a coin in at the foot, then up the bars one hop at a time.
+    const hopAt = (f) => win(f, 0.12, 0.84) * (N - 1);
+    moving.push(...walker(moving.length, (t) => { const f = F(t); if (f < 0.12) { const k = win(f, 0, 0.1), p = new V(D.x + 0.8, 0, D.z - 0.2).lerp(barAt(0), k); return { x: p.x, z: p.z, ry: ry + 0.4, still: k >= 1 }; } const h = Math.min(N - 1.001, hopAt(f)), i = Math.floor(h), k = h - i, p = barAt(i).lerp(barAt(i + 1), easeIO(k)); return { x: p.x, z: p.z, ry, still: f > 0.84, s: f > 0.96 ? Math.max(0.001, 1 - win(f, 0.96, 0.99)) : 1 }; }, { shirt: '#3d7be0', pants: '#2b3a55', y: 0 }));
+    const wi = moving.length - 5;
+    const baseAnim = moving[wi].anim;
+    moving[wi].anim = (t) => { const f = F(t), r = baseAnim(t); if (f < 0.12) return { ...r, y: y0 }; const h = Math.min(N - 1.001, hopAt(f)), i = Math.floor(h), k = h - i; return { ...r, y: top(i, f) + (top(i + 1, f) - top(i, f)) * easeIO(k) + hop(k) * 0.5 }; };
+    moving.push({ geo: coin(0.22, 0.07).rotateX(Math.PI / 2), pivot: [D.x, y0 + 1.6, D.z], anim: (t) => { const f = F(t); return { y: -easeIn(win(f, 0.07, 0.11)) * 0.6, ry: t * 6, s: life(f, 0.03, 0.06, 0.1, 0.11) }; } });
+    // Dividends: coins sprinkle down onto each bar.
+    for (let k = 0; k < 7; k++) { const p = barAt(k); moving.push({ geo: coin(0.18, 0.06), pivot: [p.x + 0.15, 0, p.z], anim: (t) => { const f = cyc(t, 4, k / 7), yT = top(k, F(t)) + 0.05; return { y: yT + (1 - easeIn(win(f, 0, 0.4))) * 2.2, ry: f * 9, s: f < 0.5 ? 1 : 0.001 }; } }); }
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.8, y0, 2.0], topAt: [D.x, y0 + 1.04, D.z] };
+  },
 };
