@@ -2811,4 +2811,59 @@ export const SCENES = {
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [3.0, y0, 2.5], topAt: [OX, y0 + 1.73, OZ] };
   },
 
+  // Wind turbine (power generators, utilities and turbine makers): the wind, caught and kept. Gusts
+  // stream across the hills and the turbines spin up; power runs down their cables to the
+  // substation, fills the battery yard bar by bar and lights the homes; on the right the crane
+  // lifts the last blade onto a new turbine, which starts to turn.
+  'power:0': () => {
+    const R = rand(4001), out = [], moving = [];
+    out.push(slab('#9fcd78'));
+    [[-3.4, -3.3, 1.75, 0.7], [-0.6, -3.6, 1.45, 0.5], [-3.8, -0.4, 1.3, 0.45], [2.6, -2.8, 1.8, 0.5]].forEach(([x, z, r, h]) => out.push(part(lathe([[r, 0], [r * 0.7, h * 0.6], [r * 0.3, h * 0.95], [0.001, h]], 32), '#8cc66a', { p: [x, y0, z] })));
+    // ---- the turbines: tower, nacelle facing the camera's side, a rotor that spins
+    const YAW = Math.PI / 4, tq = new THREE.Quaternion().setFromAxisAngle(new V(0, 1, 0), YAW), fwd = new V(1, 0, 0).applyQuaternion(tq);
+    const tower = (x, z, base, hub) => out.push(part(cyl(0.09, 0.18, hub - base, 20), '#f4f5f6', { p: [x, base + (hub - base) / 2, z] }), part(cyl(0.22, 0.24, 0.14, 20), 'A', { p: [x, base + 0.07, z] }), place(merge(part(rbox(0.6, 0.26, 0.28, 0.08), '#eef0f2', { p: [-0.1, 0, 0] }), part(box(0.3, 0.04, 0.29), 'A', { p: [-0.15, 0.1, 0] })), { p: [x, hub, z], r: [0, YAW, 0] }));
+    const rotor = (L, blades = 3) => merge(part(new THREE.SphereGeometry(0.14, 16, 12), K.white, { s: [1.3, 1, 1] }), Array.from({ length: blades }, (_, i) => part(extrude([[0, -0.05], [L * 0.25, -0.12], [L, -0.03], [L, 0.02], [L * 0.2, 0.08], [0, 0.06]], 0.04), (X, Y) => (Math.hypot(X, Y) > L * 0.85 ? K.red : K.white), { r: [Math.PI / 2, (i / 3) * TAU + Math.PI / 2, 0] }))).applyQuaternion(new THREE.Quaternion().setFromAxisAngle(new V(0, 0, 1), Math.PI / 2)).applyQuaternion(tq);
+    const turbines = [[-3.4, -3.2, y0 + 0.7, y0 + 4.9, 1.6], [-0.6, -3.6, y0 + 0.5, y0 + 4.1, 1.35], [-3.8, -0.4, y0 + 0.45, y0 + 3.5, 1.2]];
+    turbines.forEach(([x, z, b, h]) => tower(x, z, b, h));
+    // ---- the substation (middle), battery yard (right), homes (front left)
+    const SX = 0.4, SZ = 0.4;
+    out.push(part(rbox(2.0, 0.08, 1.6, 0.03), '#b9b4aa', { p: [SX, y0 + 0.04, SZ] }));
+    [[-0.5, -0.3], [0.5, -0.3], [0, 0.4]].forEach(([dx, dz]) => out.push(part(rbox(0.5, 0.6, 0.4, 0.04), '#9aa1a9', { p: [SX + dx, y0 + 0.38, SZ + dz] }), part(cyl(0.05, 0.05, 0.4, 8), '#d8dde3', { p: [SX + dx, y0 + 0.88, SZ + dz] })));
+    for (let i = 0; i < 12; i++) { const a = (i / 12) * TAU; out.push(part(box(0.04, 0.6, 0.04), K.steelDk, { p: [SX + Math.cos(a) * 1.15, y0 + 0.3, SZ + Math.sin(a) * 0.95] })); }
+    out.push(part(torus(1.0, 0.02, TAU, 40), K.steelDk, { p: [SX, y0 + 0.55, SZ], r: [Math.PI / 2, 0, 0], s: [1.15, 0.95, 1] }));
+    const bats = [[2.2, 1.9], [3.5, 1.9], [2.2, 3.1], [3.5, 3.1]];
+    bats.forEach(([x, z]) => out.push(part(rbox(1.1, 0.9, 0.9, 0.04), K.white, { p: [x, y0 + 0.45, z] }), part(box(1.12, 0.12, 0.92), 'A', { p: [x, y0 + 0.76, z] }), part(box(0.5, 0.6, 0.02), '#2b2f36', { p: [x, y0 + 0.42, z + 0.46] })));
+    const homes = [[-3.6, 3.2], [-2.0, 3.8], [-0.4, 3.6]];
+    homes.forEach(([x, z], i) => out.push(place(home(['#f3ead8', '#e4ecf0', '#efe2cc'][i], ['#7d6a5a', '#5a6b7d', 'Bd'][i], 1.3, 1.1, 0.9), { p: [x, y0, z], r: [0, 0.1 - i * 0.1, 0] })));
+    // Cables: each turbine to the substation, the substation to the batteries and the homes.
+    const cables = [...turbines.map(([x, z, b]) => curve([[x, y0 + 0.05, z], [(x + SX) / 2, y0 + 0.05, (z + SZ) / 2 + 0.3], [SX - 0.6, y0 + 0.05, SZ - 0.2]])), curve([[SX + 0.8, y0 + 0.05, SZ + 0.3], [1.6, y0 + 0.05, 1.3], [2.2, y0 + 0.05, 1.45]]), curve([[SX - 0.4, y0 + 0.05, SZ + 0.8], [-0.8, y0 + 0.05, 2.4], [-2.0, y0 + 0.05, 3.2]])];
+    cables.forEach((c) => out.push(part(tubeOn(c, 0.04), '#5b616b')));
+    // ---- the new turbine going up (back right) and its crane
+    const NX = 2.6, NZ = -2.8, NB = y0 + 0.5, NH = y0 + 3.8;
+    tower(NX, NZ, NB, NH);
+    const CX = 4.5, CZ = 0.2;
+    out.push(part(rbox(1.4, 0.4, 1.0, 0.05), '#2b2f36', { p: [CX, y0 + 0.2, CZ] }), part(rbox(1.0, 0.6, 0.8, 0.06), '#f2c94c', { p: [CX, y0 + 0.7, CZ] }));
+    const tipC = new V(NX + 0.25, NH + 1.3, NZ + 0.35);
+    out.push(beam([CX, y0 + 0.9, CZ], tipC.toArray(), 0.2, '#f2c94c'), beam([CX - 0.3, y0 + 0.9, CZ], tipC.toArray(), 0.07, '#e0b33a'), hi() ? ring(8, (a, i) => { const u = (i + 0.5) / 8, p = new V(CX - 0.15, y0 + 0.9, CZ).lerp(tipC, u); return beam([p.x - 0.18, p.y - 0.1, p.z], [p.x + 0.18, p.y + 0.12, p.z + 0.05], 0.04, '#e0b33a'); }) : []);
+    [[-4.6, 2.0], [1.2, 3.6], [1.4, -1.2]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.5 + R() * 0.15)));
+    // ---- moving parts (one 12 s cycle)
+    const P = 12, F = (t) => cyc(t, P), gust = (t) => 0.7 + 0.6 * Math.max(0, Math.sin((t / P) * TAU * 2));
+    let spin = 0, last = 0;
+    const angle = (t, k) => t * 2.2 * k + Math.sin((t / P) * TAU * 2) * 1.2 * k;
+    turbines.forEach(([x, z, b, h, L], i) => moving.push({ geo: rotor(L), pivot: [x + fwd.x * 0.2, h, z + fwd.z * 0.2], anim: (t) => ({ q: new THREE.Quaternion().setFromAxisAngle(fwd, -angle(t, 1 + i * 0.12)) }) }));
+    // Gust streaks across the hills.
+    for (let k = 0; k < 6; k++) moving.push({ geo: part(box(1.2, 0.03, 0.03), K.white), pivot: [0, y0 + 2.2 + (k % 3) * 0.9, -3.0 + k * 1.1], anim: (t) => { const u = cyc(t, 3, k / 6); return { x: -5 + u * 10, s: Math.sin(u * Math.PI) * 0.999 + 0.001, sy: 1 }; } });
+    // Pulses down the cables.
+    cables.forEach((c, i) => { for (let k = 0; k < 2; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.08, 8, 6), '#ffd23f'), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 2, k / 2 + i * 0.17), p = c.getPointAt(u); return { x: p.x, y: p.y + 0.04, z: p.z }; } }); });
+    // The battery yard fills bar by bar.
+    bats.forEach(([x, z], i) => { for (let k = 0; k < 4; k++) moving.push({ geo: part(box(0.4, 0.1, 0.03), '#62d35f'), pivot: [x, y0 + 0.2 + k * 0.14, z + 0.47], anim: (t) => { const f = F(t), lvl = 4 * win(f, 0.05 + i * 0.04, 0.6 + i * 0.04) - 4 * win(f, 0.85, 0.98); return { s: lvl > k ? 1 : 0.001 }; } }); });
+    // The homes' windows light.
+    homes.forEach(([x, z], i) => moving.push({ geo: part(rbox(0.36, 0.3, 0.06, 0.02), '#ffe066'), pivot: [x + 0.26, y0 + 0.62, z + 0.47], anim: (t) => ({ s: F(t) > 0.15 + i * 0.05 && F(t) < 0.95 ? 1 : 0.001 }) }));
+    // The last blade: hoisted from the ground to the hub, then the new rotor starts to turn.
+    const hubN = new V(NX + fwd.x * 0.2, NH, NZ + fwd.z * 0.2), lift = (f) => easeIO(win(f, 0.05, 0.45));
+    moving.push({ geo: part(cyl(0.015, 0.015, 1, 6), K.ink, { p: [0, -0.5, 0] }), pivot: tipC.toArray(), anim: (t) => { const f = F(t); return { sy: f < 0.5 ? (tipC.y - (y0 + 0.4 + lift(f) * (NH - 0.6 - y0 - 0.4)) - 0.2) : 0.6 }; } });
+    moving.push({ geo: rotor(1.3, 2), pivot: hubN.toArray(), anim: (t) => { const f = F(t), go = win(f, 0.55, 0.7); return { q: new THREE.Quaternion().setFromAxisAngle(fwd, -(easeIn(go) * 2 + Math.max(0, f - 0.7) * 26)) }; } });
+    moving.push({ geo: part(extrude([[0, -0.05], [0.33, -0.12], [1.3, -0.03], [1.3, 0.02], [0.26, 0.08], [0, 0.06]], 0.04), (X, Y) => (Math.hypot(X, Y) > 1.1 ? K.red : K.white), { r: [Math.PI / 2, Math.PI / 2, 0] }), pivot: [0, 0, 0], anim: (t) => { const f = F(t), k = lift(f), y = y0 + 0.4 + k * (NH - 0.6 - y0 - 0.4), on = f < 0.5; return { x: tipC.x - 0.65 * (1 - k), y, z: tipC.z, rz: (1 - k) * Math.PI / 2, s: on ? 1 : 0.001 }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [2.0, y0, 0.3], topAt: [SX - 0.5, y0 + 0.7, SZ - 0.3] };
+  },
 };
