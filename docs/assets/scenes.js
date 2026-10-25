@@ -3373,4 +3373,61 @@ export const SCENES = {
     moving.push({ geo: tickGeo(0.26), pivot: [HX + 0.8, y0 + 2.4, HZ - 0.6], anim: (t) => { const f = F(t); return { y: easeOut(win(f, 0.85, 0.89)) * 0.3, ry: Math.PI / 4, s: life(f, 0.85, 0.88, 0.94, 0.97) }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [2.0, y0, 3.0], topAt: [WX - 1.0, y0 + 1.8, WZ] };
   },
+
+  // Paint (paints and coatings, building products, packaging): colour on everything that's built.
+  // The stir stick turns in the giant can and drips run down its side; the painter on the scaffold
+  // rolls fresh colour across the house front; and in the open booth the robot sweeps its spray gun
+  // along a primer-grey car until it comes out gleaming.
+  'industrial:4': () => {
+    const R = rand(5101), out = [], moving = [];
+    out.push(slab('#d9d2c4'));
+    out.push(part(box(10.4, 0.03, 1.1), '#6b7078', { p: [0, y0 + 0.015, 4.5] }));
+    for (let i = 0; i < 9; i++) out.push(part(box(0.5, 0.012, 0.06), K.white, { p: [-4.4 + i * 1.1, y0 + 0.035, 4.5] }));
+    out.push(part(rbox(5.0, 0.04, 3.4, 0.03), '#a9d384', { p: [-0.4, y0 + 0.02, 1.8] }));
+    // ---- the giant paint can (back left) with its lid leaning on it
+    const CX = -3.2, CZ = -3.0, CR = 1.05, CH = 2.2;
+    out.push(part(new THREE.CylinderGeometry(CR, CR, CH, hi() ? 48 : 16), '#d8dde3', { p: [CX, y0 + CH / 2, CZ] }), part(new THREE.CylinderGeometry(CR * 1.005, CR * 1.005, CH * 0.6, hi() ? 48 : 16, 1, true), 'A', { p: [CX, y0 + CH * 0.45, CZ] }), part(torus(CR, 0.05, TAU, 48), '#b8bec6', { p: [CX, y0 + CH, CZ], r: [Math.PI / 2, 0, 0] }), part(cyl(CR * 0.96, CR * 0.96, 0.04, 40), 'B', { p: [CX, y0 + CH - 0.08, CZ] }));
+    out.push(part(torus(CR * 0.8, 0.03, Math.PI, 24), K.steelDk, { p: [CX, y0 + CH, CZ], r: [0, Math.PI / 4, 0] }), part(cyl(CR * 1.02, CR * 1.02, 0.08, 40), '#b8bec6', { p: [CX + 1.3, y0 + 0.9, CZ + 0.4], r: [0, 0, 1.25] }));
+    [[0.3, 0.7], [-0.4, 0.5], [0.9, 0.35]].forEach(([a, l]) => out.push(part(capsule(0.07, l), 'B', { p: [CX + Math.cos(a + Math.PI / 4) * (CR + 0.02), y0 + CH - l / 2 - 0.08, CZ + Math.sin(a + Math.PI / 4) * (CR + 0.02)] })));
+    out.push(part(cyl(0.7, 0.75, 0.04, 28), 'B', { p: [CX + 0.6, y0 + 0.02, CZ + 1.1], s: [1.2, 1, 0.8] }));
+    // ---- the paint store (left middle) with its wall of swatches
+    const SX = -3.6, SZ = 0.9;
+    out.push(part(rbox(2.0, 1.4, 1.6, 0.05), K.cream, { p: [SX, y0 + 0.7, SZ] }), part(rbox(2.2, 0.2, 1.8, 0.04), 'A', { p: [SX, y0 + 1.45, SZ] }), part(rbox(0.6, 0.9, 0.05, 0.02), '#9fcdea', { p: [SX + 0.5, y0 + 0.45, SZ + 0.81] }));
+    ['#e5533d', '#f29a3a', '#f2c94c', '#5fae5b', '#3fb8a8', '#3d7be0', '#8a6cf0', '#d6336c'].forEach((c, i) => out.push(part(box(0.1, 0.8, 0.03), c, { p: [SX - 0.75 + i * 0.12, y0 + 0.75, SZ + 0.82] })));
+    // ---- the house being painted (middle), with scaffold
+    const HX = 0.6, HZ = 1.8;
+    out.push(place(house2(K.cream, 'Ad', K.woodDk), { p: [HX, y0, HZ] }));
+    const FZ = HZ + 0.82, FX0 = HX - 0.35 - 0.95, FW = 1.9, FH = 1.95;
+    [FX0 - 0.1, FX0 + FW + 0.1].forEach((x) => out.push(part(box(0.06, 2.3, 0.06), K.steelDk, { p: [x, y0 + 1.15, FZ + 0.55] }), part(box(0.06, 2.3, 0.06), K.steelDk, { p: [x, y0 + 1.15, FZ + 0.15] })));
+    [0.9, 1.75].forEach((y) => out.push(part(rbox(FW + 0.3, 0.06, 0.45, 0.02), K.wood, { p: [FX0 + FW / 2, y0 + y, FZ + 0.35] })));
+    // ---- the paint booth (back right): open frame, lights, a robot on a rail
+    const BX = 2.6, BZ = -2.6;
+    out.push(part(rbox(3.4, 0.1, 2.6, 0.03), '#c9ced6', { p: [BX, y0 + 0.05, BZ] }));
+    [[-1.6, -1.2], [1.6, -1.2], [-1.6, 1.2], [1.6, 1.2]].forEach(([dx, dz]) => out.push(part(box(0.12, 2.4, 0.12), '#e9ecef', { p: [BX + dx, y0 + 1.2, BZ + dz] })));
+    out.push(part(rbox(3.5, 0.15, 2.7, 0.04), 'A', { p: [BX, y0 + 2.45, BZ] }), part(box(3.0, 0.05, 0.2), '#fff6d8', { p: [BX, y0 + 2.36, BZ - 0.5] }), part(box(3.0, 0.05, 0.2), '#fff6d8', { p: [BX, y0 + 2.36, BZ + 0.5] }));
+    out.push(part(box(3.0, 0.1, 0.2), K.steelDk, { p: [BX, y0 + 0.1, BZ - 1.0] }));
+    [[-1.2, -0.8], [-1.6, -4.4], [3.4, 3.2], [-4.6, 3.0]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.5 + R() * 0.15)));
+    // ---- moving parts (one 12 s cycle)
+    const P = 12, F = (t) => cyc(t, P);
+    // The stir stick turns in the can.
+    moving.push({ geo: merge(part(rbox(0.16, 1.8, 0.05, 0.02), K.wood, { p: [0.4, 0.6, 0], r: [0, 0, -0.2] })), pivot: [CX, y0 + CH - 0.1, CZ], anim: (t) => ({ ry: t * 1.2 }) });
+    // A drip slides down the can and grows a puddle.
+    moving.push({ geo: part(new THREE.SphereGeometry(0.09, 10, 8), 'B', { s: [1, 1.4, 1] }), pivot: [CX + Math.cos(Math.PI / 4 + 0.6) * (CR + 0.03), y0 + CH - 0.1, CZ + Math.sin(Math.PI / 4 + 0.6) * (CR + 0.03)], anim: (t) => { const u = cyc(t, 3); return { y: -easeIn(u) * (CH - 0.3), s: u < 0.9 ? 1 : 0.001 }; } });
+    // The fresh coat spreads across the house front from left to right, a strip at a time.
+    const coat = (f) => easeIO(win(f, 0.05, 0.8)) * (1 - win(f, 0.95, 1));
+    moving.push({ geo: part(box(1, FH, 0.02), 'B', { p: [0.5, FH / 2, 0] }), pivot: [FX0, y0 + 0.05, FZ + 0.02], anim: (t) => ({ sx: FW * coat(F(t)) + 0.001 }) });
+    // The painter rides along the scaffold, roller going up and down.
+    const pp = (t) => FX0 + Math.max(0.15, FW * coat(F(t)));
+    moving.push(...walker(moving.length, (t) => ({ x: pp(t), z: FZ + 0.4, ry: Math.PI / 2, still: true, push: true }), { shirt: K.white, pants: '#e9ecef', y: y0 + 0.93 }));
+    moving.push({ geo: merge(part(cyl(0.08, 0.08, 0.36, 12), 'B', { r: [0, 0, Math.PI / 2] }), beam([0, 0, 0], [0, -0.1, 0.35], 0.03, K.dark)), pivot: [0, 0, FZ + 0.07], anim: (t) => ({ x: pp(t), y: y0 + 1.4 + Math.sin(t * 5) * 0.45 }) });
+    // The car in the booth: grey primer, then the colour sweeps on with the spray.
+    const carX = BX - 0.2, carZ = BZ + 0.2;
+    moving.push({ geo: sedan('#a9b1bb'), pivot: [carX, y0 + 0.1, carZ], anim: (t) => ({ s: F(t) < 0.62 ? 1 : 0.001 }) });
+    moving.push({ geo: sedan('A'), pivot: [carX, y0 + 0.1, carZ], anim: (t) => { const f = F(t); return { s: f >= 0.62 ? 1 : 0.001 }; } });
+    const gun = (f) => carX - 1.1 + 2.2 * (0.5 - 0.5 * Math.cos(win(f, 0.1, 0.62) * Math.PI * 3));
+    const rb = moving.length;
+    moving.push({ geo: merge(part(rbox(0.5, 0.3, 0.5, 0.06), K.orange, { p: [0, 0.15, 0] }), part(cyl(0.12, 0.12, 0.9, 12), K.orange, { p: [0, 0.75, 0] }), part(box(1.0, 0.14, 0.14), K.orange, { p: [0.35, 1.2, 0.35], r: [0, -Math.PI / 4, 0.3] }), part(cyl(0.05, 0.08, 0.3, 10), K.dark, { p: [0.75, 1.0, 0.75], r: [0.6, 0, -0.6] })), pivot: [0, y0 + 0.15, BZ - 1.0], anim: (t) => ({ x: gun(F(t)) }) });
+    for (let k = 0; k < 4; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.18, 10, 8), 'A'), pivot: [0.8, 0.95, 0.8], parent: rb, anim: (t) => { const f = F(t), u = cyc(t, 0.6, k / 4); return { x: u * 0.3, z: u * 0.3, y: -u * 0.3, s: f > 0.1 && f < 0.62 ? (0.4 + u) * (1 - u) * 2.2 : 0.001 }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [3.0, y0, 1.3], topAt: [SX, y0 + 1.55, SZ] };
+  },
 };
