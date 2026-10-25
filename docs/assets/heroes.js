@@ -2379,5 +2379,44 @@ export const HEROES = {
     for (let k = 0; k < 2; k++) moving.push({ geo: part(new THREE.TorusGeometry(1, 0.012, 4, 40), '#7cf0ff'), pivot: [0, y0 + 5.0, 0.6], anim: (t) => { const f = cyc(t, 2, k / 2); return { rx: Math.PI / 2, y: -f * 4.4, x: Math.sin(t * 0.3) * 1.2 * (1 - f) + (k ? 2.4 : -2.5) * f, s: 0.1 + f * 0.9 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Intel: chips designed and made under its own roof. In the cut-open fab, wafer pods race round
+  // the ceiling rail between the tools, the lithography bay glows yellow, workers in bunny suits
+  // tend the machines, and a giant wafer of dies turns on its stand outside.
+  intel: { finder: '#0068b5', build: () => {
+    const R = rand(11), out = [], y0 = 0.24, BLUE = '#0068b5';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#c9ced6', { p: [0, 0.12, 0] }));
+    // ---- the fab: floor, back and side walls, a roof over the back half only
+    const FX = -0.6, FZ = -1.4, W = 7.4, D = 5.2, H = 2.2;
+    out.push(part(box(W, 0.06, D), '#e3eaf2', { p: [FX, y0 + 0.03, FZ] }));
+    if (hi()) for (let i = 0; i < 18; i++) out.push(part(box(0.015, 0.004, D), '#d6d9dd', { p: [FX - W / 2 + i * W / 17, y0 + 0.062, FZ] }));
+    out.push(part(rbox(W, H, 0.14, 0.03), BLUE, { p: [FX, y0 + H / 2, FZ - D / 2] }), part(rbox(0.14, H, D, 0.03), '#d6dde5', { p: [FX - W / 2, y0 + H / 2, FZ] }), part(rbox(W + 0.1, 0.14, D * 0.35, 0.03), '#d6d9dd', { p: [FX, y0 + H, FZ - D * 0.33] }));
+    out.push(part(rbox(2.4, 0.5, 0.06, 0.03), '#ffffff', { p: [FX + 1.8, y0 + H - 0.4, FZ - D / 2 + 0.08] }), part(box(1.6, 0.14, 0.02), BLUE, { p: [FX + 1.8, y0 + H - 0.4, FZ - D / 2 + 0.12] }));
+    // The lithography bay: a yellow-lit room with the big EUV tool.
+    out.push(part(box(2.6, 1.8, 0.06), '#f6d36b', { p: [FX - 2.2, y0 + 0.9, FZ - D / 2 + 0.1] }), part(box(0.06, 1.8, 2.0), '#f6d36b', { p: [FX - 0.9, y0 + 0.9, FZ - D / 2 + 1.1] }), part(box(2.6, 0.02, 2.0), '#fbe7a6', { p: [FX - 2.2, y0 + 0.07, FZ - D / 2 + 1.1] }));
+    out.push(part(rbox(1.8, 1.1, 1.0, 0.08), '#f4f5f6', { p: [FX - 2.3, y0 + 0.6, FZ - D / 2 + 1.0] }), part(rbox(0.6, 0.6, 0.9, 0.06), '#d6d9dd', { p: [FX - 1.2, y0 + 0.4, FZ - D / 2 + 1.0] }), part(box(0.5, 0.15, 0.02), BLUE, { p: [FX - 2.3, y0 + 0.9, FZ - D / 2 + 1.51] }));
+    // Rows of process tools, each with a load port.
+    for (let r = 0; r < 2; r++) for (let i = 0; i < 4; i++) { const x = FX + 0.2 + i * 0.85, z = FZ - 0.9 + r * 1.6; out.push(part(rbox(0.7, 0.9, 0.7, 0.06), '#f4f5f6', { p: [x, y0 + 0.45, z] }), part(box(0.5, 0.06, 0.02), i % 2 ? BLUE : '#2fbf5b', { p: [x, y0 + 0.75, z + 0.36] }), part(rbox(0.3, 0.06, 0.3, 0.02), '#9aa1a9', { p: [x, y0 + 0.93, z + 0.15] })); }
+    // The overhead rail loop the wafer pods ride.
+    const rail = curve([[FX - 0.6, 0, -2.9], [FX + 3.6, 0, -2.9], [FX + 3.6, 0, 0.6], [FX - 0.6, 0, 0.6], [FX - 0.9, 0, -1.2]].map(([x, , z]) => [x, y0 + 1.75, z]), true);
+    rail.curveType = 'centripetal';
+    out.push(part(tubeOn(rail, 0.05, hi() ? 120 : 30), '#00a3f6'));
+    for (const u of [0.05, 0.3, 0.55, 0.8]) { const p = rail.getPointAt(u); out.push(part(box(0.03, H - 1.75 + 0.05, 0.03), '#9aa1a9', { p: [p.x, p.y + (H - 1.75) / 2, p.z] })); }
+    // ---- the giant wafer on its stand, out front
+    const WX = 3.4, WZ = 3.2;
+    out.push(part(rbox(1.0, 0.6, 0.6, 0.06), '#3a3f47', { p: [WX, y0 + 0.3, WZ] }));
+    [[-4.6, 4.6], [-4.6, 2.2], [-1.6, 4.6], [4.7, -0.4], [4.7, -4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.7 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    const die = (i, j) => { const h = Math.sin(i * 3.1 + j * 1.7) * 0.5 + 0.5; return new THREE.Color().setHSL(0.5 + h * 0.4, 0.75, 0.5).getStyle(); };
+    const waferGeo = merge(part(cyl(1.0, 1.0, 0.04, 64), '#b9c2cc', { r: [Math.PI / 2, 0, 0] }), (() => { const g = []; for (let i = -6; i <= 6; i++) for (let j = -6; j <= 6; j++) { const x = i * 0.14, y = j * 0.14; if (Math.hypot(x, y) < 0.9) g.push(part(box(0.12, 0.12, 0.015), die(i, j), { p: [x, y, 0.025] })); } return g; })());
+    moving.push({ geo: waferGeo, pivot: [WX, y0 + 1.65, WZ], anim: (t) => ({ ry: Math.PI / 4 + Math.sin(t * 0.6) * 0.5, rz: t * 0.4 }) });
+    // Wafer pods running the rail, each with its hoist line.
+    for (let k = 0; k < 6; k++) moving.push({ geo: merge(part(rbox(0.26, 0.22, 0.24, 0.05), '#f4f5f6', { p: [0, -0.22, 0] }), part(box(0.12, 0.08, 0.12), '#7b828c', { p: [0, -0.06, 0] }), part(cyl(0.12, 0.12, 0.02, 20), BLUE, { p: [0, -0.33, 0] })), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 9, k / 6), a = along(rail, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry }; } });
+    // Workers in bunny suits walking the aisle.
+    for (let k = 0; k < 2; k++) moving.push(...walker(moving.length, (t) => { const f = cyc(t, 10, k * 0.5), x = FX + 0.2 + (f < 0.5 ? f * 2 : 2 - f * 2) * 2.6; return { x, z: FZ - 0.1, ry: f < 0.5 ? 0 : Math.PI }; }, { shirt: '#f4f5f6', pants: '#e9ecef', skin: '#f4f5f6', hair: '#c9e3f5', y: y0 + 0.06 }));
+    // The EUV tool's light pulsing.
+    moving.push({ geo: part(ball(0.08), '#c58cff'), pivot: [FX - 2.3, y0 + 1.2, FZ - D / 2 + 1.0], anim: (t) => ({ s: 0.6 + Math.max(0, Math.sin(t * 9)) * 1.2 }) });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

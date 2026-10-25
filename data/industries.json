@@ -70,7 +70,8 @@
   "caterpillar": "Moving the earth",
   "pepsico": "Snacks and sips",
   "lockheed": "Only a few can build it",
-  "deere": "Farms that steer themselves"
+  "deere": "Farms that steer themselves",
+  "intel": "Designed and made in-house"
  },
  "bank": [
   "Wells Fargo",
@@ -430,7 +431,6 @@
   "Helsing"
  ],
  "chip": [
-  "Intel",
   "Micron Technology",
   "Texas Instruments",
   "Applied Materials",
@@ -1596,5 +1596,8 @@
  ],
  "deere": [
   "Deere"
+ ],
+ "intel": [
+  "Intel"
  ]
 }
