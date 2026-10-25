@@ -2114,4 +2114,36 @@ export const HEROES2 = {
     moving.push({ geo: merge(fan(BLURP), part(torus(0.2, 0.03, TAU, 16), '#3ba55c', { p: [0, 0.02, 0], r: [Math.PI / 2, 0, 0] })), pivot: [0, y0 + 0.32, 0], anim: (t) => { const f = cyc(t, 10) * 5, i = Math.floor(f), u = f - i, a = servers[i], b = servers[(i + 1) % 5], m = easeIO(clamp01((u - 0.5) / 0.5)); return { x: a[0] + (b[0] - a[0]) * m, z: a[1] + (b[1] - a[1]) * m, y: hop(m) * 2.0, s: 1.1 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Plaid: the plumbing between apps and banks. The apps on one side, the banks on the other,
+  // and through the checkered Plaid block in the middle every connection runs: a request goes
+  // in, the bank answers, the app gets its tick.
+  plaid: { finder: '#111111', build: () => {
+    const R = rand(165), out = [], INK = '#111111';
+    out.push(ground('#8fc66f'));
+    // ---- the Plaid block: a cube of black and white checks
+    const CX = 0.0, CZ = 0.0;
+    out.push(part(cyl(0.9, 1.0, 0.4, 32), '#3a3f47', { p: [CX, y0 + 0.2, CZ] }));
+    const n = 4, c = 0.42;
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) for (let k = 0; k < n; k++) if (i === 0 || j === 0 || k === 0 || i === n - 1 || j === n - 1 || k === n - 1) out.push(part(new THREE.BoxGeometry(c * 0.96, c * 0.96, c * 0.96), (i + j + k) % 2 ? INK : K.white, { p: [CX - (n - 1) * c / 2 + i * c, y0 + 0.45 + c / 2 + j * c, CZ - (n - 1) * c / 2 + k * c] }));
+    // ---- the apps on the right and front: phones with coloured app tiles
+    const apps = [[3.8, -1.6, '#3d95ce'], [3.8, 1.2, '#2f9e6e'], [2.4, 3.6, '#8a6cf0'], [-0.6, 3.9, '#f29a3a']];
+    apps.forEach(([x, z, col]) => out.push(part(rbox(0.8, 1.5, 0.1, 0.12), INK, { p: [x, y0 + 0.95, z], r: [0, Math.PI / 4, 0] }), part(rbox(0.68, 1.3, 0.02, 0.08), col, { p: [x + 0.04, y0 + 0.95, z + 0.04], r: [0, Math.PI / 4, 0] }), part(rbox(0.4, 0.12, 0.3, 0.03), '#c9ced6', { p: [x, y0 + 0.06, z] })));
+    // ---- the banks on the left and back: small columned branches
+    const banks = [[-3.6, -3.4], [-0.6, -3.9], [2.4, -3.8], [-3.9, 0.4]];
+    const bank = () => merge(part(rbox(1.4, 0.9, 1.0, 0.04), '#efe9dc', { p: [0, 0.55, 0] }), part(rbox(1.5, 0.1, 1.1, 0.03), '#e2dccd', { p: [0, 0.05, 0] }), [0, 1, 2, 3].map((i) => part(cyl(0.05, 0.06, 0.8, 10), K.white, { p: [-0.45 + i * 0.3, 0.5, 0.58] })), part(prism(1.5, 0.4, 1.15), '#e2dccd', { p: [0, 1.0, 0] }));
+    banks.forEach(([x, z], i) => out.push(place(bank(), { p: [x, y0, z], r: [0, i === 3 ? Math.PI / 2 : 0, 0] })));
+    // ---- the pipes: from every app and every bank into the block
+    const hub = [CX, y0 + 1.3, CZ], pipesA = apps.map(([x, z]) => curve([[x, y0 + 0.4, z], [(x + CX) / 2, y0 + 0.4, (z + CZ) / 2], hub])), pipesB = banks.map(([x, z]) => curve([hub, [(x + CX) / 2, y0 + 0.4, (z + CZ) / 2], [x, y0 + 0.4, z]]));
+    [...pipesA, ...pipesB].forEach((p) => out.push(part(tubeOn(p, 0.07, hi() ? 40 : 10), '#9aa1a9')));
+    out.push(trees(R, [[4.6, 4.6], [-4.6, 4.6], [4.6, -4.6], [-2.4, 2.4]], 0.5));
+    // ---- moving parts
+    const moving = [], P = 6;
+    apps.forEach(([x, z], i) => { const bp = pipesB[i], off = i / 4;
+      moving.push(rider(part(new THREE.SphereGeometry(0.12, 10, 7), apps[i][2]), pipesA[i], P, off, 0, 0.3));
+      moving.push(rider(part(new THREE.SphereGeometry(0.12, 10, 7), apps[i][2]), bp, P, off, 0.3, 0.55));
+      moving.push(rider(part(new THREE.BoxGeometry(0.2, 0.2, 0.2), '#62d35f'), curve(bp.points.slice().reverse().map((p) => p.toArray())), P, off, 0.55, 0.75));
+      moving.push(rider(part(new THREE.BoxGeometry(0.2, 0.2, 0.2), '#62d35f'), curve(pipesA[i].points.slice().reverse().map((p) => p.toArray())), P, off, 0.75, 0.92));
+      moving.push({ geo: tickGeo(0.25), pivot: [x, y0 + 2.0, z], anim: (t) => { const f = cyc(t, P, off); return f > 0.92 || f < 0.05 ? { ry: Math.PI / 4, s: 1 } : { s: 0.001 }; } }); });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

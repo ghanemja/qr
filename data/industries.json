@@ -152,7 +152,8 @@
   "scaleai": "The labelled data behind the models",
   "huggingface": "Where the AI community shares its models",
   "runway": "Films from a sentence",
-  "discord": "Where communities hang out and talk"
+  "discord": "Where communities hang out and talk",
+  "plaid": "The plumbing between apps and banks"
  },
  "bank": [
   "PNC Financial Services",
@@ -198,7 +199,6 @@
   "A-Mark Precious Metals",
   "Brex",
   "Ramp",
-  "Plaid",
   "Revolut",
   "Monzo",
   "N26",
@@ -1813,5 +1813,8 @@
  ],
  "discord": [
   "Discord"
+ ],
+ "plaid": [
+  "Plaid"
  ]
 }
