@@ -1847,4 +1847,34 @@ export const HEROES2 = {
     moving.push({ geo: place(wing, { s: 0.7 }), pivot: [HX + 1.0, y0 + 0.35, HZ], anim: (t) => { const f = cyc(t, 12), u = easeIO(win(f, 0.1, 0.6)); return { x: u * 2.4, z: u * 0.6, s: f > 0.85 ? 1 - win(f, 0.85, 1) + 0.001 : Math.min(1, f / 0.1) + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // International Paper: the boxes the online world ships in. Logs come out of the managed pine
+  // forest to the mill, and out of the mill comes corrugated board, folded into the boxes the
+  // delivery vans carry away.
+  internationalpaper: { finder: '#004b87', build: () => {
+    const R = rand(156), out = [], BLUE = '#004b87', KRAFT = '#c99a62';
+    out.push(ground('#8fc66f'), part(box(10.2, 0.03, 1.2), '#5b616b', { p: [0, y0 + 0.015, 3.8] }));
+    // ---- the pine forest, back left: rows of conifers, a few stumps
+    for (let i = 0; i < 6; i++) for (let j = 0; j < 4; j++) { const x = -4.6 + i * 0.6 + (j % 2) * 0.3, z = -4.6 + j * 0.65; if (i === 5 && j > 1) continue; const h = 1.0 + R() * 0.5; out.push(part(cyl(0.05, 0.07, 0.4, 6), '#6f4a2c', { p: [x, y0 + 0.2, z] }), part(cone(0.32, h, 8), shade('#2f6f3a', 0.85 + R() * 0.3), { p: [x, y0 + 0.35 + h / 2, z] })); }
+    for (let k = 0; k < 4; k++) out.push(part(cyl(0.08, 0.09, 0.12, 8), '#c9a36b', { p: [-4.4 + k * 0.6, y0 + 0.06, -1.6] }), part(cone(0.12, 0.3, 8), '#5fae45', { p: [-4.1 + k * 0.6, y0 + 0.15, -1.6] }));
+    // ---- the mill, back right: buildings, a stack, the log yard
+    const MX = 2.6, MZ = -3.0;
+    out.push(part(rbox(3.4, 1.8, 2.2, 0.05), '#e6e9ed', { p: [MX, y0 + 0.9, MZ] }), part(box(3.42, 0.3, 2.22), BLUE, { p: [MX, y0 + 1.65, MZ] }), place(pixText('IP', 0.1, K.white, 0.03), { p: [MX - 1.0, y0 + 1.65, MZ + 1.12] }), part(cyl(0.25, 0.3, 3.4, 16), '#c9ced6', { p: [MX + 1.2, y0 + 1.7, MZ - 0.5] }), part(cyl(0.6, 0.6, 1.2, 20), '#9aa1a9', { p: [MX - 1.0, y0 + 2.4, MZ - 0.4] }));
+    for (let k = 0; k < 5; k++) out.push(part(cyl(0.12, 0.12, 1.4, 10), '#9a6a41', { p: [0.4, y0 + 0.12 + (k % 3) * 0.2, -2.4 + Math.floor(k / 3) * 0.26 + (k % 3) * 0.05], r: [0, 0, Math.PI / 2] }));
+    // ---- the board line: a conveyor out of the mill toward the front
+    out.push(part(rbox(0.9, 0.5, 5.0, 0.05), '#5b616b', { p: [MX, y0 + 0.25, 0.6] }), part(box(0.8, 0.03, 4.9), '#2b2f36', { p: [MX, y0 + 0.51, 0.6] }));
+    // Stacks of flat board and a pallet of boxes at the end.
+    out.push(part(box(1.0, 0.6, 1.0), KRAFT, { p: [MX - 1.4, y0 + 0.3, 0.0] }), part(box(1.0, 0.02, 1.0), '#a87a48', { p: [MX - 1.4, y0 + 0.4, 0.0] }));
+    out.push(trees(R, [[-0.6, 4.6], [-4.4, 4.4], [4.6, 4.6], [-1.6, 1.6]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 9;
+    // The log truck from the forest to the mill.
+    const logTruck = merge(part(rbox(0.7, 0.8, 0.8, 0.08), '#2f6f3a', { p: [0.9, 0.55, 0] }), part(box(1.8, 0.1, 0.8), '#3a3f47', { p: [-0.4, 0.35, 0] }), [0, 1, 2].map((k) => part(cyl(0.12, 0.12, 1.8, 10), '#9a6a41', { p: [-0.4, 0.55 + (k === 2 ? 0.2 : 0), -0.15 + (k % 2) * 0.3 + (k === 2 ? 0.15 : 0)], r: [0, 0, Math.PI / 2] })), [[-0.9, 0.42], [0.8, 0.42], [-0.9, -0.42], [0.8, -0.42]].map(([x, z]) => part(new THREE.CylinderGeometry(0.18, 0.18, 0.1, 12), '#1d1f24', { p: [x, 0.18, z], r: [Math.PI / 2, 0, 0] })));
+    const logRoute = curve([[-3.0, y0, -1.0], [-1.0, y0, -0.8], [0.6, y0, -1.6], [1.0, y0, -1.9]]);
+    moving.push({ geo: place(logTruck, { s: 0.8 }), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P), u = easeIO(win(f, 0, 0.45)) - easeIO(win(f, 0.55, 1)), a = along(logRoute, clamp01(u)); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: f < 0.5 ? a.ry : a.ry + Math.PI }; } });
+    // Corrugated boxes along the line, flat board folding up into boxes near the end.
+    for (let k = 0; k < 6; k++) moving.push({ geo: parcel(0.45), pivot: [MX, y0 + 0.73, 0], anim: (t) => { const u = cyc(t, 6, k / 6); return { z: -1.6 + u * 4.4, sy: 0.15 + 0.85 * easeOut(win(u, 0.35, 0.55)), s: Math.min(1, u / 0.05, (1 - u) / 0.05) + 0.001 }; } });
+    // The van carrying them off along the road.
+    moving.push({ geo: van(K.white, BLUE), pivot: [0, y0, 3.8], anim: (t) => { const x = 5.6 - cyc(t, 7) * 11.2; return { x, ry: Math.PI, s: clamp01((5.0 - Math.abs(x)) / 0.5) * 0.8 + 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

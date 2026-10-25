@@ -143,7 +143,8 @@
   "hertz": "The airport counter with a car for everyone off the plane",
   "goodyear": "The tyre maker the whole world can see",
   "paccar": "The premium trucks drivers ask for, and the parts that keep them running",
-  "northrop": "The planes and telescopes no one else can build"
+  "northrop": "The planes and telescopes no one else can build",
+  "internationalpaper": "The boxes the online world ships in, from the managed forest"
  },
  "bank": [
   "PNC Financial Services",
@@ -681,8 +682,7 @@
   "Formlabs"
  ],
  "tree": [
-  "Weyerhaeuser",
-  "International Paper"
+  "Weyerhaeuser"
  ],
  "search": [],
  "vr": [],
@@ -1794,5 +1794,8 @@
  ],
  "northrop": [
   "Northrop Grumman"
+ ],
+ "internationalpaper": [
+  "International Paper"
  ]
 }
