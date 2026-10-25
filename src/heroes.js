@@ -1,7 +1,7 @@
 // Signature models for the biggest names: each one shows the thing that put the company where it
 // is (its moat), not just what it sells. Built with the same kit as the kinds of company, about
 // 10 units tall at the origin; each is its own kind in models.js, with a finder colour and label.
-import { THREE, V, part, windy, rand, taper, leafShape, shade, tuft, merge, place, box, cyl, lathe, tube, ball, capsule, cone, torus, extrude, prism, beam, ring, hi, TAU, clamp01, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, K } from './kit.js';
+import { THREE, V, part, windy, rand, taper, leafShape, shade, tuft, merge, place, box, cyl, lathe, tube, ball, capsule, cone, torus, extrude, prism, star, beam, ring, hi, TAU, clamp01, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, K } from './kit.js';
 import { RoundedBoxGeometry } from './RoundedBoxGeometry.js';
 
 // A box with a chosen corner radius (the kit's boxes pick a modest one themselves).
@@ -2784,6 +2784,50 @@ export const HEROES = {
     moving.push({ geo: merge(part(rbox(1.7, 0.95, 0.9, 0.08), '#f4f5f6', { p: [-0.15, 0.65, 0] }), part(rbox(0.5, 0.65, 0.88, 0.14), '#f4f5f6', { p: [0.85, 0.5, 0] }), part(box(0.04, 0.3, 0.75), '#26323f', { p: [1.1, 0.7, 0] }), part(box(1.2, 0.2, 0.02), PURP, { p: [-0.2, 0.75, 0.46] }), part(box(1.6, 0.06, 0.4), '#9aa1a9', { p: [-0.1, 1.15, 0] }), [[-0.6, 0.42], [0.7, 0.42], [-0.6, -0.42], [0.7, -0.42]].map(([x, z]) => part(new THREE.CylinderGeometry(0.18, 0.18, 0.12, 14), '#1d1f24', { p: [x, 0.18, z], r: [Math.PI / 2, 0, 0] }))),
       pivot: [0, y0, 4.3], anim: (t) => { const f = cyc(t, 12), x = f < 0.25 ? 5.6 - 5.0 * easeOut(f / 0.25) : f < 0.75 ? 0.6 : 0.6 - 6.2 * easeIn(win(f, 0.75, 1)); return { x, ry: Math.PI, s: clamp01((5.3 - Math.abs(x)) / 0.4) * 0.85 + 0.001 }; } });
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, 12), k = f < 0.3 || f > 0.7 ? 0 : Math.sin(win(f, 0.3, 0.7) * Math.PI); return { x: 0.2 - k * 1.2, z: 3.8 - k * 0.6, ry: f < 0.5 ? Math.PI * 0.85 : -Math.PI * 0.15, s: f > 0.27 && f < 0.73 ? 1 : 0.001, still: k > 0.95 }; }, { shirt: PURP, pants: '#2b3a55', y: y0 }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
+  // American Express: premium members on its own closed-loop network. Travellers relax in the
+  // Centurion Lounge while a jet climbs past the window; the metal card turns on its stand and
+  // reward points spiral up off it.
+  amex: { finder: '#006fcf', build: () => {
+    const R = rand(29), out = [], y0 = 0.24, BLUE = '#006fcf', SLATE = '#3a4050';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#9aa1a9', { p: [0, 0.12, 0] }));
+    // ---- the runway beyond the lounge
+    out.push(part(box(10.4, 0.02, 1.4), '#4a4f57', { p: [0, y0 + 0.01, -4.2] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(0.55, 0.01, 0.06), '#f4f4f0', { p: [-4.4 + i * 1.25, y0 + 0.022, -4.2] }));
+    // ---- the lounge: floor, a window wall at the back, a side wall, furniture
+    const LX = -0.8, LZ = -0.4, W = 7.0, D = 5.0;
+    out.push(part(box(W, 0.06, D), '#6b4f3a', { p: [LX, y0 + 0.03, LZ] }), part(box(W - 0.6, 0.012, D - 0.8), '#2e3a4a', { p: [LX, y0 + 0.066, LZ] }));
+    out.push(part(rbox(0.14, 2.2, D, 0.03), '#e9e4da', { p: [LX - W / 2, y0 + 1.1, LZ] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(0.06, 2.2, 0.08), SLATE, { p: [LX - W / 2 + 0.1 + i * (W - 0.2) / 7, y0 + 1.1, LZ - D / 2] }));
+    out.push(part(box(W, 0.1, 0.12), SLATE, { p: [LX, y0 + 2.2, LZ - D / 2] }), part(box(W, 0.06, 0.1), SLATE, { p: [LX, y0 + 0.1, LZ - D / 2] }));
+    out.push(part(rbox(1.6, 0.5, 0.08, 0.03), BLUE, { p: [LX - W / 2 + 0.1, y0 + 1.7, LZ + 0.6], r: [0, Math.PI / 2, 0] }), part(box(0.9, 0.14, 0.02), '#ffffff', { p: [LX - W / 2 + 0.15, y0 + 1.7, LZ + 0.6], r: [0, Math.PI / 2, 0] }));
+    // The bar along the side wall, with bottles.
+    out.push(part(rbox(0.6, 0.9, 2.4, 0.05), '#8a5a3a', { p: [LX - W / 2 + 0.75, y0 + 0.45, LZ + 0.6] }), part(rbox(0.66, 0.06, 2.46, 0.02), '#e9e4da', { p: [LX - W / 2 + 0.75, y0 + 0.92, LZ + 0.6] }));
+    if (hi()) for (let i = 0; i < 9; i++) out.push(part(lathe([[0.04, 0], [0.04, 0.16], [0.015, 0.22], [0.015, 0.28], [0, 0.28]], 10), ['#2f6b3a', '#8a3a2a', '#d4a640'][i % 3], { p: [LX - W / 2 + 0.25, y0 + 1.15, LZ - 0.4 + i * 0.25] }));
+    out.push(part(box(0.1, 0.04, 2.4), '#5a3a2a', { p: [LX - W / 2 + 0.25, y0 + 1.12, LZ + 0.6] }));
+    // Sofas and low tables facing the window.
+    const sofa = (x, z, c) => [part(rbox(1.4, 0.3, 0.6, 0.1), c, { p: [x, y0 + 0.25, z] }), part(rbox(1.4, 0.45, 0.16, 0.08), c, { p: [x, y0 + 0.45, z + 0.3] }), part(rbox(0.16, 0.35, 0.6, 0.06), c, { p: [x - 0.7, y0 + 0.35, z] }), part(rbox(0.16, 0.35, 0.6, 0.06), c, { p: [x + 0.7, y0 + 0.35, z] })];
+    out.push(sofa(LX + 0.2, LZ - 0.7, '#c49a68'), sofa(LX + 2.2, LZ - 0.7, '#5d7f95'), sofa(LX + 1.2, LZ + 1.3, '#7a8a6a'));
+    for (const [x, z] of [[LX + 0.2, LZ - 1.5], [LX + 2.2, LZ - 1.5]]) out.push(part(cyl(0.3, 0.3, 0.05, 24), '#e9e4da', { p: [x, y0 + 0.35, z] }), part(cyl(0.05, 0.06, 0.3, 8), '#3a3f47', { p: [x, y0 + 0.18, z] }), part(cyl(0.05, 0.04, 0.1, 12), '#f4f1ea', { p: [x + 0.1, y0 + 0.43, z] }));
+    // Seated travellers.
+    const sit = (x, z, c, sk) => [part(capsule(0.15, 0.25), c, { p: [x, y0 + 0.62, z] }), part(ball(0.13), sk, { p: [x, y0 + 0.98, z] }), part(ball(0.14), '#3a2a20', { p: [x, y0 + 1.02, z + 0.02], s: [1, 0.75, 1] })];
+    out.push(sit(LX - 0.1, LZ - 0.65, '#f4f5f6', '#e9b98f'), sit(LX + 2.4, LZ - 0.65, '#2b2f36', '#8d5a3b'), sit(LX + 1.0, LZ + 1.25, '#c0392b', '#c58c66'));
+    // The card's stand out front.
+    out.push(part(rbox(1.0, 0.5, 0.6, 0.06), SLATE, { p: [3.4, y0 + 0.25, 3.4] }));
+    [[-4.6, 4.6], [-2.4, 4.7], [4.7, 0.8], [0.6, 4.7]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.7 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // The metal card turning, with its blue box and chip.
+    moving.push({ geo: merge(part(rbox(1.7, 1.08, 0.05, 0.08), '#c9ced6'), part(rbox(0.5, 0.5, 0.02, 0.02), BLUE, { p: [-0.5, 0.15, 0.03] }), part(box(0.34, 0.08, 0.01), '#ffffff', { p: [-0.5, 0.15, 0.045] }), part(rbox(0.22, 0.17, 0.02, 0.02), '#d4af37', { p: [0.35, 0.1, 0.03] }), hi() ? [0, 1, 2, 3].map((i) => part(box(0.22, 0.05, 0.01), '#7b828c', { p: [-0.55 + i * 0.3, -0.3, 0.03] })) : []),
+      pivot: [3.4, y0 + 1.35, 3.4], anim: (t) => ({ ry: t * 0.7, y: Math.sin(t * 1.3) * 0.08 }) });
+    // Points spiralling up off the card.
+    for (let k = 0; k < 8; k++) moving.push({ geo: part(star(0.11, 0.04), k % 2 ? '#d4af37' : '#7cc4ff'), pivot: [3.4, y0 + 1.4, 3.4], anim: (t) => { const f = cyc(t, 3, k / 8), a = f * TAU * 1.5 + k; return { x: Math.cos(a) * (0.6 + f * 0.4), z: Math.sin(a) * (0.6 + f * 0.4), y: f * 2.2, ry: t * 3, s: Math.min(1, f / 0.1, (1 - f) / 0.2) + 0.001 }; } });
+    // A jet climbing past the window.
+    moving.push({ geo: merge(part(capsule(0.2, 1.6), '#f4f5f6', { r: [0, 0, Math.PI / 2] }), part(extrude([[0.3, 0], [-0.1, 0], [-0.5, 1.1], [-0.35, 1.12]], 0.04), '#dfe3e8', { r: [Math.PI / 2, 0, 0] }), part(extrude([[0.3, 0], [-0.1, 0], [-0.5, 1.1], [-0.35, 1.12]], 0.04), '#dfe3e8', { r: [-Math.PI / 2, 0, 0] }), part(extrude([[0, 0], [-0.3, 0], [-0.5, 0.5], [-0.3, 0.5]], 0.04), BLUE, { p: [-0.8, 0.15, 0] })),
+      pivot: [0, y0 + 0.3, -4.2], anim: (t) => { const f = cyc(t, 9), x = -5.6 + easeIn(win(f, 0, 0.6)) * 7 + easeIn(win(f, 0.6, 1)) * 5, y = easeIn(win(f, 0.4, 1)) * 2.6; return { x, y, rz: Math.min(0.2, win(f, 0.35, 0.5) * 0.2), s: clamp01((6 - x) / 0.7) * Math.min(1, f / 0.06) + 0.001 }; } });
+    // The bartender.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 6); return { x: LX - W / 2 + 0.45, z: LZ + 0.6 + Math.sin(f * TAU) * 0.8, ry: Math.cos(f * TAU) > 0 ? -Math.PI / 2 : Math.PI / 2 }; }, { shirt: '#1d1f24', pants: '#1d1f24', y: y0 + 0.06 }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 };

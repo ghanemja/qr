@@ -80,7 +80,8 @@
   "wellsfargo": "Since 1852",
   "goldman": "Ring the bell",
   "pfizer": "Made at global scale",
-  "comcast": "The wire and the story"
+  "comcast": "The wire and the story",
+  "amex": "Membership has its privileges"
  },
  "bank": [
   "Citigroup",
@@ -123,7 +124,6 @@
   "Principal Financial"
  ],
  "payments": [
-  "American Express",
   "PayPal Holdings",
   "First Data",
   "Fiserv",
@@ -1622,5 +1622,8 @@
  ],
  "comcast": [
   "Comcast"
+ ],
+ "amex": [
+  "American Express"
  ]
 }
