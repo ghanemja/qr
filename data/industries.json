@@ -90,7 +90,8 @@
   "fedex": "Overnight, anywhere",
   "oracle": "Where the records live",
   "cisco": "The internet runs through it",
-  "stripe": "Payments in a few lines"
+  "stripe": "Payments in a few lines",
+  "kroger": "Robots in the back room"
  },
  "bank": [
   "Citigroup",
@@ -306,7 +307,6 @@
   "Quanta Services"
  ],
  "retail": [
-  "Kroger",
   "Lowe's",
   "Albertsons",
   "Best Buy",
@@ -1166,7 +1166,6 @@
   ]
  },
  "_heroes": {
-  "Kroger": 3,
   "Albertsons": 3,
   "Publix Super Markets": 3,
   "SpartanNash": 3,
@@ -1652,5 +1651,8 @@
  ],
  "stripe": [
   "Stripe"
+ ],
+ "kroger": [
+  "Kroger"
  ]
 }

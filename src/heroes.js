@@ -3162,5 +3162,46 @@ export const HEROES = {
     moving.push(...walker(moving.length, () => ({ x: LX, z: LZ + 1.5, ry: Math.PI / 2, still: true, push: true }), { shirt: PURP, pants: INK, skin: '#c58c66', hair: '#1d1f24', y: y0 }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Kroger: the grocer with robots in the back room. On the fulfilment grid little robots zip along
+  // the rails and hoist totes of groceries; out front the produce is piled high; the delivery van
+  // heads off with the orders.
+  kroger: { finder: '#0f4fa8', build: () => {
+    const R = rand(81), out = [], y0 = 0.24, BLUE = '#0f4fa8';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#55595f', { p: [0, 0.12, 0] }));
+    // ---- the fulfilment grid: a frame of stacked totes with a rail grid on top
+    const GX = -1.6, GZ = -2.2, N = 6, cell = 0.55, GH = 1.8;
+    out.push(part(box(N * cell + 0.2, 0.06, N * cell + 0.2), '#9aa1a9', { p: [GX, y0 + 0.03, GZ] }));
+    for (let i = 0; i <= N; i++) for (let j = 0; j <= N; j++) out.push(part(new THREE.BoxGeometry(0.05, GH, 0.05), '#c9ced6', { p: [GX - N * cell / 2 + i * cell, y0 + GH / 2, GZ - N * cell / 2 + j * cell] }));
+    for (let i = 0; i <= N; i++) { out.push(part(new THREE.BoxGeometry(N * cell, 0.06, 0.06), '#7b828c', { p: [GX, y0 + GH, GZ - N * cell / 2 + i * cell] }), part(new THREE.BoxGeometry(0.06, 0.06, N * cell), '#7b828c', { p: [GX - N * cell / 2 + i * cell, y0 + GH, GZ] })); }
+    const toteC = ['#e5533d', '#2f9e6e', '#f2c94c', '#3d7be0'];
+    if (hi()) for (let i = 0; i < N; i++) for (let k = 0; k < 3; k++) { const x = GX - N * cell / 2 + cell / 2 + i * cell, z = GZ + N * cell / 2 - cell / 2; out.push(part(rbox(0.45, 0.4, 0.45, 0.04), toteC[(i + k) % 4], { p: [x, y0 + 0.25 + k * 0.48, z] })); }
+    // ---- the store front with produce stands
+    const SX = 2.4, SZ = -2.0;
+    out.push(part(rbox(3.6, 1.6, 2.4, 0.05), '#e9e4da', { p: [SX + 0.4, y0 + 0.8, SZ - 0.8] }), part(rbox(3.66, 0.4, 0.12, 0.04), BLUE, { p: [SX + 0.4, y0 + 1.4, SZ + 0.43] }), part(box(1.6, 0.16, 0.02), '#ffffff', { p: [SX + 0.4, y0 + 1.4, SZ + 0.5] }), part(rbox(1.2, 0.9, 0.05, 0.03), '#2a3c50', { p: [SX + 0.4, y0 + 0.5, SZ + 0.41] }));
+    const pile = (x, z, c, r) => { const g = [part(rbox(0.9, 0.5, 0.6, 0.04), '#8a5a3a', { p: [x, y0 + 0.25, z] })]; for (let l = 0; l < 3; l++) for (let i = 0; i < 4 - l; i++) for (let j = 0; j < 3 - l; j++) g.push(part(ball(r), c, { p: [x - 0.3 + l * 0.08 + i * 0.18, y0 + 0.55 + l * 0.14, z - 0.18 + l * 0.08 + j * 0.18] })); return g; };
+    if (hi()) out.push(pile(1.4, 0.4, '#e5533d', 0.09), pile(2.6, 0.4, '#f29a3a', 0.09), pile(3.8, 0.4, '#8fc46a', 0.09));
+    else out.push(part(box(3.4, 0.6, 0.6), '#8a5a3a', { p: [2.6, y0 + 0.3, 0.4] }));
+    // Parking and a cart corral.
+    for (let i = 0; i < 6; i++) out.push(part(box(0.05, 0.012, 1.8), '#ffffff', { p: [-4.4 + i * 1.3, y0 + 0.006, 2.6] }));
+    out.push(place(sedan('#c0392b'), { p: [-3.75, y0, 2.6], r: [0, Math.PI / 2, 0] }), place(sedan('#f4f5f6'), { p: [-1.15, y0, 2.6], r: [0, -Math.PI / 2, 0] }), place(cartGeo(BLUE), { p: [2.0, y0, 2.4] }), place(cartGeo(BLUE), { p: [2.3, y0 + 0.05, 2.4] }));
+    [[-4.7, -4.7], [4.7, 4.7], [4.7, 1.4], [0.4, 4.7]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.65 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // Robots on the grid: each runs a little route, stops, lowers its gripper and lifts a tote.
+    const robot = merge(part(rbox(0.44, 0.34, 0.44, 0.06), '#f4f5f6'), part(box(0.46, 0.06, 0.46), BLUE, { p: [0, 0.1, 0] }), part(cyl(0.04, 0.04, 0.06, 10), '#e5533d', { p: [0.15, 0.2, 0.15] }));
+    for (let k = 0; k < 5; k++) {
+      const pts = [...Array(4)].map(() => [Math.floor(R() * N), Math.floor(R() * N)]), P = 6 + k * 0.7;
+      const pos = (t) => { const f = cyc(t, P, k / 5) * 4, i = Math.floor(f), u = f - i, a = pts[i], b = pts[(i + 1) % 4], m = easeIO(clamp01(u / 0.6)); const cx = (c) => GX - N * cell / 2 + cell / 2 + c * cell, cz = (c) => GZ - N * cell / 2 + cell / 2 + c * cell; return { x: cx(a[0] + (b[0] - a[0]) * m), z: cz(a[1] + (b[1] - a[1]) * m), lift: u > 0.6 ? Math.sin(win(u, 0.6, 1) * Math.PI) : 0 }; };
+      const bot = moving.length;
+      moving.push({ geo: robot, pivot: [0, y0 + GH + 0.2, 0], anim: (t) => { const p = pos(t); return { x: p.x, z: p.z }; } });
+      moving.push({ geo: merge(part(rbox(0.4, 0.36, 0.4, 0.04), toteC[k % 4]), part(box(0.3, 0.06, 0.3), '#8fc46a', { p: [0, 0.18, 0] })), pivot: [0, -0.2, 0], parent: bot, anim: (t) => { const p = pos(t); return { y: -p.lift * 1.3, s: p.lift > 0.02 ? 1 : 0.001 }; } });
+    }
+    // The delivery van.
+    moving.push({ geo: merge(part(rbox(1.7, 0.95, 0.9, 0.08), '#f4f5f6', { p: [-0.15, 0.65, 0] }), part(rbox(0.5, 0.65, 0.88, 0.14), '#f4f5f6', { p: [0.85, 0.5, 0] }), part(box(0.04, 0.3, 0.75), '#26323f', { p: [1.1, 0.7, 0] }), part(box(1.4, 0.3, 0.02), BLUE, { p: [-0.2, 0.75, 0.46] }), [[-0.6, 0.42], [0.7, 0.42], [-0.6, -0.42], [0.7, -0.42]].map(([x, z]) => part(new THREE.CylinderGeometry(0.18, 0.18, 0.12, 14), '#1d1f24', { p: [x, 0.18, z], r: [Math.PI / 2, 0, 0] }))),
+      pivot: [0, y0, 4.3], anim: (t) => { const f = cyc(t, 10), x = -5.6 + f * 11.2; return { x, s: clamp01((5.2 - Math.abs(x)) / 0.4) * 0.85 + 0.001 }; } });
+    // A shopper pushing a cart from the door.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 10), z = 0.9 + f * 2.2; return { x: 1.0, z, ry: -Math.PI / 2, push: true, s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: '#d6336c', pants: '#2b3a55', y: y0, carry: place(cartGeo(BLUE), { p: [0.95, 0, 0] }) }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
