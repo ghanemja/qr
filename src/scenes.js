@@ -181,6 +181,23 @@ const pylon = (h = 3.2, c = '#9aa1a9') => {
   return merge(g);
 };
 
+// A jigsaw piece 1 × 1 in the xz plane (thickness d), edges [top(-z), right(+x), bottom(+z), left(-x)]:
+// +1 a tab, -1 a blank, 0 flat.
+const jigsaw = (edges, d = 0.16) => {
+  const sh = new THREE.Shape(), r = 0.14, n = hi() ? 10 : 5;
+  const corners = [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5], [-0.5, 0.5]];
+  sh.moveTo(-0.5, -0.5);
+  for (let e = 0; e < 4; e++) {
+    const [ax, ay] = corners[e], [bx, by] = corners[(e + 1) % 4], k = edges[e], mx = (ax + bx) / 2, my = (ay + by) / 2, nx = (by - ay), ny = -(bx - ax);
+    if (k) { const dx = (bx - ax), dy = (by - ay); sh.lineTo(ax + dx * 0.36, ay + dy * 0.36); for (let i = 0; i <= n; i++) { const a = Math.PI + (i / n) * Math.PI * 1.0, cx = mx - nx * k * r * 0.9, cy = my - ny * k * r * 0.9; sh.lineTo(cx + Math.cos(a) * dx * r + Math.sin(a) * -nx * k * r * -1, cy + Math.cos(a) * dy * r + Math.sin(a) * -ny * k * r * -1); } sh.lineTo(ax + dx * 0.64, ay + dy * 0.64); }
+    sh.lineTo(bx, by);
+  }
+  const bev = 0.03;
+  return new THREE.ExtrudeGeometry(sh, { depth: d - bev * 2, bevelEnabled: true, bevelThickness: bev, bevelSize: bev, bevelSegments: hi() ? 2 : 1, curveSegments: 4 }).rotateX(Math.PI / 2).translate(0, d - bev, 0);
+};
+// A little quadcopter, its rotors on top, hanging hook below.
+const drone = (c = 'A') => merge(part(rbox(0.36, 0.12, 0.36, 0.05), c), [[-1, -1], [1, -1], [1, 1], [-1, 1]].flatMap(([sx, sz]) => [beam([0, 0, 0], [sx * 0.3, 0.04, sz * 0.3], 0.03, K.dark), part(cyl(0.14, 0.14, 0.015, 16), '#c9ced6', { p: [sx * 0.3, 0.1, sz * 0.3] })]), part(cyl(0.05, 0.05, 0.03, 10), '#62d35f', { p: [0.19, 0, 0], r: [0, 0, Math.PI / 2] }));
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -1479,5 +1496,50 @@ export const SCENES = {
     moving.push({ geo: part(torus(0.62, 0.12, TAU, 40), 'A'), pivot: [RX, y0 + 1.9, RZ], anim: (t) => ({ rx: Math.PI / 2, rz: t * 0.8, s: 1 + Math.sin(t * 3) * 0.04 }) });
     moving.push({ geo: part(torus(0.62, 0.06, TAU, 40), '#ff8fd0'), pivot: [RX, y0 + 1.9, RZ], anim: (t) => ({ rx: Math.PI / 2, rz: -t * 2, s: 1.0 + Math.sin(t * 5) * 0.06 }) });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [3.4, y0, -3.0], topAt: [3.4, y0 + 0.75, 3.8] };
+  },
+
+  // Puzzle pieces (IT services, consulting, staffing, HR software): fitting the right people and
+  // systems together. Drones lift the last pieces out of the box and set them into a giant floor
+  // jigsaw in the brand's colours; when it's whole it glints, and the cycle starts again. Around
+  // it, consultants work at their desks.
+  'software:6': () => {
+    const R = rand(2001), out = [], moving = [];
+    out.push(slab('#d9dde2'));
+    // ---- the board and its frame
+    const N = 4, S = 1.25, BX = 1.0, BZ = 0.8, x0 = BX - (N * S) / 2 + S / 2, z0 = BZ - (N * S) / 2 + S / 2;
+    out.push(part(rbox(N * S + 0.5, 0.12, N * S + 0.5, 0.05), 'Ad', { p: [BX, y0 + 0.06, BZ] }), part(box(N * S + 0.1, 0.02, N * S + 0.1), '#3a3f47', { p: [BX, y0 + 0.12, BZ] }));
+    // Edges match: a piece's right/bottom edges are tabs when (i + j) is even, blanks when odd.
+    const edge = (i, j) => { const e = (i + j) % 2 ? -1 : 1; return [j === 0 ? 0 : -((i + j - 1) % 2 ? -1 : 1), i === N - 1 ? 0 : e, j === N - 1 ? 0 : e, i === 0 ? 0 : -((i - 1 + j) % 2 ? -1 : 1)]; };
+    // The picture: a sunrise over hills, in brand and neutral tones, by piece.
+    const colour = (i, j) => (j === 0 ? '#f2c94c' : j === 1 ? (i === 1 || i === 2 ? K.orange : '#f6d77a') : j === 2 ? ((i + j) % 2 ? 'A' : 'Ad') : (i % 2 ? 'B' : 'Bd'));
+    const missing = [[1, 1], [3, 2], [0, 3], [2, 0]];
+    for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) if (!missing.some(([a, b]) => a === i && b === j)) out.push(part(jigsaw(edge(i, j)), colour(i, j), { p: [x0 + i * S, y0 + 0.12, z0 + j * S], s: [S, 1, S] }));
+    // ---- the puzzle box at the back left, lid leaning
+    const KX = -3.2, KZ = -2.6;
+    out.push(part(rbox(1.8, 0.5, 1.4, 0.05), K.white, { p: [KX, y0 + 0.25, KZ] }), part(box(1.82, 0.12, 1.42), 'A', { p: [KX, y0 + 0.4, KZ] }), part(rbox(1.9, 0.1, 1.5, 0.04), 'A', { p: [KX - 1.15, y0 + 0.75, KZ], r: [0, 0, 1.2] }));
+    for (let i = 0; i < 4; i++) out.push(part(jigsaw([0, 1, -1, 0]), ['#f2c94c', 'A', 'B', K.orange][i], { p: [KX - 0.4 + (i % 2) * 0.6, y0 + 0.36 + Math.floor(i / 2) * 0.05, KZ - 0.3 + Math.floor(i / 2) * 0.5], r: [0, i, 0], s: 0.55 }));
+    // ---- desks with consultants around the back and left
+    const desk = (x, z, ry) => out.push(place(merge(part(rbox(1.3, 0.06, 0.7, 0.02), '#b98a5a', { p: [0, 0.72, 0] }), [[-0.6, -0.3], [0.6, -0.3], [-0.6, 0.3], [0.6, 0.3]].map(([dx, dz]) => part(box(0.05, 0.72, 0.05), K.dark, { p: [dx, 0.36, dz] })), part(rbox(0.6, 0.4, 0.04, 0.02), '#1d2a33', { p: [0, 1.0, -0.2] }), part(box(0.1, 0.2, 0.05), K.dark, { p: [0, 0.8, -0.22] }), part(rbox(0.5, 0.45, 0.5, 0.06), '#3a3f47', { p: [0, 0.45, 0.6] })), { p: [x, y0, z], r: [0, ry, 0] }));
+    [[-0.6, -4.2, 0], [1.2, -4.2, 0], [3.0, -4.2, 0], [-4.2, 0.4, Math.PI / 2], [-4.2, 2.4, Math.PI / 2]].forEach(([x, z, ry]) => desk(x, z, ry));
+    [[4.5, 4.4], [-4.5, 4.4], [4.5, -1.2]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.55), part(cyl(0.3, 0.25, 0.4, 16), '#c9ced6', { p: [x, y0 + 0.2, z] })));
+    // A tall puzzle-piece sculpture at the back right.
+    out.push(part(cyl(0.7, 0.8, 0.3, 24), K.stone, { p: [3.4, y0 + 0.15, -3.4] }));
+    moving.push({ geo: part(jigsaw([1, -1, 1, 0], 0.3).rotateX(-Math.PI / 2).translate(0, 0.5, 0), 'A', { s: [1.9, 1.9, 1] }), pivot: [3.4, y0 + 0.3, -3.4], anim: (t) => ({ ry: t * 0.4 }) });
+    // ---- moving parts (one 10 s cycle)
+    const P = 10, F = (t) => cyc(t, P);
+    missing.forEach(([i, j], k) => {
+      const t0 = 0.05 + k * 0.17, slot = new V(x0 + i * S, y0 + 0.12, z0 + j * S), from = new V(KX + (k % 2) * 0.5 - 0.25, y0 + 0.6, KZ), lift = 1.6;
+      const at = (f) => { const u = win(f, t0, t0 + 0.15), e = easeIO(u), p = from.clone().lerp(slot, e); p.y += hop(Math.min(1, u * 1.0)) * lift + (u >= 1 ? 0 : 0); return u >= 1 ? slot.clone() : p; };
+      const back = (f) => win(f, 0.9, 0.98);
+      moving.push({ geo: part(jigsaw(edge(i, j)), colour(i, j), { s: [S, 1, S] }), pivot: [0, 0, 0], anim: (t) => { const f = F(t), p = at(f), b = back(f); if (b > 0) { const q = slot.clone().lerp(from, easeIO(b)); q.y += hop(b) * lift; return { x: q.x, y: q.y, z: q.z, s: 1 - b * 0.6 }; } return { x: p.x, y: p.y + bump(f, t0 + 0.16, 0.01) * 0.1, z: p.z, s: f < t0 ? 0.001 : 1 }; } });
+      // Its drone, flying it in and back for the next.
+      moving.push({ geo: drone(k % 2 ? 'A' : 'B'), pivot: [0, 0, 0], anim: (t) => { const f = F(t), u = win(f, t0, t0 + 0.15), carry = f >= t0 && u < 1, p = carry ? at(f) : slot.clone().lerp(from, easeIO(win(f, t0 + 0.15, t0 + 0.3))); return { x: p.x, y: (carry ? p.y : y0 + 1.6) + 0.7 + Math.sin(t * 3 + k) * 0.05, z: p.z, s: (f >= t0 - 0.02 && f < t0 + 0.32) ? 1 : 0.001 }; } });
+    });
+    // When the picture is whole, it glints: sparkles across the board.
+    for (let k = 0; k < 6; k++) moving.push({ geo: part(star(0.2, 0.05), '#ffe27a'), pivot: [x0 + (k % 3) * 1.7, y0 + 0.5, z0 + Math.floor(k / 3) * 2.6 + 0.3], anim: (t) => { const f = F(t), u = cyc(t, 0.8, k / 6); return { y: u * 0.4, ry: u * 3, s: f > 0.75 && f < 0.9 ? Math.sin(u * Math.PI) : 0.001 }; } });
+    // Consultants at their desks (heads down) and one walking a laptop over.
+    [[-0.6, -3.6, Math.PI / 2], [1.2, -3.6, Math.PI / 2], [3.0, -3.6, Math.PI / 2], [-3.6, 0.4, Math.PI], [-3.6, 2.4, Math.PI]].forEach(([x, z, ry], i) => moving.push(...walker(moving.length, (t) => ({ x, z, ry: ry + Math.PI + Math.sin(t * 0.7 + i) * 0.1, still: true }), { shirt: ['A', '#3d7be0', K.white, 'B', '#8a6cf0'][i], pants: '#2b3a55', y: y0 })));
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 12), k = f < 0.5 ? easeIO(f * 2) : 1 - easeIO((f - 0.5) * 2); return { x: -2.2 + k * 0.4, z: 3.8 - k * 5.2, ry: f < 0.5 ? Math.PI / 2 : -Math.PI / 2 }; }, { shirt: K.orange, pants: '#2b3a55', y: y0, carry: part(rbox(0.36, 0.03, 0.26, 0.01), K.dark, { p: [0.3, 0.95, 0] }) }));
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-2.9, y0, -1.1], topAt: [KX, y0 + 0.5, KZ + 0.4] };
   },
 };
