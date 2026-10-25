@@ -2998,6 +2998,19 @@ export const HEROES = {
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, 12), k = easeIO(win(f, 0, 0.6)), x = 1.2 - k * 3.0, z = 2.6 - k * 3.4; return { x, z, ry: Math.atan2(3.4, -3.0), still: f > 0.6, s: f > 0.95 ? 0.001 : 1 }; }, { shirt: '#3d7be0', pants: '#2b3a55', y: y0, carry: merge(part(rbox(0.3, 0.42, 0.18, 0.05), CORAL, { p: [-0.35, 0.3, 0.25] }), part(cyl(0.015, 0.015, 0.35, 6), '#3a3f47', { p: [-0.2, 0.62, 0.25], r: [0, 0, 0.5] })) }));
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, 12); return { x: -2.2, z: -1.4, ry: -Math.PI * 0.25, still: true, push: f > 0.58 && f < 0.7 }; }, { shirt: CORAL, pants: '#5a3a2a', skin: '#c58c66', hair: '#1d1f24', y: y0 }));
     moving.push({ geo: merge(part(torus(0.05, 0.015, TAU, 12), '#d4a640'), part(box(0.14, 0.02, 0.03), '#d4a640', { p: [0.1, 0, 0] })), pivot: [-2.0, y0 + 1.25, -1.2], anim: (t) => { const f = cyc(t, 12); return f > 0.58 && f < 0.75 ? { x: win(f, 0.6, 0.7) * 0.25, z: win(f, 0.6, 0.7) * 0.15, ry: t * 4 } : { s: 0.001 }; } });
+    // Bookings rolling across the network: each home in turn gets a pin, its lights go on, then
+    // a five-star review floats up.
+    const homes = [[-3.0, y0 + 3.0, -2.6], [0.2, y0 + 2.3, -3.4], [3.4, y0 + 1.4, -3.2], [-3.8, y0 + 2.8, 1.0], [3.3, y0+ 1.4, 3.45]];
+    const pinG = merge(part(lathe([[0, 0], [0.1, 0.3], [0.18, 0.5], [0.16, 0.62], [0, 0.7]], 20), CORAL), part(ball(0.07), '#ffffff', { p: [0, 0.5, 0] }));
+    const stars = merge([0, 1, 2, 3, 4].map((i) => part(star(0.08, 0.03), '#ffb400', { p: [-0.36 + i * 0.18, 0, 0] })));
+    homes.forEach(([x, y, z], i) => {
+      moving.push({ geo: pinG, pivot: [x, y, z], anim: (t) => { const f = cyc(t, 10, -i / homes.length); return f < 0.45 ? { s: back(win(f, 0, 0.08)) * 1.4 + 0.001, y: Math.abs(Math.sin(t * 4)) * 0.12 } : { s: 0.001 }; } });
+      moving.push({ geo: stars, pivot: [x, y + 0.3, z], anim: (t) => { const f = cyc(t, 10, -i / homes.length); return f > 0.45 && f < 0.75 ? { y: win(f, 0.45, 0.75) * 0.8, ry: Math.PI / 4, s: Math.min(1, win(f, 0.45, 0.5) * 5, (0.75 - f) / 0.05) * 1.3 + 0.001 } : { s: 0.001 }; } });
+    });
+    // The giant phone showing the listing, Reserve pulsing.
+    const PX = 1.4, PZ = 0.8;
+    moving.push({ geo: merge(part(rbox(1.1, 2.0, 0.12, 0.16), '#1d1f24'), part(rbox(0.98, 1.8, 0.02, 0.12), '#ffffff', { p: [0, 0, 0.065] }), part(rbox(0.86, 0.7, 0.02, 0.06), '#7db85a', { p: [0, 0.45, 0.075] }), part(box(0.6, 0.06, 0.01), '#c9ced6', { p: [-0.1, -0.05, 0.08] }), part(box(0.4, 0.06, 0.01), '#c9ced6', { p: [-0.2, -0.2, 0.08] }), part(rbox(0.7, 0.2, 0.02, 0.08), CORAL, { p: [0, -0.62, 0.08] })),
+      pivot: [PX, y0 + 1.3, PZ], anim: (t) => ({ ry: Math.PI / 4 + Math.sin(t * 0.6) * 0.15, y: Math.sin(t * 1.1) * 0.06 }) });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // Salesforce: the system of record for how companies sell. Leads drop from the cloud into the
