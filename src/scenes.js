@@ -323,6 +323,11 @@ const fighter = (c = '#8f9aa6', trim = 'A', gear = true) => { const Y = gear ? 0
     [-1, 1].map((sz) => part(extrude([[-0.95, 0], [-1.4, 0], [-1.45, 0.5 * sz], [-1.2, 0.5 * sz]], 0.04), c, { p: [0, Y - 0.04, 0], r: [Math.PI / 2, 0, 0] })), part(cyl(0.17, 0.2, 0.25, 14), K.dark, { p: [-1.45, Y, 0], r: [0, 0, Math.PI / 2] }), part(box(0.6, 0.04, 0.56), trim, { p: [0.0, Y + 0.24, 0] }),
     gear ? [[0.7, 0], [-0.4, 0.3], [-0.4, -0.3]].flatMap(([x, z]) => [part(cyl(0.02, 0.02, Y - 0.12, 6), K.dark, { p: [x, Y / 2, z] }), part(new THREE.CylinderGeometry(0.08, 0.08, 0.06, 10), '#1d1f24', { p: [x, 0.08, z], r: [Math.PI / 2, 0, 0] })]) : []); };
 
+// A tractor-trailer facing +x on y = 0, about 4 long: brand cab, a long trailer with a side stripe.
+const semi = (cab = 'A', trailer = K.white, stripe = 'B') => merge(part(rbox(0.85, 1.0, 0.95, 0.1), cab, { p: [1.6, 0.75, 0] }), part(box(0.04, 0.34, 0.8), '#26323f', { p: [2.04, 0.95, 0] }), part(rbox(0.5, 0.3, 0.95, 0.05), cab, { p: [1.0, 0.55, 0] }),
+  part(rbox(3.0, 1.2, 1.0, 0.06), trailer, { p: [-0.6, 1.0, 0] }), part(box(2.9, 0.22, 1.02), stripe, { p: [-0.6, 0.85, 0] }), part(box(3.2, 0.1, 0.8), K.dark, { p: [-0.3, 0.35, 0] }),
+  [[-1.7, 0.42], [-1.3, 0.42], [1.0, 0.42], [1.7, 0.42], [-1.7, -0.42], [-1.3, -0.42], [1.0, -0.42], [1.7, -0.42]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.14, 14), '#1d1f24', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] })));
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -3429,5 +3434,52 @@ export const SCENES = {
     moving.push({ geo: merge(part(rbox(0.5, 0.3, 0.5, 0.06), K.orange, { p: [0, 0.15, 0] }), part(cyl(0.12, 0.12, 0.9, 12), K.orange, { p: [0, 0.75, 0] }), part(box(1.0, 0.14, 0.14), K.orange, { p: [0.35, 1.2, 0.35], r: [0, -Math.PI / 4, 0.3] }), part(cyl(0.05, 0.08, 0.3, 10), K.dark, { p: [0.75, 1.0, 0.75], r: [0.6, 0, -0.6] })), pivot: [0, y0 + 0.15, BZ - 1.0], anim: (t) => ({ x: gun(F(t)) }) });
     for (let k = 0; k < 4; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.18, 10, 8), 'A'), pivot: [0.8, 0.95, 0.8], parent: rb, anim: (t) => { const f = F(t), u = cyc(t, 0.6, k / 4); return { x: u * 0.3, z: u * 0.3, y: -u * 0.3, s: f > 0.1 && f < 0.62 ? (0.4 + u) * (1 - u) * 2.2 : 0.001 }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [3.0, y0, 1.3], topAt: [SX, y0 + 1.55, SZ] };
+  },
+
+  // Parcel with wings (truckload, brokerage, warehouse and supply companies): freight matched and
+  // moving. Over the cross-dock the winged parcel flaps; on the load board each load lights up with
+  // the truck it's matched to; a semi rolls in off the highway and backs up to its door, one pulls
+  // out, and the yard tractor shuttles a trailer between them.
+  'parcel:2': () => {
+    const R = rand(5201), out = [], moving = [];
+    out.push(slab('#bdb8aa'));
+    out.push(part(box(10.4, 0.03, 1.2), '#5b616b', { p: [0, y0 + 0.015, 4.4] }));
+    for (let i = 0; i < 9; i++) out.push(part(box(0.5, 0.012, 0.06), K.white, { p: [-4.4 + i * 1.1, y0 + 0.035, 4.4] }));
+    out.push(part(rbox(9.6, 0.03, 3.4, 0.03), '#8e9298', { p: [0.2, y0 + 0.015, 1.6] }));
+    for (let i = 0; i < 7; i++) out.push(part(box(0.06, 0.012, 2.2), '#f2c94c', { p: [-2.2 + i * 1.0, y0 + 0.04, 1.4] }));
+    // ---- the cross-dock (back): long low building, its doors facing the yard
+    const WX = 0.4, WZ = -2.4, WW = 7.2, WD = 3.0, WH = 2.0;
+    out.push(part(rbox(WW, WH, WD, 0.06), '#e9e6df', { p: [WX, y0 + WH / 2, WZ] }), part(box(WW + 0.02, 0.3, WD + 0.02), 'A', { p: [WX, y0 + WH - 0.3, WZ] }));
+    if (hi()) for (let x = WX - WW / 2 + 0.2; x < WX + WW / 2; x += 0.24) out.push(part(box(0.06, WH - 0.6, 0.04), '#d8d4ca', { p: [x, y0 + (WH - 0.6) / 2, WZ + WD / 2 + 0.02] }));
+    const doors = [-2.2, -1.2, -0.2, 0.8, 1.8, 2.8];
+    doors.forEach((x) => out.push(part(box(0.8, 1.2, 0.05), '#3a3f47', { p: [x, y0 + 0.6, WZ + WD / 2 + 0.04] }), part(rbox(0.9, 0.12, 0.5, 0.03), '#5b616b', { p: [x, y0 + 1.35, WZ + WD / 2 + 0.25] })));
+    out.push(part(rbox(1.4, 0.8, 1.0, 0.05), K.white, { p: [-3.9, y0 + 0.4, WZ + 0.2] }), part(rbox(1.2, 0.4, 0.05, 0.02), '#9fcdea', { p: [-3.9, y0 + 0.5, WZ + 0.71] }));
+    // Parked trailers at three doors.
+    [-2.2, 0.8, 2.8].forEach((x, i) => out.push(place(merge(part(rbox(1.0, 1.2, 3.0, 0.06), K.white, { p: [0, 1.0, 0] }), part(box(1.02, 0.22, 2.9), ['B', 'A', '#5b8ad0'][i], { p: [0, 0.85, 0] }), part(box(0.8, 0.1, 3.2), K.dark, { p: [0, 0.35, 0] }), [-0.42, 0.42].flatMap((dx) => [-1.1, -0.7].map((dz) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.14, 14), '#1d1f24', { p: [dx, 0.2, dz], r: [0, 0, Math.PI / 2] })))), { p: [x, y0, WZ + WD / 2 + 1.6], r: [0, Math.PI, 0] })));
+    // ---- the load board (left): rows of loads and trucks
+    const LB = new V(-4.0, 0, 1.6), q = new THREE.Quaternion().setFromAxisAngle(new V(0, 1, 0), Math.PI / 4);
+    out.push(place(merge(part(rbox(1.8, 1.4, 0.12, 0.05), K.dark, { p: [0, 2.0, 0] }), part(box(1.6, 1.2, 0.02), '#141a22', { p: [0, 2.0, 0.07] }), part(cyl(0.06, 0.06, 1.3, 8), K.steelDk, { p: [0, 0.65, 0] })), { p: [LB.x, y0, LB.z], r: [0, Math.PI / 4, 0] }));
+    const bp = (lx, ly) => new V(lx, ly, 0.1).applyQuaternion(q).add(new V(LB.x, y0, LB.z));
+    for (let r = 0; r < 4; r++) { out.push(merge(part(box(0.22, 0.18, 0.02), '#c99a62')).applyQuaternion(q).translate(...bp(-0.6, 2.45 - r * 0.3).toArray())); out.push(merge(part(box(0.3, 0.16, 0.02), '#9aa1a9')).applyQuaternion(q).translate(...bp(0.55, 2.45 - r * 0.3).toArray())); }
+    [[4.6, 3.0], [-4.6, -0.4], [4.6, -0.4]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.5 + R() * 0.15)));
+    // ---- moving parts (one 12 s cycle)
+    const P = 12, F = (t) => cyc(t, P);
+    // The winged parcel over the roof.
+    const wp = moving.length;
+    moving.push({ geo: parcel(0.9), pivot: [WX - 0.6, y0 + WH + 2.0, WZ], anim: (t) => ({ y: Math.sin(t * 2) * 0.18, ry: 0.5 + Math.sin(t * 0.6) * 0.3 }) });
+    [-1, 1].forEach((s2) => moving.push({ geo: merge(Array.from({ length: 5 }, (_, i) => part(rbox(0.26, 0.05, 1.5 - i * 0.2, 0.03), i < 2 ? 'A' : '#f4f1e4', { p: [0.4 - i * 0.22, 0, s2 * (0.75 - i * 0.1)], r: [0, s2 * (0.12 - i * 0.07), 0] }))), pivot: [0, 0.25, s2 * 0.46], parent: wp, anim: (t) => ({ rx: -s2 * (0.25 + Math.sin(t * 9) * 0.45) }) }));
+    // The load board: each load lights green with its truck, a line between them.
+    for (let r = 0; r < 4; r++) { const a = bp(-0.45, 2.45 - r * 0.3), b = bp(0.36, 2.45 - r * 0.3), d = b.clone().sub(a); moving.push({ geo: merge(part(box(1, 0.04, 0.02), '#46d36b', { p: [0.5, 0, 0] })).applyQuaternion(q), pivot: a.toArray(), anim: (t) => { const f = F(t), k = win(f, 0.1 + r * 0.18, 0.16 + r * 0.18) * (1 - win(f, 0.92, 0.97)); return { sx: k * d.length() + 0.001 }; } }); moving.push({ geo: merge(part(box(0.32, 0.2, 0.02), '#46d36b')).applyQuaternion(q), pivot: bp(0.55, 2.45 - r * 0.3).add(new V(0, 0, 0)).toArray(), anim: (t) => { const f = F(t); return { s: f > 0.16 + r * 0.18 && f < 0.92 ? 1 : 0.001 }; } }); }
+    // An arriving semi: in off the highway, swings round, backs up to its door.
+    const inPath = curve([[6.0, 0, 4.2], [3.0, 0, 4.2], [0.6, 0, 3.6], [-0.6, 0, 2.2], [-0.2, 0, 0.9]]);
+    moving.push({ geo: semi('A', K.white, 'B'), pivot: [0, y0, 0], anim: (t) => { const f = F(t), u = f < 0.4 ? easeOut(win(f, 0, 0.4)) * 0.75 : f < 0.6 ? 0.75 + easeIO(win(f, 0.4, 0.6)) * 0.249 : 0.999, { p, ry } = along(inPath, u); const back = f > 0.4; return { x: p.x, z: p.z, ry: back ? along(inPath, 0.999).ry + Math.PI * 0 : ry, s: f > 0.94 ? Math.max(0.001, 1 - win(f, 0.94, 0.99)) : Math.min(1, f / 0.03) * 0.999 + 0.001 }; } });
+    // A departing semi: pulls away from its door and out onto the highway westward.
+    const outPath = curve([[1.8, 0, 0.6], [1.6, 0, 2.4], [0.0, 0, 4.0], [-3.0, 0, 4.5], [-6.0, 0, 4.5]]);
+    moving.push({ geo: semi('Ad', K.white, 'A'), pivot: [0, y0, 0], anim: (t) => { const f = cyc(t, P, 0.5), u = easeIn(win(f, 0.1, 0.6)), { p, ry } = along(outPath, Math.min(0.999, u)); return { x: p.x, z: p.z, ry, s: f > 0.6 ? 0.001 : f < 0.1 ? Math.max(0.001, f / 0.1) : clamp01((5.0 - Math.abs(p.x)) / 0.6) * 0.999 + 0.001 }; } });
+    // The yard tractor shuttles back and forth.
+    moving.push({ geo: merge(part(rbox(0.8, 0.7, 0.8, 0.08), K.orange, { p: [0.2, 0.6, 0] }), part(box(1.3, 0.12, 0.7), K.dark, { p: [0, 0.3, 0] }), [[-0.4, 0.38], [0.45, 0.38], [-0.4, -0.38], [0.45, -0.38]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.12, 12), '#1d1f24', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] }))), pivot: [0, y0, 2.6], anim: (t) => { const k = Math.sin(t * 0.5); return { x: 2.4 + k * 1.4, ry: Math.cos(t * 0.5) > 0 ? 0 : Math.PI }; } });
+    // A forklift at the open door.
+    moving.push({ geo: merge(part(rbox(0.5, 0.4, 0.4, 0.05), '#f2c94c', { p: [0, 0.35, 0] }), part(box(0.05, 0.8, 0.3), K.dark, { p: [0.3, 0.6, 0] }), place(parcel(0.3), { p: [0.5, 0.45, 0] })), pivot: [-1.2, y0, WZ + WD / 2 + 0.5], anim: (t) => { const k = Math.sin(t * 0.9); return { z: k * 0.5, ry: -Math.PI / 2 }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-2.0, y0, 3.0], topAt: [WX + 2.6, y0 + WH, WZ] };
   },
 };
