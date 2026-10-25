@@ -1318,5 +1318,70 @@ export const HEROES = {
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, 16), a = Math.PI * (0.75 - f), r = RR + 0.75; return { x: Math.cos(a) * r, z: Math.sin(a) * r, ry: Math.atan2(Math.cos(a), Math.sin(a)), s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: OPT, pants: '#2b3a55', y: y0 }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // CVS Health: a pharmacy within reach of nearly everyone, joined to its own insurer and benefits
+  // manager. Cars collect prescriptions at the drive-thru, a delivery van heads out, the heart
+  // beats on the sign, and the famously long receipt unspools right across the lot.
+  cvs: { finder: '#cc0000', build: () => {
+    const R = rand(23), out = [], y0 = 0.24, RED = '#cc0000';
+    const heart = () => { const s = new THREE.Shape(); s.moveTo(0, -0.5); s.bezierCurveTo(-0.15, -0.32, -0.55, -0.1, -0.5, 0.18); s.bezierCurveTo(-0.45, 0.48, -0.08, 0.5, 0, 0.25); s.bezierCurveTo(0.08, 0.5, 0.45, 0.48, 0.5, 0.18); s.bezierCurveTo(0.55, -0.1, 0.15, -0.32, 0, -0.5); return new THREE.ExtrudeGeometry(s, { depth: 0.06, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03, bevelSegments: hi() ? 3 : 1, curveSegments: hi() ? 16 : 5 }).translate(0, 0, -0.03); };
+    // Block letters C, V, S from short bars, about 0.5 tall.
+    const bar = (x, y, w, h, a = 0) => part(box(w, h, 0.05), '#ffffff', { p: [x, y, 0], r: [0, 0, a] });
+    const letters = () => merge(bar(-0.75, 0, 0.09, 0.5), bar(-0.62, 0.21, 0.3, 0.09), bar(-0.62, -0.21, 0.3, 0.09),
+      bar(-0.14, 0, 0.09, 0.54, 0.32), bar(0.14, 0, 0.09, 0.54, -0.32),
+      bar(0.62, 0.21, 0.3, 0.09), bar(0.5, 0.11, 0.09, 0.2), bar(0.62, 0, 0.3, 0.09), bar(0.74, -0.11, 0.09, 0.2), bar(0.62, -0.21, 0.3, 0.09));
+    // ---- the lot
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#50555d', { p: [0, 0.12, 0] }));
+    out.push(part(rbox(10.2, 0.08, 1.0, 0.03), '#c9c4b8', { p: [0, y0 + 0.04, -4.75] }), part(rbox(1.0, 0.08, 8.4, 0.03), '#c9c4b8', { p: [-4.75, y0 + 0.04, -0.5] }));
+    for (let i = 0; i < 4; i++) out.push(part(box(0.05, 0.012, 1.8), '#eceae4', { p: [-4.1 + i * 1.3, y0 + 0.006, 2.3] }));
+    out.push(part(box(2.0, 0.012, 0.05), '#eceae4', { p: [-3.2, y0 + 0.006, 3.2] }));
+    for (let i = 0; i < 5; i++) out.push(part(box(0.05, 0.012, 0.6), '#f2c94c', { p: [4.2, y0 + 0.006, 3.8 - i * 1.6] }));
+    [[-4.75, -3.9], [-4.75, -1.6], [-4.75, 0.8], [-2.5, -4.75], [1.8, -4.75], [4.3, -4.75]].forEach(([x, z]) => out.push(miniTree(R, x, y0 + 0.08, z, 0.75 + R() * 0.2)));
+    out.push(lampPost(-4.4, y0, 3.9, -Math.PI / 4), lampPost(4.6, y0, 4.3, -Math.PI * 0.75));
+    out.push(place(sedan('#c0392b'), { p: [-3.45, y0, 2.2], r: [0, Math.PI / 2, 0] }), place(sedan('#7a8a6a'), { p: [-2.15, y0, 2.2], r: [0, Math.PI / 2, 0] }));
+    // ---- the store
+    const SX = -0.3, SZ = -2.2, W = 5.6, D = 3.0, H = 1.7;
+    out.push(part(rbox(W + 0.4, 0.1, D + 0.5, 0.03), '#d6d0c4', { p: [SX, y0 + 0.05, SZ + 0.15] }));
+    out.push(part(rbox(W, H, D, 0.05), '#efe9dd', { p: [SX, y0 + H / 2, SZ] }), part(rbox(W + 0.06, 0.12, D + 0.06, 0.03), '#d9d2c4', { p: [SX, y0 + H, SZ] }));
+    out.push(part(rbox(W + 0.08, 0.42, 0.14, 0.04), RED, { p: [SX, y0 + H - 0.3, SZ + D / 2 + 0.04] }));
+    for (const x of [-2.1, -1.2, 1.0, 1.9]) out.push(part(rbox(0.8, 0.85, 0.05, 0.03), '#2a3c50', { p: [SX + x, y0 + 0.62, SZ + D / 2 + 0.01] }));
+    out.push(part(rbox(1.0, 1.05, 0.05, 0.03), '#3a5068', { p: [SX - 0.1, y0 + 0.55, SZ + D / 2 + 0.01] }), part(box(0.03, 1.0, 0.06), '#c9ced6', { p: [SX - 0.1, y0 + 0.55, SZ + D / 2 + 0.02] }));
+    out.push(place(letters(), { p: [SX + 0.65, y0 + H - 0.3, SZ + D / 2 + 0.12], s: 0.55 }));
+    // The rooftop sign that carries the heart, and the roof units.
+    out.push(part(rbox(1.3, 1.1, 0.16, 0.06), RED, { p: [SX - 1.6, y0 + H + 0.6, SZ + D / 2 - 0.3] }), part(box(0.08, 0.3, 0.08), '#5b616b', { p: [SX - 1.6, y0 + H + 0.1, SZ + D / 2 - 0.3] }));
+    if (hi()) [[0.8, -0.4], [1.8, -0.9], [-0.2, -1.0]].forEach(([x, z]) => out.push(part(rbox(0.7, 0.35, 0.55, 0.05), '#b9bec6', { p: [SX + x, y0 + H + 0.2, SZ + z] }), part(cyl(0.18, 0.18, 0.04, 20), '#7b828c', { p: [SX + x, y0 + H + 0.39, SZ + z] })));
+    // MinuteClinic on the left wall.
+    out.push(part(rbox(0.06, 0.9, 1.0, 0.03), '#2a3c50', { p: [SX - W / 2 - 0.01, y0 + 0.55, SZ + 0.6] }), part(rbox(0.1, 0.3, 1.3, 0.04), '#0b6e99', { p: [SX - W / 2 - 0.04, y0 + 1.25, SZ + 0.6] }), part(rbox(0.12, 0.18, 0.06, 0.02), '#ffffff', { p: [SX - W / 2 - 0.08, y0 + 1.25, SZ + 0.6] }), part(rbox(0.12, 0.06, 0.18, 0.02), '#ffffff', { p: [SX - W / 2 - 0.08, y0 + 1.25, SZ + 0.6] }));
+    // The drive-thru: a canopy over the lane with the pharmacy window.
+    const DX = SX + W / 2;
+    out.push(part(rbox(0.06, 0.55, 0.7, 0.03), '#9cc4dd', { p: [DX + 0.01, y0 + 0.95, SZ + 0.3] }), part(rbox(1.7, 0.14, 1.6, 0.04), RED, { p: [DX + 0.8, y0 + 1.9, SZ + 0.3] }));
+    for (const z of [-0.45, 1.05]) out.push(part(cyl(0.06, 0.06, 1.85, 12), '#c9ced6', { p: [DX + 1.5, y0 + 0.93, SZ + z] }));
+    out.push(part(rbox(0.5, 0.14, 0.4, 0.04), '#c9ced6', { p: [DX + 0.25, y0 + 0.9, SZ + 0.3] }));
+    // ---- moving parts
+    const moving = [];
+    moving.push({ geo: part(heart(), '#ffffff', { s: 0.7 }), pivot: [SX - 1.6, y0 + H + 0.62, SZ + D / 2 - 0.2], anim: (t) => { const f = (t * 1.1) % 1; return { s: 1 + bump(f, 0.1, 0.05) * 0.18 + bump(f, 0.3, 0.05) * 0.12 }; } });
+    // Cars stop at the drive-thru window, collect a bag, and drive on.
+    for (let k = 0; k < 1; k++) moving.push({ geo: sedan(k ? '#3d6ea8' : '#3d6ea8'), pivot: [DX + 0.8, y0, 0], anim: (t) => {
+      const f = cyc(t, 10, k * 0.5), z = f < 0.35 ? 5.4 - (5.4 - SZ - 0.3) * easeOut(f / 0.35) : f < 0.6 ? SZ + 0.3 : SZ + 0.3 - 3.4 * easeIn(win(f, 0.6, 0.85));
+      return { z, ry: Math.PI / 2, s: clamp01(Math.min(5.2 - z, z + 4.9) / 0.5) + 0.001 };
+    } });
+    moving.push({ geo: merge(part(rbox(0.22, 0.28, 0.14, 0.03), '#ffffff'), part(box(0.23, 0.08, 0.15), RED, { p: [0, 0.03, 0] })), pivot: [DX + 0.1, y0 + 1.0, SZ + 0.3], anim: (t) => {
+      const f = cyc(t, 10); return f > 0.38 && f < 0.58 ? { x: easeOut(win(f, 0.38, 0.48)) * 0.4 } : { s: 0.001 };
+    } });
+    // The delivery van heads out along the back.
+    moving.push({ geo: merge(part(rbox(1.5, 0.85, 0.85, 0.08), '#ffffff', { p: [-0.2, 0.62, 0] }), part(rbox(0.55, 0.6, 0.82, 0.12), '#ffffff', { p: [0.75, 0.5, 0] }), part(box(0.04, 0.3, 0.7), '#26323f', { p: [1.02, 0.68, 0] }), part(box(1.52, 0.1, 0.87), RED, { p: [-0.2, 0.42, 0] }),
+      part(heart(), RED, { p: [-0.2, 0.75, 0.44], s: 0.35 }), [[-0.6, 0.4], [0.6, 0.4], [-0.6, -0.4], [0.6, -0.4]].map(([x, z]) => part(new THREE.CylinderGeometry(0.18, 0.18, 0.12, 16), '#1d1f24', { p: [x, 0.18, z], r: [Math.PI / 2, 0, 0] }))),
+      pivot: [0, y0, 3.9], anim: (t) => { const f = cyc(t, 13, 0.3), x = -5.6 + f * 11.2; return { x, s: clamp01((5.2 - Math.abs(x)) / 0.5) + 0.001 }; } });
+    // The receipt: it unspools from the door, meanders across the lot, then is torn off.
+    const path = curve([[SX - 0.1, y0 + 0.9, SZ + D / 2 + 0.1], [SX - 0.1, y0 + 0.3, SZ + D / 2 + 0.6], [0.6, y0 + 0.03, 0.4], [1.8, y0 + 0.03, 0.2], [2.0, y0 + 0.03, 1.4], [0.6, y0 + 0.03, 1.6], [-0.4, y0 + 0.03, 2.4], [0.3, y0 + 0.03, 3.2], [1.9, y0 + 0.03, 2.9], [2.6, y0 + 0.03, 3.6], [1.2, y0 + 0.03, 4.4], [-0.6, y0 + 0.03, 4.0]]);
+    const N = hi() ? 70 : 24, L = path.getLength() / N;
+    for (let i = 0; i < N; i++) {
+      const u = (i + 0.5) / N, p = path.getPointAt(u), d = path.getTangentAt(u), q = new THREE.Quaternion().setFromUnitVectors(new V(1, 0, 0), d);
+      const geo = merge(part(box(L * 1.04, 0.012, 0.3), '#fbfaf5'), hi() && i % 2 ? [part(box(L * 0.8, 0.014, 0.025), '#b9b4aa', { p: [0, 0, -0.07] }), part(box(L * 0.5, 0.014, 0.025), '#b9b4aa', { p: [-L * 0.1, 0, 0.04] })] : []);
+      moving.push({ geo, pivot: p.toArray(), anim: (t) => { const f = cyc(t, 12), show = f < 0.7 ? f / 0.62 >= i / N : f < 0.8; return show ? { q, s: f > 0.72 ? 1 - win(f, 0.72, 0.8) * 0.999 : 1 } : { s: 0.001 }; } });
+    }
+    // A shopper heads out of the door with a bag.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 12), z = SZ + D / 2 + 0.4 + f * 3.0; return { x: SX - 0.9, z, ry: -Math.PI / 2, s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: '#3d7be0', pants: '#2b3a55', y: y0, carry: part(rbox(0.22, 0.3, 0.14, 0.03), '#ffffff', { p: [0.05, 0.75, 0.3] }) }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

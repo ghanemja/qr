@@ -50,7 +50,8 @@
   "mcdonalds": "Billions served",
   "spacex": "Land and fly again",
   "jpmorgan": "The fortress",
-  "unitedhealth": "Coverage and care"
+  "unitedhealth": "Coverage and care",
+  "cvs": "The pharmacy next door"
  },
  "bank": [
   "Bank of America",
@@ -163,7 +164,6 @@
   "Markel"
  ],
  "health": [
-  "CVS Health",
   "McKesson",
   "AmerisourceBergen",
   "Cardinal Health",
@@ -1241,7 +1241,6 @@
   "IQVIA Holdings": 7,
   "PathAI": 7,
   "Truveta": 7,
-  "CVS Health": 8,
   "Walgreens Boots Alliance": 8,
   "Rite Aid": 8,
   "McKesson": 9,
@@ -1545,5 +1544,8 @@
  ],
  "unitedhealth": [
   "UnitedHealth Group"
+ ],
+ "cvs": [
+  "CVS Health"
  ]
 }
