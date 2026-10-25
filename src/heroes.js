@@ -2538,5 +2538,42 @@ export const HEROES = {
     [['#f4f5f6', 7, 0], ['#c0392b', 9, 0.4], ['#3d6ea8', 8, 0.7]].forEach(([c, Pc, o], i) => moving.push({ geo: sedan(c), pivot: [0, y0, 0], anim: (t) => { const f = cyc(t, Pc, o), along2 = i === 0 ? { x: -2.6 + 0.3, z: -5.4 + f * 10.8, ry: -Math.PI / 2 } : i === 1 ? { x: 5.4 - f * 10.8, z: -2.6 - 0.3, ry: Math.PI } : { x: 4.4 - 0.3, z: 5.4 - f * 10.8, ry: Math.PI / 2 }; const e = Math.max(Math.abs(along2.x), Math.abs(along2.z)); return { ...along2, s: clamp01((5.1 - e) / 0.4) * 0.8 + 0.001 }; } }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Mastercard: the network every stall in the market can take. Shoppers tap cards and phones at
+  // the stalls, contactless waves ripple out, each payment runs into the interlocking circles at
+  // the centre of the square and back as an approval.
+  mastercard: { finder: '#eb001b', build: () => {
+    const R = rand(41), out = [], y0 = 0.24, RED = '#eb001b', YEL = '#f79e1b', ORG = '#ff5f00';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#d9cdb8', { p: [0, 0.12, 0] }));
+    if (hi()) for (let i = 0; i < 26; i++) for (let j = 0; j < 26; j++) if ((i + j) % 2) out.push(part(box(0.38, 0.006, 0.38), '#cfc2aa', { p: [-5 + i * 0.4 + 0.2, y0 + 0.003, -5 + j * 0.4 + 0.2] }));
+    // ---- the centrepiece: two great rings, the overlap glowing orange
+    out.push(part(lathe([[0, 0], [1.3, 0], [1.2, 0.3], [0.9, 0.35], [0, 0.35]], 48), '#c9c2b4', { p: [0, y0, 0] }));
+    // ---- stalls round the square, each with a striped awning and a terminal
+    const stalls = [[-3.4, -3.2, 0.6], [0.0, -3.9, 0], [3.4, -3.2, -0.6], [-3.9, 0.4, 1.57], [3.9, 0.4, -1.57], [-3.0, 3.6, 2.4], [3.0, 3.6, -2.4]];
+    const goods = ['#e5533d', '#f2c94c', '#2f9e6e', '#8a6cf0', '#3d7be0', '#d6336c', '#f29a3a'];
+    stalls.forEach(([x, z, a], i) => {
+      const c = Math.cos(a), s = Math.sin(a), L = (u, w, h) => [x + u * c + w * s, y0 + h, z - u * s + w * c];
+      out.push(part(rbox(1.5, 0.7, 0.7, 0.04), '#8a5a3a', { p: L(0, 0, 0.35), r: [0, a, 0] }), part(rbox(1.56, 0.06, 0.76, 0.02), '#c49a68', { p: L(0, 0, 0.72), r: [0, a, 0] }));
+      for (const u of [-0.7, 0.7]) out.push(part(cyl(0.03, 0.03, 1.5, 8), '#5a3a2a', { p: L(u, -0.35, 0.75) }));
+      out.push(part(box(1.7, 0.05, 1.0), (px, py, pz) => (Math.floor(((px - x) * c - (pz - z) * s + 2) * 4) % 2 ? goods[i] : '#f4f1ea'), { p: L(0, 0.0, 1.5), r: [0.25, a, 0] }));
+      if (hi()) for (let k = 0; k < 5; k++) out.push(part(ball(0.09), goods[(i + k) % goods.length], { p: L(-0.55 + k * 0.27, 0.05, 0.82) }));
+      out.push(part(rbox(0.12, 0.18, 0.06, 0.02), '#2b2f36', { p: L(0.5, 0.4, 0.84), r: [0, a, 0] }), part(box(0.08, 0.05, 0.01), '#7cf0ff', { p: L(0.5, 0.44, 0.88), r: [0, a, 0] }));
+    });
+    [[-4.6, -1.8], [4.6, -1.8], [-1.6, 4.6], [1.6, 4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.7 + R() * 0.2)));
+    out.push(lampPost(-1.8, y0, -1.8, Math.PI / 4));
+    // ---- moving parts
+    const moving = [];
+    const ringGeo = (c) => part(new THREE.TorusGeometry(0.75, 0.16, hi() ? 16 : 6, hi() ? 64 : 20), c);
+    moving.push({ geo: merge(place(ringGeo(RED), { p: [-0.45, 0, 0] }), place(ringGeo(YEL), { p: [0.45, 0, 0] }), part(new THREE.TorusGeometry(0.3, 0.1, hi() ? 12 : 5, 24, Math.PI * 0.7), ORG, { p: [0, 0, 0.05], r: [0, 0, Math.PI * 0.65] })), pivot: [0, y0 + 1.75, 0], anim: (t) => ({ ry: Math.PI / 4 + Math.sin(t * 0.5) * 0.6, y: Math.sin(t * 1.2) * 0.08, s: 1.4 }) });
+    // Shoppers at each stall tap; a contactless ripple, a payment to the centre and back.
+    stalls.forEach(([x, z, a], i) => {
+      const c = Math.cos(a), s = Math.sin(a), L = (u, w, h) => [x + u * c + w * s, y0 + h, z - u * s + w * c], T = L(0.5, 0.4, 0.62), S = L(0.3, 1.0, 0);
+      moving.push(...walker(moving.length, () => ({ x: S[0], z: S[2], ry: a + Math.PI / 2, still: true, push: true }), { shirt: goods[(i + 3) % goods.length], pants: '#2b3a55', skin: ['#e9b98f', '#c58c66', '#8d5a3b'][i % 3], hair: ['#3a2a20', '#1d1f24', '#d9b26b'][i % 3], y: y0 }));
+      moving.push({ geo: part(new THREE.TorusGeometry(0.15, 0.015, 4, 24, Math.PI * 0.6), '#7cf0ff'), pivot: T, anim: (t) => { const f = cyc(t, 4, i / 7); return f < 0.25 ? { ry: a, rz: -Math.PI * 0.3, s: 0.5 + f * 4 } : { s: 0.001 }; } });
+      const path = curve([T, [(T[0]) / 2, y0 + 2.6, (T[2]) / 2], [0, y0 + 1.6, 0]]);
+      moving.push({ geo: part(ball(0.07), YEL), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 4, i / 7); if (f < 0.15 || f > 0.75) return { s: 0.001 }; const u = f < 0.45 ? win(f, 0.15, 0.45) : 1 - win(f, 0.45, 0.75), p = path.getPointAt(u); return { x: p.x, y: p.y, z: p.z, s: f < 0.45 ? 1 : 1.2 }; } });
+      moving.push({ geo: merge(part(rbox(0.06, 0.18, 0.06, 0.02), '#2fbf5b', { p: [-0.06, 0.03, 0], r: [0, 0, 0.7] }), part(rbox(0.06, 0.32, 0.06, 0.02), '#2fbf5b', { p: [0.06, 0.1, 0], r: [0, 0, -0.6] })), pivot: [T[0], T[1] + 0.5, T[2]], anim: (t) => { const f = cyc(t, 4, i / 7); return f > 0.75 && f < 0.98 ? { s: back(win(f, 0.75, 0.82)) + 0.001, ry: Math.PI / 4 } : { s: 0.001 }; } });
+    });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

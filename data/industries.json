@@ -74,7 +74,8 @@
   "intel": "Designed and made in-house",
   "delta": "The hub that runs on time",
   "nike": "Just do it",
-  "uber": "Rides in minutes"
+  "uber": "Rides in minutes",
+  "mastercard": "Accepted everywhere"
  },
  "bank": [
   "Wells Fargo",
@@ -120,7 +121,6 @@
  ],
  "payments": [
   "American Express",
-  "Mastercard",
   "PayPal Holdings",
   "First Data",
   "Fiserv",
@@ -1607,5 +1607,8 @@
  ],
  "uber": [
   "Uber Technologies"
+ ],
+ "mastercard": [
+  "Mastercard"
  ]
 }
