@@ -301,6 +301,20 @@ const jet = (tail = 'A', body = '#f4f5f6', gear = true) => { const Y = 0.62, win
     [-0.75, 0.75].map((z) => part(cyl(0.13, 0.11, 0.55, 16), '#c9ced6', { p: [0.1, Y - 0.28, z], r: [0, 0, Math.PI / 2] })), [-0.75, 0.75].map((z) => part(cyl(0.09, 0.09, 0.02, 14), K.dark, { p: [0.38, Y - 0.28, z], r: [0, 0, Math.PI / 2] })),
     gear ? [[1.0, 0], [-0.15, 0.25], [-0.15, -0.25]].flatMap(([x, z]) => [part(cyl(0.025, 0.025, Y - 0.3, 6), K.dark, { p: [x, (Y - 0.3) / 2 + 0.08, z] }), part(new THREE.CylinderGeometry(0.09, 0.09, 0.08, 12), '#1d1f24', { p: [x, 0.09, z], r: [Math.PI / 2, 0, 0] })]) : []); };
 
+// An app block: a rounded tile w × h × w on y = 0 with its icon on the +z and +x faces
+// (kind 0 doc lines, 1 checklist, 2 chart, 3 image).
+const appBlock = (kind, c = 'A', w = 1.0, h = 0.6) => { const g = [part(rbox(w, h, w, 0.1), c, { p: [0, h / 2, 0] })];
+  const face = (q) => { const f = []; const ic = K.white;
+    if (kind === 0) [0.18, 0.06, -0.06].forEach((y, i) => f.push(part(box(w * (i === 2 ? 0.4 : 0.6), 0.06, 0.02), ic, { p: [-w * (i === 2 ? 0.1 : 0), h / 2 + y, 0] })));
+    if (kind === 1) [0.14, -0.04].forEach((y) => f.push(part(box(0.1, 0.1, 0.02), ic, { p: [-w * 0.25, h / 2 + y, 0] }), part(box(w * 0.4, 0.05, 0.02), ic, { p: [w * 0.08, h / 2 + y, 0] })));
+    if (kind === 2) [0.12, 0.24, 0.18, 0.3].forEach((bh, i) => f.push(part(box(0.1, bh, 0.02), ic, { p: [-w * 0.24 + i * 0.16, h / 2 - 0.14 + bh / 2, 0] })));
+    if (kind === 3) f.push(part(box(w * 0.6, h * 0.55, 0.02), ic, { p: [0, h / 2, 0] }), part(prism(0.3, 0.18, 0.03), c, { p: [-0.05, h / 2 - 0.14, 0.01] }), part(new THREE.CylinderGeometry(0.05, 0.05, 0.03, 10), c, { p: [0.15, h / 2 + 0.08, 0.01], r: [Math.PI / 2, 0, 0] }));
+    return merge(f).applyQuaternion(q); };
+  const n = merge(face(new THREE.Quaternion())).translate(0, 0, w / 2 + 0.005), e = merge(face(new THREE.Quaternion().setFromAxisAngle(new V(0, 1, 0), Math.PI / 2))).translate(w / 2 + 0.005, 0, 0);
+  return merge(g, n, e); };
+// A little red bug drone (a threat), facing +x.
+const bugGeo = () => merge(part(new THREE.SphereGeometry(0.22, 14, 10), '#d93a2b', { s: [1.2, 0.8, 1] }), part(new THREE.SphereGeometry(0.12, 12, 8), '#2b2f36', { p: [0.24, 0.02, 0] }), [-1, 1].flatMap((s) => [beam([0, 0, s * 0.15], [0.05, -0.18, s * 0.35], 0.03, '#2b2f36'), beam([-0.12, 0, s * 0.15], [-0.15, -0.18, s * 0.35], 0.03, '#2b2f36'), part(new THREE.SphereGeometry(0.03, 6, 4), K.yellow, { p: [0.32, 0.1, s * 0.06] })]));
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -2569,5 +2583,53 @@ export const SCENES = {
     moving.push({ geo: merge(cardGeo('A').scale(0.6, 0.6, 0.6)), pivot: [TX, y0 + 1.4, TZ + 1.2], anim: (t) => { const f = F(t); return { y: easeOut(win(f, 0.97, 1)) * 0.3, ry: Math.PI / 4, s: life(f, 0.96, 0.98, 0.995, 1) + life(f, 0, 0.0001, 0.02, 0.04) }; } });
     moving.push({ geo: part(rbox(0.36, 0.34, 0.06, 0.02), '#ffe066'), pivot: [TX + 0.48, y0 + 0.55 + 3 * 0.6, TZ + 0.62], anim: (t) => { const f = F(t); return { s: f > 0.98 || f < 0.3 ? 1 : 0.001 }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.3, y0, 4.0], topAt: [HX, y0 + 0.96, HZ] };
+  },
+
+  // App blocks (workspace, security and enterprise software): build what you need from blocks, and
+  // keep it safe. Blocks (docs, checklists, charts, images) fly from the palette and snap onto the
+  // growing tower; the firewall ring's scanner sweeps and zaps the bugs that try to get in; the
+  // search lens circles the tower and lights up the block it finds.
+  'software:2': () => {
+    const R = rand(3601), out = [], moving = [];
+    out.push(slab('#d8d3ea'));
+    out.push(part(rbox(10.0, 0.03, 10.0, 0.04), '#ece9f5', { p: [0, y0 + 0.015, 0] }));
+    // ---- the tower of blocks (back middle) on its pad
+    const TX = -1.0, TZ = -1.8, BW = 1.1, BH = 0.62, cols = ['A', 'B', 'Ad', '#f6d77a', '#9ad0f0', 'Bd'];
+    out.push(part(cyl(1.3, 1.4, 0.2, 40), K.white, { p: [TX, y0 + 0.1, TZ] }), part(cyl(1.32, 1.32, 0.05, 40), 'A', { p: [TX, y0 + 0.05, TZ] }));
+    const base = y0 + 0.2;
+    const layout = [[0, 0, 0], [0, 1, 1], [0.08, 2, 2], [-0.05, 3, 3]];
+    layout.forEach(([dx, lvl, k], i) => out.push(place(appBlock(k % 4, cols[i % cols.length], BW, BH), { p: [TX + dx, base + lvl * BH, TZ], r: [0, (i % 2) * 0.12 - 0.05, 0] })));
+    // ---- the firewall ring round it: posts, a rail, a scanner arm
+    const FR = 2.5;
+    for (let i = 0; i < 14; i++) { const a = (i / 14) * TAU; out.push(part(rbox(0.16, 0.8, 0.16, 0.04), '#5b616b', { p: [TX + Math.cos(a) * FR, y0 + 0.4, TZ + Math.sin(a) * FR] }), part(new THREE.SphereGeometry(0.08, 10, 8), 'A', { p: [TX + Math.cos(a) * FR, y0 + 0.86, TZ + Math.sin(a) * FR] })); }
+    out.push(part(torus(FR, 0.04, TAU, 64), '#ff8a3a', { p: [TX, y0 + 0.62, TZ], r: [Math.PI / 2, 0, 0] }), part(torus(FR, 0.03, TAU, 64), '#ff8a3a', { p: [TX, y0 + 0.3, TZ], r: [Math.PI / 2, 0, 0] }));
+    // ---- the palette (front left): shelves of blocks waiting
+    const PX = -3.4, PZ = 2.8;
+    out.push(part(rbox(2.4, 0.1, 1.0, 0.03), K.wood, { p: [PX, y0 + 0.5, PZ] }), part(rbox(2.4, 0.1, 1.0, 0.03), K.wood, { p: [PX, y0 + 1.15, PZ] }), [-1.1, 1.1].map((x) => part(box(0.08, 1.2, 0.9), K.woodDk, { p: [PX + x, y0 + 0.6, PZ] })));
+    for (let i = 0; i < 6; i++) out.push(place(appBlock(i % 4, cols[i], 0.5, 0.3), { p: [PX - 0.75 + (i % 3) * 0.75, y0 + 0.55 + Math.floor(i / 3) * 0.65, PZ] }));
+    // ---- teammates' desks (front right)
+    [[2.4, 2.6], [3.8, 1.2]].forEach(([x, z]) => out.push(place(desk(K.wood, '#3a3f47'), { p: [x, y0, z], r: [0, Math.PI, 0] })));
+    [[4.5, -4.4], [-4.5, -4.4], [4.6, 4.4]].forEach(([x, z]) => out.push(part(cyl(0.3, 0.22, 0.4, 14), '#c99a62', { p: [x, y0 + 0.2, z] }), miniTree(R, x, y0 + 0.4, z, 0.45)));
+    // ---- moving parts (one 12 s cycle)
+    const P = 12, F = (t) => cyc(t, P);
+    // Three new blocks fly from the palette to the top of the tower, one after another.
+    for (let k = 0; k < 3; k++) {
+      const from = new V(PX - 0.75 + k * 0.75, y0 + 1.25, PZ), to = new V(TX, base + (4 + k) * BH, TZ), a = 0.08 + k * 0.22;
+      moving.push({ geo: appBlock((k + 1) % 4, cols[(k + 4) % cols.length], BW, BH), pivot: [0, 0, 0], anim: (t) => { const f = F(t), u = easeIO(win(f, a, a + 0.14)), p = from.clone().lerp(to, u), land = bump(f, a + 0.145, 0.01); return { x: p.x, y: p.y + hop(u) * 2.0 - land * 0.06, z: p.z, ry: (1 - u) * 1.5, s: (0.45 + 0.55 * u) * (f > a ? 1 : 0.001) * (1 - win(f, 0.94, 0.99)) + 0.001 }; } });
+    }
+    // The scanner arm sweeps round the ring.
+    moving.push({ geo: merge(part(box(FR, 0.06, 0.06), '#ff8a3a', { p: [FR / 2, 0, 0] }), part(new THREE.SphereGeometry(0.12, 12, 8), '#ffd23f', { p: [FR, 0, 0] })), pivot: [TX, y0 + 0.9, TZ], anim: (t) => ({ ry: t * 1.2 }) });
+    // Bugs crawl in from the edges and are zapped at the ring.
+    [[0.8, 0.1], [2.6, 0.45], [4.2, 0.75]].forEach(([ang, o]) => {
+      const dir = new V(Math.cos(ang), 0, -Math.sin(ang)), from = new V(TX, y0 + 0.3, TZ).addScaledVector(dir, 5.4), hit = new V(TX, y0 + 0.3, TZ).addScaledVector(dir, FR + 0.3);
+      moving.push({ geo: bugGeo(), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 6, o), u = win(f, 0, 0.5), p = from.clone().lerp(hit, u); return { x: p.x, y: p.y + Math.abs(Math.sin(t * 9)) * 0.05, z: p.z, ry: Math.atan2(dir.z, -dir.x), s: f < 0.5 ? Math.min(1, f / 0.05) : 0.001 }; } });
+      moving.push({ geo: merge(puff(0.35), part(star(0.4, 0.06), '#ffd23f', { r: [0, Math.PI / 4, 0] })), pivot: hit.toArray(), anim: (t) => { const f = cyc(t, 6, o), u = win(f, 0.5, 0.62); return { y: u * 0.3, s: u > 0 && u < 1 ? (0.5 + u) * (1 - u) * 2 : 0.001 }; } });
+    });
+    // The search lens circles the tower and lights the block it finds.
+    moving.push({ geo: merge(part(torus(0.42, 0.07, TAU, 32), 'B'), part(cyl(0.38, 0.38, 0.03, 28), '#cfeefc', { r: [Math.PI / 2, 0, 0] }), beam([0.3, -0.3, 0], [0.75, -0.75, 0], 0.12, K.dark)), pivot: [TX, base + 2.4 * BH, TZ], anim: (t) => { const a = t * 0.6; return { x: Math.cos(a) * 1.7, z: -Math.sin(a) * 1.7, y: Math.sin(t * 1.3) * 0.4, ry: a + Math.PI / 2 }; } });
+    moving.push({ geo: part(rbox(BW + 0.1, BH + 0.1, BW + 0.1, 0.12), '#ffe066'), pivot: [TX, base + 2 * BH + BH / 2, TZ], anim: (t) => { const f = cyc(t, 4); return { s: f > 0.4 && f < 0.6 ? 1 : 0.001, y: -BH / 2 - 0.05 }; } });
+    // Teammates at their desks.
+    [[2.4, 2.6], [3.8, 1.2]].forEach(([x, z], i) => moving.push(...walker(moving.length, () => ({ x, z: z - 0.55, ry: -Math.PI / 2, still: true, push: true }), { shirt: i ? '#8a6cf0' : '#3fb8a8', pants: '#2b3a55', y: y0 - 0.22 })));
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.2, y0, 2.9], topAt: [PX, y0 + 1.2, PZ - 0.1] };
   },
 };
