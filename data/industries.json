@@ -68,7 +68,8 @@
   "ibm": "Mainframes to qubits",
   "lilly": "Medicine at scale",
   "caterpillar": "Moving the earth",
-  "pepsico": "Snacks and sips"
+  "pepsico": "Snacks and sips",
+  "lockheed": "Only a few can build it"
  },
  "bank": [
   "Wells Fargo",
@@ -412,7 +413,6 @@
   "Wynn Resorts"
  ],
  "rocket": [
-  "Lockheed Martin",
   "General Dynamics",
   "Northrop Grumman",
   "Raytheon",
@@ -1590,5 +1590,8 @@
  ],
  "pepsico": [
   "PepsiCo"
+ ],
+ "lockheed": [
+  "Lockheed Martin"
  ]
 }

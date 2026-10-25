@@ -2279,5 +2279,58 @@ export const HEROES = {
       pivot: [0, y0, 2.0], anim: (t) => { const f = cyc(t, 10), x = -5.6 + f * 11.2; return { x, s: clamp01((5.2 - Math.abs(x)) / 0.5) + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Lockheed Martin: aircraft and spacecraft only a few can build. An F-35B rises off the pad,
+  // hovers on its lift fan and sets down again; another taxis out; the radar turns; a satellite
+  // stands in its test frame by the Skunk Works hangar.
+  lockheed: { finder: '#00297a', build: () => {
+    const R = rand(3), out = [], y0 = 0.24, NAVY = '#00297a', JET = '#7d858c';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#9fb98a', { p: [0, 0.12, 0] }));
+    // The jet: a blended planform, canopy, canted twin tails and a nozzle; nose along +x.
+    const jet = () => {
+      const half = [[1.7, 0], [0.7, 0.24], [0.15, 0.36], [-0.5, 1.25], [-0.85, 1.25], [-0.7, 0.45], [-1.1, 0.42], [-1.45, 0.85], [-1.65, 0.85], [-1.55, 0.25], [-1.7, 0.0]];
+      const pts = [...half, ...half.slice(1, -1).reverse().map(([x, z]) => [x, -z])];
+      const body = new THREE.ExtrudeGeometry(new THREE.Shape(pts.map(([x, z]) => new THREE.Vector2(x, z))), { depth: 0.16, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.05, bevelSegments: hi() ? 3 : 1 }).rotateX(Math.PI / 2).translate(0, 0.08, 0);
+      return merge(part(body, JET), part(capsule(0.2, 1.2), JET, { p: [0.0, 0.08, 0], r: [0, 0, Math.PI / 2], s: [1, 1, 1.3] }), part(ball(0.2), '#c9a24a', { p: [0.75, 0.24, 0], s: [1.6, 0.7, 0.8] }),
+        [-1, 1].map((s) => part(extrude([[0, 0], [-0.35, 0], [-0.55, 0.5], [-0.32, 0.5]], 0.03), JET, { p: [-1.05, 0.15, s * 0.32], r: [s * 0.35, 0, 0] })), part(cyl(0.14, 0.17, 0.3, 16), '#4a4f57', { p: [-1.75, 0.08, 0], r: [0, 0, Math.PI / 2] }));
+    };
+    // ---- the airfield
+    out.push(part(box(10.4, 0.02, 1.6), '#4a4f57', { p: [0, y0 + 0.01, 3.9] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(0.55, 0.01, 0.06), '#f4f4f0', { p: [-4.4 + i * 1.25, y0 + 0.022, 3.9] }));
+    out.push(part(box(1.0, 0.02, 3.0), '#5a5f67', { p: [-2.6, y0 + 0.008, 1.8] }));
+    // The vertical landing pad.
+    const PX = 1.8, PZ = 0.6;
+    out.push(part(cyl(1.5, 1.5, 0.05, 48), '#5a5f67', { p: [PX, y0 + 0.025, PZ] }), part(torus(1.25, 0.04, TAU, 48), '#f2c94c', { p: [PX, y0 + 0.055, PZ], r: [Math.PI / 2, 0, 0] }));
+    if (hi()) for (let i = 0; i < 12; i++) { const a = (i / 12) * TAU; out.push(part(ball(0.05), '#ffe08a', { p: [PX + Math.cos(a) * 1.42, y0 + 0.07, PZ + Math.sin(a) * 1.42] })); }
+    // ---- the hangar with the skunk badge
+    const HX = -2.4, HZ = -2.8;
+    const arch = new THREE.Shape([...Array(hi() ? 33 : 11)].map((_, i, a) => { const u = Math.PI * (i / (a.length - 1)); return new THREE.Vector2(Math.cos(u) * 2.1, Math.sin(u) * 1.7); }));
+    out.push(part(new THREE.ExtrudeGeometry(arch, { depth: 3.4, bevelEnabled: false, curveSegments: 4 }).translate(0, 0, -1.7), '#c9ced6', { p: [HX, y0, HZ] }), part(new THREE.ShapeGeometry(new THREE.Shape([...Array(hi() ? 33 : 11)].map((_, i, a) => { const u = Math.PI * (i / (a.length - 1)); return new THREE.Vector2(Math.cos(u) * 1.6, Math.sin(u) * 1.3); }))), '#3a3f47', { p: [HX, y0 + 0.01, HZ + 1.71] }));
+    out.push(part(cyl(0.38, 0.38, 0.05, 32), '#f4f5f6', { p: [HX, y0 + 1.15, HZ + 1.86], r: [Math.PI / 2, 0, 0] }), part(capsule(0.08, 0.3), '#1d1f24', { p: [HX - 0.05, y0 + 1.12, HZ + 1.9], r: [0, 0, 1.3] }), part(capsule(0.04, 0.3), '#1d1f24', { p: [HX + 0.18, y0 + 1.25, HZ + 1.9], r: [0, 0, -0.7] }), part(box(0.25, 0.03, 0.02), '#f4f5f6', { p: [HX - 0.02, y0 + 1.16, HZ + 1.92], r: [0, 0, 1.3] }));
+    // A parked jet in the doorway.
+    out.push(place(jet(), { p: [HX, y0 + 0.32, HZ + 1.0], r: [0, -Math.PI / 2, 0], s: 0.75 }));
+    // The satellite in its test frame.
+    const SX = 2.8, SZ = -3.0;
+    for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) out.push(part(box(0.06, 2.2, 0.06), '#f2c94c', { p: [SX + sx * 0.8, y0 + 1.1, SZ + sz * 0.8] }));
+    out.push(part(box(1.66, 0.06, 1.66), '#f2c94c', { p: [SX, y0 + 2.2, SZ] }));
+    out.push(part(rbox(0.7, 0.9, 0.7, 0.04), '#d4a640', { p: [SX, y0 + 1.1, SZ] }), part(cyl(0.35, 0.05, 0.3, 24), '#f4f5f6', { p: [SX, y0 + 1.7, SZ], r: [0, 0, 0] }));
+    for (const s of [-1, 1]) out.push(part(box(1.3, 0.6, 0.03), '#1f3550', { p: [SX + s * 1.05, y0 + 1.15, SZ], r: [0, 0, 0] }), part(box(0.4, 0.05, 0.05), '#c9ced6', { p: [SX + s * 0.5, y0 + 1.15, SZ] }));
+    // The radar dome on its tower.
+    out.push(part(rbox(0.8, 1.6, 0.8, 0.05), '#e9ecef', { p: [4.2, y0 + 0.8, 0.2] }));
+    [[-4.6, 0.4], [-4.6, -0.9], [4.6, 2.4], [-0.4, -4.6], [0.6, -1.8]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.7 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // The F-35B: rises, hovers with its lift fan doors open, turns, and lands.
+    const hov = moving.length;
+    moving.push({ geo: jet(), pivot: [PX, y0 + 0.32, PZ], anim: (t) => { const f = cyc(t, 12), up = easeIO(win(f, 0.08, 0.3)) * (1 - easeIO(win(f, 0.7, 0.92))); return { y: up * 2.6 + Math.sin(t * 3) * 0.04 * up, ry: Math.PI / 4 + Math.sin(win(f, 0.3, 0.7) * Math.PI) * 0.8, rz: Math.sin(t * 2) * 0.03 * up }; } });
+    moving.push({ geo: part(box(0.4, 0.02, 0.3), JET), pivot: [0.45, 0.32, 0], parent: hov, anim: (t) => { const f = cyc(t, 12), o = win(f, 0.03, 0.08) * (1 - win(f, 0.92, 0.97)); return { rz: -o * 1.2 }; } });
+    for (let k = 0; k < 4; k++) moving.push({ geo: part(cone(0.18, 0.6, 12), '#ffd27f'), pivot: [k < 2 ? 0.45 : -1.6, -0.25, 0], parent: hov, anim: (t) => { const f = cyc(t, 12), on = f > 0.06 && f < 0.95; return on ? { rx: Math.PI, s: 0.9 + Math.sin(t * 30 + k) * 0.15, y: -0.1 } : { s: 0.001 }; } });
+    // The radar turning.
+    moving.push({ geo: merge(part(new THREE.SphereGeometry(0.6, hi() ? 32 : 12, hi() ? 20 : 8, 0, TAU, 0, Math.PI * 0.6), '#f4f5f6'), part(box(0.9, 0.5, 0.05), '#c9ced6', { p: [0, 0.2, 0.2] })), pivot: [4.2, y0 + 1.75, 0.2], anim: (t) => ({ ry: t * 1.2 }) });
+    // A second jet taxiing along the runway and away.
+    moving.push({ geo: jet(), pivot: [0, y0 + 0.32, 3.9], anim: (t) => { const f = cyc(t, 10), x = -5.4 + easeIn(f) * 11, y = easeIn(win(f, 0.6, 1)) * 2.5; return { x, y, rz: win(f, 0.55, 0.7) * 0.2, s: clamp01((5.6 - x) / 0.6) * Math.min(1, f / 0.05) + 0.001 }; } });
+    // Crew walking to the hangar.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 9), z = 3.0 - f * 4.4; return { x: -2.6, z, ry: Math.PI / 2, s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: '#5a6b4a', pants: '#3a4433', y: y0 }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
