@@ -193,27 +193,39 @@ const homeMap = (() => {
       }
       return hit;
     });
+    // Distance from a point to the piece's nearest edge (outer coast or a border with another region).
+    const clearance = (x, y) => {
+      let best = Infinity;
+      for (const poly of polys) for (const ring of poly) for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const [ax, ay] = ring[j], dx = ring[i][0] - ax, dy = ring[i][1] - ay;
+        const u = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy || 1)));
+        best = Math.min(best, Math.hypot(x - ax - u * dx, y - ay - u * dy));
+      }
+      return best;
+    };
     // Spots near each company's real city, nudged apart and kept inside the piece: `pins` are the
     // few biggest shown on the US map, `spots` the many shown when the region is opened.
-    const place = (gap, max) => {
+    // `margin` keeps a model's whole footprint on the piece, not just its centre.
+    const place = (gap, max, margin) => {
       const out = [];
       for (const c of members) {
         const xy = proj([c.lon, c.lat]);
         if (!xy) continue;
-        const m = gap / 3;
         let spot = null;
-        for (let k = 0; k < 600 && !spot; k++) {
+        for (let k = 0; k < 1200 && !spot; k++) {
           const rr = 3 * Math.sqrt(k), a = k * 2.39996;
           const x = xy[0] + Math.cos(a) * rr, y = xy[1] + Math.sin(a) * rr;
-          if (inside(x, y) && inside(x + m, y) && inside(x - m, y) && inside(x, y + m) && inside(x, y - m) && out.every((q) => Math.hypot(q[1] - x, q[2] - y) >= gap)) spot = [x, y];
+          if (inside(x, y) && clearance(x, y) >= margin && out.every((q) => Math.hypot(q[1] - x, q[2] - y) >= gap)) spot = [x, y];
         }
         if (spot) out.push([c.slug, Math.round(spot[0]), Math.round(spot[1])]);
         if (out.length >= max) break;
       }
       return out;
     };
-    const pins = place(36, 8);
-    const spots = place(24, 40);
+    // Spots in the region view stand on a lot about 1 world unit across (the selection ring), about
+    // 17 map units at the home page's scale.
+    const pins = place(36, 8, 12);
+    const spots = place(24, 40, 17);
     const [cx, cy] = path.centroid(shape);
     const r1 = (v) => Math.round(v * 10) / 10;
     return {
