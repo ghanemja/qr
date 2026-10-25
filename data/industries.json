@@ -75,7 +75,8 @@
   "delta": "The hub that runs on time",
   "nike": "Just do it",
   "uber": "Rides in minutes",
-  "mastercard": "Accepted everywhere"
+  "mastercard": "Accepted everywhere",
+  "att": "Fibre to the door"
  },
  "bank": [
   "Wells Fargo",
@@ -494,7 +495,6 @@
   "Interpublic Group"
  ],
  "comms": [
-  "AT&T",
   "Charter Communications",
   "Comcast",
   "CenturyLink",
@@ -1478,7 +1478,6 @@
   "Windstream Holdings": 3,
   "CenturyLink": 3,
   "Motorola Solutions": 4,
-  "AT&T": 0,
   "Discord": 0,
   "Carvana": 1
  },
@@ -1610,5 +1609,8 @@
  ],
  "mastercard": [
   "Mastercard"
+ ],
+ "att": [
+  "AT&T"
  ]
 }

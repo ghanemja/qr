@@ -2575,5 +2575,53 @@ export const HEROES = {
     });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // AT&T: fibre in the ground and a network a century deep. The block is cut open to show the
+  // conduits; pulses of light run from the central office under the street into every home, whose
+  // windows light up; the striped globe turns over the office.
+  att: { finder: '#00a8e0', build: () => {
+    const R = rand(13), out = [], BLUE = '#00a8e0', NAVY = '#0057b8';
+    const soil = [['#7a5a3a', 0.4], ['#9a7a52', 0.35], ['#b08a5e', 0.35]];
+    let yb = 0;
+    for (const [c, h] of soil) { out.push(part(box(10.4, h, 10.4), c, { p: [0, yb + h / 2, 0] })); yb += h; }
+    const TZ = 3.45, top = 0.35, y0 = yb + top + 0.04;
+    // The top layer, with an open trench along the street where the fibre runs.
+    for (const [z0, z1] of [[-5.2, TZ - 0.25], [TZ + 0.25, 5.2]]) out.push(part(box(10.4, top, z1 - z0), '#9a7a52', { p: [0, yb + top / 2, (z0 + z1) / 2] }), part(box(10.42, 0.06, z1 - z0 + 0.02), '#86c766', { p: [0, yb + top + 0.01, (z0 + z1) / 2] }));
+    out.push(part(box(10.4, 0.02, 0.5), '#6b4f30', { p: [0, yb + 0.01, TZ] }));
+    // ---- the street along the front and the conduit beneath it, drawn on the cut faces
+    const SZ = 2.6;
+    out.push(part(box(10.4, 0.02, 1.0), '#5c6068', { p: [0, y0 + 0.0, SZ] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(0.45, 0.006, 0.05), '#f2c94c', { p: [-4.5 + i * 1.3, y0 + 0.012, SZ] }));
+    const cy = yb + 0.12;
+    out.push(part(cyl(0.09, 0.09, 10.4, 16), '#f29a3a', { p: [0, cy, TZ], r: [0, 0, Math.PI / 2] }), part(cyl(0.06, 0.06, 10.4, 12), '#3d7be0', { p: [0, cy + 0.02, TZ - 0.16], r: [0, 0, Math.PI / 2] }));
+    // ---- the central office with the globe over it
+    const OX = -3.0, OZ = -2.6;
+    out.push(part(rbox(3.0, 1.8, 2.0, 0.05), '#d6d0c4', { p: [OX, y0 + 0.9, OZ] }), part(rbox(3.06, 0.12, 2.06, 0.03), '#b9b2a2', { p: [OX, y0 + 1.8, OZ] }));
+    for (let j = 0; j < 3; j++) for (let i = 0; i < 6; i++) out.push(part(box(0.3, 0.3, 0.02), '#2a3c50', { p: [OX - 1.2 + i * 0.48, y0 + 0.4 + j * 0.5, OZ + 1.01] }));
+    out.push(part(cyl(0.08, 0.08, 0.9, 10), '#c9ced6', { p: [OX, y0 + 2.25, OZ] }));
+    // ---- the neighbourhood: homes along the street, each with its drop
+    const homes = [[-3.6, 4.2], [-1.6, 4.2], [0.4, 4.2], [1.9, 0.6], [0.0, 0.6], [-1.9, 0.6]];
+    const house = (x, z, c, roof, face) => [part(rbox(1.1, 0.8, 0.9, 0.04), c, { p: [x, y0 + 0.4, z] }), part(prism(1.2, 0.5, 1.0), roof, { p: [x, y0 + 0.8, z], r: [0, Math.PI / 2, 0] }), part(box(0.22, 0.38, 0.04), '#6b4f3a', { p: [x, y0 + 0.19, z + face * 0.46] })];
+    homes.forEach(([x, z], i) => out.push(house(x, z, ['#f6e7c8', '#d9e7f2', '#f2d0c9', '#e7f2d9', '#f6e7c8', '#d9e7f2'][i], ['#b8452f', '#4a5d74', '#6b4f3a', '#5a3a2a', '#4a5d74', '#b8452f'][i], z > SZ ? -1 : 1)));
+    [[4.6, -4.6], [4.6, -1.8], [-4.6, 1.8], [1.4, -4.6], [4.6, 4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.7 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // The globe: a sphere banded with blue stripes, turning.
+    const globe = merge(part(new THREE.SphereGeometry(0.7, hi() ? 48 : 16, hi() ? 32 : 10), (px, py, pz) => { const lat = Math.asin(Math.max(-1, Math.min(1, py / 0.7))), lon = Math.atan2(pz, px), offset = Math.sin(lon * 1 + 0.6) * 0.35; return Math.floor((lat + offset + Math.PI / 2) / (Math.PI / 8)) % 2 ? '#ffffff' : BLUE; }));
+    moving.push({ geo: globe, pivot: [OX, y0 + 3.1, OZ], anim: (t) => ({ ry: t * 0.6, rz: 0.2 }) });
+    // Light pulses along the main conduit, out the drop to each home.
+    for (let k = 0; k < 8; k++) moving.push({ geo: part(ball(0.1), '#ffffff'), pivot: [0, cy, TZ], anim: (t) => ({ x: -5.2 + cyc(t, 2.5, k / 8) * 10.4 }) });
+    homes.forEach(([x, z], i) => {
+      const door = [x, y0 + 0.1, z + (z > SZ ? -0.46 : 0.46)], drop = curve([[x, cy, TZ], [x, y0 + 0.9, (TZ + door[2]) / 2], door]);
+      out.push(part(tubeOn(drop, 0.025, hi() ? 16 : 6), '#f29a3a'));
+      moving.push({ geo: part(ball(0.05), '#7cf0ff'), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 1.6, i * 0.17), p = drop.getPointAt(u); return { x: p.x, y: p.y, z: p.z }; } });
+      moving.push({ geo: part(box(0.24, 0.2, 0.02), '#ffe9a8'), pivot: [x + 0.3, y0 + 0.5, z + (z > SZ ? -0.46 : 0.46)], anim: (t) => ({ s: Math.sin(t * 1.3 + i * 1.7) > -0.2 ? 1 : 0.001 }) });
+    });
+    // A splicing van parked by a handhole, its worker at the cabinet.
+    out.push(part(rbox(0.5, 0.6, 0.35, 0.04), '#9aa1a9', { p: [3.6, y0 + 0.3, SZ - 0.8] }), part(box(0.3, 0.02, 0.06), BLUE, { p: [3.6, y0 + 0.45, SZ - 0.62] }));
+    moving.push({ geo: merge(part(rbox(1.7, 0.95, 0.9, 0.08), '#f4f5f6', { p: [-0.15, 0.65, 0] }), part(rbox(0.5, 0.65, 0.88, 0.14), '#f4f5f6', { p: [0.85, 0.5, 0] }), part(box(0.04, 0.3, 0.75), '#26323f', { p: [1.1, 0.7, 0] }), part(box(1.0, 0.25, 0.02), NAVY, { p: [-0.2, 0.7, 0.46] }), [[-0.6, 0.42], [0.7, 0.42], [-0.6, -0.42], [0.7, -0.42]].map(([x, z]) => part(new THREE.CylinderGeometry(0.18, 0.18, 0.12, 14), '#1d1f24', { p: [x, 0.18, z], r: [Math.PI / 2, 0, 0] }))),
+      pivot: [0, y0, SZ + 0.2], anim: (t) => { const f = cyc(t, 12), x = f < 0.3 ? -5.6 + 8.6 * easeOut(f / 0.3) : f < 0.7 ? 3.0 : 3.0 + 3 * easeIn(win(f, 0.7, 0.9)); return { x, s: clamp01((5.3 - Math.abs(x)) / 0.4) * 0.85 + 0.001 }; } });
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 12); return { x: 3.6, z: SZ - 0.3, ry: Math.PI / 2, still: true, s: f > 0.32 && f < 0.68 ? 1 : 0.001 }; }, { shirt: BLUE, pants: '#2b3a55', y: y0 }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
