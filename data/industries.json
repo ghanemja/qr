@@ -142,7 +142,8 @@
   "carmax": "The no-haggle used car, reconditioned and priced at scale",
   "hertz": "The airport counter with a car for everyone off the plane",
   "goodyear": "The tyre maker the whole world can see",
-  "paccar": "The premium trucks drivers ask for, and the parts that keep them running"
+  "paccar": "The premium trucks drivers ask for, and the parts that keep them running",
+  "northrop": "The planes and telescopes no one else can build"
  },
  "bank": [
   "PNC Financial Services",
@@ -447,7 +448,6 @@
  ],
  "rocket": [
   "General Dynamics",
-  "Northrop Grumman",
   "Raytheon",
   "L3 Technologies",
   "L3Harris Technologies",
@@ -1791,5 +1791,8 @@
  ],
  "paccar": [
   "Paccar"
+ ],
+ "northrop": [
+  "Northrop Grumman"
  ]
 }
