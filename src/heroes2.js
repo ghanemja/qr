@@ -2148,38 +2148,48 @@ export const HEROES2 = {
       moving.push({ geo: tickGeo(0.25), pivot: [x, y0 + 2.0, z], anim: (t) => { const f = cyc(t, P, off); return f > 0.92 || f < 0.05 ? { ry: Math.PI / 4, s: 1 } : { s: 0.001 }; } }); });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // Ramp: the corporate card that saves money. Each employee's purchase hits the card's rules:
-  // coffee and the new laptop sail through with a tick, the gold watch is declined, and what is
-  // saved piles up in the jar.
+  // Ramp: the corporate card that spends less. Every purchase leaves the giant card for a
+  // supplier round the board: flights, the cloud, the café, office supplies go through with a
+  // tick and their receipts file themselves in the books; the luxury watch hits the card's rule,
+  // the barrier drops, and that money goes to savings instead.
   ramp: { finder: '#e4f222', build: () => {
-    const R = rand(166), out = [], LIME = '#e4f222', INK = '#1d1f24';
-    out.push(ground('#8fc66f'), part(rbox(7.6, 0.08, 6.0, 0.03), '#eceee8', { p: [-0.4, y0 + 0.04, -0.6] }), part(rbox(7.6, 2.4, 0.2, 0.03), '#e6e8e2', { p: [-0.4, y0 + 1.2, -3.6] }), place(pixText('RAMP', 0.1, INK, 0.03), { p: [-2.6, y0 + 1.6, -3.48] }));
-    // ---- the card, standing in the middle
-    const CQ = Math.PI / 4;
-    out.push(part(cyl(0.6, 0.7, 0.3, 32), '#3a3f47', { p: [0, y0 + 0.15, 0] }), part(cyl(0.1, 0.1, 0.6, 10), '#c9ced6', { p: [0, y0 + 0.6, 0] }));
-    const card = merge(part(rbox(2.2, 1.4, 0.08, 0.14), INK), part(rbox(0.36, 0.28, 0.09, 0.04), K.gold, { p: [-0.6, 0.15, 0] }), part(extrude([[0, 0], [0.5, 0], [0.25, 0.4]], 0.1), LIME, { p: [0.6, 0.2, 0] }), pixText('RAMP', 0.05, LIME, 0.1).translate(-0.4, -0.4, 0));
-    out.push(place(card, { p: [0, y0 + 1.6, 0], r: [0, CQ, 0] }));
-    // ---- the employees' stations: a café counter, a laptop desk, a jewellery case
-    const shops = [[-3.4, 2.4], [-0.4, 3.4], [3.0, 2.4]];
-    out.push(part(rbox(1.4, 0.9, 0.6, 0.04), '#8a5a36', { p: [-3.4, y0 + 0.45, 2.4] }), part(cyl(0.12, 0.1, 0.25, 14), K.white, { p: [-3.4, y0 + 1.03, 2.4] }));
-    out.push(place(desk(K.white, '#9aa1a9'), { p: [-0.4, y0, 3.4] }));
-    out.push(part(rbox(1.4, 0.9, 0.7, 0.04), '#5b2a40', { p: [3.0, y0 + 0.45, 2.4] }), part(rbox(1.2, 0.3, 0.6, 0.03), '#cfe6f2', { p: [3.0, y0 + 1.05, 2.4] }), part(torus(0.12, 0.03, TAU, 16), K.gold, { p: [3.0, y0 + 1.0, 2.4] }));
-    shops.forEach(([x, z], i) => out.push(place(fan(['#3d7be0', '#e5533d', '#2f9e6e'][i]), { p: [x + 0.6, y0, z + 0.8], s: 1.4 })));
-    // ---- the savings jar, back right
-    const JX = 3.2, JZ = -2.0;
-    out.push(part(new THREE.CylinderGeometry(0.75, 0.7, 1.6, hi() ? 32 : 12, 1, true), '#d6eef8', { p: [JX, y0 + 0.8, JZ] }), part(cyl(0.7, 0.7, 0.05, 24), '#d6eef8', { p: [JX, y0 + 0.02, JZ] }), part(cyl(0.6, 0.6, 0.2, 24), LIME, { p: [JX, y0 + 1.7, JZ] }));
-    out.push(trees(R, [[-4.6, -2.4], [4.6, 4.6], [-4.6, 4.6], [4.6, -4.4]], 0.5));
+    const R = rand(215), out = [], LIME = '#e4f222', INK = '#1d1f24';
+    out.push(ground('#8fc66f'), part(cyl(2.3, 2.3, 0.05, 56), '#eceee8', { p: [0, y0 + 0.025, 0] }));
+    // ---- the card, big, on its stand in the middle
+    out.push(part(cyl(0.8, 0.95, 0.4, 32), INK, { p: [0, y0 + 0.2, 0] }), part(cyl(0.14, 0.14, 0.7, 12), '#c9ced6', { p: [0, y0 + 0.75, 0] }));
+    const card = merge(part(rbox(3.0, 1.9, 0.1, 0.18), INK), part(rbox(0.5, 0.38, 0.11, 0.05), K.gold, { p: [-0.9, 0.25, 0] }), part(extrude([[0, 0], [0.7, 0], [0.35, 0.55]], 0.12), LIME, { p: [0.8, 0.3, 0] }), pixText('RAMP', 0.08, LIME, 0.12).translate(-0.5, -0.5, 0), part(box(3.0, 0.08, 0.11), '#3a3f47', { p: [0, -0.15, 0] }));
+    out.push(place(card, { p: [0, y0 + 2.1, 0], r: [-0.25, Math.PI / 4, 0, 'YXZ'] }));
+    // ---- the suppliers round the edge, each with its sign
+    const sup = [[-3.7, -0.4, 'FLIGHTS', '#3d7be0'], [-2.0, -3.7, 'CLOUD', '#8a6cf0'], [1.6, -3.8, 'CAFE', '#8a5a36'], [3.8, -0.2, 'SUPPLIES', '#e5533d'], [2.0, 3.6, 'WATCHES', '#b8860b']];
+    const shopG = (name, c) => merge(part(rbox(1.7, 1.3, 1.4, 0.05), '#f4efe6', { p: [0, 0.65, 0] }), part(box(1.74, 0.36, 1.44), c, { p: [0, 1.2, 0] }), pixText(name, 0.045, K.white, 0.03).translate(0, 1.2, 0.73), part(box(1.1, 0.6, 0.03), '#9cc3e0', { p: [0, 0.5, 0.71] }));
+    sup.forEach(([x, z, name, c]) => out.push(place(shopG(name, c), { p: [x, y0, z], r: [0, Math.PI / 4, 0] })));
+    // Shop dressing: a little jet by FLIGHTS, a cloud over CLOUD, cups at the CAFE, boxes at SUPPLIES, a giant watch at WATCHES.
+    out.push(place(jet('#3d7be0'), { p: [-3.4, y0, 1.6], r: [0, Math.PI / 4, 0], s: 0.5 }));
+    [[-2.2, 2.5, -3.7, 0.4], [-1.7, 2.7, -3.6, 0.35], [-2.5, 2.6, -3.5, 0.3]].forEach(([x, y, z, r]) => out.push(part(new THREE.SphereGeometry(r, 14, 10), K.white, { p: [x, y0 + y, z] })));
+    out.push(part(cyl(0.18, 0.14, 0.4, 16), K.white, { p: [2.6, y0 + 0.2, -3.0] }), part(cyl(0.18, 0.14, 0.4, 16), K.white, { p: [2.9, y0 + 0.2, -2.7] }));
+    out.push(...[0, 1, 2].map((k) => place(parcel(0.4), { p: [3.4 + k * 0.1, y0 + 0.18 + k * 0.36, 1.2] })));
+    out.push(part(torus(0.5, 0.1, TAU, 32), K.gold, { p: [3.4, y0 + 2.0, 3.8], r: [0, Math.PI / 4, 0] }), part(cyl(0.42, 0.42, 0.06, 32), K.white, { p: [3.4, y0 + 2.0, 3.8], r: [Math.PI / 2, 0, Math.PI / 4] }), part(box(0.3, 1.6, 0.2), '#5b3a2a', { p: [3.4, y0 + 1.0, 3.8] }));
+    // ---- the books (back left) and the savings jar (front left)
+    const BX = -4.1, BZ = -3.9;
+    out.push(part(rbox(1.4, 0.15, 1.0, 0.04), '#3a3f47', { p: [BX, y0 + 0.08, BZ] }), part(rbox(1.3, 0.12, 0.95, 0.04), '#2f6f3a', { p: [BX, y0 + 0.22, BZ] }));
+    const JX = -3.2, JZ = 3.4;
+    out.push(part(new THREE.CylinderGeometry(0.85, 0.8, 2.0, hi() ? 32 : 12, 1, true), '#d6eef8', { p: [JX, y0 + 1.0, JZ] }), part(cyl(0.8, 0.8, 0.05, 24), '#d6eef8', { p: [JX, y0 + 0.02, JZ] }), part(cyl(0.7, 0.7, 0.22, 24), LIME, { p: [JX, y0 + 2.1, JZ] }), place(pixText('SAVED', 0.05, INK, 0.03), { p: [JX + 0.6, y0 + 1.3, JZ + 0.6], r: [0, Math.PI / 4, 0] }));
+    out.push(trees(R, [[-0.4, 4.6], [4.6, -4.4], [-4.6, 1.8], [0.2, -4.6]], 0.5));
     // ---- moving parts
-    const moving = [], P = 9;
-    const top = [0, y0 + 2.4, 0], res = [true, true, false];
-    shops.forEach(([x, z], i) => {
-      const a = i / 3, path = curve([[x, y0 + 1.4, z], [x * 0.5, y0 + 2.8, z * 0.5], top]);
-      moving.push(rider(part(rbox(0.5, 0.3, 0.05, 0.06), INK), path, P, -a, 0, 0.25));
-      moving.push({ geo: res[i] ? tickGeo(0.3) : crossGeo(0.3), pivot: [x, y0 + 2.2, z], anim: (t) => { const f = cyc(t, P, -a); return f > 0.27 && f < 0.5 ? { ry: CQ, s: back(win(f, 0.27, 0.33)) } : { s: 0.001 }; } });
-      if (!res[i]) moving.push(rider(place(coin(0.18, 0.06), { r: [Math.PI / 2, 0, 0] }), curve([top, [(JX) / 2, y0 + 3.0, JZ / 2], [JX, y0 + 1.4, JZ]]), P, -a, 0.3, 0.5, (t) => ({ ry: t * 4 })));
+    const moving = [], P = 15, n = sup.length, C = [0, y0 + 2.1, 0];
+    sup.forEach(([x, z], i) => {
+      const a = i / n, ok = i !== 4, to = curve([C, [x * 0.5, y0 + 3.2, z * 0.5], [x, y0 + 1.9, z]]);
+      moving.push(rider(merge(part(rbox(0.6, 0.38, 0.05, 0.08), INK), part(box(0.6, 0.06, 0.06), LIME)), to, P, -a, 0.0, 0.08, () => ({ ry: Math.PI / 4 })));
+      moving.push({ geo: ok ? tickGeo(0.4) : crossGeo(0.4), pivot: [x, y0 + 2.5, z], anim: (t) => { const f = cyc(t, P, -a); return f > 0.08 && f < 0.2 ? { ry: Math.PI / 4, s: back(win(f, 0.08, 0.12)) } : { s: 0.001 }; } });
+      if (ok) moving.push(rider(merge(part(box(0.4, 0.55, 0.02), K.white), [0, 1, 2].map((k) => part(box(0.28, 0.03, 0.025), '#9aa1a9', { p: [0, 0.12 - k * 0.1, 0] }))), curve([[x, y0 + 2.1, z], [(x + BX) / 2, y0 + 3.4, (z + BZ) / 2], [BX, y0 + 0.5, BZ]]), P, -a, 0.12, 0.2, (t, u) => ({ rz: u * 4 })));
+      else { moving.push(rider(place(coin(0.25, 0.08), { r: [Math.PI / 2, 0, 0] }), curve([[x, y0 + 2.1, z], [(x + JX) / 2, y0 + 3.2, (z + JZ) / 2], [JX, y0 + 1.8, JZ]]), P, -a, 0.12, 0.2, (t) => ({ ry: t * 5 })));
+        moving.push({ geo: merge(part(box(1.6, 0.1, 0.1), '#e5533d'), part(box(0.3, 0.12, 0.12), K.white, { p: [0.4, 0, 0] })), pivot: [x - 0.9, y0 + 0.9, z + 1.0], anim: (t) => { const f = cyc(t, P, -a); return { rz: -(Math.PI / 2) * (1 - (easeIO(win(f, 0.06, 0.1)) - easeIO(win(f, 0.25, 0.3)))) }; } }); }
     });
-    // The jar's level climbing over time.
-    moving.push({ geo: part(cyl(0.68, 0.68, 1.4, 24), (x, y) => (Math.floor(y * 10) % 2 ? '#e9b949' : '#f6d66e'), { p: [0, 0.7, 0] }), pivot: [JX, y0 + 0.05, JZ], anim: (t) => ({ sy: 0.15 + 0.8 * cyc(t, P * 3) }) });
+    // The books growing thicker, the jar filling.
+    moving.push({ geo: part(rbox(1.2, 0.6, 0.9, 0.03), K.white, { p: [0, 0.3, 0] }), pivot: [BX, y0 + 0.28, BZ], anim: (t) => ({ sy: 0.1 + 0.9 * cyc(t, P * 3) }) });
+    moving.push({ geo: part(cyl(0.78, 0.78, 1.8, 24), (x, y) => (Math.floor(y * 10) % 2 ? '#e9b949' : '#f6d66e'), { p: [0, 0.9, 0] }), pivot: [JX, y0 + 0.05, JZ], anim: (t) => ({ sy: 0.1 + 0.85 * cyc(t, P * 3) }) });
+    // Employees walking between the card and the shops.
+    [0, 0.5].forEach((o, i) => moving.push(...walker(moving.length, (t) => { const u = cyc(t, 12, o) * TAU; return { x: Math.cos(u) * 2.6, z: Math.sin(u) * 2.6, ry: -u - Math.PI / 2 }; }, { shirt: ['#3d7be0', '#d6336c'][i], pants: INK, y: y0 })));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // Nuro: delivery with no one in the driver's seat. The narrow electric pod pulls away from the
