@@ -206,6 +206,19 @@ const stethoscope = (run, c = 'A') => merge(part(tubeOn(run, 0.08, hi() ? 80 : 2
 // A member card, flat face toward +z, centred on the origin.
 const cardGeo = (c = 'A') => merge(part(rbox(0.9, 0.56, 0.04, 0.06), c), part(box(0.86, 0.1, 0.045), shade('#ffffff', 0.95), { p: [0, 0.12, 0] }), part(box(0.3, 0.05, 0.05), K.white, { p: [-0.22, -0.12, 0] }), part(box(0.2, 0.15, 0.05), K.gold, { p: [0.25, -0.1, 0] }));
 
+// Pallet racking: n bays × levels, each shelf stocked with boxes; front face toward +z, on y = 0.
+const racking = (R, bays = 3, levels = 3, frame = '#2a5bb0', beamC = K.orange, boxes = ['#c99a62', '#d9ab70', '#e8d3ad']) => {
+  const g = [], bw = 1.1, lh = 0.75, d = 0.8;
+  for (let i = 0; i <= bays; i++) [-d / 2, d / 2].forEach((z) => g.push(part(new THREE.BoxGeometry(0.07, levels * lh + 0.1, 0.07), frame, { p: [i * bw, (levels * lh + 0.1) / 2, z] })));
+  for (let l = 0; l < levels; l++) {
+    [-d / 2, d / 2].forEach((z) => g.push(part(new THREE.BoxGeometry(bays * bw, 0.08, 0.06), beamC, { p: [(bays * bw) / 2, 0.1 + l * lh, z] })));
+    for (let i = 0; i < bays; i++) for (let k = 0; k < 2; k++) if (R() > 0.15) g.push(part(rbox(0.45, 0.4 + R() * 0.15, 0.6, 0.03), boxes[Math.floor(R() * boxes.length)], { p: [i * bw + 0.3 + k * 0.5, 0.36 + l * lh, 0] }));
+  }
+  return merge(g);
+};
+// A medicine case: a white box with a brand cross.
+const medBox = (c = 'A', s = 1) => merge(part(rbox(0.5 * s, 0.36 * s, 0.4 * s, 0.03 * s), K.white), part(box(0.22 * s, 0.07 * s, 0.02), c, { p: [0, 0, 0.2 * s + 0.01] }), part(box(0.07 * s, 0.22 * s, 0.02), c, { p: [0, 0, 0.2 * s + 0.01] }));
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -1658,5 +1671,49 @@ export const SCENES = {
     moving.push({ geo: sedan('B'), pivot: [0, y0, 0], anim: (t) => { const f = cyc(t, 14), u = f < 0.4 ? easeOut(f / 0.4) * 0.5 : f < 0.55 ? 0.5 : 0.5 + easeIn(win(f, 0.55, 1)) * 0.5, { p, ry } = along(lane, Math.min(0.999, u)); return { x: p.x, z: p.z, ry, s: Math.min(clamp01(f / 0.04), clamp01((1 - f) / 0.04)) * 0.85 + 0.001 }; } });
     moving.push({ geo: merge(part(rbox(0.3, 0.2, 0.2, 0.03), K.white), part(box(0.1, 0.22, 0.04), 'A', { p: [0, 0, 0.11] })), pivot: [CX - W / 2 - 0.3, y0 + 1.0, CZ - 0.6], anim: (t) => { const f = cyc(t, 14); return { x: -easeOut(win(f, 0.42, 0.5)) * 0.6, s: f > 0.42 && f < 0.56 ? 1 : 0.001 }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.6, y0, -2.4], topAt: [CX + 1.4, y0 + H, CZ - 0.6] };
+  },
+
+  // Medical supplies (drug and medical distributors): the shelves behind every pharmacy. In the
+  // distribution centre, racks of medicine cases feed totes along the conveyor through a scanner;
+  // vans run orders out to the pharmacy and the hospital, and a drone drops an urgent box on the
+  // hospital's roof.
+  'health:9': () => {
+    const R = rand(2301), out = [], moving = [];
+    out.push(slab('#c4c7cb'));
+    // ---- the distribution centre: back wall, racking, the conveyor and scanner arch
+    out.push(part(rbox(10.4, 2.8, 0.25, 0.04), '#e3e6ea', { p: [0, y0 + 1.4, -5.05] }), part(box(10.4, 0.35, 0.27), 'A', { p: [0, y0 + 2.55, -5.05] }));
+    [-4.9, -1.4, 1.6].forEach((x) => out.push(place(racking(R, 3, 3, '#2a5bb0', K.orange, ['#ffffff', '#f4f5f6', '#e8d3ad']), { p: [x, y0, -4.3] })));
+    const CZ = -2.6, TOPY = y0 + 0.75, X0 = -4.8, X1 = 3.4;
+    out.push(part(box(X1 - X0, 0.08, 0.7), '#3a3f47', { p: [(X0 + X1) / 2, TOPY - 0.04, CZ] }));
+    [CZ - 0.37, CZ + 0.37].forEach((z) => out.push(part(new THREE.BoxGeometry(X1 - X0, 0.14, 0.05), '#c9ced6', { p: [(X0 + X1) / 2, TOPY - 0.03, z] })));
+    for (let x = X0 + 0.1; x <= X1; x += 0.9) [CZ - 0.32, CZ + 0.32].forEach((z) => out.push(part(new THREE.BoxGeometry(0.07, 0.7, 0.07), '#9aa1a9', { p: [x, y0 + 0.35, z] })));
+    const AX = -0.2;
+    out.push(part(rbox(0.16, 1.5, 0.16, 0.04), K.white, { p: [AX, y0 + 0.75, CZ - 0.5] }), part(rbox(0.16, 1.5, 0.16, 0.04), K.white, { p: [AX, y0 + 0.75, CZ + 0.5] }), part(rbox(0.2, 0.18, 1.2, 0.04), 'A', { p: [AX, y0 + 1.55, CZ] }));
+    // The loading dock, at the conveyor's end.
+    out.push(part(rbox(1.6, 0.6, 1.6, 0.04), '#9aa1a9', { p: [4.3, y0 + 0.3, CZ] }));
+    // ---- the pharmacy (front left) and hospital (front right)
+    const PX = -3.4, PZ = 3.2;
+    out.push(part(rbox(2.6, 1.5, 1.8, 0.05), '#f4f5f6', { p: [PX, y0 + 0.75, PZ] }), part(rbox(2.64, 0.35, 1.84, 0.05), 'B', { p: [PX, y0 + 1.35, PZ] }), part(rbox(1.6, 0.8, 0.05, 0.03), '#9fcdea', { p: [PX + 0.3, y0 + 0.65, PZ - 0.91] }), part(rbox(0.4, 0.4, 0.06, 0.03), '#5fae5b', { p: [PX - 0.9, y0 + 1.35, PZ - 0.93] }), part(rbox(0.14, 0.32, 0.07, 0.02), K.white, { p: [PX - 0.9, y0 + 1.35, PZ - 0.97] }), part(rbox(0.32, 0.14, 0.07, 0.02), K.white, { p: [PX - 0.9, y0 + 1.35, PZ - 0.97] }));
+    const HX = 2.6, HZ = 3.0;
+    out.push(part(rbox(2.8, 2.6, 2.0, 0.05), '#eef0f2', { p: [HX, y0 + 1.3, HZ] }), part(box(2.82, 0.2, 2.02), 'A', { p: [HX, y0 + 2.5, HZ] }));
+    for (let f = 0; f < 3; f++) for (let i = 0; i < 3; i++) out.push(part(rbox(0.5, 0.4, 0.05, 0.02), '#9fcdea', { p: [HX - 0.9 + i * 0.9, y0 + 0.6 + f * 0.7, HZ - 1.01] }));
+    out.push(part(cyl(0.6, 0.6, 0.04, 24), '#5b616b', { p: [HX, y0 + 2.62, HZ] }), part(box(0.12, 0.02, 0.6), K.white, { p: [HX - 0.18, y0 + 2.65, HZ] }), part(box(0.12, 0.02, 0.6), K.white, { p: [HX + 0.18, y0 + 2.65, HZ] }), part(box(0.36, 0.02, 0.12), K.white, { p: [HX, y0 + 2.65, HZ] }));
+    [[-0.4, 4.4], [0.6, 2.2], [-4.6, 0.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.55 + R() * 0.2)));
+    // ---- moving parts
+    // Totes ride the line through the scanner, each with a case on board.
+    for (let k = 0; k < 6; k++) moving.push({ geo: merge(part(rbox(0.55, 0.28, 0.45, 0.04), 'A', { p: [0, 0.14, 0] }), place(medBox('B', 0.7), { p: [0, 0.35, 0] })), pivot: [0, TOPY, CZ], anim: (t) => { const u = cyc(t, 12, k / 6), x = X0 + 0.3 + u * (X1 - X0 - 0.6); return { x, s: Math.min(1, u / 0.03, (1 - u) / 0.03) }; } });
+    moving.push({ geo: part(box(0.04, 0.6, 1.0), '#ff5a4a'), pivot: [AX, y0 + 1.15, CZ], anim: (t) => ({ s: cyc(t, 2) < 0.15 ? 1 : 0.001 }) });
+    // A picker pulls cases from the racks.
+    moving.push(...walker(moving.length, (t) => { const k = Math.sin(t * 0.4); return { x: -1.0 + k * 3.0, z: -3.45, ry: Math.cos(t * 0.4) > 0 ? 0 : Math.PI }; }, { shirt: K.orange, pants: '#2b3a55', y: y0, carry: place(medBox('A', 0.6), { p: [0.3, 0.95, 0] }) }));
+    // Two vans: dock → pharmacy and dock → hospital.
+    const dock = new V(4.3, 0, CZ + 1.4);
+    [[new V(PX + 1.6, 0, PZ - 1.5), 0], [new V(HX - 1.9, 0, HZ - 1.4), 0.5]].forEach(([to, o]) => {
+      const c = curve([dock.toArray(), [1.2, 0, -0.6], [to.x, 0, to.z]]);
+      moving.push({ geo: van(K.white, 'A'), pivot: [0, y0, 0], anim: (t) => { const f = cyc(t, 12, o), u = f < 0.45 ? easeIO(f / 0.45) : f < 0.55 ? 1 : 1 - easeIO(win(f, 0.55, 1)), { p, ry } = along(c, Math.min(0.999, u)); return { x: p.x, z: p.z, ry: ry + (f > 0.55 ? Math.PI : 0) }; } });
+    });
+    // The drone with an urgent case for the hospital roof.
+    const DF = new V(4.3, y0 + 1.6, CZ), DT = new V(HX, y0 + 2.9, HZ);
+    moving.push({ geo: merge(drone('A'), place(medBox('A', 0.55), { p: [0, -0.28, 0] })), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 9), u = f < 0.45 ? easeIO(f / 0.45) : f < 0.55 ? 1 : 1 - easeIO(win(f, 0.55, 1)), p = DF.clone().lerp(DT, u); return { x: p.x, y: p.y + hop(u) * 1.6 + Math.sin(t * 3) * 0.04, z: p.z }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-0.6, y0, 0.4], topAt: [PX, y0 + 1.52, PZ] };
   },
 };
