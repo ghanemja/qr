@@ -147,7 +147,8 @@
   "internationalpaper": "The boxes the online world ships in, from the managed forest",
   "newmont": "The world's biggest gold miner, decades of ore in the ground",
   "databricks": "The lakehouse: every kind of data in one lake, turned into answers",
-  "perplexity": "An answer engine that shows its sources"
+  "perplexity": "An answer engine that shows its sources",
+  "neuralink": "Thought into action, placed with a robot's precision"
  },
  "bank": [
   "PNC Financial Services",
@@ -671,8 +672,7 @@
   "DeepSeek",
   "Sakana AI",
   "Liquid AI",
-  "Lila Sciences",
-  "Neuralink"
+  "Lila Sciences"
  ],
  "robot": [
   "Boston Dynamics",
@@ -1416,7 +1416,6 @@
   "Liquid AI": 5,
   "DeepL": 6,
   "Sierra": 6,
-  "Neuralink": 1,
   "Sakana AI": 1,
   "DeepSeek": 1,
   "Scale AI": 2,
@@ -1803,5 +1802,8 @@
  ],
  "perplexity": [
   "Perplexity"
+ ],
+ "neuralink": [
+  "Neuralink"
  ]
 }
