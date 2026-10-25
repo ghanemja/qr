@@ -146,7 +146,8 @@
   "northrop": "The planes and telescopes no one else can build",
   "internationalpaper": "The boxes the online world ships in, from the managed forest",
   "newmont": "The world's biggest gold miner, decades of ore in the ground",
-  "databricks": "The lakehouse: every kind of data in one lake, turned into answers"
+  "databricks": "The lakehouse: every kind of data in one lake, turned into answers",
+  "perplexity": "An answer engine that shows its sources"
  },
  "bank": [
   "PNC Financial Services",
@@ -655,7 +656,6 @@
  ],
  "ai": [
   "Scale AI",
-  "Perplexity",
   "Thinking Machines Lab",
   "Harvey",
   "Sierra",
@@ -1423,7 +1423,6 @@
   "Mercor": 2,
   "Cohere": 2,
   "Mistral AI": 2,
-  "Perplexity": 0,
   "Ripple": 3,
   "Chainalysis": 3,
   "Revolut": 4,
@@ -1801,5 +1800,8 @@
  ],
  "databricks": [
   "Databricks"
+ ],
+ "perplexity": [
+  "Perplexity"
  ]
 }

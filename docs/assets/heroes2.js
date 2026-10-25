@@ -1942,4 +1942,31 @@ export const HEROES2 = {
     for (let k = 0; k < 5; k++) { const v = new V(-0.7 + k * 0.35, 0, 0.07).applyQuaternion(BQ); moving.push({ geo: part(box(0.22, 1.0, 0.02), [RED, '#3d7be0', '#f2c94c', '#2f9e6e', RED][k], { p: [0, 0.5, 0] }), pivot: [-3.2 + v.x, y0 + 1.05, -3.6 + v.z], anim: (t) => ({ q: BQ, sy: 0.2 + 0.8 * (0.4 + 0.6 * Math.abs(Math.sin(t * 0.6 + k))) * (0.4 + k * 0.12) }) }); }
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Perplexity: an answer engine that shows its sources. A question goes up; the search reaches
+  // out to the pages around it, three light up, and the answer card fills in with numbered
+  // citations pointing back to them.
+  perplexity: { finder: '#20808d', build: () => {
+    const R = rand(159), out = [], TEAL = '#20808d', INK = '#13343b';
+    out.push(ground('#8fc66f'), part(cyl(2.0, 2.0, 0.05, 48), '#e9efef', { p: [0, y0 + 0.025, 0] }));
+    // ---- the sources: little pages on stands in a ring, each numbered
+    const N = 7, srcs = Array.from({ length: N }, (_, i) => { const a = (i / N) * TAU + 0.3; return [Math.cos(a) * 3.7, Math.sin(a) * 3.7, a]; });
+    srcs.forEach(([x, z, a], i) => out.push(part(cyl(0.05, 0.05, 0.9, 8), '#9aa1a9', { p: [x, y0 + 0.45, z] }), place(merge(part(rbox(0.8, 1.0, 0.05, 0.04), K.white), part(box(0.6, 0.1, 0.06), ['#3d7be0', '#e5533d', '#2f9e6e', '#f29a3a', '#8a6cf0', '#d6336c', '#3fb8a8'][i], { p: [0, 0.3, 0] }), [0, 1, 2].map((k) => part(box(0.55, 0.04, 0.06), '#c9ced6', { p: [0, 0.08 - k * 0.15, 0] }))), { p: [x, y0 + 1.4, z], r: [0, -a - Math.PI / 2, 0] })));
+    // ---- the answer card in the middle: a tall tablet on a plinth
+    const Q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 4, 0)), at = (dx, dy, dz = 0.08) => { const v = new V(dx, dy, dz).applyQuaternion(Q); return [v.x, y0 + v.y, v.z]; };
+    out.push(part(cyl(0.6, 0.7, 0.3, 32), INK, { p: [0, y0 + 0.15, 0] }), part(rbox(2.0, 2.6, 0.12, 0.12), INK, { p: at(0, 1.8, 0), q: Q }), part(rbox(1.84, 2.44, 0.02, 0.08), '#f6f8f8', { p: at(0, 1.8, 0.07), q: Q }));
+    out.push(part(rbox(1.6, 0.36, 0.02, 0.08), '#e6f2f3', { p: at(0, 2.75, 0.09), q: Q }), place(pixText('?', 0.06, TEAL, 0.03), { p: at(0.62, 2.75, 0.1), q: Q }));
+    // The Perplexity mark: an eight-armed asterisk on top.
+    out.push(...[0, 1, 2, 3].map((k) => part(box(0.08, 0.7, 0.06), TEAL, { p: at(0, 3.5, 0), q: Q.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new V(0, 0, 1), k * Math.PI / 4)) })));
+    out.push(trees(R, [[4.6, 4.6], [-4.6, -4.6], [4.6, -4.4], [-4.6, 4.4]], 0.5));
+    // ---- moving parts
+    const moving = [], P = 8, cited = [1, 3, 5];
+    // The question rising from the plinth into the card's search bar.
+    moving.push({ geo: merge(part(rbox(0.9, 0.36, 0.05, 0.12), TEAL), [0, 1, 2].map((k) => part(box(0.12, 0.05, 0.06), K.white, { p: [-0.25 + k * 0.2, 0, 0] }))), pivot: at(0, 0.6, 0.4), anim: (t) => { const f = cyc(t, P); return f < 0.15 ? { q: Q, y: easeOut(win(f, 0, 0.15)) * 1.8, s: Math.min(1, f / 0.03) + 0.001 } : { s: 0.001 }; } });
+    // Search beams out to every page; three answer and light up.
+    srcs.forEach(([x, z], i) => { const out1 = curve([[0, y0 + 2.4, 0], [x * 0.5, y0 + 3.0, z * 0.5], [x, y0 + 1.6, z]]); moving.push(rider(part(new THREE.SphereGeometry(0.07, 8, 6), '#7fd3dc'), out1, P, 0, 0.15, 0.35));
+      if (cited.includes(i)) { const back1 = curve([[x, y0 + 1.6, z], [x * 0.5, y0 + 3.2, z * 0.5], [0, y0 + 2.2, 0]]); moving.push(rider(part(new THREE.SphereGeometry(0.1, 10, 7), TEAL), back1, P, 0, 0.38, 0.55)); moving.push({ geo: part(torus(0.6, 0.04, TAU, 32), TEAL, { r: [Math.PI / 2, 0, 0] }), pivot: [x, y0 + 0.92, z], anim: (t) => { const f = cyc(t, P); return f > 0.35 && f < 0.95 ? { s: 1 + Math.sin(t * 6) * 0.05 } : { s: 0.001 }; } }); } });
+    // The answer lines filling in, each with its citation number.
+    for (let k = 0; k < 4; k++) moving.push({ geo: merge(part(box(1.2 - (k % 2) * 0.3, 0.07, 0.02), '#5b6b7d', { p: [0, 0, 0] }), part(rbox(0.16, 0.16, 0.025, 0.04), TEAL, { p: [0.75 - (k % 2) * 0.15, 0, 0] })), pivot: at(-0.15, 2.2 - k * 0.3, 0.1), anim: (t) => { const f = cyc(t, P), a = 0.55 + k * 0.08; return f > a && f < 0.97 ? { q: Q, s: 1, sx: Math.min(1, win(f, a, a + 0.06)) + 0.001 } : { s: 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
