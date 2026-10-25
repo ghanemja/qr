@@ -86,7 +86,8 @@
   "jnj": "Medicine and the surgeon's hand",
   "waymo": "The car drives itself",
   "airbnb": "Belong anywhere",
-  "salesforce": "Pipeline to closed-won"
+  "salesforce": "Pipeline to closed-won",
+  "fedex": "Overnight, anywhere"
  },
  "bank": [
   "Citigroup",
@@ -348,7 +349,6 @@
   "Simon Property Group"
  ],
  "parcel": [
-  "FedEx",
   "XPO Logistics",
   "C.H. Robinson Worldwide",
   "J.B. Hunt Transport Services",
@@ -1640,5 +1640,8 @@
  ],
  "salesforce": [
   "salesforce.com"
+ ],
+ "fedex": [
+  "FedEx"
  ]
 }

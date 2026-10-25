@@ -3034,5 +3034,38 @@ export const HEROES = {
     for (let k = 0; k < 2; k++) moving.push(...walker(moving.length, (t) => { const f = cyc(t, 11, k * 0.5), x = 4.6 - f * 7.6; return { x, z: 2.3 + k * 0.6, ry: Math.PI, s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: k ? BLUE : '#f4f5f6', pants: '#2b3a55', skin: k ? '#8d5a3b' : '#e9b98f', y: y0 }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // FedEx: overnight, anywhere, through one giant hub. Freighters land in a steady stream at
+  // Memphis, their containers roll into the sort, and vans fan out with the morning's deliveries.
+  fedex: { finder: '#4d148c', build: () => {
+    const R = rand(7), out = [], y0 = 0.24, PURP = '#4d148c', ORANGE = '#ff6600';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#86c766', { p: [0, 0.12, 0] }), part(box(10.2, 0.02, 4.0), '#9aa1a9', { p: [0, y0 + 0.01, -2.6] }));
+    const jet = () => merge(part(lathe([[0, 0], [0.2, 0.12], [0.32, 0.35], [0.34, 0.7], [0.34, 2.3], [0.22, 3.0], [0, 3.3]], 28), (px, py) => (py > 0.1 ? '#f4f5f6' : '#e9ecef'), { r: [0, 0, Math.PI / 2], p: [1.65, 0.45, 0] }), part(box(1.6, 0.14, 0.02), PURP, { p: [0.4, 0.55, 0.34] }), part(box(0.5, 0.14, 0.02), ORANGE, { p: [-0.6, 0.55, 0.34] }),
+      [-1, 1].map((k) => part(extrude([[0.38, 0], [-0.1, 0], [-0.7, 1.55], [-0.5, 1.58]], 0.05), '#dfe3e8', { p: [0.1, 0.35, 0], r: [k * (Math.PI / 2 - 0.06), 0, 0] })), [-1, 1].map((k) => part(cyl(0.12, 0.12, 0.45, 16), '#c9ced6', { p: [0.3, 0.2, k * 0.6], r: [0, 0, Math.PI / 2] })),
+      [-1, 1].map((k) => part(extrude([[0, 0], [-0.3, 0], [-0.5, 0.55], [-0.35, 0.55]], 0.04), '#dfe3e8', { p: [-1.3, 0.55, 0], r: [k * Math.PI / 2, 0, 0] })), part(extrude([[0, 0], [-0.45, 0], [-0.75, 0.75], [-0.48, 0.75]], 0.05), PURP, { p: [-1.2, 0.72, 0] }));
+    // ---- the runway along the back
+    out.push(part(box(10.4, 0.02, 1.5), '#4a4f57', { p: [0, y0 + 0.022, -4.1] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(0.55, 0.01, 0.06), '#f4f4f0', { p: [-4.4 + i * 1.25, y0 + 0.034, -4.1] }));
+    // ---- the hub: a long low building with an arrow on its roof, and the sort belts out front
+    const HX = -0.8, HZ = 0.4;
+    out.push(part(rbox(5.6, 1.2, 2.2, 0.05), '#e9ecef', { p: [HX, y0 + 0.6, HZ] }), part(rbox(5.66, 0.12, 2.26, 0.03), '#c9ced6', { p: [HX, y0 + 1.2, HZ] }));
+    out.push(part(extrude([[-1.4, -0.18], [0.7, -0.18], [0.7, -0.45], [1.4, 0], [0.7, 0.45], [0.7, 0.18], [-1.4, 0.18]], 0.06), ORANGE, { p: [HX, y0 + 1.3, HZ], r: [-Math.PI / 2, 0, 0] }));
+    for (let i = 0; i < 6; i++) out.push(part(rbox(0.6, 0.7, 0.06, 0.02), '#5b616b', { p: [HX - 2.2 + i * 0.88, y0 + 0.35, HZ - 1.11] }));
+    out.push(part(rbox(1.6, 0.32, 0.08, 0.03), PURP, { p: [HX - 1.8, y0 + 0.95, HZ + 1.12] }), part(box(0.5, 0.2, 0.02), ORANGE, { p: [HX - 1.3, y0 + 0.95, HZ + 1.17] }));
+    // ---- the van yard and the road out
+    out.push(part(box(10.4, 0.02, 1.0), '#5c6068', { p: [0, y0 + 0.012, 3.4] }));
+    [[-4.6, 4.7], [-1.4, 4.7], [1.8, 4.7], [4.7, 4.7], [4.6, 1.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.65 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // Freighters landing one after another: glide in, flare, roll out, turn off.
+    for (let k = 0; k < 3; k++) moving.push({ geo: jet(), pivot: [0, y0 + 0.04, -4.1], anim: (t) => { const f = cyc(t, 12, k / 3); const x = 6.6 - f * 11.5, glide = clamp01((x - 0.4) / 6), y = glide * glide * 3.0; return { x, y, ry: Math.PI, rz: -glide * 0.12 + (glide < 0.05 ? 0.06 : 0), s: clamp01((5.8 - Math.abs(x)) / 0.6) * 0.85 + 0.001 }; } });
+    // Containers from the apron into the hub doors.
+    for (let k = 0; k < 4; k++) moving.push({ geo: merge(part(extrude([[-0.3, 0], [0.3, 0], [0.3, 0.4], [0.12, 0.55], [-0.3, 0.55]], 0.5), '#c9ced6'), part(box(0.4, 0.18, 0.02), PURP, { p: [0, 0.28, 0.26] })), pivot: [0, y0 + 0.02, 0], anim: (t) => { const f = cyc(t, 6, k / 4); return { x: HX + 2.6 - f * 5.0, z: HZ - 2.2 + Math.min(1, f * 2.5) * 0.9, ry: Math.PI / 2, s: Math.min(1, f / 0.08, (1 - f) / 0.08) + 0.001 }; } });
+    // Vans out on the road.
+    const van = merge(part(rbox(1.7, 0.95, 0.9, 0.08), '#f4f5f6', { p: [-0.15, 0.65, 0] }), part(rbox(0.5, 0.65, 0.88, 0.14), '#f4f5f6', { p: [0.85, 0.5, 0] }), part(box(0.04, 0.3, 0.75), '#26323f', { p: [1.1, 0.7, 0] }), part(box(0.8, 0.22, 0.02), PURP, { p: [-0.35, 0.8, 0.46] }), part(box(0.4, 0.22, 0.02), ORANGE, { p: [0.25, 0.8, 0.46] }), [[-0.6, 0.42], [0.7, 0.42], [-0.6, -0.42], [0.7, -0.42]].map(([x, z]) => part(new THREE.CylinderGeometry(0.18, 0.18, 0.12, 14), '#1d1f24', { p: [x, 0.18, z], r: [Math.PI / 2, 0, 0] })));
+    for (let k = 0; k < 3; k++) moving.push({ geo: van, pivot: [0, y0, 3.4], anim: (t) => { const f = cyc(t, 9, k / 3), x = -5.6 + f * 11.2; return { x, s: clamp01((5.2 - Math.abs(x)) / 0.4) * 0.8 + 0.001 }; } });
+    // A courier with a parcel crossing to the vans.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 6), z = HZ + 1.3 + (f < 0.5 ? f * 2 : 2 - f * 2) * 1.4; return { x: HX + 1.2, z, ry: f < 0.5 ? -Math.PI / 2 : Math.PI / 2 }; }, { shirt: PURP, pants: '#2b2f36', y: y0, carry: part(rbox(0.36, 0.26, 0.3, 0.03), '#c99a62', { p: [0.28, 1.1, 0] }) }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
