@@ -3,7 +3,7 @@
 // Geometry carries vertex colours; parts painted 'A'/'B' (and darker 'Ad'/'Bd') take the
 // company's own two brand colours in the shader, so one geometry serves many companies.
 import * as THREE from 'three';
-import { V, part, merge, place, box, cyl, lathe, tube, ball, cone, torus, extrude, prism, star, beam, ring, faceted, TAU, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, legacy, K, withDetail } from './kit.js';
+import { V, part, windy, rand, taper, leafShape, shade, tuft, merge, place, box, cyl, lathe, tube, ball, cone, torus, extrude, prism, star, beam, ring, faceted, hi, TAU, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, legacy, K, withDetail } from './kit.js';
 import { HEROES } from './heroes.js';
 
 
@@ -423,19 +423,59 @@ const CENTER = {
     ...[-0.5, 0.5].map((x) => ({ geo: part(ball(0.22, 1), '#7cf0ff'), pivot: [x, 8, 1.2], anim: (t) => ({ sy: bump(cyc(t, 2.9), 0.5, 0.025) > 0.3 ? 0.1 : 1 }) })),
     { geo: part(ball(0.25, 1), 'A'), pivot: [0, 10.3, 0], anim: (t) => ({ s: 1 + Math.max(0, Math.sin(t * 4)) * 0.5 }) },
   ] }),
+  // A broad shade tree, grown procedurally: a curved trunk forks into branches and twigs, and
+  // hundreds of lobed leaves gather in clusters at their ends, lighter on the outside and on top,
+  // darker within. Grass grows at its foot, a few leaves lie fallen, and more drift down. Every
+  // leaf and blade sways on its own in the wind (modelMaterial).
   tree: () => {
-    const bark = '#7a5233';
-    const parts = [part(cyl(0.9, 1.5, 9, 9), bark, { p: [0, 4.5, 0] })];
-    ring(7, (a, i) => parts.push(beam([0, 5.5 + (i % 3) * 0.8, 0], [Math.cos(a) * 4.2, 8.6 + (i % 2) * 0.8, Math.sin(a) * 4.2], 0.4, bark)));
-    const greens = ['#7cc456', '#5fae45', '#94d26a', '#4f9a3c', '#86cc5f'];
-    ring(7, (a, i) => parts.push(part(ball(2.1, 0), greens[i % 5], { p: [Math.cos(a) * 4.2, 9.4 + (i % 2) * 0.8, Math.sin(a) * 4.2] })));
-    ring(5, (a, i) => parts.push(part(ball(2.4, 0), greens[(i + 2) % 5], { p: [Math.cos(a + 0.6) * 2, 11.4, Math.sin(a + 0.6) * 2] })));
-    parts.push(part(ball(2.6, 0), greens[1], { p: [0, 12.8, 0] }));
-    // Leaves come loose and drift down, swaying.
-    return { geo: merge(parts), moving: [[3.6, 1.2], [-3, 2.6], [1.2, -3.4], [-2.2, -2.2]].map(([x, z], i) => ({ geo: part(box(0.7, 0.06, 0.45), greens[i % 5]), pivot: [x, 8, z], anim: (t) => {
-      const f = cyc(t, 4.4, i / 4);
-      return { y: -f * 7.8, x: Math.sin(f * 9 + i) * 0.9, z: Math.cos(f * 7 + i) * 0.5, rx: Math.sin(t * 5 + i) * 0.7, rz: Math.cos(t * 4 + i) * 0.6, s: life(f, 0, 0.08, 0.85, 1) };
-    } })) };
+    const R = rand(11), bark = '#7a5233', greens = ['#8fd35f', '#7cc456', '#a6dc6e', '#9bd85f', '#b5e27a', '#86cc5f'], grass = ['#7fcf3f', '#6cc23a', '#94d84f', '#a6dc5e'];
+    const wood = [], tips = [];
+    const barkColor = (x, y, z) => shade(bark, 0.78 + 0.3 * Math.sin(y * 6 + Math.atan2(z, x) * 3) ** 2);
+    const grow = (from, dir, len, r, depth) => {
+      const to = from.clone().addScaledVector(dir, len);
+      const mid = from.clone().lerp(to, 0.5).add(new V((R() - 0.5) * len * 0.22, 0, (R() - 0.5) * len * 0.22));
+      wood.push(part(taper([from.toArray(), mid.toArray(), to.toArray()], r, r * 0.6), barkColor));
+      if (depth === 0) { tips.push(to, from.clone().lerp(to, 0.5).add(new V(0, -0.35, 0))); return; }
+      if (depth === 1) tips.push(from.clone().lerp(to, 0.6).add(new V(0, -0.5, 0)));
+      // The crown spreads wide: early forks reach outwards, twigs droop at their ends.
+      const kids = depth === 4 ? 3 : depth === 1 ? 2 : 3;
+      for (let k = 0; k < kids; k++) {
+        const a = (k / kids) * TAU + R() * 1.3 + depth, out = depth >= 3 ? 1 : 0.85;
+        const rise = depth >= 3 ? 0.55 + R() * 0.35 : depth === 2 ? 0.25 + R() * 0.35 : -0.1 + R() * 0.3;
+        const d = new V(Math.cos(a) * out, rise, Math.sin(a) * out).addScaledVector(dir, 0.35).normalize();
+        grow(to, d, len * (0.68 + R() * 0.14), r * 0.62, depth - 1);
+      }
+    };
+    grow(new V(0, -0.2, 0), new V(0.07, 1, 0.04).normalize(), 4.3, 0.6, 4);
+    // Root flare where the trunk meets the ground.
+    ring(5, (a) => wood.push(part(taper([[0, 0.9, 0], [Math.cos(a) * 0.7, 0.25, Math.sin(a) * 0.7], [Math.cos(a) * 1.4, 0.02, Math.sin(a) * 1.4]], 0.32, 0.06, 8), barkColor)));
+    const center = tips.reduce((c, p) => c.add(p), new V()).multiplyScalar(1 / tips.length);
+    const reach = Math.max(...tips.map((p) => p.distanceTo(center))) + 1.4;
+    const blade = leafShape(5), leaves = [], up = new V(0, 0, 1), n = new V(), q = new THREE.Quaternion(), twist = new THREE.Quaternion();
+    const perTip = hi() ? 17 : 5, size = hi() ? 0.82 : 1.4, spread = hi() ? 1.3 : 1.5;
+    for (const tip of tips) {
+      for (let i = 0; i < perTip; i++) {
+        n.set(R() * 2 - 1, R() * 1.8 - 0.9, R() * 2 - 1).normalize();
+        const at = tip.clone().addScaledVector(n, spread * (0.45 + 0.55 * Math.sqrt(R())));
+        const outward = at.distanceTo(center) / reach, top = (at.y - center.y) / reach;
+        const k = Math.min(1.12, Math.max(0.66, 0.7 + outward * 0.32 + top * 0.25 + (R() - 0.5) * 0.12));
+        q.setFromUnitVectors(up, n.clone().add(new V(0, 0.35, 0)).normalize()).multiply(twist.setFromAxisAngle(up, R() * TAU));
+        const g = part(blade, shade(greens[Math.floor(R() * greens.length)], k), { p: at.toArray(), q, s: size * (0.75 + R() * 0.45) });
+        leaves.push(windy(g, 0.35 + outward * 0.65));
+      }
+    }
+    // Grass in tufts around the foot of the trunk, and a few fallen leaves.
+    const ground = [];
+    for (let i = 0, nt = hi() ? 26 : 8; i < nt; i++) { const a = (i / nt) * TAU + R() * 0.5, d = 1.3 + R() * 3; ground.push(tuft(R, Math.cos(a) * d, Math.sin(a) * d, 0.6, hi() ? 22 : 7, grass, 0.8)); }
+    for (let i = 0; i < 9; i++) { const a = R() * TAU, d = 1 + R() * 3.4; ground.push(part(blade, shade(greens[i % greens.length], 0.85), { p: [Math.cos(a) * d, 0.03, Math.sin(a) * d], r: [-Math.PI / 2 + (R() - 0.5) * 0.3, 0, R() * TAU], s: 0.8 })); }
+    const drifting = [0, 1, 2, 3, 4].map((i) => tips[(i * 7 + 3) % tips.length]);
+    return { geo: merge(wood, leaves, ground), move: (t) => ({ rz: Math.sin(t * 0.8) * 0.008 }),
+      moving: drifting.map((tip, i) => ({ geo: part(blade, greens[i % greens.length], { s: 0.9 }), pivot: tip.toArray(), anim: (t) => {
+        const f = cyc(t, 5.5, i / 5), fall = tip.y - 0.05, k = easeIn(Math.min(1, f / 0.8)) * 0.4 + Math.min(1, f / 0.8) * 0.6;
+        return f < 0.8
+          ? { y: -k * fall, x: Math.sin(f * 11 + i) * 0.9, z: Math.cos(f * 8 + i) * 0.6, rx: Math.sin(t * 4 + i) * 1.1, rz: Math.cos(t * 3.3 + i) * 0.9, ry: t * 1.5, s: Math.min(1, f * 12) }
+          : { y: -fall, x: Math.sin(0.8 * 11 + i) * 0.9, z: Math.cos(0.8 * 8 + i) * 0.6, rx: -Math.PI / 2, s: 1 - win(f, 0.88, 1) };
+      } })) };
   },
 };
 
@@ -1483,7 +1523,13 @@ export function modelMaterial() {
   m.onBeforeCompile = (sh) => {
     sh.uniforms.uTime = uTime;
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nattribute float mask;\nattribute vec3 brandA;\nattribute vec3 brandB;\nvarying float vWater;\nvarying vec2 vFlat;')
+      .replace('#include <common>', '#include <common>\nattribute float mask;\nattribute float wind;\nattribute vec3 brandA;\nattribute vec3 brandB;\nuniform float uTime;\nvarying float vWater;\nvarying vec2 vFlat;')
+      // Wind: weighted vertices (leaves, blades) sway, each with its own phase so they flutter.
+      .replace('#include <begin_vertex>', `#include <begin_vertex>
+  if (wind > 0.0) {
+    float ph = dot(position, vec3(1.7, 0.9, 1.3));
+    transformed += wind * vec3(sin(uTime * 1.6 + ph) * 0.16 + sin(uTime * 0.7 + position.y * 0.3) * 0.1, sin(uTime * 2.3 + ph * 1.3) * 0.06, cos(uTime * 1.3 + ph * 0.8) * 0.13);
+  }`)
       .replace('#include <color_vertex>', `#include <color_vertex>
   vWater = mask > 4.5 ? 1.0 : 0.0;
   vFlat = position.xz;
