@@ -71,10 +71,11 @@ const cyl = (rt, rb, h, seg = 14) => {
   return new THREE.LatheGeometry(pts, hi() ? Math.max(32, seg * 2) : Math.max(16, seg));
 };
 // A shape turned on a lathe from [radius, height] points (bottles, cups, bells, nose cones).
-const lathe = (pts, seg) => new THREE.LatheGeometry(pts.map(([r, y]) => new THREE.Vector2(Math.max(0, r), y)), seg || (hi() ? 48 : 18));
+const lathe = (pts, seg) => new THREE.LatheGeometry(pts.map(([r, y]) => new THREE.Vector2(Math.max(0, r), y)), hi() ? seg || 48 : Math.min(seg || 12, 12));
 // A smooth curve through points (handles, cables, straws, hoses) as a tube of radius r.
 const tube = (pts, r, closed = false) => new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map((p) => new V(...p)), closed), hi() ? 48 : 16, r, hi() ? 12 : 6, closed);
-const ball = (r) => new THREE.SphereGeometry(r, hi() ? 32 : 14, hi() ? 20 : 9);
+const ball = (r) => new THREE.SphereGeometry(r, hi() ? 32 : 10, hi() ? 20 : 6);
+const capsule = (r, len) => new THREE.CapsuleGeometry(r, len, hi() ? 6 : 2, hi() ? 14 : 6);
 const cone = (r, h, seg = 12) => (seg <= 8 ? faceted(new THREE.ConeGeometry(r, h, seg)) : new THREE.ConeGeometry(r, h, hi() ? 40 : 16));
 const torus = (r, t, arc = Math.PI * 2, seg = 24) => new THREE.TorusGeometry(r, t, hi() ? 16 : 8, hi() ? Math.max(48, seg * 2) : seg, arc);
 function extrude(points, depth) {
@@ -187,6 +188,6 @@ const K = {
 };
 
 export const withDetail = (detail, make) => { const was = DETAIL; DETAIL = detail; try { return make(); } finally { DETAIL = was; } };
-export { THREE, V, BRAND, part, windy, rand, taper, leafShape, bladeShape, shade, tuft, merge, place, box, cyl, lathe, tube, ball, cone, torus, extrude, prism, star, beam, ring, faceted, hi,
+export { THREE, V, BRAND, part, windy, rand, taper, leafShape, bladeShape, shade, tuft, merge, place, box, cyl, lathe, tube, ball, capsule, cone, torus, extrude, prism, star, beam, ring, faceted, hi,
   TAU, clamp01, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, legacy, K };
 
