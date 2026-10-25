@@ -107,7 +107,8 @@
   "adobe": "The tools every creative works in: layers, PDFs and the red A",
   "intuit": "The money software for households and small businesses: refunds and books",
   "workday": "One system for a company's people and its pay",
-  "motorolasolutions": "The radios first responders bet their lives on"
+  "motorolasolutions": "The radios first responders bet their lives on",
+  "charter": "The cable already runs to every house on the street"
  },
  "bank": [
   "PNC Financial Services",
@@ -504,7 +505,6 @@
   "Interpublic Group"
  ],
  "comms": [
-  "Charter Communications",
   "CenturyLink",
   "Frontier Communications",
   "Windstream Holdings",
@@ -1470,7 +1470,6 @@
   "Aramark": 2,
   "American Tower": 1,
   "DISH Network": 2,
-  "Charter Communications": 2,
   "Altice USA": 3,
   "Frontier Communications": 3,
   "Windstream Holdings": 3,
@@ -1702,5 +1701,8 @@
  ],
  "motorolasolutions": [
   "Motorola Solutions"
+ ],
+ "charter": [
+  "Charter Communications"
  ]
 }

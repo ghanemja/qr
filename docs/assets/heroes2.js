@@ -703,4 +703,38 @@ export const HEROES2 = {
     veh(place(van(K.white, '#e5533d'), { s: 0.9 }), ambGo, -Math.PI / 2, '#e5533d');
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Charter (Spectrum): the cable already runs to every house. From the headend with its
+  // dishes, light races down the line on the poles and into each home; one by one the houses
+  // light up with TV and Wi-Fi.
+  charter: { finder: '#0099d8', build: () => {
+    const R = rand(120), out = [], BLUE = '#0099d8', NAVY = '#003057';
+    out.push(ground('#8fc66f'), part(box(10.2, 0.03, 1.2), '#5b616b', { p: [0, y0 + 0.015, 0.4] }), part(box(1.2, 0.03, 4.2), '#5b616b', { p: [-0.4, y0 + 0.015, 2.9] }));
+    // ---- the headend, back left: a low building with satellite dishes
+    const HX = -3.2, HZ = -3.4;
+    out.push(part(rbox(2.6, 1.4, 1.8, 0.05), '#e6e9ed', { p: [HX, y0 + 0.7, HZ] }), part(box(2.64, 0.3, 1.84), NAVY, { p: [HX, y0 + 1.3, HZ] }), place(pixText('SPECTRUM', 0.05, K.white, 0.02), { p: [HX, y0 + 1.3, HZ + 0.93] }));
+    [[-4.4, -1.6, 0.7], [-2.6, -1.8, 0.55], [-1.2, -4.0, 0.6]].forEach(([x, z, r]) => out.push(part(cyl(0.06, 0.08, 0.8, 10), '#9aa1a9', { p: [x, y0 + 0.4, z] }), place(radarDish(r), { p: [x, y0 + 0.9, z], r: [0, -2.3, 0] })));
+    // ---- the homes along the street
+    const homes = [[1.4, -1.6, 0], [3.6, -1.6, 0], [1.8, 2.6, Math.PI], [3.8, 2.6, Math.PI], [-2.6, 2.4, Math.PI]];
+    homes.forEach(([x, z, ry], i) => out.push(place(home(['#fbf3e3', '#e8eef4', '#f6e7e1', '#eef3e6', '#f1e2c6'][i], ['#8a5a36', '#5b6b7d', '#a35a3c', '#3f6f8f', '#6f4a2c'][i], 1.6, 1.3, 1.0), { p: [x, y0, z], r: [0, ry === Math.PI ? Math.PI / 2 : 0, 0] })));
+    // ---- the poles and the cable run: headend → along the street → drops to each house
+    const poles = [-1.8, 0.4, 2.6, 4.6], PY = 2.0, PZ = -0.35;
+    poles.forEach((x) => out.push(part(cyl(0.06, 0.08, PY + 0.2, 10), '#8a5a36', { p: [x, y0 + (PY + 0.2) / 2, PZ] }), part(box(0.05, 0.05, 0.6), '#6f4a2c', { p: [x, y0 + PY, PZ] }), part(cyl(0.12, 0.12, 0.3, 10), '#5b616b', { p: [x, y0 + PY - 0.3, PZ + 0.1] })));
+    const trunk = curve([[HX + 1.3, y0 + 1.2, HZ + 0.4], [-1.8, y0 + PY, PZ], [-0.7, y0 + PY - 0.18, PZ], [0.4, y0 + PY, PZ], [1.5, y0 + PY - 0.18, PZ], [2.6, y0 + PY, PZ], [3.6, y0 + PY - 0.18, PZ], [4.6, y0 + PY, PZ]]);
+    out.push(part(tubeOn(trunk, 0.025, hi() ? 120 : 30), '#1d1f24'));
+    const drops = homes.map(([x, z, ry], i) => { const px = poles.reduce((a, b) => (Math.abs(b - x) < Math.abs(a - x) ? b : a)), dz = ry ? 0.55 : -0.55; return curve([[px, y0 + PY, PZ], [(px + x) / 2, y0 + PY - 0.4, (PZ + z + dz) / 2], [x, y0 + 1.0, z + dz]]); });
+    drops.forEach((c) => out.push(part(tubeOn(c, 0.018, hi() ? 32 : 10), '#1d1f24')));
+    out.push(trees(R, [[4.6, 4.6], [0.4, 4.6], [-4.6, 4.6], [4.6, -4.4], [0.4, -4.4], [-4.6, 0.8]]));
+    // ---- moving parts
+    const moving = [], P = 8;
+    // Light down the trunk line.
+    for (let k = 0; k < 8; k++) moving.push(rider(part(new THREE.SphereGeometry(0.09, 10, 7), '#7fe3ff'), trunk, 2.4, k / 8));
+    // Into each home, which lights up with TV and Wi-Fi.
+    homes.forEach(([x, z, ry], i) => {
+      const at = 0.1 + i * 0.15;
+      moving.push(rider(part(new THREE.SphereGeometry(0.11, 10, 7), '#7fe3ff'), drops[i], P, 0, at, at + 0.1));
+      moving.push({ geo: merge([0, 1, 2].map((k) => part(torus(0.18 + k * 0.14, 0.035, Math.PI / 2, 16), BLUE, { r: [0, 0, Math.PI / 4] }))), pivot: [x, y0 + 2.0, z], anim: (t) => { const f = cyc(t, P); return f > at + 0.1 ? { ry: Math.PI / 4, s: Math.min(1, win(f, at + 0.1, at + 0.16)) * (1 + Math.sin(t * 4 + i) * 0.06) * Math.min(1, (1 - f) / 0.05) + 0.001 } : { s: 0.001 }; } });
+      moving.push({ geo: part(box(0.5, 0.36, 0.05), '#7fe3ff'), pivot: [x + (ry ? 0.55 : 0.2), y0 + 0.62, z + (ry ? 0.2 : 0.55)], anim: (t) => { const f = cyc(t, P); return f > at + 0.1 && f < 0.97 ? { ry: ry ? Math.PI / 2 : 0 } : { s: 0.001 }; } });
+    });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
