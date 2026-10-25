@@ -165,6 +165,13 @@ const tubeGeo = (cap = '#e5533d') => merge(part(cyl(0.07, 0.07, 0.38, 12), '#eef
 // A green tick in a disc, facing +z, centred on the origin.
 const tickGeo = (r = 0.3) => merge(part(cyl(r, r, 0.06, 24), '#5fae5b', { r: [Math.PI / 2, 0, 0] }), part(extrude([[-0.5, 0.05], [-0.25, -0.2], [0.45, 0.45], [0.35, 0.55], [-0.25, 0.0], [-0.42, 0.15]].map(([x, y]) => [x * r, y * r]), 0.08), K.white, { p: [0, 0, 0.03] }));
 
+// A heart, flat face toward +z, about 2s across, centred on the origin, with a bevelled edge.
+const heartGeo = (s = 1, depth = 0.6) => { const pts = []; for (let i = 0; i < (hi() ? 48 : 20); i++) { const a = (i / (hi() ? 48 : 20)) * TAU; pts.push([(16 * Math.sin(a) ** 3) / 16 * s, ((13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a)) / 16) * s]); } return extrude(pts, depth); };
+// A hospital bed facing +x on y = 0, with a patient under the covers.
+const bed = (blanket = 'A') => merge(part(rbox(2.0, 0.3, 1.0, 0.05), '#c9ced6', { p: [0, 0.55, 0] }), [-0.85, 0.85].flatMap((x) => [-0.4, 0.4].map((z) => part(cyl(0.04, 0.04, 0.45, 8), K.steelDk, { p: [x, 0.25, z] }))),
+  part(rbox(0.08, 0.7, 1.0, 0.03), '#9aa1a9', { p: [-1.0, 0.8, 0] }), part(rbox(1.9, 0.2, 0.95, 0.08), K.white, { p: [0, 0.78, 0] }), part(rbox(1.3, 0.22, 0.98, 0.08), blanket, { p: [0.3, 0.86, 0] }),
+  part(rbox(0.4, 0.14, 0.6, 0.06), K.white, { p: [-0.7, 0.92, 0] }), part(new THREE.SphereGeometry(0.17, 14, 10), '#e9b98f', { p: [-0.62, 1.08, 0] }), part(new THREE.SphereGeometry(0.175, 14, 10), '#5a3a28', { p: [-0.68, 1.12, 0], s: [1, 0.7, 1] }));
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -1362,5 +1369,52 @@ export const SCENES = {
       pivot: [0, y0 + 0.08, 4.35], anim: (t) => { const f = cyc(t, 12), x = f < 0.15 ? SX - 6 + 6 * easeOut(f / 0.15) : f < 0.65 ? SX : SX + 10 * easeIn(win(f, 0.65, 1)); return { x, s: clamp01((5.0 - Math.abs(x)) / 0.8) * 0.999 + 0.001 }; } });
     moving.push(...walker(moving.length, (t) => { const k = Math.sin(t * 0.35); return { x: 0.6 + k * 1.4, z: 0.6, ry: Math.cos(t * 0.35) > 0 ? 0 : Math.PI }; }, { shirt: K.orange, pants: '#2b3a55', y: y0, carry: part(cyl(0.05, 0.08, 0.2, 10), K.white, { p: [0.25, 0.95, 0.2] }) }));
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [3.4, y0, -0.4], topAt: [RX, y0 + 3.05, RZ] };
+  },
+
+  // Heartbeat (medical devices, supplies, implants, wearables): devices that keep people going. A
+  // big heart beats in time with the trace racing across the wall monitor; a patient rests by a
+  // bedside monitor and a dripping IV; a supply cart rolls through; and in rehab a patient with a
+  // new knee walks the parallel bars beside the physio.
+  'health:1': () => {
+    const R = rand(1801), out = [], moving = [];
+    out.push(slab('#e6ecef'), labWalls(2.4, '#eaf2f4'));
+    out.push(part(box(10.2, 0.012, 4.0), '#d7e4ea', { p: [0, y0 + 0.006, -3.0] }));
+    // ---- the ECG on the back wall: a glowing trace, with the bright dot racing along it
+    const beat = (x) => { const u = ((x % 2.4) + 2.4) % 2.4; return u > 1.0 && u < 1.1 ? (u - 1.0) * 6 : u >= 1.1 && u < 1.25 ? 0.6 - (u - 1.1) * 8 : u >= 1.25 && u < 1.35 ? -0.6 + (u - 1.25) * 6 : u > 1.6 && u < 1.9 ? Math.sin((u - 1.6) / 0.3 * Math.PI) * 0.15 : 0; };
+    const ecgPts = []; for (let x = -4.6; x <= 0.2; x += 0.04) ecgPts.push([x, y0 + 1.5 + beat(x + 4.6) * 0.8, -4.98]);
+    out.push(part(rbox(5.2, 1.6, 0.06, 0.04), '#14232b', { p: [-2.2, y0 + 1.5, -5.0] }), part(tube(ecgPts, 0.03), '#62e38a'));
+    // ---- the big heart on its plinth
+    const HX = -1.6, HZ = -1.2;
+    out.push(part(cyl(0.9, 1.0, 0.5, 32), K.white, { p: [HX, y0 + 0.25, HZ] }), part(cyl(1.02, 1.04, 0.14, 32), 'A', { p: [HX, y0 + 0.07, HZ] }), part(cyl(0.08, 0.1, 0.6, 10), K.steel, { p: [HX, y0 + 0.8, HZ] }));
+    // ---- the patient's bed, monitor and IV at the back right
+    const BX = 2.6, BZ = -3.6;
+    out.push(place(bed('A'), { p: [BX, y0, BZ] }), part(cyl(0.04, 0.04, 2.0, 8), K.steel, { p: [BX - 1.4, y0 + 1.0, BZ + 0.7] }), part(cyl(0.3, 0.3, 0.04, 5), K.steelDk, { p: [BX - 1.4, y0 + 0.04, BZ + 0.7] }), part(rbox(0.3, 0.42, 0.1, 0.06), '#d9eef7', { p: [BX - 1.4, y0 + 1.75, BZ + 0.7] }), part(tube([[BX - 1.4, y0 + 1.5, BZ + 0.7], [BX - 1.1, y0 + 1.0, BZ + 0.5], [BX - 0.5, y0 + 0.95, BZ + 0.2]], 0.012), '#cfe6ef'));
+    out.push(part(rbox(0.8, 0.6, 0.12, 0.04), '#3a3f47', { p: [BX + 1.6, y0 + 1.6, -4.95] }), part(box(0.68, 0.48, 0.02), '#0f1b22', { p: [BX + 1.6, y0 + 1.6, -4.88] }), part(rbox(0.5, 0.4, 0.4, 0.04), '#d8dde3', { p: [BX + 1.6, y0 + 0.2, BZ + 0.2] }));
+    // ---- rehab: parallel bars at the front
+    const PZ = 3.0, PX0 = -1.6, PX1 = 2.2;
+    [PZ - 0.45, PZ + 0.45].forEach((z) => { out.push(part(cyl(0.035, 0.035, PX1 - PX0, 10), K.steel, { p: [(PX0 + PX1) / 2, y0 + 0.95, z], r: [0, 0, Math.PI / 2] })); [PX0, (PX0 + PX1) / 2, PX1].forEach((x) => out.push(part(cyl(0.035, 0.035, 0.95, 8), K.steelDk, { p: [x, y0 + 0.47, z] }))); });
+    out.push(part(rbox(PX1 - PX0 + 0.6, 0.04, 1.4, 0.02), '#8fc4e8', { p: [(PX0 + PX1) / 2, y0 + 0.02, PZ] }));
+    [[4.5, 4.4], [-4.5, 0.6], [4.5, 0.0]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.55), part(cyl(0.3, 0.25, 0.4, 16), '#c9ced6', { p: [x, y0 + 0.2, z] })));
+    // ---- moving parts
+    const P = 1.2, pulse = (t) => { const f = cyc(t, P); return bump(f, 0.1, 0.05) * 0.14 + bump(f, 0.28, 0.06) * 0.08; };
+    moving.push({ geo: merge(part(heartGeo(1.1, 0.7), 'A'), part(heartGeo(0.82, 0.74).translate(-0.12, 0.12, 0.02), 'Ad')), pivot: [HX, y0 + 2.2, HZ], anim: (t) => { const k = pulse(t); return { s: 1 + k, ry: Math.PI / 4 + Math.sin(t * 0.4) * 0.3 }; } });
+    // The dot racing along the trace, in time with the heart.
+    moving.push({ geo: part(new THREE.SphereGeometry(0.08, 12, 8), '#d9ffe6'), pivot: [-4.6, y0 + 1.5, -4.95], anim: (t) => { const u = cyc(t, P * 2), x = u * 4.8; return { x, y: beat(x) * 0.8 }; } });
+    // The bedside monitor's own small trace dot, and the IV drip.
+    moving.push({ geo: part(new THREE.SphereGeometry(0.03, 8, 6), '#62e38a'), pivot: [BX + 1.3, y0 + 1.6, -4.86], anim: (t) => { const u = cyc(t, P), x = u * 0.6; return { x, y: beat(x * 4 + 1.0) * 0.2 }; } });
+    moving.push({ geo: part(new THREE.SphereGeometry(0.03, 8, 6), '#bfe3f2', { s: [1, 1.6, 1] }), pivot: [BX - 1.4, y0 + 1.5, BZ + 0.7], anim: (t) => { const u = cyc(t, 1.5); return { y: -u * 0.18, s: u < 0.9 ? 1 : 0.001 }; } });
+    // A nurse checks on the patient.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 14), k = f < 0.4 ? easeIO(f / 0.4) : f < 0.6 ? 1 : 1 - easeIO(win(f, 0.6, 1)); return { x: 0.6 + k * 1.4, z: -2.0 - k * 0.6, ry: f < 0.5 ? -0.4 : Math.PI - 0.4, still: f > 0.4 && f < 0.6 }; }, { shirt: '#5fb7c9', pants: '#5fb7c9', y: y0 }));
+    // The rehab patient walks the bars (knee brace on), the physio alongside.
+    const px = (t) => { const f = cyc(t, 12); return PX0 + 0.3 + (PX1 - PX0 - 0.6) * (f < 0.5 ? easeIO(f * 2) : 1 - easeIO((f - 0.5) * 2)); };
+    const dir = (t) => (cyc(t, 12) < 0.5 ? 0 : Math.PI);
+    moving.push(...walker(moving.length, (t) => ({ x: px(t), z: PZ, ry: dir(t) }), { shirt: 'B', pants: '#3b4a5c', y: y0, carry: part(cyl(0.09, 0.09, 0.14, 10), 'A', { p: [0, 0.5, 0.1] }) }));
+    moving.push(...walker(moving.length, (t) => ({ x: px(t) + 0.2, z: PZ + 0.9, ry: dir(t) }), { shirt: '#5fae5b', pants: '#2b3a55', y: y0 }));
+    // A supply cart rolls through, stocked with boxes.
+    const cartPath = curve([[-4.4, 0, 4.4], [-3.0, 0, 1.4], [0.4, 0, 0.8], [3.2, 0, 1.2], [3.8, 0, 3.8], [0.6, 0, 4.5]], true);
+    moving.push({ geo: merge(part(rbox(1.0, 0.06, 0.6, 0.02), K.steel, { p: [0, 0.3, 0] }), part(rbox(1.0, 0.06, 0.6, 0.02), K.steel, { p: [0, 0.75, 0] }), [[-0.45, -0.25], [0.45, -0.25], [-0.45, 0.25], [0.45, 0.25]].flatMap(([x, z]) => [part(cyl(0.025, 0.025, 0.8, 6), K.steelDk, { p: [x, 0.45, z] }), part(new THREE.CylinderGeometry(0.07, 0.07, 0.04, 10), '#1d1f24', { p: [x, 0.07, z], r: [Math.PI / 2, 0, 0] })]),
+      [[-0.25, 0.42, 'A'], [0.2, 0.42, K.white], [-0.2, 0.87, K.white], [0.25, 0.87, 'B']].map(([x, y, c]) => part(rbox(0.38, 0.22, 0.45, 0.03), c, { p: [x, y, 0] }))),
+      pivot: [0, y0, 0], anim: (t) => { const { p, ry } = along(cartPath, cyc(t, 20)); return { x: p.x, z: p.z, ry }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.6, y0, 2.2], topAt: [BX + 1.6, y0 + 0.4, BZ + 0.2] };
   },
 };
