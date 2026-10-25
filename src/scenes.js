@@ -292,6 +292,15 @@ const helixGeo = (h = 1.4, r = 0.3) => { const n = hi() ? 16 : 8, g = []; for (l
 // A whiteboard on legs facing +z, on y = 0.
 const whiteboard = (w = 1.8) => merge(part(rbox(w, 1.1, 0.06, 0.03), K.white, { p: [0, 1.35, 0] }), part(box(w + 0.06, 0.06, 0.1), '#9aa1a9', { p: [0, 0.78, 0.03] }), [-1, 1].map((sx) => part(cyl(0.03, 0.03, 1.9, 8), '#9aa1a9', { p: [sx * w * 0.45, 0.95, -0.05] })), [-1, 1].map((sx) => part(box(0.06, 0.04, 0.5), '#9aa1a9', { p: [sx * w * 0.45, 0.02, 0] })));
 
+// An airliner facing +x, wheels on y = 0, about 3.4 long and 3.6 across the wings: white body with
+// a window band and a brand cheatline, swept wings with engines, brand tail.
+const jet = (tail = 'A', body = '#f4f5f6', gear = true) => { const Y = 0.62, wing = (sz) => part(extrude([[0.45, 0], [-0.25, 0], [-0.95, 1.75 * sz], [-0.7, 1.8 * sz]].map(([x, z]) => [x, z]), 0.07), '#dfe3e8', { p: [0.1, Y - 0.1, 0], r: [Math.PI / 2, 0, 0] });
+  return merge(part(capsule(0.3, 2.7), body, { p: [0, Y, 0], r: [0, 0, Math.PI / 2] }), part(box(2.4, 0.07, 0.6), '#26323f', { p: [0.05, Y + 0.1, 0] }), part(box(2.9, 0.06, 0.605), tail, { p: [-0.05, Y - 0.05, 0] }),
+    part(rbox(0.22, 0.1, 0.42, 0.04), '#26323f', { p: [1.48, Y + 0.13, 0], r: [0, 0, -0.35] }), wing(1), wing(-1),
+    part(extrude([[-1.0, 0], [-1.65, 0], [-1.85, 0.95], [-1.55, 0.95]], 0.07), tail, { p: [0, Y + 0.2, 0] }), part(extrude([[-1.3, 0], [-1.75, 0], [-1.9, 0.6], [-1.7, 0.62]], 0.05), '#dfe3e8', { p: [0, Y + 0.05, 0], r: [Math.PI / 2, 0, 0] }), part(extrude([[-1.3, 0], [-1.75, 0], [-1.9, -0.6], [-1.7, -0.62]], 0.05), '#dfe3e8', { p: [0, Y + 0.05, 0], r: [Math.PI / 2, 0, 0] }),
+    [-0.75, 0.75].map((z) => part(cyl(0.13, 0.11, 0.55, 16), '#c9ced6', { p: [0.1, Y - 0.28, z], r: [0, 0, Math.PI / 2] })), [-0.75, 0.75].map((z) => part(cyl(0.09, 0.09, 0.02, 14), K.dark, { p: [0.38, Y - 0.28, z], r: [0, 0, Math.PI / 2] })),
+    gear ? [[1.0, 0], [-0.15, 0.25], [-0.15, -0.25]].flatMap(([x, z]) => [part(cyl(0.025, 0.025, Y - 0.3, 6), K.dark, { p: [x, (Y - 0.3) / 2 + 0.08, z] }), part(new THREE.CylinderGeometry(0.09, 0.09, 0.08, 12), '#1d1f24', { p: [x, 0.09, z], r: [Math.PI / 2, 0, 0] })]) : []); };
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -2450,5 +2459,63 @@ export const SCENES = {
       for (let k = 0; k < 4; k++) moving.push({ geo: part(box(1.2 - k * 0.15, 0.05, 0.02), k % 2 ? '#3d7be0' : '#2b2f36', { p: [(1.2 - k * 0.15) / 2, 0, 0] }), pivot: [x - side.x * 0.75 + fw.x * 0.04, y0 + 1.75 - k * 0.2, z - side.z * 0.75 + fw.z * 0.04], anim: (t) => { const f = cyc(t, 8, i * 0.4); return { ry, sx: win(f, k * 0.18, k * 0.18 + 0.15) * (1 - win(f, 0.92, 0.98)) * 0.999 + 0.001 }; } });
     });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-2.2, y0, 2.0], topAt: [-4.4, y0 + 2.0, -3.6] };
+  },
+
+  // Control tower (airlines and travel booking): a network that brings every flight home. The
+  // tower's radar sweeps while two jets circle in the holding stack; the next one is cleared, flies
+  // the glide path, touches down in a puff of tyre smoke, rolls out and taxis to the gate; the
+  // departures board flips its row to green, and the travellers walk out to the terminal.
+  'plane:0': () => {
+    const R = rand(3401), out = [], moving = [];
+    out.push(slab('#9ccc7a'));
+    // ---- the runway along the front, the taxiway up to the apron
+    const RZ = 3.0;
+    out.push(part(box(10.4, 0.04, 1.6), '#5b616b', { p: [0, y0 + 0.02, RZ] }));
+    for (let i = 0; i < 9; i++) out.push(part(box(0.6, 0.012, 0.08), K.white, { p: [-4.0 + i * 1.0, y0 + 0.045, RZ] }));
+    [-4.6, 4.6].forEach((x) => { for (let k = 0; k < 6; k++) out.push(part(box(0.5, 0.012, 0.1), K.white, { p: [x, y0 + 0.045, RZ - 0.6 + k * 0.24] })); });
+    if (hi()) for (let x = -5.0; x <= 5.0; x += 0.5) [RZ - 0.85, RZ + 0.85].forEach((z) => out.push(part(new THREE.SphereGeometry(0.05, 8, 6), '#ffd27a', { p: [x, y0 + 0.06, z] })));
+    out.push(part(box(1.0, 0.035, 3.8), '#6b7078', { p: [-2.6, y0 + 0.018, 0.4] }), part(rbox(7.6, 0.035, 2.4, 0.03), '#7d838b', { p: [0.6, y0 + 0.018, -1.6] }));
+    if (hi()) for (let z = RZ - 0.8; z > -0.8; z -= 0.4) out.push(part(box(0.05, 0.012, 0.2), '#f2c94c', { p: [-2.6, y0 + 0.04, z] }));
+    // ---- the terminal (back right) with its gates and the departures board
+    const TX = 2.3, TZ = -3.6, TW = 5.0;
+    out.push(part(rbox(TW, 1.7, 1.8, 0.06), '#eef0f2', { p: [TX, y0 + 0.85, TZ] }), part(box(TW - 0.4, 0.9, 0.05), '#9fcdea', { p: [TX, y0 + 0.9, TZ + 0.91] }), part(extrude([[-TW / 2 - 0.1, 0], [TW / 2 + 0.1, 0], [TW / 2 - 0.2, 0.5], [-TW / 2 + 0.2, 0.5]], 2.0), 'A', { p: [TX, y0 + 1.7, TZ], r: [0, 0, 0] }));
+    [1.0, 3.4].forEach((x) => out.push(part(rbox(0.5, 0.5, 1.4, 0.05), '#c9ced6', { p: [x, y0 + 0.95, TZ + 1.5] }), part(cyl(0.06, 0.06, 0.7, 8), K.steelDk, { p: [x, y0 + 0.35, TZ + 2.0] })));
+    const DB = new V(TX + 1.3, y0, TZ + 1.0);
+    out.push(part(rbox(1.6, 1.0, 0.1, 0.03), K.dark, { p: [DB.x - 3.6, y0 + 2.4, TZ + 0.95] }), part(cyl(0.04, 0.04, 0.6, 6), K.steelDk, { p: [DB.x - 3.6, y0 + 1.95, TZ + 0.9] }));
+    const rows = 4, BX0 = DB.x - 3.6;
+    for (let i = 0; i < rows; i++) out.push(part(box(0.9, 0.12, 0.02), '#f2c94c', { p: [BX0 - 0.25, y0 + 2.75 - i * 0.2, TZ + 1.01] }), part(box(0.35, 0.12, 0.02), i === 1 ? '#3a3f47' : '#e9ecef', { p: [BX0 + 0.45, y0 + 2.75 - i * 0.2, TZ + 1.01] }));
+    // A parked jet at the far gate.
+    out.push(place(jet('Bd'), { p: [3.4, y0, -1.0], r: [0, Math.PI / 2, 0], s: [0.8, 0.8, 0.8] }));
+    // ---- the control tower (back left)
+    const CX = -3.4, CZ = -2.9, CH = 3.4;
+    out.push(part(rbox(1.6, 0.6, 1.6, 0.05), '#e3e0da', { p: [CX, y0 + 0.3, CZ] }), part(cyl(0.38, 0.48, CH, 24), '#eef0f2', { p: [CX, y0 + CH / 2, CZ] }), part(cyl(0.5, 0.5, 0.1, 24), 'A', { p: [CX, y0 + CH * 0.5, CZ] }));
+    out.push(part(cyl(0.95, 0.7, 0.3, 8), '#d8dde3', { p: [CX, y0 + CH + 0.15, CZ] }), part(cyl(0.98, 0.92, 0.75, 8), '#4a7aa8', { p: [CX, y0 + CH + 0.68, CZ] }), part(cyl(1.08, 1.0, 0.16, 8), 'A', { p: [CX, y0 + CH + 1.12, CZ] }));
+    if (hi()) ring(8, (a) => out.push(part(box(0.05, 0.75, 0.05), '#d8dde3', { p: [CX + Math.cos(a + Math.PI / 8) * 0.96, y0 + CH + 0.68, CZ + Math.sin(a + Math.PI / 8) * 0.96] })));
+    out.push(part(cyl(0.05, 0.05, 0.5, 8), K.steelDk, { p: [CX + 0.4, y0 + CH + 1.45, CZ] }));
+    // A windsock by the runway, trees.
+    out.push(part(cyl(0.04, 0.04, 1.4, 8), K.steelDk, { p: [4.1, y0 + 0.7, RZ - 1.4] }));
+    [[-4.6, -0.8], [0.4, 0.8], [4.6, 0.6], [1.6, 1.2]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.5 + R() * 0.15)));
+    // ---- moving parts (one 14 s cycle)
+    const P = 14, F = (t) => cyc(t, P);
+    moving.push({ geo: radarDish(0.5, K.white), pivot: [CX, y0 + CH + 1.35, CZ], anim: (t) => ({ ry: t * 1.4 }) });
+    moving.push({ geo: part(new THREE.SphereGeometry(0.09, 10, 8), '#ff3b30'), pivot: [CX + 0.4, y0 + CH + 1.75, CZ], anim: (t) => ({ s: cyc(t, 1.2) < 0.3 ? 1 : 0.001 }) });
+    moving.push({ geo: merge(part(cone(0.14, 0.7, 12), (x, y) => (Math.floor((y + 0.35) * 5) % 2 ? K.white : K.orange), { r: [0, 0, Math.PI / 2] })), pivot: [4.1, y0 + 1.3, RZ - 1.4], anim: (t) => ({ ry: 2.6 + Math.sin(t * 0.7) * 0.3, rz: -0.2 + Math.sin(t * 2.3) * 0.08, x: -0.35 }) });
+    // The holding stack: two jets circling high over the field.
+    [0, Math.PI].forEach((o, i) => moving.push({ geo: jet(i ? 'B' : 'A', '#f4f5f6', false).scale(0.55, 0.55, 0.55), pivot: [0.6, 4.9 + i * 0.6, 0.2], anim: (t) => { const a = t * 0.45 + o; return { x: Math.cos(a) * 2.6, z: -Math.sin(a) * 2.6, ry: a + Math.PI / 2, rx: -0.25 }; } }));
+    // The arrival: down the glide path from the right, flare, touchdown, roll-out, taxi to the gate.
+    const glide = (f) => {
+      if (f < 0.32) { const k = win(f, 0, 0.32); return { p: new V(6.5 - k * 5.2, y0 + 4.2 * (1 - k) ** 1.4, RZ), ry: 0 + Math.PI, pitch: 0.12 * (1 - k) }; }
+      if (f < 0.5) { const k = easeOut(win(f, 0.32, 0.5)); return { p: new V(1.3 - k * 3.9, y0, RZ), ry: Math.PI, pitch: 0 }; }
+      const taxi = curve([[-2.6, 0, RZ], [-2.6, 0, 0.6], [-2.2, 0, -1.4], [-0.4, 0, -1.7]]), k = easeIO(win(f, 0.52, 0.8)), { p, ry } = along(taxi, Math.min(0.999, k));
+      return { p: new V(p.x, y0, p.z), ry: f < 0.52 ? Math.PI : ry, pitch: 0 };
+    };
+    moving.push({ geo: jet('A').scale(0.85, 0.85, 0.85), pivot: [0, 0, 0], anim: (t) => { const f = F(t), g = glide(f); return { x: g.p.x, y: g.p.y, z: g.p.z, ry: g.ry, rz: g.pitch, s: (f > 0.92 ? Math.max(0.001, 1 - win(f, 0.92, 0.97)) : f < 0.03 ? f / 0.03 : 1) }; } });
+    // Tyre smoke at touchdown.
+    for (let k = 0; k < 3; k++) moving.push({ geo: puff(0.25), pivot: [1.3 - k * 0.3, y0 + 0.15, RZ + (k - 1) * 0.15], anim: (t) => { const f = F(t), u = win(f, 0.32, 0.42); return { y: u * 0.3, s: u > 0 && u < 1 ? (0.6 + u) * (1 - u) * 1.6 : 0.001 }; } });
+    // The board flips the arriving row to green.
+    moving.push({ geo: part(box(0.35, 0.12, 0.03), '#46d36b'), pivot: [BX0 + 0.45, y0 + 2.55, TZ + 1.02], anim: (t) => { const f = F(t); return { sy: f > 0.42 ? 1 : Math.max(0.001, 1 - cyc(t, 0.25)), s: 1 }; } });
+    // Travellers out of the jet and into the terminal.
+    for (let k = 0; k < 2; k++) moving.push(...walker(moving.length, (t) => { const f = F(t), u = win(f, 0.8 + k * 0.03, 0.95 + k * 0.03), A = new V(-0.4 + k * 0.3, 0, -1.2), B = new V(0.2 + k * 0.4, 0, TZ + 1.0), p = A.lerp(B, u); return { x: p.x, z: p.z, ry: Math.atan2(-(TZ + 1.0 - (-1.2)), 0.6), s: u > 0 && u < 1 ? 0.8 : 0.001 }; }, { shirt: ['#e5533d', '#8a6cf0'][k], pants: '#2b3a55', y: y0, carry: place(merge(part(rbox(0.3, 0.4, 0.18, 0.04), k ? 'B' : 'A'), part(cyl(0.02, 0.02, 0.3, 6), K.dark, { p: [0, 0.32, 0] })), { p: [0, 0.25, 0.32] }) }));
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-4.0, y0, 1.3], topAt: [TX + 2.0, y0 + 2.2, TZ] };
   },
 };
