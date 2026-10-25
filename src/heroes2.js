@@ -1304,34 +1304,41 @@ export const HEROES2 = {
     for (let k = 0; k < (hi() ? 12 : 4); k++) moving.push({ geo: part(torus(0.08, 0.035, TAU, 12), '#e9b949'), pivot: [BX - 0.2 + (k % 3) * 0.12, y0 + 2.6, BZ + 0.2 + (k % 4) * 0.08], anim: (t) => { const f = cyc(t, P); if (f < 0.25 || f > 0.75) return { s: 0.001 }; const u = cyc(t, 0.8, k / 12); return { y: -u * 1.1, rx: u * 8 + k, rz: u * 5, s: 1 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // Mondelez International: the snacks the world reaches for. Off the line roll the Oreos; the
-  // giant one twists open and dunks in the glass of milk, while the purple Cadbury bars go out
-  // to the world.
+  // Mondelez International: the snacks the world reaches for. The giant Oreo twists open and
+  // dunks in the glass of milk; Cadbury, Toblerone and Ritz stand round it; and packs of all of
+  // them circle the turning globe they are sold across.
   mondelez: { finder: '#4f2170', build: () => {
-    const R = rand(138), out = [], PURP = '#4f2170', OREO = '#2b1d16';
-    out.push(ground('#8fc66f'), part(rbox(7.6, 0.08, 6.0, 0.03), '#ece6f2', { p: [-0.4, y0 + 0.04, -0.8] }));
-    // ---- the factory line along the back
-    out.push(part(rbox(7.6, 2.4, 0.2, 0.03), '#e2dbea', { p: [-0.4, y0 + 1.2, -4.4] }), part(box(7.62, 0.3, 0.22), PURP, { p: [-0.4, y0 + 2.2, -4.4] }), place(pixText('MONDELEZ', 0.065, K.white, 0.03), { p: [-0.4, y0 + 2.2, -4.28] }));
-    out.push(part(rbox(7.0, 0.5, 0.9, 0.05), '#5b616b', { p: [-0.4, y0 + 0.25, -3.4] }), part(box(6.9, 0.03, 0.8), '#e9e6df', { p: [-0.4, y0 + 0.52, -3.4] }), part(rbox(1.2, 1.2, 1.2, 0.05), '#c9ced6', { p: [-3.4, y0 + 0.9, -3.4] }));
-    // The Cadbury stacks on the right.
-    for (let k = 0; k < 4; k++) for (let j = 0; j < 3; j++) out.push(part(rbox(0.9, 0.12, 0.45, 0.03), PURP, { p: [3.4, y0 + 0.08 + (k * 3 + j) * 0.13, -1.0 + j * 0.0], r: [0, (k + j) * 0.3, 0] }));
-    // ---- the glass of milk, the centrepiece
-    const GX = 0.2, GZ = 0.6;
-    out.push(part(new THREE.CylinderGeometry(0.95, 0.85, 2.4, hi() ? 40 : 14, 1, true), '#e3eef5', { p: [GX, y0 + 1.2, GZ] }), part(cyl(0.9, 0.82, 1.9, 40), '#fbfbf8', { p: [GX, y0 + 0.97, GZ] }), part(torus(0.95, 0.04, TAU, 40), '#d5e3ec', { p: [GX, y0 + 2.4, GZ], r: [Math.PI / 2, 0, 0] }));
-    out.push(trees(R, [[4.6, 4.6], [-4.6, 4.6], [4.6, 2.0], [-4.6, 1.6], [1.6, 4.6]], 0.55));
+    const R = rand(228), out = [], PURP = '#4f2170', OREO = '#2b1d16';
+    out.push(ground('#8fc66f'), part(cyl(2.6, 2.6, 0.05, 56), '#ece6f2', { p: [0.2, y0 + 0.025, 0.4] }));
+    // ---- the glass of milk
+    const GX = 1.4, GZ = 0.9;
+    out.push(part(new THREE.CylinderGeometry(1.0, 0.9, 2.6, hi() ? 40 : 14, 1, true), '#e3eef5', { p: [GX, y0 + 1.3, GZ] }), part(cyl(0.95, 0.87, 2.0, 40), '#fbfbf8', { p: [GX, y0 + 1.02, GZ] }), part(torus(1.0, 0.05, TAU, 40), '#d5e3ec', { p: [GX, y0 + 2.6, GZ], r: [Math.PI / 2, 0, 0] }));
+    // ---- Cadbury: a giant purple bar standing up, back left
+    const bar = merge(part(rbox(1.6, 2.6, 0.4, 0.06), PURP), Array.from({ length: 8 }, (_, k) => part(rbox(0.66, 0.54, 0.1, 0.06), '#5d2a86', { p: [-0.38 + (k % 2) * 0.76, -0.95 + Math.floor(k / 2) * 0.64, 0.2] })), place(pixText('CADBURY', 0.04, K.gold, 0.02), { p: [0, 1.15, 0.22] }));
+    out.push(place(bar, { p: [-3.4, y0 + 1.3, -2.4], r: [0, Math.PI / 4, -0.12] }));
+    // Toblerone: a long triangular bar of peaks, back right.
+    const tob = merge(part(box(3.0, 0.1, 0.8), '#d9b45a', { p: [0, 0.05, 0] }), Array.from({ length: 7 }, (_, k) => part(prism(0.42, 0.62, 0.8), '#c9a24a', { p: [-1.26 + k * 0.42, 0.1, 0], r: [0, 0, 0] })));
+    out.push(place(tob, { p: [2.4, y0, -3.4], r: [0, -Math.PI / 4 + 0.3, 0] }));
+    // Ritz: a stack of round crackers, front left.
+    for (let k = 0; k < 5; k++) { out.push(part(new THREE.CylinderGeometry(0.6, 0.6, 0.12, hi() ? 24 : 10), '#e8a24a', { p: [-3.0, y0 + 0.07 + k * 0.13, 2.4], r: [0, k * 0.4, 0] })); }
+    if (hi()) for (let k = 0; k < 7; k++) { const a = k * TAU / 7; out.push(part(cyl(0.03, 0.03, 0.02, 6), '#b8752e', { p: [-3.0 + Math.cos(a) * 0.35, y0 + 0.72, 2.4 + Math.sin(a) * 0.35] })); }
+    // The globe on its stand, back.
+    out.push(part(cyl(0.5, 0.6, 0.3, 24), '#3a3f47', { p: [-0.6, y0 + 0.15, -3.6] }), part(cyl(0.08, 0.08, 1.0, 8), '#9aa1a9', { p: [-0.6, y0 + 0.8, -3.6] }));
+    out.push(trees(R, [[4.6, 4.6], [-4.6, 4.6], [4.6, 0.4], [-4.6, -0.4]], 0.5));
     // ---- moving parts
     const moving = [], P = 8;
-    const half = (top) => merge(part(cyl(0.7, 0.7, 0.18, 40), OREO), hi() ? Array.from({ length: 16 }, (_, k) => part(box(0.05, 0.03, 0.1), '#3d2b22', { p: [Math.cos(k * TAU / 16) * 0.5, top ? 0.1 : -0.1, Math.sin(k * TAU / 16) * 0.5], r: [0, -k * TAU / 16, 0] })) : []);
-    // Oreos rolling along the line.
-    const small = merge(part(cyl(0.22, 0.22, 0.06, 20), OREO, { p: [0, 0.07, 0] }), part(cyl(0.2, 0.2, 0.05, 20), K.white), part(cyl(0.22, 0.22, 0.06, 20), OREO, { p: [0, -0.07, 0] }));
-    for (let k = 0; k < 8; k++) moving.push({ geo: small, pivot: [0, y0 + 0.65, -3.4], anim: (t) => { const u = cyc(t, 6, k / 8); return { x: -2.6 + u * 5.6, s: Math.min(1, u / 0.05, (1 - u) / 0.05) + 0.001 }; } });
-    // The giant Oreo: twist, lift the top, dunk the cream half, put it back together.
-    const OX = GX - 2.4, OZ = GZ + 0.4, f0 = (t) => cyc(t, P);
-    const bot = moving.length;
-    moving.push({ geo: merge(half(false), part(cyl(0.64, 0.64, 0.14, 40), K.white, { p: [0, 0.16, 0] })), pivot: [OX, y0 + 1.2, OZ], anim: (t) => { const f = f0(t), d = easeIO(win(f, 0.35, 0.5)) - easeIO(win(f, 0.62, 0.77)), dip = bump(f, 0.56, 0.04); return { rx: Math.PI / 2 * 0.9, ry: Math.PI / 4, x: d * (GX - OX), z: d * (GZ - OZ - 0.0), y: d * 1.4 - dip * 1.0 }; } });
-    moving.push({ geo: half(true), pivot: [OX, y0 + 1.2, OZ], anim: (t) => { const f = f0(t), tw = easeIO(win(f, 0.05, 0.25)) - easeIO(win(f, 0.82, 0.95)), lift = easeIO(win(f, 0.2, 0.32)) - easeIO(win(f, 0.8, 0.9)); return { rx: Math.PI / 2 * 0.9, ry: Math.PI / 4, q: undefined, x: -lift * 0.6, z: lift * 0.6, rz: tw * 1.5 }; } });
-    // Bars heading out to the world.
-    for (let k = 0; k < 3; k++) moving.push(rider(part(rbox(0.6, 0.08, 0.3, 0.03), PURP), curve([[3.4, y0 + 1.8, -1.0], [4.0, y0 + 3.0, 1.0], [4.6, y0 + 2.0, 3.6]]), 4, k / 3, 0, 1, (t, u) => ({ rx: u * 4 })));
+    const land = (x, y, z) => { const u = x, v = y, w = z; if (Math.abs(v) > 0.88) return '#f4f6f8'; const n = Math.sin(u * 4.1 + 1.3) + Math.sin(v * 3.7 + u * 2.1) + Math.sin(w * 4.3 - v * 1.7); return n > 0.6 ? '#7cc46a' : '#3b8fd9'; };
+    moving.push({ geo: part(new THREE.SphereGeometry(1.0, hi() ? 40 : 14, hi() ? 24 : 8), land), pivot: [-0.6, y0 + 2.3, -3.6], anim: (t) => ({ ry: t * 0.3 }) });
+    for (let k = 0; k < 4; k++) moving.push({ geo: part(rbox(0.36, 0.22, 0.1, 0.04), [PURP, '#d9b45a', '#e8a24a', '#1f5fa8'][k]), pivot: [-0.6, y0 + 2.3, -3.6], anim: (t) => { const a = t * 0.9 + k * TAU / 4; return { x: Math.cos(a) * 1.5, z: Math.sin(a) * 1.5, y: Math.sin(a * 2) * 0.3, ry: -a }; } });
+    // The giant Oreo: stands on edge; the top wafer twists off, the cream half dunks, it goes back together.
+    const OX = -0.9, OZ = 1.1, OQ = Math.PI / 4;
+    const wafer = merge(part(cyl(1.0, 1.0, 0.24, 48), OREO, { r: [Math.PI / 2, 0, 0] }), hi() ? Array.from({ length: 20 }, (_, k) => part(box(0.06, 0.04, 0.14), '#3d2b22', { p: [Math.cos(k * TAU / 20) * 0.75, Math.sin(k * TAU / 20) * 0.75, 0.12], r: [0, 0, k * TAU / 20] })) : [], part(torus(0.42, 0.03, TAU, 32), '#3d2b22', { p: [0, 0, 0.12] }));
+    const half = moving.length;
+    moving.push({ geo: merge(wafer, part(cyl(0.94, 0.94, 0.2, 48), K.white, { p: [0, 0, -0.22], r: [Math.PI / 2, 0, 0] })), pivot: [OX, y0 + 1.1, OZ], anim: (t) => { const f = cyc(t, P), d = easeIO(win(f, 0.35, 0.5)) - easeIO(win(f, 0.72, 0.86)), dip = bump(f, 0.6, 0.06); return { ry: OQ, x: d * (GX - OX), z: d * (GZ - OZ), y: d * 2.0 - dip * 1.2, rx: d * Math.PI / 2 }; } });
+    moving.push({ geo: wafer, pivot: [OX, y0 + 1.1, OZ], anim: (t) => { const f = cyc(t, P), tw = easeIO(win(f, 0.05, 0.25)) - easeIO(win(f, 0.88, 0.98)), lift = easeIO(win(f, 0.2, 0.32)) - easeIO(win(f, 0.86, 0.96)); const back1 = new V(0, 0, -1).applyAxisAngle(new V(0, 1, 0), OQ); return { ry: OQ, x: back1.x * (0.44 + lift * 0.9), z: back1.z * (0.44 + lift * 0.9), y: lift * 0.4, rz: tw * 2.0 }; } });
+    out.push(part(rbox(1.2, 0.5, 0.8, 0.06), '#d8d0e6', { p: [OX, y0 + 0.25, OZ] }));
+    // Splashes when it dunks.
+    for (let k = 0; k < 5; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.1, 8, 6), K.white), pivot: [GX, y0 + 2.6, GZ], anim: (t) => { const f = cyc(t, P), u = win(f, 0.58, 0.72); return u > 0 && u < 1 ? { x: Math.cos(k * 1.3) * u * 0.8, z: Math.sin(k * 1.3) * u * 0.8, y: hop(u) * 0.6 } : { s: 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // Hershey: America's chocolate town. In the factory each Kiss is dropped onto the belt and
