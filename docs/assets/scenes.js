@@ -256,6 +256,14 @@ const heliGeo = (c = 'A', trim = K.white) => merge(part(capsule(0.36, 0.7), c, {
   [-0.3, 0.3].flatMap((z) => [part(cyl(0.025, 0.025, 1.2, 6), K.dark, { p: [0.1, 0.04, z], r: [0, 0, Math.PI / 2] }), beam([-0.2, 0.04, z], [-0.15, 0.3, z * 0.7], 0.03, K.dark), beam([0.4, 0.04, z], [0.35, 0.3, z * 0.7], 0.03, K.dark)]));
 const rotorGeo = (r = 1.1) => merge(part(cyl(0.06, 0.06, 0.12, 8), K.dark), [0, 1].map((i) => part(box(r * 2, 0.02, 0.1), '#3a3f47', { p: [0, 0.06, 0], r: [0, i * Math.PI / 2, 0] })));
 
+// A glass vial with a brand cap, on y = 0, about h tall.
+const vial = (h = 0.4, cap = 'A', fill = 'B') => { const c = (r, hh, col, y) => part(new THREE.CylinderGeometry(r, r, hh, hi() ? 18 : 8), col, { p: [0, y, 0] }); return merge(c(h * 0.24, h * 0.8, '#dceff7', h * 0.4), c(h * 0.245, h * 0.45, fill, h * 0.25), c(h * 0.14, h * 0.1, '#c9ced6', h * 0.85), c(h * 0.2, h * 0.14, cap, h * 0.95)); };
+// A ball-and-stick molecule centred on the origin (about 1.6 across).
+const molecule = (a = 'A', b = K.white, c = 'B') => { const at = [[0, 0, 0, a, 0.26], [0.75, 0.3, 0, b, 0.18], [-0.6, 0.45, 0.3, c, 0.22], [-0.2, -0.65, -0.35, b, 0.18], [0.35, 0.1, 0.7, c, 0.2], [-0.95, 1.0, 0.35, b, 0.15]], bonds = [[0, 1], [0, 2], [0, 3], [0, 4], [2, 5]];
+  return merge(at.map(([x, y, z, col, r]) => part(new THREE.SphereGeometry(r, hi() ? 18 : 8, hi() ? 12 : 6), col, { p: [x, y, z] })), bonds.map(([i, j]) => beam(at[i].slice(0, 3), at[j].slice(0, 3), 0.06, '#c9ced6'))); };
+// A red cross-out mark facing +z.
+const crossGeo = (r = 0.3) => merge(part(cyl(r, r, 0.06, 24), '#e5533d', { r: [Math.PI / 2, 0, 0] }), [1, -1].map((s) => part(box(r * 1.2, r * 0.26, 0.08), K.white, { p: [0, 0, 0.03], r: [0, 0, s * Math.PI / 4] })));
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -2022,5 +2030,79 @@ export const SCENES = {
     moving.push({ geo: part(heartGeo(0.22, 0.12), '#e5533d', { r: [0, Math.PI / 4, 0] }), pivot: [0, y0 + 2.2, 0], anim: (t) => { const f = cyc(t, P, 0.45), k = win(f, 0, 0.45), { p } = along(home2, k * 0.999); return { x: p.x, z: p.z, y: Math.sin(t * 3) * 0.06, s: f > 0.48 ? 0.001 : life(f, 0.02, 0.07, 0.42, 0.48) }; } });
     moving.push({ geo: sedan('A'), pivot: [0, y0, 1.6], anim: (t) => { const f = cyc(t, P, 0.45), x = f < 0.5 ? -1.2 : -1.2 - easeIn(win(f, 0.5, 0.75)) * 0.2, z = f < 0.5 ? 0 : easeIn(win(f, 0.5, 0.75)) * 2.9, gone = f > 0.75 ? clamp01((f - 0.75) / 0.05) : 0, back = f > 0.92 ? win(f, 0.92, 1) : 0; return { x: x + (f > 0.75 ? -easeIn(win(f, 0.75, 0.9)) * 4 : 0), z, ry: f > 0.62 ? Math.PI * 0.5 * win(f, 0.62, 0.75) + Math.PI / 2 : Math.PI / 2, s: (f < 0.8 ? 0.75 : Math.max(0.001, 0.75 * (1 - gone))) * (f > 0.9 ? back : 1) + 0.001 }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [1.8, y0, 2.4], topAt: [CX, y0 + 1.1, CZ] };
+  },
+
+  // Syringe (pharmaceuticals and animal health): the pipeline is the moat. New candidates leave the
+  // lab on the line and meet the Phase I, II and III gates; most are turned away (a red cross, and
+  // off the belt), the few that pass get a green tick and are packed, and the van takes the
+  // medicine to the pharmacy. Behind it all the giant syringe primes and a drop beads at its tip.
+  'health:5': () => {
+    const R = rand(2801), out = [], moving = [];
+    out.push(slab('#d3dde3'));
+    out.push(part(rbox(10.2, 0.03, 2.6, 0.03), '#e8edf0', { p: [0, y0 + 0.015, 1.6] }), part(box(10.4, 0.03, 1.0), '#5b616b', { p: [0, y0 + 0.015, 4.65] }));
+    for (let i = 0; i < 9; i++) out.push(part(box(0.5, 0.012, 0.06), K.white, { p: [-4.4 + i * 1.1, y0 + 0.035, 4.65] }));
+    // ---- the research lab (back left) with its molecule turning over the roof
+    const LX = -2.6, LZ = -3.4, W = 4.4, D = 2.4, H = 2.0;
+    out.push(part(rbox(W, H, D, 0.06), '#f4f5f6', { p: [LX, y0 + H / 2, LZ] }), part(box(W + 0.02, 0.22, D + 0.02), 'A', { p: [LX, y0 + H - 0.2, LZ] }));
+    for (let i = 0; i < 6; i++) out.push(part(rbox(0.5, 0.9, 0.05, 0.02), '#9fcdea', { p: [LX - W / 2 + 0.5 + i * 0.68, y0 + 0.9, LZ + D / 2 + 0.01] }));
+    out.push(part(cyl(0.05, 0.05, 0.8, 8), K.steelDk, { p: [LX + 0.6, y0 + H + 0.4, LZ] }), part(rbox(0.9, 0.3, 0.6, 0.04), '#c9ced6', { p: [LX - 1.3, y0 + H + 0.15, LZ - 0.4] }));
+    // A chute from the lab to the head of the line.
+    const X0 = -4.4, X1 = 2.5, CZ = 1.4, BY = y0 + 0.7;
+    out.push(part(tube([[LX - 1.6, y0 + 1.2, LZ + D / 2], [X0 + 0.2, y0 + 1.5, -0.4], [X0 + 0.2, BY + 0.5, CZ]], 0.16), '#c9ced6'), part(rbox(0.6, 0.5, 0.6, 0.06), 'Ad', { p: [X0 + 0.2, BY + 0.3, CZ] }));
+    // ---- the line: belt on legs from the hopper to the packing plant
+    out.push(part(box(X1 - X0, 0.08, 0.6), '#3a3f47', { p: [(X0 + X1) / 2, BY - 0.04, CZ] }));
+    [CZ - 0.32, CZ + 0.32].forEach((z) => out.push(part(new THREE.BoxGeometry(X1 - X0, 0.12, 0.05), '#c9ced6', { p: [(X0 + X1) / 2, BY - 0.02, z] })));
+    for (let x = X0 + 0.3; x < X1; x += 1.0) [CZ - 0.26, CZ + 0.26].forEach((z) => out.push(part(new THREE.BoxGeometry(0.06, BY - y0, 0.06), '#9aa1a9', { p: [x, y0 + (BY - y0) / 2, z] })));
+    // The three gates: arches with one, two, three lamps; a reject bin in front of each.
+    const gates = [-2.6, -0.7, 1.1];
+    gates.forEach((gx, g) => {
+      [-0.5, 0.5].forEach((dz) => out.push(part(rbox(0.16, 1.3, 0.16, 0.04), K.white, { p: [gx, y0 + 0.65, CZ + dz] })));
+      out.push(part(rbox(0.24, 0.24, 1.24, 0.05), 'A', { p: [gx, y0 + 1.38, CZ] }));
+      for (let k = 0; k <= g; k++) out.push(part(new THREE.SphereGeometry(0.06, 10, 8), '#ffd23f', { p: [gx + 0.13, y0 + 1.38, CZ - 0.25 * g / 2 + k * 0.25] }));
+      out.push(part(rbox(0.6, 0.4, 0.5, 0.04), '#9aa1a9', { p: [gx + 0.45, y0 + 0.2, CZ + 0.85] }), part(box(0.5, 0.02, 0.4), '#3a3f47', { p: [gx + 0.45, y0 + 0.41, CZ + 0.85] }));
+    });
+    // ---- the packing plant (right) and the pharmacy across the road (front left)
+    const PX = 3.7, PZ = 1.4;
+    out.push(part(rbox(2.0, 1.6, 2.0, 0.06), '#eef0f2', { p: [PX, y0 + 0.8, PZ] }), part(box(2.02, 0.2, 2.02), 'B', { p: [PX, y0 + 1.35, PZ] }), part(rbox(0.06, 0.6, 0.7, 0.03), '#2a3c50', { p: [PX - 1.01, y0 + 0.62, PZ] }), part(rbox(1.0, 0.8, 0.06, 0.03), '#5b616b', { p: [PX + 0.2, y0 + 0.4, PZ + 1.01] }));
+    const FX = -3.6, FZ = 3.45;
+    out.push(part(rbox(2.2, 1.3, 1.0, 0.05), K.white, { p: [FX, y0 + 0.65, FZ] }), part(rbox(2.24, 0.3, 1.04, 0.04), '#5fae5b', { p: [FX, y0 + 1.16, FZ] }), part(rbox(1.4, 0.6, 0.05, 0.02), '#9fcdea', { p: [FX + 0.2, y0 + 0.55, FZ + 0.51] }));
+    out.push(part(rbox(0.12, 0.36, 0.08, 0.02), K.white, { p: [FX - 0.75, y0 + 1.16, FZ + 0.54] }), part(rbox(0.36, 0.12, 0.08, 0.02), K.white, { p: [FX - 0.75, y0 + 1.16, FZ + 0.54] }));
+    // ---- the giant syringe on its stand (back right), needle up
+    const SX = 2.6, SZ = -3.3, SB = y0 + 1.1, SL = 2.5, SR = 0.42;
+    out.push(part(rbox(1.6, 0.2, 1.6, 0.05), K.stoneDk, { p: [SX, y0 + 0.1, SZ] }), [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([a, b]) => beam([SX + a * 0.6, y0 + 0.2, SZ + b * 0.6], [SX + a * 0.5, SB + 0.1, SZ + b * 0.5], 0.06, K.steelDk)), part(torus(0.58, 0.05, TAU, 32), K.steelDk, { p: [SX, SB + 0.1, SZ], r: [Math.PI / 2, 0, 0] }));
+    out.push(part(new THREE.CylinderGeometry(SR, SR, SL, hi() ? 40 : 14, 1, true), '#e6f3f9', { p: [SX, SB + SL / 2, SZ] }), part(rbox(1.3, 0.1, 0.4, 0.04), K.white, { p: [SX, SB + 0.05, SZ] }));
+    if (hi()) for (let i = 1; i < 9; i++) out.push(part(new THREE.CylinderGeometry(SR + 0.005, SR + 0.005, 0.02, 40, 1, true, -0.3, 1.6), '#5b616b', { p: [SX, SB + i * 0.28, SZ] }));
+    out.push(part(cyl(SR, SR * 0.3, 0.3, 32), '#e6f3f9', { p: [SX, SB + SL + 0.15, SZ] }), part(cyl(0.11, 0.11, 0.24, 14), 'A', { p: [SX, SB + SL + 0.42, SZ] }), part(cyl(0.025, 0.012, 1.0, 8), '#d8dde3', { p: [SX, SB + SL + 1.04, SZ] }));
+    [[-4.6, -1.2], [4.6, -1.4], [1.6, -1.2], [-0.2, -4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.5 + R() * 0.2)));
+    // ---- moving parts
+    const P = 12, F = (t) => cyc(t, P);
+    // The molecule turns over the lab.
+    moving.push({ geo: molecule('A', K.white, 'B'), pivot: [LX + 0.6, y0 + H + 1.15, LZ], anim: (t) => ({ ry: t * 0.8, rx: Math.sin(t * 0.5) * 0.3 }) });
+    // The syringe primes: the plunger pushes, the dose falls in the barrel, a drop beads at the tip.
+    const push = (f) => easeIO(win(f, 0.1, 0.45)) * (1 - easeIO(win(f, 0.65, 0.95)));
+    moving.push({ geo: merge(part(cyl(SR - 0.04, SR - 0.04, 0.16, 32), K.dark, { p: [0, 0.08, 0] }), part(cyl(0.08, 0.08, 1.2, 12), '#e9ecef', { p: [0, -0.6, 0] }), part(cyl(0.38, 0.38, 0.08, 28), K.white, { p: [0, -1.2, 0] })), pivot: [SX, SB + 0.2, SZ], anim: (t) => ({ y: push(F(t)) * 0.9 }) });
+    moving.push({ geo: part(cyl(SR - 0.03, SR - 0.03, 1, 32), 'B', { p: [0, 0.5, 0] }), pivot: [SX, SB + 0.36, SZ], anim: (t) => { const k = push(F(t)); return { y: k * 0.9, sy: (SL - 0.4 - k * 0.9) * 0.999 }; } });
+    moving.push({ geo: part(new THREE.SphereGeometry(0.09, 12, 10), 'B', { s: [1, 1.3, 1] }), pivot: [SX, SB + SL + 1.6, SZ], anim: (t) => { const f = F(t); return { y: win(f, 0.45, 0.6) * 0.3, s: life(f, 0.38, 0.45, 0.55, 0.62) }; } });
+    // Candidates on the line: six set off each cycle; only two make it through all three gates.
+    const fate = [3, 0, 1, 3, 2, 0]; // the gate each is stopped at (3 = approved)
+    const xAt = (u) => X0 + 0.4 + u * (X1 - X0 + 0.2);
+    for (let k = 0; k < 6; k++) {
+      const stop = fate[k], gx = stop < 3 ? gates[stop] : X1 + 0.4, uStop = (gx - X0 - 0.4) / (X1 - X0 + 0.2) + (stop < 3 ? 0.02 : 0);
+      const pu = (t) => cyc(t, P, k / 6);
+      moving.push({ geo: vial(0.6, stop === 3 ? 'A' : '#9aa1a9', stop === 3 ? 'B' : '#c3b4ff'), pivot: [0, BY, CZ], anim: (t) => {
+        const f = pu(t), u = Math.min(f / 0.7, uStop), off = stop < 3 ? win(f, uStop * 0.7 + 0.04, uStop * 0.7 + 0.14) : 0;
+        return { x: xAt(u) + off * 0.35, z: off * 0.85, y: -easeIn(off) * 0.5 + hop(off) * 0.2, rx: off * 1.3, s: Math.min(1, f / 0.03) * (stop < 3 ? 1 - win(f, uStop * 0.7 + 0.14, uStop * 0.7 + 0.18) : 1 - win(f, 0.72, 0.75)) * 0.999 + 0.001 };
+      } });
+      const passAt = (g) => (gates[g] - X0 - 0.4) / (X1 - X0 + 0.2) * 0.7;
+      if (stop < 3) moving.push({ geo: crossGeo(0.22), pivot: [gx, y0 + 1.95, CZ], anim: (t) => { const f = pu(t), a = passAt(stop) + 0.02; return { y: easeOut(win(f, a, a + 0.05)) * 0.2, ry: Math.PI / 4, s: life(f, a, a + 0.04, a + 0.12, a + 0.15) }; } });
+      else moving.push({ geo: tickGeo(0.26), pivot: [gates[2], y0 + 1.95, CZ], anim: (t) => { const f = pu(t), a = passAt(2); return { y: easeOut(win(f, a, a + 0.05)) * 0.2, ry: Math.PI / 4, s: life(f, a, a + 0.04, a + 0.12, a + 0.15) }; } });
+    }
+    // The van: out of the plant, round to the pharmacy and back.
+    const route = curve([[PX + 0.2, 0, PZ + 1.5], [PX - 0.8, 0, 3.6], [1.0, 0, 4.65], [-1.0, 0, 4.65], [FX + 1.2, 0, 4.65]]);
+    moving.push({ geo: merge(van(K.white, 'A'), place(medBox('A', 0.5), { p: [-0.2, 1.25, 0] })), pivot: [0, y0, 0], anim: (t) => { const f = F(t), u = f < 0.4 ? easeIO(f / 0.4) : f < 0.55 ? 1 : 1 - easeIO(win(f, 0.55, 0.95)), { p, ry } = along(route, Math.min(0.999, u)); return { x: p.x, z: p.z, ry: ry + (f > 0.55 ? Math.PI : 0), s: 0.85 }; } });
+    // Scientists in lab coats.
+    moving.push(...walker(moving.length, (t) => { const k = Math.sin(t * 0.45); return { x: -1.6 + k * 2.2, z: -1.4, ry: Math.cos(t * 0.45) > 0 ? 0 : Math.PI }; }, { shirt: K.white, pants: '#2b3a55', y: y0 }));
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P, 0.5), c = curve([[FX - 1.4, 0, 5.0], [FX - 0.6, 0, 4.3], [FX + 0.3, 0, FZ + 0.7]]), k = win(f, 0, 0.5), { p, ry } = along(c, k * 0.999); return { x: p.x, z: p.z, ry, s: f > 0.55 ? 0.001 : Math.min(1, f / 0.03), still: f > 0.5 }; }, { shirt: '#8a6cf0', pants: '#2b3a55', y: y0 }));
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.6, y0, -3.4], topAt: [PX, y0 + 1.6, PZ] };
   },
 };
