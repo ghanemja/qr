@@ -3215,4 +3215,50 @@ export const SCENES = {
     moving.push({ geo: tankTruck('A', '#dfe3e8', 'B'), pivot: [0.4, y0, 0], anim: (t) => { const f = cyc(t, 10), z = f < 0.15 ? 5.6 - (5.6 - 2.0) * easeOut(f / 0.15) : f < 0.55 ? 2.0 : 2.0 + easeIn(win(f, 0.55, 0.8)) * 3.6; return { z, ry: Math.PI / 2, s: clamp01((5.0 - Math.abs(z)) / 0.6) * 0.75 + 0.001 }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-1.4, y0, 3.7], topAt: [-0.6, y0 + TH + 0.45, -2.8] };
   },
+
+  // Crypto coin (crypto payments, custody, corporate cards, chain analytics): value that settles
+  // in seconds, on a record nobody can rewrite. Payments hop between the wallet kiosks by way of
+  // the chain; the ring of linked blocks turns round the giant coin and each new one flashes as
+  // it's confirmed; the tracing lens follows the chain, and the custody vault keeps the keys.
+  'payments:3': () => {
+    const R = rand(4801), out = [], moving = [];
+    out.push(slab('#cfd2e6'));
+    out.push(part(rbox(10.0, 0.03, 10.0, 0.04), '#e6e8f4', { p: [0, y0 + 0.015, 0] }));
+    // ---- the giant coin on its plinth (back middle)
+    const CX = -0.6, CZ = -1.4, CR = 1.5;
+    out.push(part(cyl(1.4, 1.6, 0.5, 40), K.white, { p: [CX, y0 + 0.25, CZ] }), part(cyl(1.52, 1.52, 0.1, 40), 'A', { p: [CX, y0 + 0.12, CZ] }), part(rbox(0.4, 0.3, 0.6, 0.05), '#c9ced6', { p: [CX, y0 + 0.62, CZ] }));
+    // ---- the chain: a ring of linked blocks round the plinth
+    const RR = 2.9, NB = 10, RY = y0 + 0.35;
+    out.push(part(torus(RR, 0.05, TAU, 64), '#9aa1c9', { p: [CX, y0 + 0.06, CZ], r: [Math.PI / 2, 0, 0] }));
+    // ---- wallet kiosks at three corners, the vault (back left)
+    const kiosks = [new V(-3.8, 0, 3.2), new V(3.8, 0, 2.6), new V(3.6, 0, -3.4)];
+    kiosks.forEach((k, i) => out.push(part(rbox(0.9, 1.4, 0.6, 0.08), K.white, { p: [k.x, y0 + 0.7, k.z] }), part(rbox(0.7, 0.5, 0.04, 0.03), ['A', 'B', 'Ad'][i], { p: [k.x, y0 + 1.0, k.z + 0.31] }), part(box(0.92, 0.12, 0.62), ['A', 'B', 'Ad'][i], { p: [k.x, y0 + 1.36, k.z] })));
+    const VX = -3.8, VZ = -3.6;
+    out.push(part(rbox(2.0, 1.8, 1.6, 0.08), '#8e959e', { p: [VX, y0 + 0.9, VZ] }), part(box(2.02, 0.16, 1.62), 'A', { p: [VX, y0 + 1.7, VZ] }), part(cyl(0.6, 0.6, 0.12, 32), '#c9ced6', { p: [VX, y0 + 0.9, VZ + 0.81], r: [Math.PI / 2, 0, 0] }));
+    [[4.6, 0.2], [-4.6, 0.8], [0.4, 4.5]].forEach(([x, z]) => out.push(part(cyl(0.3, 0.22, 0.4, 14), '#c99a62', { p: [x, y0 + 0.2, z] }), miniTree(R, x, y0 + 0.4, z, 0.45)));
+    // ---- moving parts (one 10 s cycle)
+    const P = 10, F = (t) => cyc(t, P);
+    // The coin turns on its edge, bobbing.
+    const emblem = merge(part(extrude(ring(6, (a) => [Math.cos(a) * 0.8, Math.sin(a) * 0.8]), 0.34), 'Ad'), [-0.24, 0.24].map((x, i) => part(torus(0.3, 0.08, TAU, 24), K.white, { p: [x, 0, 0], s: [1, 1, 3], r: [0, 0, i ? 0.5 : -0.5] })));
+    moving.push({ geo: merge(coin(CR, 0.32).rotateX(Math.PI / 2), emblem).translate(0, CR, 0), pivot: [CX, y0 + 0.62, CZ], anim: (t) => ({ ry: t * 0.7, y: Math.sin(t * 1.5) * 0.06 }) });
+    // The ring of blocks turns; the newest flashes as it joins.
+    const blk = merge(part(box(0.55, 0.55, 0.55), '#5b5f86'), part(box(0.57, 0.08, 0.57), 'A', { p: [0, 0.12, 0] }), part(box(0.3, 0.3, 0.57), '#7d82b0'));
+    const ringI = moving.length;
+    moving.push({ geo: merge(Array.from({ length: NB }, (_, i) => { const a = (i / NB) * TAU; return [place(blk, { p: [Math.cos(a) * RR, 0, Math.sin(a) * RR], r: [0, -a, 0] }), part(new THREE.TorusGeometry(0.14, 0.04, 6, 14), '#c9ced6', { p: [Math.cos(a + Math.PI / NB) * RR, 0.05, Math.sin(a + Math.PI / NB) * RR], r: [0, -a - Math.PI / NB, 0] })]; })), pivot: [CX, RY, CZ], anim: (t) => ({ ry: (t / P) * (TAU / NB) }) });
+    moving.push({ geo: part(rbox(0.66, 0.66, 0.66, 0.1), '#ffe066'), pivot: [CX + RR, RY, CZ], anim: (t) => { const f = F(t); return { s: life(f, 0.55, 0.6, 0.75, 0.85) + 0.001 }; } });
+    // Payments: from one kiosk, over to the chain, then on to the next kiosk, with a tick.
+    const Q = new V(CX + RR, RY + 0.6, CZ);
+    kiosks.forEach((k, i) => {
+      const from = new V(k.x, y0 + 1.6, k.z), to = kiosks[(i + 1) % 3].clone().setY(y0 + 1.6), o = i / 3;
+      moving.push({ geo: coin(0.24, 0.07).rotateX(Math.PI / 2), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P, o), a = easeIO(win(f, 0, 0.25)), b = easeIO(win(f, 0.35, 0.6)), p = f < 0.3 ? from.clone().lerp(Q, a).add(new V(0, hop(a) * 1.2, 0)) : Q.clone().lerp(to, b).add(new V(0, hop(b) * 1.2, 0)); return { x: p.x, y: p.y, z: p.z, ry: t * 6, s: f < 0.62 ? 1 : 0.001 }; } });
+      moving.push({ geo: tickGeo(0.24), pivot: [to.x, y0 + 2.0, to.z], anim: (t) => { const f = cyc(t, P, o); return { y: easeOut(win(f, 0.6, 0.65)) * 0.3, ry: Math.PI / 4, s: life(f, 0.6, 0.63, 0.72, 0.76) }; } });
+    });
+    // The tracing lens follows the chain round.
+    moving.push({ geo: merge(part(torus(0.36, 0.06, TAU, 28), 'B'), part(cyl(0.32, 0.32, 0.03, 24), '#cfeefc', { r: [Math.PI / 2, 0, 0] }), beam([0.26, -0.26, 0], [0.62, -0.62, 0], 0.1, K.dark)), pivot: [CX, RY + 1.2, CZ], anim: (t) => { const a = -t * 0.5; return { x: Math.cos(a) * RR, z: -Math.sin(a) * RR, ry: a + Math.PI / 2, rx: -0.3 }; } });
+    // The vault's wheel turns.
+    moving.push({ geo: merge(part(cyl(0.12, 0.12, 0.1, 14), K.gold, { r: [Math.PI / 2, 0, 0] }), ring(3, (a) => beam([0, 0, 0.05], [Math.cos(a) * 0.4, Math.sin(a) * 0.4, 0.05], 0.06, K.gold))), pivot: [VX, y0 + 0.9, VZ + 0.9], anim: (t) => ({ rz: Math.sin(t * 0.8) * 1.5 }) });
+    // Someone at a kiosk.
+    moving.push(...walker(moving.length, (t) => ({ x: kiosks[1].x - 0.2, z: kiosks[1].z + 0.8, ry: Math.PI / 2, still: true, push: Math.sin(t * 2) > 0 }), { shirt: '#3fb8a8', pants: '#2b3a55', y: y0 }));
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-2.6, y0, 1.6], topAt: [VX, y0 + 1.8, VZ] };
+  },
 };
