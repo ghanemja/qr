@@ -142,6 +142,11 @@ const bottle = (h = 0.5, body = 'A', cap = 'B') => merge(part(lathe([[0, 0], [h 
 // A soap bubble: pale, with a highlight.
 const bubbleGeo = (r = 0.15) => merge(part(new THREE.SphereGeometry(r, hi() ? 16 : 8, hi() ? 12 : 6), (x, y, z) => (y > r * 0.5 && x < 0 ? '#ffffff' : '#cfeefc'), {}));
 
+// A lifebuoy ring lying in the xz plane: brand and white quarters.
+const lifebuoy = (r = 0.32) => part(torus(r, r * 0.32, TAU, 32), (x, y, z) => (Math.floor((Math.atan2(z, x) + TAU) / (Math.PI / 2)) % 2 ? 'A' : K.white));
+// A beach umbrella (striped canopy on a pole), on y = 0.
+const parasol = (a = 'A', b = K.white, r = 0.8) => merge(part(cyl(0.025, 0.025, 1.4, 8), K.white, { p: [0, 0.7, 0] }), part(cone(r, 0.35, 16), (x, y, z) => (Math.floor((Math.atan2(z, x) + TAU) / (TAU / 8)) % 2 ? a : b), { p: [0, 1.45, 0] }));
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -1072,5 +1077,57 @@ export const SCENES = {
     moving.push(...walker(moving.length, () => ({ x: HX0 + 0.9, z: HZ0 + 2.2, ry: Math.PI, still: true }), { shirt: '#8fc4e8', pants: '#3b4a5c', y: FY }));
     moving.push({ geo: merge(part(rbox(0.04, 0.04, 0.22, 0.015), 'A'), part(box(0.04, 0.05, 0.05), K.white, { p: [0, 0.03, -0.09] })), pivot: [HX0 + 0.72, FY + 1.5, HZ0 + 2.2], anim: (t) => ({ z: Math.sin(t * 14) * 0.04, ry: Math.PI / 2 }) });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.6, y0, 2.0], topAt: [-0.6, y0 + 2.42, WZ] };
+  },
+
+  // Lifebuoy (life, auto and home insurers, reinsurers): there when you need it. A swimmer gets
+  // into trouble beyond the waves; the lifeguard climbs down from the tower, runs to the water and
+  // throws the lifebuoy on its line, then hauls the swimmer safely ashore while the beach plays on.
+  'insurance:2': () => {
+    const R = rand(1301), out = [], moving = [];
+    out.push(slab('#e9d7a8'));
+    // ---- the sea along the front, the sand, the boardwalk and huts at the back
+    const SHORE = 1.3, SEA = y0 + 0.03;
+    out.push(part(rbox(10.4, 0.12, 5.2 - SHORE + 0.1, 0.04), '#d9c48e', { p: [0, y0 - 0.05, (SHORE - 0.1 + 5.2) / 2] }), part(new THREE.PlaneGeometry(10.4, 5.2 - SHORE).rotateX(-Math.PI / 2), 'W', { p: [0, SEA, (SHORE + 5.2) / 2] }));
+    out.push(part(box(10.4, 0.012, 0.25), '#f2e8cf', { p: [0, y0 + 0.006, SHORE - 0.1] }));
+    out.push(part(box(10.4, 0.18, 1.3), '#b98a5a', { p: [0, y0 + 0.09, -3.6] }));
+    if (hi()) for (let i = 0; i < 26; i++) out.push(part(box(0.05, 0.19, 1.3), '#a37b4f', { p: [-5.1 + i * 0.4, y0 + 0.095, -3.6] }));
+    const hut = ['A', K.white, 'B', K.white, 'A'];
+    for (let i = 0; i < 5; i++) { const x = -4.2 + i * 1.9; out.push(part(rbox(1.3, 1.3, 1.0, 0.04), (X, Y) => (Math.floor((X - x + 2) * 4) % 2 ? hut[i] : K.white), { p: [x, y0 + 0.83, -4.6] }), part(prism(1.5, 0.5, 1.2), i % 2 ? 'Ad' : 'Bd', { p: [x, y0 + 1.48, -4.6] }), part(rbox(0.4, 0.8, 0.04, 0.02), '#7a5233', { p: [x, y0 + 0.58, -4.08] })); }
+    // ---- the lifeguard tower, brand coloured, with buoys on a stand
+    const TX = 0.6, TZ = -1.2, TH = 1.9;
+    [[-0.5, -0.5], [0.5, -0.5], [-0.5, 0.5], [0.5, 0.5]].forEach(([x, z]) => out.push(beam([TX + x * 1.3, y0, TZ + z * 1.3], [TX + x, y0 + TH, TZ + z], 0.1, K.white)));
+    out.push(part(rbox(1.5, 0.12, 1.5, 0.03), K.white, { p: [TX, y0 + TH, TZ] }), part(rbox(1.2, 0.9, 1.1, 0.06), 'A', { p: [TX, y0 + TH + 0.5, TZ - 0.1] }), part(box(1.0, 0.4, 0.04), '#9fcdea', { p: [TX, y0 + TH + 0.6, TZ + 0.47] }), part(prism(1.6, 0.5, 1.6), K.white, { p: [TX, y0 + TH + 0.95, TZ - 0.1] }));
+    for (let i = 0; i < 6; i++) out.push(part(box(0.6, 0.05, 0.12), K.white, { p: [TX + 0.9, y0 + 0.3 + i * 0.3, TZ + 0.75], r: [0, 0, 0] }));
+    beam([TX + 0.65, y0, TZ + 0.75], [TX + 0.65, y0 + TH, TZ + 0.75], 0.05, K.white);
+    out.push(beam([TX + 0.65, y0, TZ + 0.75], [TX + 0.65, y0 + TH, TZ + 0.75], 0.05, K.white), beam([TX + 1.15, y0, TZ + 0.75], [TX + 1.15, y0 + TH, TZ + 0.75], 0.05, K.white));
+    out.push(part(cyl(0.04, 0.04, 2.6, 8), K.white, { p: [TX - 0.6, y0 + TH + 1.3, TZ - 0.6] }), part(box(0.6, 0.4, 0.02), 'B', { p: [TX - 0.3, y0 + TH + 2.35, TZ - 0.6] }));
+    out.push(part(box(0.08, 1.2, 0.08), K.white, { p: [-1.0, y0 + 0.6, 0.6] }), place(lifebuoy(0.3), { p: [-1.0, y0 + 0.95, 0.66], r: [Math.PI / 2, 0, 0] }));
+    // ---- the beach: parasols, towels, a sandcastle, a bucket
+    [[-3.6, -1.0, 'A'], [-2.0, 0.2, 'B'], [3.2, -1.2, '#e5533d'], [3.8, 0.3, '#3d7be0']].forEach(([x, z, c], i) => out.push(place(parasol(c, K.white), { p: [x, y0, z], r: [0, 0, 0.12 * (i % 2 ? 1 : -1)] }), part(box(1.1, 0.02, 0.6), ['#f2c94c', '#5fae5b', '#f39ab8', '#8a6cf0'][i], { p: [x + 0.5, y0 + 0.01, z + 0.5], r: [0, 0.3 * i, 0] })));
+    out.push(part(cyl(0.45, 0.55, 0.35, 8), '#dcc488', { p: [-0.5, y0 + 0.17, -0.2] }), part(cyl(0.3, 0.38, 0.3, 8), '#dcc488', { p: [-0.5, y0 + 0.5, -0.2] }), ring(4, (a) => part(cyl(0.1, 0.12, 0.35, 6), '#dcc488', { p: [-0.5 + Math.cos(a) * 0.45, y0 + 0.5, -0.2 + Math.sin(a) * 0.45] })), part(cyl(0.12, 0.1, 0.2, 12), '#e5533d', { p: [0.1, y0 + 0.1, 0.1] }));
+    // ---- moving parts (one 12 s cycle)
+    const P = 12, F = (t) => cyc(t, P);
+    // Waves roll in to the shore in bands of foam.
+    for (let k = 0; k < 3; k++) moving.push({ geo: part(new THREE.CapsuleGeometry(0.06, 9.6, 3, 8), '#ffffff', { r: [0, 0, Math.PI / 2] }), pivot: [0, SEA + 0.02, 0], anim: (t) => { const u = cyc(t, 4, k / 3); return { z: 5.0 - u * (5.0 - SHORE - 0.1), sy: 1, sx: 1, s: Math.min(1, u * 5, (1 - u) * 8) }; } });
+    // Happy swimmers bobbing.
+    const swimmer = (cap) => merge(part(new THREE.SphereGeometry(0.15, 12, 9), '#e9b98f', { p: [0, 0.14, 0] }), part(new THREE.SphereGeometry(0.16, 12, 9), cap, { p: [-0.02, 0.2, 0], s: [1, 0.6, 1] }), part(capsule(0.14, 0.2), '#3d7be0', { p: [0, -0.1, 0] })).scale(1.5, 1.5, 1.5);
+    [[-3.2, 2.4, '#f2c94c'], [-1.6, 3.4, '#e5533d'], [3.8, 2.6, '#5fae5b']].forEach(([x, z, c], i) => moving.push({ geo: swimmer(c), pivot: [x, SEA, z], anim: (t) => ({ y: Math.sin(t * 2 + i) * 0.06, x: Math.sin(t * 0.4 + i) * 0.3 }) }));
+    // The swimmer in trouble: bobbing and waving, then pulled in on the ring and walking out.
+    const SW = new V(1.9, SEA, 3.9), DRY = new V(1.5, y0, SHORE + 0.1);
+    const swPos = (f) => f < 0.45 ? SW.clone() : f < 0.72 ? SW.clone().lerp(new V(DRY.x, SEA, SHORE + 0.4), easeIO(win(f, 0.45, 0.72))) : new V(DRY.x, SEA, SHORE + 0.4);
+    const sw = moving.length;
+    moving.push({ geo: swimmer('#8a6cf0'), pivot: [0, 0, 0], anim: (t) => { const f = F(t), p = swPos(f), dunk = f < 0.42 ? Math.abs(Math.sin(t * 3)) * 0.18 : 0; return { x: p.x, y: p.y - dunk + Math.sin(t * 2) * 0.03, z: p.z, s: f < 0.74 ? 1 : 0.001 }; } });
+    moving.push({ geo: part(capsule(0.07, 0.5), '#e9b98f', { p: [0, 0.3, 0] }), pivot: [0.22, 0.15, 0], parent: sw, anim: (t) => ({ rz: F(t) < 0.42 ? -0.3 + Math.sin(t * 8) * 0.5 : -1.2 }) });
+    // Safe: they walk up the beach to their towel.
+    moving.push(...walker(moving.length, (t) => { const f = F(t), k = win(f, 0.74, 0.95); return { x: DRY.x - k * 2.6, z: DRY.z - k * 1.2, ry: Math.atan2(1.2, -2.6), s: f > 0.74 && f < 0.97 ? 1 : 0.001, still: f > 0.95 }; }, { shirt: '#3d7be0', pants: '#3d7be0', y: y0 }));
+    // The lifeguard: down the ladder, along the sand to the water's edge, throws, hauls in.
+    const GP = (f) => { const a = new V(TX + 0.9, 0, TZ + 1.0), b = new V(DRY.x - 0.3, 0, SHORE - 0.2); return f < 0.18 ? a : f < 0.32 ? a.lerp(b, easeIO(win(f, 0.18, 0.32))) : f < 0.85 ? b : b.lerp(a, easeIO(win(f, 0.85, 0.98))); };
+    moving.push(...walker(moving.length, (t) => { const f = F(t), p = GP(f), back2 = f > 0.85; return { x: p.x, z: p.z, ry: back2 ? Math.atan2(-(TZ + 1.0 - (SHORE - 0.2)), TX + 0.9 - DRY.x + 0.3) : f < 0.32 ? Math.atan2(-(SHORE - 0.2 - TZ - 1.0), DRY.x - 0.3 - TX - 0.9) : -Math.PI / 2, still: f > 0.32 && f < 0.85, push: f > 0.35 && f < 0.72 }; }, { shirt: 'A', pants: 'A', y: y0 }));
+    // The lifebuoy: carried, thrown out to the swimmer, then hauled back with them in it.
+    const ringPos = (f) => { const hand = GP(f).add(new V(0.3, y0 + 1.0, 0)); if (f < 0.34) return hand; if (f < 0.45) { const k = easeOut(win(f, 0.34, 0.45)), p = hand.clone().lerp(SW.clone().add(new V(0, 0.05, 0)), k); p.y += hop(k) * 1.6; return p; } return swPos(f).add(new V(0, 0.05, 0)); };
+    moving.push({ geo: lifebuoy(0.42), pivot: [0, 0, 0], anim: (t) => { const f = F(t), p = ringPos(f); return { x: p.x, y: p.y, z: p.z, rx: f < 0.45 && f > 0.34 ? win(f, 0.34, 0.45) * TAU : 0, s: f < 0.76 ? 1 : 0.001 }; } });
+    // Its line, from the lifeguard's hands to the ring.
+    moving.push({ geo: part(new THREE.CylinderGeometry(0.012, 0.012, 1, 5), '#f2c94c', { p: [0, 0.5, 0] }), pivot: [0, 0, 0], anim: (t) => { const f = F(t), a = GP(f).add(new V(0.15, y0 + 1.0, 0)), b = ringPos(f), d = b.clone().sub(a), L = d.length(); const on = f > 0.35 && f < 0.74; return { x: a.x, y: a.y, z: a.z, q: new THREE.Quaternion().setFromUnitVectors(new V(0, 1, 0), d.normalize()), sx: on ? 1 : 0.001, sy: on ? Math.max(0.001, L) : 0.001, sz: on ? 1 : 0.001 }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.6, y0, -2.3], topAt: [TX, y0 + TH + 1.45, TZ - 0.1] };
   },
 };
