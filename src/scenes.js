@@ -614,4 +614,82 @@ export const SCENES = {
     moving.push({ geo: merge(part(cyl(0.38, 0.38, 0.08, 20), K.dark), ring(5, (a) => part(box(0.32, 0.03, 0.1), K.steel, { p: [Math.cos(a) * 0.17, 0.06, Math.sin(a) * 0.17], r: [0, -a, 0.3] }))), pivot: [-4.2, y0 + 1.12, 2.8], anim: (t) => ({ ry: t * 8 }) });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.7, y0, 1.3], topAt: [MX, y0 + 1.36, MZ] };
   },
+
+  // Engine (auto parts, powertrains, components): the parts that keep the world driving. A big
+  // cutaway engine on its stand runs: four pistons pump off the turning crankshaft, the camshaft
+  // turns at half speed, each cylinder flashes as it fires and the turbo spins. Behind, the parts
+  // store sends its van to the garage, where a car rises on the lift.
+  'car:6': () => {
+    const R = rand(707), out = [], moving = [];
+    out.push(slab('#c2c4c6'));
+    out.push(part(box(10.2, 0.012, 0.08), '#f2c94c', { p: [0, y0 + 0.006, 0.4] }));
+    // ---- the engine on its stand
+    const EX = -0.3, EZ = 2.0, CY = y0 + 1.25, RC = 0.3, LR = 0.9, PITCH = 0.95, xs = [-1.5, -0.5, 0.5, 1.5].map((k) => EX + k * PITCH);
+    [EX - 2.3, EX + 2.3].forEach((x) => out.push(part(rbox(0.25, 0.9, 0.25, 0.05), '#3a3f47', { p: [x, y0 + 0.45, EZ] }), part(rbox(0.9, 0.12, 1.3, 0.04), '#3a3f47', { p: [x, y0 + 0.06, EZ] })));
+    // Crankcase and the block, cut away along the front so the pistons show.
+    out.push(part(rbox(4.1, 0.7, 1.4, 0.1), '#5b616b', { p: [EX, CY - 0.15, EZ] }), part(rbox(4.1, 0.25, 1.2, 0.08), '#3a3f47', { p: [EX, CY - 0.6, EZ] }), [EX - 2.3, EX + 2.3].map((x) => part(box(0.5, 0.12, 0.3), '#3a3f47', { p: [x + (x < EX ? 0.25 : -0.25), CY - 0.1, EZ] })));
+    const BY = CY + 0.35, BH = 1.35;
+    out.push(part(rbox(4.1, BH, 0.5, 0.06), 'A', { p: [EX, BY + BH / 2, EZ - 0.5] }), [EX - 2.05, EX + 2.05].map((x) => part(rbox(0.1, BH, 1.3, 0.04), 'A', { p: [x, BY + BH / 2, EZ] })));
+    xs.forEach((x) => out.push(part(new THREE.CylinderGeometry(0.4, 0.4, BH, hi() ? 28 : 10, 1, true, Math.PI * 0.1, Math.PI * 1.3), '#c9ced6', { p: [x, BY + BH / 2, EZ], r: [0, Math.PI * 0.5, 0] })));
+    [-1, 0, 1].forEach((k) => out.push(part(box(0.1, BH, 0.8), 'Ad', { p: [EX + k * PITCH, BY + BH / 2, EZ - 0.15] })));
+    // Head and cam cover, also cut open.
+    const HY = BY + BH;
+    out.push(part(rbox(4.1, 0.35, 1.3, 0.06), '#7d8792', { p: [EX, HY + 0.17, EZ] }), part(rbox(4.1, 0.4, 0.3, 0.08), 'A', { p: [EX, HY + 0.55, EZ - 0.5] }));
+    xs.forEach((x) => out.push(part(cyl(0.05, 0.05, 0.35, 8), '#e9e6df', { p: [x + 0.18, HY + 0.4, EZ + 0.35], r: [0.5, 0, 0] }), part(cyl(0.1, 0.1, 0.06, 10), K.dark, { p: [x + 0.18, HY + 0.6, EZ + 0.45], r: [0.5, 0, 0] })));
+    // Intake manifold and the exhaust to the turbo.
+    xs.forEach((x) => out.push(part(tube([[x, HY + 0.1, EZ - 0.55], [x, HY + 0.1, EZ - 0.95], [x * 0.3 + EX * 0.7, HY - 0.4, EZ - 1.2]], 0.09), '#b5bcc6')));
+    out.push(part(cyl(0.18, 0.18, 3.2, 16), '#b5bcc6', { p: [EX, HY - 0.4, EZ - 1.2], r: [0, 0, Math.PI / 2] }));
+    // Timing belt at the front, and the oil pan.
+    const TX = EX + 2.2;
+    out.push(part(tube([[TX, CY, EZ + 0.25], [TX, HY + 0.4, EZ + 0.25], [TX, HY + 0.4, EZ - 0.25], [TX, CY, EZ - 0.25]], 0.035, true), '#2b2f36'));
+    // ---- the parts store at the back right
+    const SX = 2.4, SZ = -3.4;
+    out.push(part(rbox(4.2, 2.2, 2.4, 0.06), '#eef0f2', { p: [SX, y0 + 1.1, SZ] }), part(rbox(4.26, 0.5, 2.46, 0.06), 'A', { p: [SX, y0 + 2.0, SZ] }), part(box(2.2, 0.26, 0.05), K.white, { p: [SX, y0 + 2.0, SZ + 1.24] }));
+    out.push(part(rbox(2.6, 1.2, 0.05, 0.03), '#9fcdea', { p: [SX - 0.4, y0 + 0.9, SZ + 1.21] }), part(rbox(0.7, 1.4, 0.06, 0.03), '#2a3c50', { p: [SX + 1.4, y0 + 0.7, SZ + 1.21] }), part(rbox(4.4, 0.08, 0.6, 0.03), 'Bd', { p: [SX, y0 + 1.62, SZ + 1.45], r: [0.2, 0, 0] }));
+    if (hi()) for (let i = 0; i < 4; i++) out.push(part(box(0.5, 0.9, 0.3), ['#e5533d', '#3d7be0', '#f2c94c', '#5fae5b'][i], { p: [SX - 1.4 + i * 0.65, y0 + 0.75, SZ + 0.9] }));
+    // Tyres stacked out front, a pallet of boxed parts.
+    const tyreG = merge(part(torus(0.36, 0.15, TAU, 24), '#24262b', { r: [Math.PI / 2, 0, 0] }), part(cyl(0.22, 0.22, 0.12, 16), K.steel));
+    for (let i = 0; i < 5; i++) out.push(place(tyreG, { p: [SX - 2.4 + (i > 2 ? 0.0 : 0), y0 + 0.15 + (i % 3) * 0.3, SZ + 2.0 + (i > 2 ? 0.75 : 0)] }));
+    for (let i = 0; i < 6; i++) out.push(part(rbox(0.45, 0.35, 0.45, 0.03), i % 2 ? '#c99a62' : '#d9ab70', { p: [3.4 + (i % 3) * 0.5, y0 + 0.3 + Math.floor(i / 3) * 0.36, 3.6], r: [0, (R() - 0.5) * 0.2, 0] }), part(box(0.47, 0.06, 0.2), 'B', { p: [3.4 + (i % 3) * 0.5, y0 + 0.4 + Math.floor(i / 3) * 0.36, 3.83] }));
+    out.push(part(rbox(1.6, 0.14, 1.0, 0.02), '#a37b4f', { p: [3.9, y0 + 0.07, 3.6] }));
+    // ---- the garage lift at the front right
+    const GX = -2.6, GZ = -2.4;
+    out.push(part(rbox(3.4, 0.05, 2.6, 0.02), '#9aa1a9', { p: [GX, y0 + 0.025, GZ] }));
+    [-1.3, 1.3].forEach((dx) => out.push(part(rbox(0.3, 2.6, 0.3, 0.05), '#d6336c', { p: [GX + dx, y0 + 1.3, GZ - 0.9] }), part(rbox(0.5, 0.1, 0.5, 0.02), K.dark, { p: [GX + dx, y0 + 0.05, GZ - 0.9] })));
+    out.push(part(box(2.9, 0.15, 0.2), '#d6336c', { p: [GX, y0 + 2.55, GZ - 0.9] }));
+    [[-4.4, 4.4], [4.4, 4.4], [-4.5, -0.2]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.55 + R() * 0.2)));
+    // ---- moving parts: the engine
+    const crank = (t) => t * 5;
+    const phase = [0, Math.PI, Math.PI, 0];
+    moving.push({ geo: merge(part(cyl(0.09, 0.09, 4.3, 12), K.steel, { r: [0, 0, Math.PI / 2] }), xs.map((x, i) => [-1, 1].map((s) => part(rbox(0.06, 0.62, 0.36, 0.03), K.steelDk, { p: [x - EX + s * 0.2, RC / 2 * Math.cos(phase[i]), RC / 2 * Math.sin(phase[i])], r: [-phase[i], 0, 0] }))),
+      xs.map((x, i) => part(cyl(0.08, 0.08, 0.35, 12), K.steel, { p: [x - EX, RC * Math.cos(phase[i]), RC * Math.sin(phase[i])], r: [0, 0, Math.PI / 2] })), part(cyl(0.3, 0.3, 0.12, 24), K.dark, { p: [TX - EX, 0, 0], r: [0, 0, Math.PI / 2] })),
+      pivot: [EX, CY, EZ], anim: (t) => ({ rx: crank(t) }) });
+    const rod = merge(part(rbox(0.12, LR, 0.07, 0.03), K.steel, { p: [0, LR / 2, 0] }), part(torus(0.09, 0.03, TAU, 14), K.steelDk, { r: [0, Math.PI / 2, 0] }));
+    const piston = merge(part(cyl(0.37, 0.37, 0.45, 24), '#d8dde3'), [0.12, 0.05].map((y) => part(new THREE.CylinderGeometry(0.375, 0.375, 0.025, 24), K.steelDk, { p: [0, y, 0] })), part(cyl(0.06, 0.06, 0.5, 8), K.steelDk, { p: [0, -0.1, 0], r: [0, 0, Math.PI / 2] }));
+    xs.forEach((x, i) => {
+      const th = (t) => crank(t) + phase[i], pinY = (t) => RC * Math.cos(th(t)), pinZ = (t) => RC * Math.sin(th(t));
+      const py = (t) => pinY(t) + Math.sqrt(LR * LR - pinZ(t) ** 2);
+      moving.push({ geo: piston, pivot: [x, CY, EZ], anim: (t) => ({ y: py(t) + 0.1 }) });
+      moving.push({ geo: rod, pivot: [x, CY, EZ], anim: (t) => ({ y: pinY(t), z: pinZ(t), rx: Math.atan2(-pinZ(t), py(t) - pinY(t)) }) });
+      // A flash at the top of the stroke as it fires.
+      moving.push({ geo: part(new THREE.SphereGeometry(0.28, 12, 8), K.yellow, { s: [1.3, 0.4, 1.3] }), pivot: [x, HY - 0.1, EZ], anim: (t) => { const c = ((th(t) % TAU) + TAU) % TAU, k = bump(c, 0.25, 0.3) * (Math.floor((crank(t) + phase[i]) / TAU + i * 0.5) % 2 ? 1 : 0); return { s: k * 1.1 + 0.001 }; } });
+    });
+    // The camshaft at half speed, and its pulley.
+    moving.push({ geo: merge(part(cyl(0.06, 0.06, 4.0, 10), K.steel, { r: [0, 0, Math.PI / 2] }), xs.map((x, i) => part(extrude([[0, -0.1], [0.1, 0], [0, 0.18], [-0.1, 0]], 0.1), K.steelDk, { p: [x - EX + 0.18, 0, 0], r: [i * 1.57, Math.PI / 2, 0] })), part(cyl(0.38, 0.38, 0.1, 28), K.dark, { p: [TX - EX, 0, 0], r: [0, 0, Math.PI / 2] }), hi() ? ring(6, (a) => part(box(0.12, 0.06, 0.06), K.steel, { p: [TX - EX + 0.06, Math.cos(a) * 0.25, Math.sin(a) * 0.25] })) : []),
+      pivot: [EX, HY + 0.4, EZ + 0.1], anim: (t) => ({ rx: crank(t) / 2 }) });
+    // The turbo: its snail housing and a spinning compressor wheel.
+    out.push(part(torus(0.3, 0.16, TAU * 0.85, 24), '#b5bcc6', { p: [EX + 1.7, HY - 0.4, EZ - 1.45], r: [0, 0, 0] }), part(cyl(0.18, 0.22, 0.3, 18), '#9aa1a9', { p: [EX + 1.7, HY - 0.4, EZ - 1.3], r: [Math.PI / 2, 0, 0] }));
+    moving.push({ geo: merge(part(cone(0.16, 0.18, 14), K.gold, { r: [Math.PI / 2, 0, 0] }), ring(6, (a) => part(box(0.02, 0.15, 0.12), K.gold, { p: [Math.cos(a) * 0.08, Math.sin(a) * 0.08, 0], r: [0, 0, a] }))), pivot: [EX + 1.7, HY - 0.4, EZ - 1.45], anim: (t) => ({ rz: t * 25 }) });
+    // ---- the lift raises the car; a mechanic works beneath
+    const liftY = (t) => { const f = cyc(t, 10); return 1.4 * easeIO(win(f, 0.1, 0.3)) * (1 - easeIO(win(f, 0.75, 0.95))); };
+    moving.push({ geo: merge([-1.3, 1.3].map((dx) => part(rbox(0.5, 0.12, 0.3, 0.03), K.dark, { p: [dx, 0, 0] })), [-0.5, 0.5].map((z) => part(box(2.3, 0.08, 0.12), K.dark, { p: [0, 0.05, z + 0.9] }))), pivot: [GX, y0 + 0.4, GZ - 0.9], anim: (t) => ({ y: liftY(t) }) });
+    moving.push({ geo: sedan('B'), pivot: [GX, y0 + 0.43, GZ], anim: (t) => ({ y: liftY(t) }) });
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 10), k = win(f, 0.32, 0.42) - win(f, 0.62, 0.72); return { x: GX - 1.0 + k * 0.9, z: GZ + 1.3 - k * 1.2, ry: k > 0 && k < 1 ? Math.PI / 2 : 0, still: !(f > 0.32 && f < 0.42) && !(f > 0.62 && f < 0.72) }; }, { shirt: 'A', pants: '#2b3a55', y: y0 }));
+    // ---- the van runs parts from the store to the garage
+    const run = curve([[SX + 1.2, 0, SZ + 2.0], [SX - 0.8, 0, -0.5], [GX + 1.4, 0, -0.3], [GX + 0.4, 0, -0.8], [GX + 1.6, 0, -1.0], [SX - 0.6, 0, SZ + 1.8]], true);
+    moving.push({ geo: merge(part(rbox(1.5, 0.9, 0.8, 0.08), K.white, { p: [-0.15, 0.62, 0] }), part(rbox(0.45, 0.6, 0.78, 0.12), K.white, { p: [0.75, 0.45, 0] }), part(box(0.04, 0.28, 0.66), '#26323f', { p: [0.98, 0.62, 0] }), part(box(1.2, 0.26, 0.02), 'A', { p: [-0.2, 0.7, 0.41] }), part(box(1.2, 0.26, 0.02), 'A', { p: [-0.2, 0.7, -0.41] }),
+      [[-0.55, 0.38], [0.6, 0.38], [-0.55, -0.38], [0.6, -0.38]].map(([x, z]) => part(new THREE.CylinderGeometry(0.16, 0.16, 0.1, 14), '#1d1f24', { p: [x, 0.16, z], r: [Math.PI / 2, 0, 0] }))),
+      pivot: [0, y0, 0], anim: (t) => { const { p, ry } = along(run, cyc(t, 12)); return { x: p.x, z: p.z, ry }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [3.7, y0, -0.2], topAt: [SX - 1.2, y0 + 2.25, SZ] };
+  },
 };
