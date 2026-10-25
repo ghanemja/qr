@@ -2146,4 +2146,38 @@ export const HEROES2 = {
       moving.push({ geo: tickGeo(0.25), pivot: [x, y0 + 2.0, z], anim: (t) => { const f = cyc(t, P, off); return f > 0.92 || f < 0.05 ? { ry: Math.PI / 4, s: 1 } : { s: 0.001 }; } }); });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Ramp: the corporate card that saves money. Each employee's purchase hits the card's rules:
+  // coffee and the new laptop sail through with a tick, the gold watch is declined, and what is
+  // saved piles up in the jar.
+  ramp: { finder: '#e4f222', build: () => {
+    const R = rand(166), out = [], LIME = '#e4f222', INK = '#1d1f24';
+    out.push(ground('#8fc66f'), part(rbox(7.6, 0.08, 6.0, 0.03), '#eceee8', { p: [-0.4, y0 + 0.04, -0.6] }), part(rbox(7.6, 2.4, 0.2, 0.03), '#e6e8e2', { p: [-0.4, y0 + 1.2, -3.6] }), place(pixText('RAMP', 0.1, INK, 0.03), { p: [-2.6, y0 + 1.6, -3.48] }));
+    // ---- the card, standing in the middle
+    const CQ = Math.PI / 4;
+    out.push(part(cyl(0.6, 0.7, 0.3, 32), '#3a3f47', { p: [0, y0 + 0.15, 0] }), part(cyl(0.1, 0.1, 0.6, 10), '#c9ced6', { p: [0, y0 + 0.6, 0] }));
+    const card = merge(part(rbox(2.2, 1.4, 0.08, 0.14), INK), part(rbox(0.36, 0.28, 0.09, 0.04), K.gold, { p: [-0.6, 0.15, 0] }), part(extrude([[0, 0], [0.5, 0], [0.25, 0.4]], 0.1), LIME, { p: [0.6, 0.2, 0] }), pixText('RAMP', 0.05, LIME, 0.1).translate(-0.4, -0.4, 0));
+    out.push(place(card, { p: [0, y0 + 1.6, 0], r: [0, CQ, 0] }));
+    // ---- the employees' stations: a café counter, a laptop desk, a jewellery case
+    const shops = [[-3.4, 2.4], [-0.4, 3.4], [3.0, 2.4]];
+    out.push(part(rbox(1.4, 0.9, 0.6, 0.04), '#8a5a36', { p: [-3.4, y0 + 0.45, 2.4] }), part(cyl(0.12, 0.1, 0.25, 14), K.white, { p: [-3.4, y0 + 1.03, 2.4] }));
+    out.push(place(desk(K.white, '#9aa1a9'), { p: [-0.4, y0, 3.4] }));
+    out.push(part(rbox(1.4, 0.9, 0.7, 0.04), '#5b2a40', { p: [3.0, y0 + 0.45, 2.4] }), part(rbox(1.2, 0.3, 0.6, 0.03), '#cfe6f2', { p: [3.0, y0 + 1.05, 2.4] }), part(torus(0.12, 0.03, TAU, 16), K.gold, { p: [3.0, y0 + 1.0, 2.4] }));
+    shops.forEach(([x, z], i) => out.push(place(fan(['#3d7be0', '#e5533d', '#2f9e6e'][i]), { p: [x + 0.6, y0, z + 0.8], s: 1.4 })));
+    // ---- the savings jar, back right
+    const JX = 3.2, JZ = -2.0;
+    out.push(part(new THREE.CylinderGeometry(0.75, 0.7, 1.6, hi() ? 32 : 12, 1, true), '#d6eef8', { p: [JX, y0 + 0.8, JZ] }), part(cyl(0.7, 0.7, 0.05, 24), '#d6eef8', { p: [JX, y0 + 0.02, JZ] }), part(cyl(0.6, 0.6, 0.2, 24), LIME, { p: [JX, y0 + 1.7, JZ] }));
+    out.push(trees(R, [[-4.6, -2.4], [4.6, 4.6], [-4.6, 4.6], [4.6, -4.4]], 0.5));
+    // ---- moving parts
+    const moving = [], P = 9;
+    const top = [0, y0 + 2.4, 0], res = [true, true, false];
+    shops.forEach(([x, z], i) => {
+      const a = i / 3, path = curve([[x, y0 + 1.4, z], [x * 0.5, y0 + 2.8, z * 0.5], top]);
+      moving.push(rider(part(rbox(0.5, 0.3, 0.05, 0.06), INK), path, P, -a, 0, 0.25));
+      moving.push({ geo: res[i] ? tickGeo(0.3) : crossGeo(0.3), pivot: [x, y0 + 2.2, z], anim: (t) => { const f = cyc(t, P, -a); return f > 0.27 && f < 0.5 ? { ry: CQ, s: back(win(f, 0.27, 0.33)) } : { s: 0.001 }; } });
+      if (!res[i]) moving.push(rider(place(coin(0.18, 0.06), { r: [Math.PI / 2, 0, 0] }), curve([top, [(JX) / 2, y0 + 3.0, JZ / 2], [JX, y0 + 1.4, JZ]]), P, -a, 0.3, 0.5, (t) => ({ ry: t * 4 })));
+    });
+    // The jar's level climbing over time.
+    moving.push({ geo: part(cyl(0.68, 0.68, 1.4, 24), (x, y) => (Math.floor(y * 10) % 2 ? '#e9b949' : '#f6d66e'), { p: [0, 0.7, 0] }), pivot: [JX, y0 + 0.05, JZ], anim: (t) => ({ sy: 0.15 + 0.8 * cyc(t, P * 3) }) });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
