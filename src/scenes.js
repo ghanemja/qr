@@ -2915,4 +2915,58 @@ export const SCENES = {
     for (let i = 0; i < 9; i++) { const lp = new V(-0.34 + (i % 3) * 0.34, 0.65 - Math.floor(i / 3) * 0.4, 0.1).applyQuaternion(hq).add(new V(HX, y0 + 1.25, HZ)); moving.push({ geo: merge(part(rbox(0.28, 0.3, 0.02, 0.03), ['#f2c94c', '#9ad0f0', '#e5533d', '#5fae5b', '#c3b4ff', '#f29a3a'][i % 6])).applyQuaternion(hq), pivot: lp.toArray(), anim: (t) => { const f = F(t); return { s: life(f, 0.1 + i * 0.06, 0.13 + i * 0.06, 0.9, 0.96) + 0.001 }; } }); }
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.6, y0, 0.8], topAt: [PX, y0 + 1.12, PZ] };
   },
+
+  // Parcels on the move (marketplaces, delivery, industrial supply, freight rail): anyone can sell
+  // to anyone, and the parcel finds its way. A seller leaves a parcel on the step and the van
+  // collects it; at the hub parcels ride the sorting loop; a delivery drone flies one out and drops
+  // it by parachute into a customer's yard; behind it all the freight train rolls by.
+  'parcel:0': () => {
+    const R = rand(4201), out = [], moving = [];
+    out.push(slab('#a9d384'));
+    // ---- the railway along the back
+    const RZ = -4.4;
+    out.push(part(box(10.4, 0.08, 1.0), '#9a8f7c', { p: [0, y0 + 0.04, RZ] }));
+    if (hi()) for (let x = -5.0; x <= 5.0; x += 0.4) out.push(part(box(0.12, 0.05, 0.9), K.woodDk, { p: [x, y0 + 0.1, RZ] }));
+    [-0.3, 0.3].forEach((dz) => out.push(part(box(10.4, 0.05, 0.05), K.steel, { p: [0, y0 + 0.15, RZ + dz] })));
+    // ---- the roads, the hub (back middle) with its sorting loop on the forecourt
+    out.push(part(box(10.4, 0.03, 1.0), '#6b7078', { p: [0, y0 + 0.015, 1.0] }), part(box(1.0, 0.03, 3.4), '#6b7078', { p: [-0.6, y0 + 0.015, -0.9] }));
+    const HX = 0.6, HZ = -2.6;
+    out.push(part(rbox(4.6, 1.6, 2.0, 0.06), '#e3e0da', { p: [HX, y0 + 0.8, HZ] }), part(box(4.62, 0.3, 2.02), 'A', { p: [HX, y0 + 1.38, HZ] }));
+    [-1.0, 0.4, 1.8].forEach((dx) => out.push(part(rbox(0.9, 1.0, 0.06, 0.03), '#3a3f47', { p: [HX + dx, y0 + 0.5, HZ + 1.01] })));
+    out.push(part(cyl(0.6, 0.6, 0.06, 28), '#5b616b', { p: [HX + 1.4, y0 + 1.63, HZ - 0.3] }), part(torus(0.45, 0.03, TAU, 28), K.yellow, { p: [HX + 1.4, y0 + 1.67, HZ - 0.3], r: [Math.PI / 2, 0, 0] }));
+    const LX = 2.6, LZ = -0.2, LR = 1.2, LY = y0 + 0.75;
+    out.push(part(torus(LR, 0.32, TAU, 48), '#3a3f47', { p: [LX, LY, LZ], r: [Math.PI / 2, 0, 0], s: [1, 1, 0.25] }));
+    [LR - 0.3, LR + 0.3].forEach((r) => out.push(part(torus(r, 0.04, TAU, 48), '#c9ced6', { p: [LX, LY + 0.06, LZ], r: [Math.PI / 2, 0, 0] })));
+    for (let i = 0; i < 6; i++) { const a = (i / 6) * TAU; out.push(part(box(0.08, LY - y0, 0.08), '#9aa1a9', { p: [LX + Math.cos(a) * LR, y0 + (LY - y0) / 2, LZ + Math.sin(a) * LR] })); }
+    out.push(part(rbox(0.6, 0.06, 1.4, 0.03), K.steel, { p: [LX - 0.2, y0 + 0.5, LZ - 1.6], r: [0.4, 0, 0] }));
+    // ---- the seller's house (front left) and the customer's (front right)
+    const SH = new V(-3.4, 0, 2.8), CH = new V(2.9, 0, 2.6);
+    out.push(place(home('#f3ead8', 'Bd', 1.6, 1.4, 1.0), { p: [SH.x, y0, SH.z], r: [0, Math.PI, 0] }), place(home('#e4ecf0', 'Ad', 1.6, 1.3, 1.0), { p: [CH.x, y0, CH.z + 0.3], r: [0, 0, 0] }));
+    out.push(part(rbox(3.2, 0.03, 1.6, 0.04), '#8cc66a', { p: [CH.x, y0 + 0.02, CH.z + 1.75] }), part(box(3.2, 0.3, 0.05), K.white, { p: [CH.x, y0 + 0.15, CH.z + 2.55] }));
+    [[-2.4, -1.6], [4.6, 1.4], [-0.6, 4.4]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.5 + R() * 0.15)));
+    // ---- moving parts (one 12 s cycle)
+    const P = 12, F = (t) => cyc(t, P), box1 = parcel(0.32);
+    // The freight train.
+    const train = merge(part(rbox(1.6, 0.9, 0.8, 0.08), 'A', { p: [0, 0.75, 0] }), part(rbox(0.6, 0.4, 0.82, 0.05), '#26323f', { p: [0.5, 1.0, 0] }), part(box(1.6, 0.12, 0.84), K.dark, { p: [0, 0.3, 0] }),
+      [1, 2].map((i) => merge(part(box(1.6, 0.12, 0.8), K.dark, { p: [-i * 1.8, 0.3, 0] }), part(rbox(1.55, 0.7, 0.78, 0.04), ['#e5533d', '#3d7be0', '#f2c94c'][i - 1], { p: [-i * 1.8, 0.75, 0] }))),
+      [0, 1, 2].flatMap((i) => [-0.5, 0.5].map((dx) => part(new THREE.CylinderGeometry(0.16, 0.16, 0.9, 12), '#1d1f24', { p: [-i * 1.8 + dx, 0.2, 0], r: [Math.PI / 2, 0, 0] }))));
+    train.translate(1.8, 0, 0);
+    moving.push({ geo: train, pivot: [0, y0 + 0.1, RZ], anim: (t) => { const f = F(t), x = -1.9 + 3.8 * (easeIO(win(f, 0.05, 0.45)) - easeIO(win(f, 0.55, 0.95))); return { x }; } });
+    // Parcels riding the sorting loop.
+    for (let k = 0; k < 7; k++) moving.push({ geo: parcel(0.28), pivot: [LX, LY + 0.2, LZ], anim: (t) => { const a = t * 0.8 + (k / 7) * TAU; return { x: Math.cos(a) * LR, z: -Math.sin(a) * LR, ry: a }; } });
+    // The seller's parcel: pops onto the step, the van collects it and drives to the hub.
+    const step = new V(SH.x + 0.3, y0 + 0.13, SH.z - 1.0);
+    moving.push({ geo: box1, pivot: step.toArray(), anim: (t) => { const f = F(t); return { s: f < 0.25 ? life(f, 0.02, 0.06, 0.2, 0.24) : 0.001 }; } });
+    const vr = curve([[-5.0, 0, 1.0], [SH.x + 0.4, 0, 1.0], [-1.0, 0, 1.0], [-0.6, 0, -0.4], [-0.6, 0, -1.3]]);
+    moving.push({ geo: merge(van(K.white, 'A'), place(box1, { p: [-0.2, 1.25, 0] })), pivot: [0, y0, 0], anim: (t) => { const f = F(t), u = f < 0.2 ? easeOut(win(f, 0.05, 0.2)) * 0.32 : f < 0.26 ? 0.32 : 0.32 + easeIO(win(f, 0.26, 0.5)) * 0.67, { p, ry } = along(vr, Math.min(0.999, u)); return { x: p.x, z: p.z, ry, s: f > 0.52 ? Math.max(0.001, 0.85 * (1 - win(f, 0.52, 0.56))) : 0.85 * Math.min(1, f / 0.05) + 0.001 }; } });
+    // The drone: off the hub's pad, over to the customer's yard, a parcel down on its parachute.
+    const D0 = new V(HX + 1.4, y0 + 1.9, HZ - 0.3), D1 = new V(CH.x + 0.3, y0 + 3.4, CH.z + 1.8), dp = (f) => (f < 0.4 ? D0.clone().lerp(D1, easeIO(win(f, 0.1, 0.4))).add(new V(0, hop(win(f, 0.1, 0.4)) * 1.2, 0)) : D1.clone().lerp(D0, easeIO(win(f, 0.55, 0.85))).add(new V(0, hop(win(f, 0.55, 0.85)) * 1.2, 0)));
+    moving.push({ geo: drone('A'), pivot: [0, 0, 0], anim: (t) => { const f = F(t), p = dp(f); return { x: p.x, y: p.y + Math.sin(t * 3) * 0.04, z: p.z }; } });
+    moving.push({ geo: box1, pivot: [0, 0, 0], anim: (t) => { const f = F(t), p = dp(Math.min(f, 0.42)), d = win(f, 0.42, 0.6); return { x: p.x, y: f < 0.42 ? p.y - 0.35 : D1.y - 0.35 - d * (D1.y - 0.35 - y0 - 0.15), z: p.z, s: f > 0.08 && f < 0.82 ? 1 : 0.001 }; } });
+    moving.push({ geo: merge(part(new THREE.SphereGeometry(0.4, 16, 8, 0, TAU, 0, Math.PI / 2), (x, y, z) => (Math.floor((Math.atan2(z, x) + 4) * 1.3) % 2 ? 'B' : K.white)), [0, 1, 2, 3].map((i) => beam([Math.cos(i * Math.PI / 2) * 0.38, 0, Math.sin(i * Math.PI / 2) * 0.38], [0, -0.6, 0], 0.015, K.dark))), pivot: [D1.x, 0, D1.z], anim: (t) => { const f = F(t), d = win(f, 0.42, 0.6); return { y: D1.y - 0.35 - d * (D1.y - 0.35 - y0 - 0.15) + 0.6, s: f > 0.43 && f < 0.62 ? Math.min(1, win(f, 0.43, 0.45)) * (1 - win(f, 0.6, 0.62)) * 0.999 + 0.001 : 0.001 }; } });
+    // The customer comes out for it.
+    moving.push(...walker(moving.length, (t) => { const f = F(t), a = win(f, 0.6, 0.7), b = win(f, 0.74, 0.84), A = new V(CH.x - 0.1, 0, CH.z + 1.0), B = new V(D1.x - 0.5, 0, D1.z - 0.1), p = A.clone().lerp(B, a - b); return { x: p.x, z: p.z, ry: b > 0 ? Math.PI / 2 + 0.4 : -Math.PI / 2 + 0.4, s: f > 0.58 && f < 0.86 ? 1 : 0.001, still: a >= 1 && b <= 0 }; }, { shirt: '#8a6cf0', pants: '#2b3a55', y: y0 }));
+    moving.push({ geo: tickGeo(0.26), pivot: [D1.x, y0 + 2.0, D1.z], anim: (t) => { const f = F(t); return { y: easeOut(win(f, 0.7, 0.75)) * 0.3, ry: Math.PI / 4, s: life(f, 0.7, 0.73, 0.8, 0.84) }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.7, y0, -1.6], topAt: [HX - 1.2, y0 + 1.6, HZ] };
+  },
 };
