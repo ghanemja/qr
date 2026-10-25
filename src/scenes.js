@@ -2690,4 +2690,66 @@ export const SCENES = {
     moving.push({ geo: merge(part(capsule(0.32, 2.2), '#2b2f36', { r: [0, 0, Math.PI / 2] }), part(rbox(0.5, 0.5, 0.2, 0.08), '#2b2f36', { p: [0.3, 0.45, 0] }), part(box(0.6, 0.05, 0.05), '#2b2f36', { p: [0.3, 0.55, 0] }), part(box(0.3, 0.06, 0.22), 'A', { p: [0.3, 0.68, 0] }), part(extrude([[-1.3, 0], [-1.6, 0.4], [-1.45, 0.4], [-1.2, 0]], 0.05), '#2b2f36')), pivot: [3.3, SEA - 0.12, -1.8], anim: (t) => { const f = cyc(t, P, 0.5), up = easeIO(win(f, 0.05, 0.25)) * (1 - easeIO(win(f, 0.75, 0.95))); return { y: -0.9 + up * 0.9, x: Math.sin(f * TAU) * 0.5, ry: Math.PI / 2 + 0.2, s: up > 0.02 ? 1 : 0.001 }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-2.2, y0, 4.3], topAt: [-4.4, y0 + 2.2, 4.0] };
   },
+
+  // Graphics card (chip designers, equipment makers, electronics manufacturers): from bare board
+  // to finished card. On the assembly line boards ride through the pick-and-place, whose head
+  // drops chips on; through the glowing reflow oven; and under the inspection scanner, which ticks
+  // each one; finished cards stack at the end. Behind, the giant card's fans spin.
+  'chip:1': () => {
+    const R = rand(3801), out = [], moving = [];
+    out.push(slab('#cfd4da'));
+    out.push(part(rbox(10.0, 0.03, 10.0, 0.04), '#e6e9ed', { p: [0, y0 + 0.015, 0] }));
+    // ---- the giant graphics card (back left), standing on its slot, facing the camera
+    const GX = -2.2, GZ = -2.8, GA = Math.PI / 4, q = new THREE.Quaternion().setFromAxisAngle(new V(0, 1, 0), GA), CW = 4.6, CH = 2.0, CB = y0 + 0.7;
+    const at = (lx, ly, lz) => new V(lx, ly, lz).applyQuaternion(q).add(new V(GX, 0, GZ));
+    const card = [part(rbox(CW + 0.6, 0.7, 1.0, 0.06), '#2b2f36', { p: [0, y0 + 0.35, 0] }), part(box(CW * 0.5, 0.06, 0.2), '#141619', { p: [-0.6, y0 + 0.71, 0] }),
+      part(rbox(CW, 0.12, 0.5, 0.03), '#1f6f4a', { p: [0, CB + 0.06, 0] }), part(rbox(CW, CH, 0.45, 0.12), '#3a3f47', { p: [0, CB + CH / 2 + 0.1, 0] }), part(rbox(CW - 0.1, CH - 0.2, 0.06, 0.08), 'A', { p: [0, CB + CH / 2 + 0.1, 0.24] }),
+      part(box(CW * 0.5, 0.12, 0.08), K.gold, { p: [-0.6, CB, 0] })];
+    [-1.1, 1.1].forEach((x) => card.push(part(cyl(0.8, 0.8, 0.08, 40), '#1d1f24', { p: [x, CB + CH / 2 + 0.1, 0.27], r: [Math.PI / 2, 0, 0] }), part(torus(0.8, 0.04, TAU, 40), '#c9ced6', { p: [x, CB + CH / 2 + 0.1, 0.31] })));
+    if (hi()) for (let i = 0; i < 18; i++) card.push(part(box(0.04, CH - 0.4, 0.3), '#9aa1a9', { p: [-CW / 2 + 0.3 + i * 0.24, CB + CH / 2 + 0.1, -0.1] }));
+    card.push(part(box(0.2, CH, 0.5), '#c9ced6', { p: [CW / 2 + 0.05, CB + CH / 2 + 0.1, 0] }), part(box(0.2, 0.5, 0.12), 'B', { p: [CW / 2 + 0.05, CB + CH - 0.3, 0.2] }));
+    out.push(place(merge(card), { p: [GX, 0, GZ], r: [0, GA, 0] }));
+    // ---- the assembly line along the front: conveyor, pick-and-place, reflow oven, inspection
+    const LZ = 1.6, X0 = -4.6, X1 = 3.0, BY = y0 + 0.7;
+    out.push(part(box(X1 - X0, 0.08, 0.8), '#3a3f47', { p: [(X0 + X1) / 2, BY - 0.04, LZ] }));
+    [LZ - 0.42, LZ + 0.42].forEach((z) => out.push(part(new THREE.BoxGeometry(X1 - X0, 0.12, 0.05), '#c9ced6', { p: [(X0 + X1) / 2, BY - 0.02, z] })));
+    for (let x = X0 + 0.3; x < X1; x += 1.1) [LZ - 0.35, LZ + 0.35].forEach((z) => out.push(part(new THREE.BoxGeometry(0.06, BY - y0, 0.06), '#9aa1a9', { p: [x, y0 + (BY - y0) / 2, z] })));
+    const PPX = -2.6, OVX = -0.2, INX = 2.0;
+    // Pick-and-place: a glass-sided gantry with reels of parts on its side.
+    out.push(part(rbox(1.5, 0.3, 1.3, 0.04), '#e3e6ea', { p: [PPX, BY + 1.15, LZ] }), [[-0.7, -0.6], [0.7, -0.6], [-0.7, 0.6], [0.7, 0.6]].map(([x, z]) => part(box(0.1, 1.1, 0.1), '#e3e6ea', { p: [PPX + x, BY + 0.55, LZ + z] })), part(box(1.3, 0.08, 0.08), 'A', { p: [PPX, BY + 0.98, LZ] }));
+    for (let i = 0; i < 4; i++) out.push(part(cyl(0.28, 0.28, 0.06, 20), ['#e5533d', '#3d7be0', '#f2c94c', '#5fae5b'][i], { p: [PPX - 0.55 + i * 0.36, BY + 0.3, LZ - 0.85], r: [Math.PI / 2, 0, 0] }), part(cyl(0.08, 0.08, 0.08, 10), K.white, { p: [PPX - 0.55 + i * 0.36, BY + 0.3, LZ - 0.85], r: [Math.PI / 2, 0, 0] }));
+    // Reflow oven: a long hood with glowing windows.
+    out.push(part(rbox(2.0, 0.8, 1.2, 0.06), '#d8dde3', { p: [OVX, BY + 0.4, LZ] }), part(box(2.02, 0.12, 1.22), 'Ad', { p: [OVX, BY + 0.7, LZ] }));
+    for (let i = 0; i < 4; i++) out.push(part(rbox(0.36, 0.24, 0.04, 0.02), '#ff9a4a', { p: [OVX - 0.66 + i * 0.44, BY + 0.38, LZ + 0.61] }));
+    // Inspection: an arch with a camera, its screen beside.
+    out.push([-0.55, 0.55].map((dz) => part(rbox(0.14, 1.2, 0.14, 0.04), K.white, { p: [INX, BY + 0.6, LZ + dz] })), part(rbox(0.3, 0.22, 1.3, 0.05), 'B', { p: [INX, BY + 1.25, LZ] }), part(cyl(0.1, 0.12, 0.2, 14), K.dark, { p: [INX, BY + 1.05, LZ] }));
+    out.push(part(rbox(0.9, 0.7, 0.08, 0.04), K.dark, { p: [INX + 0.3, BY + 1.0, LZ + 1.0], r: [0, Math.PI / 4, 0] }), part(cyl(0.04, 0.04, BY + 0.6 - y0, 8), K.steelDk, { p: [INX + 0.3, y0 + (BY + 0.6 - y0) / 2, LZ + 1.0] }));
+    // The finished cards stacked on a pallet at the end.
+    const SX = 4.0, SZ = 1.6;
+    out.push(part(rbox(1.2, 0.16, 1.2, 0.03), K.wood, { p: [SX, y0 + 0.08, SZ] }));
+    for (let i = 0; i < 4; i++) out.push(part(rbox(0.9, 0.18, 0.5, 0.03), i % 2 ? '#3a3f47' : '#2b2f36', { p: [SX, y0 + 0.25 + i * 0.2, SZ - 0.2] }), part(box(0.86, 0.1, 0.02), 'A', { p: [SX, y0 + 0.25 + i * 0.2, SZ + 0.06] }));
+    // A wafer etch tool and its load port (back right).
+    out.push(part(rbox(2.2, 1.6, 1.6, 0.08), '#eef0f2', { p: [2.6, y0 + 0.8, -3.4] }), part(box(2.22, 0.18, 1.62), 'A', { p: [2.6, y0 + 1.45, -3.4] }), part(cyl(0.5, 0.5, 0.6, 24), '#c9ced6', { p: [2.0, y0 + 1.9, -3.6] }), part(cyl(0.5, 0.5, 0.6, 24), '#c9ced6', { p: [3.2, y0 + 1.9, -3.6] }), part(rbox(0.8, 0.5, 0.06, 0.03), '#2a3c50', { p: [2.6, y0 + 0.9, -2.58] }));
+    [[4.6, -0.6], [-4.6, 4.4], [0.2, 4.4]].forEach(([x, z]) => out.push(part(cyl(0.3, 0.22, 0.4, 14), '#c99a62', { p: [x, y0 + 0.2, z] }), miniTree(R, x, y0 + 0.4, z, 0.45)));
+    // ---- moving parts
+    // The card's fans spin.
+    [-1.1, 1.1].forEach((x) => moving.push({ geo: merge(part(cyl(0.16, 0.16, 0.1, 16), '#2b2f36', { r: [Math.PI / 2, 0, 0] }), ring(9, (a) => part(box(0.66, 0.03, 0.18), '#4a4f58', { p: [Math.cos(a) * 0.4, Math.sin(a) * 0.4, 0], r: [0.4, 0, a] }))).applyQuaternion(q), pivot: at(x, CB + CH / 2 + 0.1, 0.3).toArray(), anim: (t) => ({ q: new THREE.Quaternion().setFromAxisAngle(new V(0, 0, 1).applyQuaternion(q), -t * 7) }) }));
+    // Boards ride the line; chips appear on them under the pick-and-place; they tick at inspection.
+    const P = 10, N = 4, xAt = (u) => X0 + 0.3 + u * (X1 - X0 - 0.4);
+    for (let k = 0; k < N; k++) {
+      const u = (t) => cyc(t, P, k / N), bi = moving.length;
+      moving.push({ geo: merge(part(rbox(0.9, 0.06, 0.6, 0.02), '#1f6f4a'), part(box(0.4, 0.07, 0.06), K.gold, { p: [-0.1, 0, 0.27] })), pivot: [0, BY + 0.04, LZ], anim: (t) => { const f = u(t); return { x: xAt(f), s: Math.min(1, f / 0.03, (1 - f) / 0.03) * 0.999 + 0.001 }; } });
+      [[0.1, 0, 0.3], [-0.25, -0.1, 0.18], [-0.2, 0.15, 0.16]].forEach(([dx, dz, w], j) => moving.push({ geo: chipGeo(w), pivot: [dx, 0.03, dz], parent: bi, anim: (t) => { const f = u(t), uc = (PPX - X0 - 0.3) / (X1 - X0 - 0.4) + j * 0.01; return { s: f > uc ? 1 : 0.001 }; } }));
+      moving.push({ geo: tickGeo(0.18), pivot: [INX, BY + 1.0, LZ + 1.04], anim: (t) => { const f = u(t), ui = (INX - X0 - 0.3) / (X1 - X0 - 0.4); return { ry: Math.PI / 4, s: life(f, ui, ui + 0.02, ui + 0.07, ui + 0.09) }; } });
+    }
+    // The pick-and-place head darts and dabs.
+    moving.push({ geo: merge(part(rbox(0.3, 0.3, 0.3, 0.05), K.dark), part(cyl(0.03, 0.03, 0.4, 8), K.steel, { p: [0, -0.3, 0] })), pivot: [PPX, BY + 0.85, LZ], anim: (t) => ({ x: Math.sin(t * 2.6) * 0.45, z: Math.sin(t * 3.7) * 0.3, y: -Math.max(0, Math.sin(t * 7.8)) * 0.2 }) });
+    // The inspection beam sweeps.
+    moving.push({ geo: part(box(0.04, 0.02, 0.9), '#62d35f'), pivot: [INX, BY + 0.2, LZ], anim: (t) => ({ x: Math.sin(t * 4) * 0.4 }) });
+    // The oven windows breathe.
+    moving.push({ geo: merge([0, 1, 2, 3].map((i) => part(box(0.3, 0.18, 0.02), '#ffd23f', { p: [OVX - 0.66 + i * 0.44, 0, 0] }))), pivot: [0, BY + 0.38, LZ + 0.63], anim: (t) => ({ sy: 0.7 + Math.sin(t * 3) * 0.3 }) });
+    // A tech walks the line.
+    moving.push(...walker(moving.length, (t) => { const k = Math.sin(t * 0.35); return { x: k * 3.0 - 0.6, z: LZ + 1.3, ry: Math.cos(t * 0.35) > 0 ? 0 : Math.PI }; }, { shirt: K.white, pants: '#2b3a55', y: y0 }));
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.4, y0, -0.8], topAt: [2.6, y0 + 2.2, -3.6] };
+  },
 };
