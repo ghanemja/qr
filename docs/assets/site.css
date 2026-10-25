@@ -65,11 +65,12 @@ small { color: var(--muted); font-size: 0.8em; }
 }
 .brand { display: flex; align-items: center; gap: 8px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; white-space: nowrap; }
 .brand:hover { text-decoration: none; }
-.nav { display: flex; gap: 14px; margin-left: auto; font-size: 14px; }
-.nav a { color: var(--muted); }
+.nav { display: flex; align-items: center; gap: 14px; margin-left: auto; font-size: 14px; white-space: nowrap; }
+.nav a { color: var(--muted); flex: none; }
 .nav a:hover { color: var(--text); text-decoration: none; }
+.nav a[aria-current="page"] { color: var(--text); font-weight: 600; }
 .nav a.lib-link { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; margin: -3px 0; border: 1px solid var(--line); border-radius: 999px; color: var(--text); font-weight: 600; }
-.nav a.lib-link:hover { background: var(--surface-2); }
+.nav a.lib-link:hover, .nav a.lib-link[aria-current="page"] { background: var(--surface-2); }
 .lib-link .l-short { display: none; }
 @media (max-width: 1080px) { .lib-link .l-long { display: none; } .lib-link .l-short { display: inline; } }
 .site-foot { max-width: 1040px; margin: 0 auto; padding: 18px 16px 32px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
@@ -230,9 +231,11 @@ body.atlas { height: 100vh; height: 100dvh; display: flex; flex-direction: colum
 .card-qr div { display: grid; gap: 6px; flex: 1; }
 
 @media (max-width: 720px) {
-  .topbar { gap: 10px; padding: 8px 12px; }
-  .brand span, .nav a:not(.keep) { display: none; }
-  .nav { gap: 10px; font-size: 13px; }
+  /* Every nav link stays visible: the nav drops to its own row and scrolls sideways if it must. */
+  .topbar { flex-wrap: wrap; gap: 6px 10px; padding: 8px 12px; }
+  .brand span { display: none; }
+  .nav { order: 3; flex: 1 0 100%; margin: 0; padding: 3px 0; gap: 14px; font-size: 13px; overflow-x: auto; scrollbar-width: none; }
+  .nav::-webkit-scrollbar { display: none; }
   .filters { top: 8px; left: 8px; right: 52px; }
   .filters button { height: 30px; padding: 0 10px; font-size: 12px; }
   .zoom { top: 8px; right: 8px; }

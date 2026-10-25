@@ -363,12 +363,26 @@ const siteSearch = (cls) => `<div class="${cls}" role="search" data-sitesearch>
     <input type="search" placeholder="Search companies…" autocomplete="off" spellcheck="false" aria-label="Search companies" aria-expanded="false">
     <ul class="ss-results" role="listbox" hidden></ul>
   </div>`;
-const topbar = (depth, extra = '') => {
+// The site navigation, the same five links on every page (the topbar of site.css pages and the
+// qw-nav of the 3D pages); `current` marks the page you are on.
+const NAV = [
+  ['world', 'index.html', 'QR world'],
+  ['map', 'map.html', 'Flat map'],
+  ['dir', 'companies.html', 'Directory'],
+  ['about', 'about.html', 'About'],
+];
+const navLinks = (depth, current) => {
+  const up = '../'.repeat(depth);
+  const cur = (key) => (key === current ? ' aria-current="page"' : '');
+  return NAV.map(([key, href, label]) => `<a href="${up}${href}"${cur(key)}>${label}</a>`).join('')
+    + `<a class="lib-link" href="${up}library.html" aria-label="Access 3D asset library"${cur('lib')}>${CUBE}<span class="l-long">Access 3D asset library</span><span class="l-short">3D library</span></a>`;
+};
+const topbar = (depth, extra = '', current = '') => {
   const up = '../'.repeat(depth);
   return `<header class="topbar">
   <a class="brand" href="${up}index.html"><img src="${up}assets/icon.svg" alt="" width="22" height="22"><span>QR&nbsp;Compass</span></a>
   ${extra}
-  <nav class="nav"><a href="${up}index.html">QR world</a><a href="${up}map.html">Flat map</a><a href="${up}companies.html">Directory</a><a class="keep" href="${up}about.html">About</a><a class="keep lib-link" href="${up}library.html">${CUBE}<span class="l-long">Access 3D asset library</span><span class="l-short">3D library</span></a></nav>
+  <nav class="nav" aria-label="Site">${navLinks(depth, current)}</nav>
 </header>`;
 };
 // The site footer: credit and licence.
@@ -402,13 +416,13 @@ const qwHead = ({ title, description, path, depth }) => {
 <script type="importmap">{"imports":{"three":"${up || './'}assets/three.module.min.js"}}</script>
 </head>`;
 };
-const qwTop = (depth) => {
+const qwTop = (depth, current = '') => {
   const up = '../'.repeat(depth);
   return `<div class="qw-brand">
     <a class="qw-logo" href="${up}index.html" aria-label="QR Compass home">${LOGO}</a>
   </div>
   ${depth ? siteSearch('qw-find') : ''}
-  <nav class="qw-nav">${depth ? `<a href="${up}index.html">← Map</a>` : ''}<a href="${up}about.html">About</a><a class="lib-link" href="${up}library.html" aria-label="Access 3D asset library">${CUBE}<span class="l-long">Access 3D asset library</span><span class="l-short">3D library</span></a></nav>`;
+  <nav class="qw-nav" aria-label="Site">${navLinks(depth, current)}</nav>`;
 };
 const ICONS = {
   spring: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.6"/><path d="M12 9.4c-1.6-3.9 1.4-6.4 3.2-4.6 1.6 1.6-.4 4.6-3.2 4.6Zm2.6 2.6c3.9-1.6 6.4 1.4 4.6 3.2-1.6 1.6-4.6-.4-4.6-3.2ZM12 14.6c1.6 3.9-1.4 6.4-3.2 4.6-1.6-1.6.4-4.6 3.2-4.6ZM9.4 12c-3.9 1.6-6.4-1.4-4.6-3.2 1.6-1.6 4.6.4 4.6 3.2Z"/></svg>',
@@ -545,7 +559,7 @@ function indexPage() {
 ${topbar(0, `<div class="search" role="search">
     <input id="q" type="search" placeholder="Search a company or city…" autocomplete="off" spellcheck="false" aria-label="Search companies" aria-controls="results" aria-expanded="false">
     <ul id="results" role="listbox" hidden></ul>
-  </div>`)}
+  </div>`, 'map')}
 <div class="stage" id="stage">
   <svg id="map" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="World map of company headquarters">
     <rect class="sea" x="-${W}" y="-${H}" width="${W * 3}" height="${H * 3}"/>
@@ -634,7 +648,7 @@ function worldPage() {
   return `${qwHead({ title: 'QR Compass · America’s companies on a map', description, path: '', depth: 0 })}
 <body class="qw qw-home">
 <section class="qw-stage hm-stage" id="stage">
-  ${qwTop(0)}
+  ${qwTop(0, 'world')}
   <div class="hm-intro" id="intro">
     <h1>Where America’s biggest companies live</h1>
     <p>Hover a region to wake it up. Click it to break it off the map and walk its streets.</p>
@@ -694,7 +708,7 @@ function directoryPage() {
   const description = `Directory of all ${f500.length} companies on the ${LIST_YEAR} Fortune 500 and ${startups.length} startups, each with a shareable QR page.`;
   return `${head({ title: 'Directory · QR Compass', description, path: 'companies.html', depth: 0 })}
 <body class="page">
-${topbar(0, siteSearch('search'))}
+${topbar(0, siteSearch('search'), 'dir')}
 <main class="directory">
   <h1>Directory</h1>
   <p class="lede">${esc(description)}</p>
@@ -725,7 +739,7 @@ ${footer(0)}
 function aboutPage() {
   return `${head({ title: 'About the data · QR Compass', description: 'Sources and caveats for the QR Compass company map.', path: 'about.html', depth: 0 })}
 <body class="page">
-${topbar(0, siteSearch('search'))}
+${topbar(0, siteSearch('search'), 'about')}
 <main class="prose">
   <h1>About the data</h1>
   <p>QR Compass gives every company a page with its own 3D model. Tap it, or press “Turn into QR code”, and the model breaks into pixels that settle into a QR code that scans back to that page, so a post or slide about a company can point to one stable link.</p>
@@ -791,7 +805,7 @@ function libraryPage() {
   return `${head({ title: '3D asset library · QR Compass', description, path: 'library.html', depth: 0 }).replace('</head>', `<script type="importmap">{"imports":{"three":"./assets/three.module.min.js"}}</script>
 </head>`)}
 <body class="page library">
-${topbar(0, siteSearch('search'))}
+${topbar(0, siteSearch('search'), 'lib')}
 <main>
   <h1>3D asset library</h1>
   <p class="lede">${esc(description)} Each file credits the project and carries the full licence; keep them with the model when you share it.</p>
