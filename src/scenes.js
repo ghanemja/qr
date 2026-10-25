@@ -136,6 +136,12 @@ const humanoid = (base, path, { y = 0, shell = '#f4f5f6', joint = 'A', s = 1.25 
   ];
 };
 
+// A product bottle (body in a brand colour, cap, label), on y = 0, about h tall.
+const bottle = (h = 0.5, body = 'A', cap = 'B') => merge(part(lathe([[0, 0], [h * 0.28, 0.01], [h * 0.3, h * 0.08], [h * 0.3, h * 0.62], [h * 0.16, h * 0.78], [h * 0.12, h * 0.84], [0, h * 0.84]], 20), body),
+  part(cyl(h * 0.13, h * 0.13, h * 0.18, 14), cap, { p: [0, h * 0.92, 0] }), part(new THREE.CylinderGeometry(h * 0.305, h * 0.305, h * 0.26, 20, 1, true), K.white, { p: [0, h * 0.36, 0] }));
+// A soap bubble: pale, with a highlight.
+const bubbleGeo = (r = 0.15) => merge(part(new THREE.SphereGeometry(r, hi() ? 16 : 8, hi() ? 12 : 6), (x, y, z) => (y > r * 0.5 && x < 0 ? '#ffffff' : '#cfeefc'), {}));
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -999,5 +1005,72 @@ export const SCENES = {
     moving.push({ geo: merge(part(rbox(0.6, 0.06, 0.6, 0.02), K.steel), part(box(0.08, 0.1, 0.5), K.steelDk, { p: [0, 0.08, -0.3] })), pivot: [PX, y0 + 0.66, PZ], anim: (t) => ({ y: easeIO(win(cyc(t, PP), 0.05, 0.85)) * 0.9 }) });
     moving.push({ geo: part(lathe([[0, 0], [0.18, 0.02], [0.08, 0.3], [0.2, 0.6], [0, 0.62]], 16), '#f29a3a', { r: [Math.PI, 0, 0] }), pivot: [PX, y0 + 0.63, PZ], anim: (t) => { const k = easeIO(win(cyc(t, PP), 0.05, 0.85)); return { y: k * 0.9, sy: Math.max(0.001, Math.min(1, k * 1.5)), s: cyc(t, PP) > 0.97 ? 0.001 : 1 }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [3.6, y0, 3.2], topAt: [PX, y0 + 1.9, PZ] };
+  },
+
+  // Bubbles (household and personal care, cleaning, hygiene services): products in every home,
+  // every day. The filling line fills, caps and boxes bottles under a giant pump bottle; the van
+  // carries them off; in a cut-away home the bath foams over with rising bubbles and the washer
+  // spins.
+  'care:0': () => {
+    const R = rand(1201), out = [], moving = [];
+    out.push(slab('#a9d7c9'));
+    // ---- the plant: back wall with its stripe and a giant pump bottle on the roof
+    const WZ = -4.45;
+    out.push(part(rbox(6.0, 2.4, 1.2, 0.05), '#f4f5f6', { p: [-2.1, y0 + 1.2, WZ] }), part(box(6.02, 0.3, 1.22), 'A', { p: [-2.1, y0 + 2.1, WZ] }));
+    [-4.1, -2.1, -0.1].forEach((x) => out.push(part(rbox(1.2, 0.8, 0.05, 0.03), '#9fcdea', { p: [x, y0 + 1.2, WZ + 0.61] })));
+    out.push(place(bottle(2.4, 'A', 'B'), { p: [-2.6, y0 + 2.4, WZ] }), part(box(0.14, 0.14, 0.7), 'B', { p: [-2.6, y0 + 2.4 + 2.35, WZ + 0.35] }), part(cyl(0.05, 0.05, 0.3, 8), 'B', { p: [-2.6, y0 + 2.4 + 2.3, WZ + 0.7], r: [Math.PI / 2, 0, 0] }));
+    // ---- the line: conveyor along x, filler, capper, the case packer
+    const CZ = -2.7, TOPY = y0 + 0.75, X0 = -4.7, X1 = 0.4;
+    out.push(part(box(X1 - X0, 0.08, 0.7), '#3a3f47', { p: [(X0 + X1) / 2, TOPY - 0.04, CZ] }));
+    [CZ - 0.37, CZ + 0.37].forEach((z) => out.push(part(new THREE.BoxGeometry(X1 - X0, 0.14, 0.05), '#c9ced6', { p: [(X0 + X1) / 2, TOPY - 0.03, z] })));
+    for (let x = X0 + 0.1; x <= X1; x += 0.85) [CZ - 0.32, CZ + 0.32].forEach((z) => out.push(part(new THREE.BoxGeometry(0.07, 0.7, 0.07), '#9aa1a9', { p: [x, y0 + 0.35, z] })));
+    const FX = -3.3, KX = -1.9;
+    [FX, KX].forEach((x, i) => { out.push(part(rbox(0.9, 0.12, 1.0, 0.03), '#eef0f2', { p: [x, y0 + 1.85, CZ] }), [-0.4, 0.4].map((dz) => part(box(0.1, 1.15, 0.1), '#eef0f2', { p: [x, y0 + 1.3, CZ + dz] }))); out.push(part(rbox(0.94, 0.2, 1.04, 0.03), i ? 'B' : 'A', { p: [x, y0 + 1.97, CZ] })); });
+    out.push(part(rbox(1.0, 0.7, 1.0, 0.05), '#c99a62', { p: [X1 + 0.6, y0 + 0.35, CZ] }), part(box(1.02, 0.1, 1.02), 'A', { p: [X1 + 0.6, y0 + 0.5, CZ] }));
+    for (let i = 0; i < 4; i++) out.push(part(rbox(0.6, 0.45, 0.6, 0.03), '#d9ab70', { p: [X1 + 0.3 + (i % 2) * 0.65, y0 + 0.23 + Math.floor(i / 2) * 0.46, CZ + 1.1] }), part(box(0.62, 0.08, 0.2), 'A', { p: [X1 + 0.3 + (i % 2) * 0.65, y0 + 0.3 + Math.floor(i / 2) * 0.46, CZ + 1.31] }));
+    // ---- the home, cut away: bathroom and laundry
+    const HX0 = -0.4, HX1 = 4.8, HZ0 = 0.2, HZ1 = 4.6, FY = y0 + 0.2, WH = 2.2, MID = 2.1;
+    out.push(part(rbox(HX1 - HX0, 0.2, HZ1 - HZ0, 0.04), '#d9cbb4', { p: [(HX0 + HX1) / 2, y0 + 0.1, (HZ0 + HZ1) / 2] }));
+    out.push(part(box(MID - HX0, 0.02, HZ1 - HZ0 - 0.1), '#e6f2f6', { p: [(HX0 + MID) / 2, FY + 0.01, (HZ0 + HZ1) / 2] }));
+    if (hi()) for (let i = 1; i < 6; i++) out.push(part(box(MID - HX0, 0.022, 0.02), '#c7dde5', { p: [(HX0 + MID) / 2, FY + 0.012, HZ0 + i * 0.73] }));
+    out.push(part(rbox(HX1 - HX0, WH, 0.15, 0.03), '#f6efe2', { p: [(HX0 + HX1) / 2, FY + WH / 2, HZ0] }), part(rbox(0.15, WH, HZ1 - HZ0, 0.03), '#f6efe2', { p: [HX0, FY + WH / 2, (HZ0 + HZ1) / 2] }), part(rbox(0.12, 0.9, 2.4, 0.03), '#eadfcc', { p: [MID, FY + 0.45, HZ0 + 1.2] }));
+    out.push(part(box(HX1 - HX0, 0.12, 0.17), 'Bd', { p: [(HX0 + HX1) / 2, FY + WH, HZ0] }), part(box(0.17, 0.12, HZ1 - HZ0), 'Bd', { p: [HX0, FY + WH, (HZ0 + HZ1) / 2] }));
+    // The bath along the back wall, tiles, a sink with its mirror, a shelf of products.
+    if (hi()) for (let i = 0; i < 8; i++) for (let j = 0; j < 4; j++) out.push(part(box(0.3, 0.3, 0.02), (i + j) % 2 ? '#d9eef5' : '#ffffff', { p: [HX0 + 0.3 + i * 0.32, FY + 0.2 + j * 0.32, HZ0 + 0.09] }));
+    out.push(part(rbox(1.7, 0.6, 0.95, 0.2), K.white, { p: [0.65, FY + 0.3, HZ0 + 0.6] }), part(rbox(1.5, 0.05, 0.75, 0.1), '#a9dff2', { p: [0.65, FY + 0.56, HZ0 + 0.6] }), part(tube([[0.0, FY + 0.9, HZ0 + 0.1], [0.0, FY + 1.05, HZ0 + 0.25], [0.0, FY + 0.85, HZ0 + 0.35]], 0.03), K.steel));
+    if (hi()) for (let i = 0; i < 14; i++) out.push(place(bubbleGeo(0.12 + R() * 0.1), { p: [0.05 + R() * 1.3, FY + 0.62 + R() * 0.12, HZ0 + 0.3 + R() * 0.6] }));
+    out.push(part(rbox(0.6, 0.12, 0.45, 0.04), K.white, { p: [HX0 + 0.35, FY + 0.85, HZ0 + 2.2] }), part(cyl(0.05, 0.07, 0.75, 10), K.white, { p: [HX0 + 0.35, FY + 0.4, HZ0 + 2.2] }), part(rbox(0.04, 0.7, 0.55, 0.03), '#bfe3f2', { p: [HX0 + 0.1, FY + 1.45, HZ0 + 2.2] }));
+    out.push(part(box(0.08, 0.04, 1.0), '#c99a62', { p: [HX0 + 0.12, FY + 1.95, HZ0 + 1.2] }));
+    [['A', 'B'], ['B', 'A'], [K.white, 'A'], ['Ad', K.white]].forEach(([b, c], i) => out.push(place(bottle(0.32, b, c), { p: [HX0 + 0.14, FY + 1.97, HZ0 + 0.8 + i * 0.26] })));
+    // Laundry: the washer, a dryer, a basket, detergent.
+    out.push(part(rbox(0.9, 1.0, 0.8, 0.08), K.white, { p: [3.0, FY + 0.5, HZ0 + 0.55] }), part(torus(0.3, 0.05, TAU, 28), '#c9ced6', { p: [3.0, FY + 0.5, HZ0 + 0.96] }), part(rbox(0.6, 0.12, 0.05, 0.02), '#9aa1a9', { p: [3.0, FY + 0.92, HZ0 + 0.96] }));
+    out.push(part(rbox(0.9, 1.0, 0.8, 0.08), '#eef0f2', { p: [4.0, FY + 0.5, HZ0 + 0.55] }), part(cyl(0.3, 0.3, 0.04, 24), '#5b616b', { p: [4.0, FY + 0.5, HZ0 + 0.96], r: [Math.PI / 2, 0, 0] }));
+    out.push(place(bottle(0.45, 'A', 'B'), { p: [3.0, FY + 1.0, HZ0 + 0.4] }), part(lathe([[0.32, 0], [0.38, 0.35], [0, 0.36]].reverse().map(([r, y]) => [r, 0.36 - y]).reverse(), 20), '#e8d3ad', { p: [3.5, FY, HZ0 + 1.8] }));
+    out.push(part(lathe([[0, 0], [0.3, 0], [0.36, 0.38], [0.34, 0.4], [0.28, 0.04], [0, 0.04]], 20), '#d9c39a', { p: [3.6, FY, HZ0 + 1.9] }), part(new THREE.SphereGeometry(0.22, 10, 7), '#8fc4e8', { p: [3.55, FY + 0.33, HZ0 + 1.9], s: [1, 0.5, 1] }), part(new THREE.SphereGeometry(0.18, 10, 7), '#f39ab8', { p: [3.7, FY + 0.36, HZ0 + 1.8], s: [1, 0.5, 1] }));
+    [[-4.5, 4.4], [-4.6, 0.6], [-1.6, 4.5]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.55 + R() * 0.2)));
+    // ---- moving parts
+    // Bottles ride the line: filled under the filler, capped under the capper, boxed at the end.
+    const P = 1.6, N = 6, travel = (u) => X0 + 0.2 + u * (X1 - X0 - 0.2);
+    for (let k = 0; k < N; k++) {
+      const u = (t) => cyc(t, P * N, k / N), x = (t) => travel(u(t));
+      moving.push({ geo: merge(part(lathe([[0, 0], [0.13, 0.01], [0.135, 0.04], [0.135, 0.28], [0.07, 0.35], [0.055, 0.38], [0, 0.38]], 18), 'A'), part(new THREE.CylinderGeometry(0.137, 0.137, 0.12, 18, 1, true), K.white, { p: [0, 0.16, 0] })), pivot: [0, TOPY, CZ], anim: (t) => ({ x: x(t), s: Math.min(1, u(t) / 0.03, (1 - u(t)) / 0.03) }) });
+      moving.push({ geo: part(cyl(0.06, 0.06, 0.08, 12), 'B'), pivot: [0, TOPY + 0.42, CZ], anim: (t) => ({ x: x(t), s: x(t) > KX && u(t) < 0.97 ? 1 : 0.001 }) });
+    }
+    // The filler's nozzle and the capper's head bob as bottles pass.
+    moving.push({ geo: merge(part(cyl(0.05, 0.03, 0.5, 10), K.steel), part(rbox(0.3, 0.2, 0.3, 0.04), K.steelDk, { p: [0, 0.3, 0] })), pivot: [FX, TOPY + 0.95, CZ], anim: (t) => ({ y: -bump(cyc(t, P), 0.5, 0.15) * 0.25 }) });
+    moving.push({ geo: merge(part(cyl(0.1, 0.1, 0.25, 12), K.steelDk), part(rbox(0.3, 0.2, 0.3, 0.04), K.steelDk, { p: [0, 0.2, 0] })), pivot: [KX, TOPY + 0.95, CZ], anim: (t) => ({ y: -bump(cyc(t, P, 0.3), 0.5, 0.15) * 0.3, ry: t * 6 }) });
+    // A worker checks the line.
+    moving.push(...walker(moving.length, (t) => { const k = Math.sin(t * 0.4); return { x: -2.4 + k * 1.6, z: CZ + 0.95, ry: Math.cos(t * 0.4) > 0 ? 0 : Math.PI }; }, { shirt: 'A', pants: '#2b3a55', y: y0 }));
+    // The van runs cases from the plant round to the home.
+    const run = curve([[X1 + 1.6, 0, CZ + 0.3], [3.6, 0, -1.6], [4.5, 0, -0.6], [3.6, 0, -1.0], [X1 + 1.7, 0, CZ + 0.9]], true);
+    moving.push({ geo: van(K.white, 'A'), pivot: [0, y0, 0], anim: (t) => { const { p, ry } = along(run, cyc(t, 12)); return { x: p.x, z: p.z, ry }; } });
+    // Bubbles rise from the bath, wobble and pop.
+    for (let k = 0; k < 10; k++) { const bx = 0.1 + R() * 1.2, bz = HZ0 + 0.35 + R() * 0.5, r = 0.1 + R() * 0.12; moving.push({ geo: bubbleGeo(r), pivot: [bx, FY + 0.7, bz], anim: (t) => { const u = cyc(t, 4 + (k % 3), k / 10); return { y: u * 3.2, x: Math.sin(t * 2 + k) * 0.25 * u + u * 0.6, z: Math.cos(t * 1.7 + k) * 0.2 * u + u * 0.8, s: u > 0.92 ? 1 + (u - 0.92) * 6 : Math.min(1, u * 10) }; } }); }
+    // The washer's drum turns, clothes tumbling.
+    moving.push({ geo: merge(part(cyl(0.27, 0.27, 0.02, 24), '#bfe3f2', { r: [Math.PI / 2, 0, 0] }), [['#e5533d', 0], ['#3d7be0', 2], ['#f2c94c', 4]].map(([c, a]) => part(new THREE.SphereGeometry(0.1, 8, 6), c, { p: [Math.cos(a) * 0.14, Math.sin(a) * 0.14, 0.02], s: [1.4, 0.8, 0.5] }))), pivot: [3.0, FY + 0.5, HZ0 + 0.95], anim: (t) => ({ rz: t * 5 }) });
+    // Someone brushing their teeth at the sink.
+    moving.push(...walker(moving.length, () => ({ x: HX0 + 0.9, z: HZ0 + 2.2, ry: Math.PI, still: true }), { shirt: '#8fc4e8', pants: '#3b4a5c', y: FY }));
+    moving.push({ geo: merge(part(rbox(0.04, 0.04, 0.22, 0.015), 'A'), part(box(0.04, 0.05, 0.05), K.white, { p: [0, 0.03, -0.09] })), pivot: [HX0 + 0.72, FY + 1.5, HZ0 + 2.2], anim: (t) => ({ z: Math.sin(t * 14) * 0.04, ry: Math.PI / 2 }) });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.6, y0, 2.0], topAt: [-0.6, y0 + 2.42, WZ] };
   },
 };
