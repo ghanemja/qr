@@ -4,15 +4,26 @@ Notes for the next session working on this repo. Live site: https://ghanemja.git
 
 ## Where things stand
 
-- **59 bespoke "hero" models** are built and live, each a small animated scene showing the company's moat:
+- **124 bespoke "hero" models** are built and live, each a small animated scene showing the company's moat:
   - **The first 16, rebuilt to the current quality bar:** amazon, walmart, apple, alphabet, berkshire, spacex, cocacola, exxon, microsoft, nvidia, costco, meta, ford, tesla, disney, mcdonalds.
   - **43 added in the latest session:** jpmorgan, unitedhealth, cvs, boeing, homedepot, netflix, starbucks, visa, chevron, anthropic, openai, gm, verizon, bofa, target, ups, ibm, lilly, caterpillar, pepsico, lockheed, deere, intel, delta, nike, uber, mastercard, att, wellsfargo, goldman, pfizer, comcast, amex, pg, jnj, waymo, airbnb, salesforce, fedex, oracle, cisco, stripe, kroger.
   - Stripe was rebuilt once (as the payments layer under a street of businesses), and Airbnb and Salesforce were strengthened after the user's feedback.
+  - **65 added in the second batch** (in `src/heroes2.js`, the `HEROES2` object):
+    - Banks and finance: citigroup, morganstanley, capitalone, usbancorp, moodys, nasdaq, ice.
+    - Payments: paypal, block.
+    - Tech and hardware: dell, hp, supermicro, adobe, intuit, workday, motorolasolutions, charter.
+    - Retail: lowes, bestbuy, tjx, macys, gap, lululemon, ulta, dollargeneral, dollartree, autozone, oreilly.
+    - Groceries and food service: publix, albertsons, sysco.
+    - Food, drink and restaurants: tyson, kraftheinz, generalmills, mondelez, hershey, keurigdrpepper, monster, chipotle, doordash.
+    - Health: abbott. Travel and casinos: marriott, southwest, lasvegassands, mgm, caesars.
+    - Cars: carvana, carmax, hertz, goodyear, paccar. Defence: northrop. Materials and mining: internationalpaper, newmont.
+    - Startups: databricks, perplexity, neuralink, scaleai, huggingface, runway, discord, plaid, ramp, nuro, figureai.
+  - **Skipped at the user's request:** KKR, Apollo and Fiserv (they stay on their shared shapes).
 - Every other company uses one of the **137 shared industry shapes**. **57 of them have been rebuilt as full scenes** (334 companies); the agreed upgrade list is finished. See **Shared-shape upgrades** below.
 
 ## The user's plan, in order
 
-1. **Bespoke models (done for now).** The user will post on LinkedIn next. More heroes are welcome if asked. Candidates: Citigroup, Adobe, Broadcom, Qualcomm, Dell, HP, Marriott, Micron, Databricks, Anduril, Figure AI, Zipline.
+1. **Bespoke models (done for now).** More heroes only if the user asks. Ask before doing Broadcom, Qualcomm, Micron, Anduril or Zipline (already on upgraded shared scenes), or Amgen, Gilead, Regeneron, Halliburton or ConocoPhillips.
 2. **Upgrade the shared shapes** (done for the agreed list; see **Shared-shape upgrades** below for what's done and what's deliberately skipped).
 3. **Advertisement video** of the coolest models, set to music "from Equalizer" (the user wants to advertise Equalizer too).
    - Equalizer is the user's own music-making app: https://github.com/ghanemja/equalizer (studio: https://ghanemja.github.io/equalizer/). Every sound is an equation; a song is `{ bpm, bars, tracks: [{ name, equation, params, pattern }] }`, and `examples/render.mjs` renders one headlessly to WAV (no samples, no dependencies). Ready-made tracks live in its `docs/audio/` (for example `hyperbolic-808.mp3`, `four-on-the-floor.mp3`). Plan: compose a custom ad track in Equalizer, render it, cut the video to its beat, and show an end card crediting "Soundtrack made in Equalizer" with its link.
@@ -71,19 +82,7 @@ No more shared shapes are queued. Further upgrades only if the user asks (see th
   - `oil:3` Gas pump: World Kinect, Murphy USA, Diamondback, Delek, Coterra
   - `power:4` Cooling towers: NRG, Exelon, Dominion, Entergy
   - The user may still add Amgen, Gilead, Regeneron, Halliburton or ConocoPhillips; ask before doing so.
-- **Every shape used by only 1–3 companies.** Instead, well-known companies on those shapes are **candidates for their own bespoke hero** (don't build them until the user picks):
-  - Banks and finance: Citigroup, Morgan Stanley, Capital One, U.S. Bancorp, KKR, Apollo, Fiserv, Moody's, Nasdaq, Intercontinental Exchange.
-  - Payments: PayPal, Block.
-  - Tech and hardware: Dell, HP, Super Micro, Adobe, Intuit, Workday, Motorola Solutions, Charter.
-  - Retail: Lowe's, Best Buy, TJX, Macy's, Gap, Lululemon, Ulta, Dollar General, Dollar Tree, AutoZone, O'Reilly.
-  - Groceries and food service: Publix, Albertsons, Sysco.
-  - Food, drink and restaurants: Tyson, Kraft Heinz, General Mills, Mondelēz, Hershey, Keurig Dr Pepper, Monster, Chipotle, DoorDash.
-  - Health: Abbott.
-  - Travel and casinos: Marriott, Southwest, Las Vegas Sands, MGM, Caesars.
-  - Cars and vehicles: Carvana, CarMax, Hertz, Goodyear, Paccar.
-  - Defence and space: Northrop Grumman.
-  - Materials and mining: International Paper, Newmont.
-  - Startups: Databricks, Perplexity, Neuralink, Scale AI, Hugging Face, Runway, Discord, Plaid, Ramp, Nuro.
+- **Every shape used by only 1–3 companies.** The well-known companies on them got their own heroes (the second batch above); the rest keep their shapes.
 
 Next: item 3 (the ad video).
 
@@ -132,7 +131,8 @@ The software renderer in a cloud container is slow (about 1.5 fps), so timed fra
 - Commit messages should end with the attribution trailer the session's system prompt asks for. Never put a model name in commits.
 - **Workflow for a new hero:**
   1. Write the `build()` for it.
-  2. Append it to `HEROES` (just before the final `};` in `src/heroes.js`).
+  2. Append it to `HEROES2` (just before the final `};` in `src/heroes2.js`).
+     - `heroes2.js` has its own small helpers at the top: `ground`, `trees` (push its result into `out`; it keeps trees on the board), `pixText` (a blocky pixel font for signs), `rider` (a part riding a curve over part of a cycle), `pulse` (a ring that swells once a cycle) and `block` (an office block with window bands).
   3. Run `addhero.py`.
   4. `npm run build`.
   5. `vc.mjs`, then `still.cjs` and `gal.cjs`. Look at the images and fix anything off.
