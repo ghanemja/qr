@@ -3,7 +3,7 @@
 // QR world (qrshot.html), run on Playwright's fake clock so its morph lands on exact frames.
 //   node tools/video/render.cjs <outdir> [fps=30] [workers=3]      every frame (resumable)
 //   node tools/video/render.cjs <outdir> stills 3.1,12,30          a few stage frames, as PNGs
-//   ONLY=page (or qr) node tools/video/render.cjs <outdir>         just the filmed shots
+//   ONLY=page (or qr, or stage) node tools/video/render.cjs <outdir>   just those shots
 // Needs the repo served at HOST (docs/ at /qr/, tools/ at /tools/; see README.md).
 const { chromium } = require('playwright');
 const fs = require('fs');
@@ -11,11 +11,13 @@ const HOST = process.env.HOST || 'http://localhost:8124';
 const [out, a1 = '30', a2 = '3'] = process.argv.slice(2);
 fs.mkdirSync(out, { recursive: true });
 const ARGS = ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'];
+// FMT=portrait renders the 4:5 vertical cut (1080×1350) instead of 16:9 (1920×1080).
+const PORTRAIT = process.env.FMT === 'portrait', VIEW = PORTRAIT ? { width: 1080, height: 1350 } : { width: 1920, height: 1080 };
 const name = (f) => `${out}/f${String(f).padStart(5, '0')}.jpg`;
 
 async function open(url, { clock = false } = {}) {
   const b = await chromium.launch({ args: ARGS });
-  const p = await b.newPage({ viewport: { width: 1920, height: 1080 }, reducedMotion: 'no-preference' });
+  const p = await b.newPage({ viewport: VIEW, reducedMotion: 'no-preference' });
   p.on('pageerror', (e) => console.log('ERR', e.message));
   p.on('console', (m) => { if (m.type() === 'error') console.log('CONSOLE', m.text()); });
   if (clock) { await p.clock.install({ time: 0 }); await p.clock.pauseAt(1000); } // time moves only when we say
@@ -23,7 +25,7 @@ async function open(url, { clock = false } = {}) {
   return { b, p };
 }
 async function stage() {
-  const { b, p } = await open('/tools/video/stage.html');
+  const { b, p } = await open(`/tools/video/stage.html${PORTRAIT ? '?fmt=portrait' : ''}`);
   await p.waitForFunction(() => document.title === 'ready', null, { timeout: 120000 });
   await p.evaluate(() => document.fonts.ready);
   return { b, p };
@@ -40,13 +42,15 @@ async function qrShot(shot, fps) {
   for (let i = 0; i < 150 && !(await p.evaluate(() => !!window.world)); i++) await new Promise((r) => setTimeout(r, 200));
   await p.evaluate(() => document.fonts.ready);
   await p.clock.runFor(2600); // let the world grow in before the shot starts
-  let now = 0;
+  // The page's clock runs at window.rate(t) of the video's, so the shot can slow down for the morph.
+  let page = 0, done = 0;
   for (let f = first; f < last; f++) {
-    const ms = Math.round(((f - first) / fps) * 1000);
-    if (ms > now) await p.clock.runFor(ms - now);
-    now = ms;
-    await p.evaluate((t) => window.cue(t), ms / 1000);
-    await p.clock.runFor(1); now += 1; // draw the cue's changes
+    const t = (f - first) / fps, ms = Math.round(page);
+    if (ms > done) await p.clock.runFor(ms - done);
+    done = ms;
+    await p.evaluate((t) => window.cue(t), t);
+    await p.clock.runFor(1); done += 1; page += 1; // draw the cue's changes
+    page += (1000 / fps) * (await p.evaluate((t) => (window.rate ? window.rate(t) : 1), t)) - 1;
     await p.screenshot({ path: name(f), type: 'jpeg', quality: 94 });
     if ((f - first) % 30 === 0) console.log(`qr ${shot.slug}: ${f - first}/${last - first}`);
   }
@@ -96,14 +100,18 @@ async function pageShot(shot, fps) {
   await b0.close();
   const qr = shots.filter((s) => s.kind === 'qr'), pages = shots.filter((s) => s.kind === 'page');
   const isQR = (f) => [...qr, ...pages].some((s) => f >= Math.round(s.t0 * fps) && f < Math.round(s.t1 * fps));
+  // NEED=a-b,c-d (seconds) renders only what those spans use, e.g. just the short cut's segments.
+  const need = process.env.NEED && process.env.NEED.split(',').map((r) => r.split('-').map(Number));
+  const wanted = (t0, t1) => !need || need.some(([a, b]) => t0 < b && t1 > a);
+  for (const list of [qr, pages]) list.splice(0, list.length, ...list.filter((s) => wanted(s.t0, s.t1)));
   const todo = [];
-  for (let f = 0; f < Math.round(dur * fps); f++) if (!isQR(f) && !fs.existsSync(name(f))) todo.push(f);
+  for (let f = 0; f < Math.round(dur * fps); f++) if (!isQR(f) && wanted(f / fps, (f + 1) / fps) && !fs.existsSync(name(f))) todo.push(f);
   console.log(`${todo.length} stage frames, ${qr.length} QR shot(s) and ${pages.length} page shot(s) to render on ${workers} workers`);
   let next = 0, done = 0; const t0 = Date.now();
   await Promise.all([
     ...(only && only !== 'qr' ? [] : qr.map((s) => qrShot(s, fps))),
     (async () => { if (!only || only === 'page') for (const s of pages) await pageShot(s, fps); })(),
-    ...Array.from({ length: only ? 0 : workers }, async () => {
+    ...Array.from({ length: only && only !== 'stage' ? 0 : workers }, async () => {
       const { b, p } = await stage();
       while (next < todo.length) {
         const f = todo[next++];

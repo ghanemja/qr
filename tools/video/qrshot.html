@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <title>QR shot</title>
 <style>
-  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #f6f1e7; font-family: Inter, sans-serif; color: #17202c; }
+  html, body { margin: 0; width: 100vw; height: 100vh; overflow: hidden; background: #f6f1e7; font-family: Inter, sans-serif; color: #17202c; }
   #stage { position: absolute; inset: 0; }
   .ov { position: absolute; left: 0; right: 0; text-align: center; opacity: 0; pointer-events: none; text-shadow: 0 2px 26px #f6f1e7, 0 0 10px #f6f1e7; }
   .ov b { display: block; font: 800 76px/1.05 'Inter Display', Inter, sans-serif; letter-spacing: -2px; }
@@ -27,7 +27,10 @@ const C = JSON.parse(html.match(/window\.COMPANY=(\{.*?\});<\/script>/)[1]);
 document.querySelector('#c1 b').textContent = C.name;
 const world = createQRWorld(document.getElementById('stage'), { slug: C.slug, model: C.model, look: C.look, qr: C.qr, viewScale: 1.3, insets: () => ({ top: 300, bottom: 50 }) });
 // The shot, in seconds from its first frame (the world has already grown in by then).
-const SCAN = 2, BACK = 5.5;
+const SCAN = 1, BACK = 5.6;
+// Playback rate of the page's clock at shot time t: the breakdown plays at half speed so every
+// pixel can be seen peeling off and landing; the rebuild a little faster.
+window.rate = (t) => (t >= SCAN && t < SCAN + 3.4 ? 0.5 : t >= BACK && t < BACK + 2.4 ? 0.7 : 1);
 let scanned = false, back = false;
 const ease = (x) => (x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x));
 const fade = (u, a, b, c, d) => Math.min(ease((u - a) / (b - a)), 1 - ease((u - c) / (d - c)));
@@ -35,9 +38,9 @@ window.cue = (t) => {
   if (t >= SCAN && !scanned) { scanned = true; world.setScan(true); }
   if (t >= BACK && !back) { back = true; world.setScan(false); }
   const c1 = document.getElementById('c1'), c2 = document.getElementById('c2');
-  c1.style.opacity = fade(t, 0.1, 0.5, 1.7, 2.1);
-  c2.style.opacity = fade(t, 3.6, 4.0, 5.3, 5.7);
-  c2.style.transform = `translateY(${(1 - ease((t - 3.6) / 0.4)) * -24}px)`;
+  c1.style.opacity = fade(t, 0.05, 0.35, 1.3, 1.7);
+  c2.style.opacity = fade(t, 3.8, 4.2, 5.5, 5.9);
+  c2.style.transform = `translateY(${(1 - ease((t - 3.8) / 0.4)) * -24}px)`;
 };
 window.world = world;
 </script>

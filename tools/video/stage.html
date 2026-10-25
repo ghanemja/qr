@@ -6,7 +6,7 @@
 <meta charset="utf-8">
 <title>QR Compass ad</title>
 <style>
-  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #f6f1e7; font-family: Inter, sans-serif; color: #17202c; }
+  html, body { margin: 0; width: 100vw; height: 100vh; overflow: hidden; background: #f6f1e7; font-family: Inter, sans-serif; color: #17202c; }
   canvas { position: absolute; inset: 0; }
   .ov { position: absolute; opacity: 0; will-change: opacity, transform; }
   #cap { left: 96px; bottom: 92px; text-shadow: 0 0 18px #f6f1e7, 0 0 8px #f6f1e7, 0 0 3px #f6f1e7; }
@@ -30,6 +30,18 @@
   #veil { inset: 0; background: #f6f1e7; }
   #big { left: 0; right: 0; top: 70px; text-align: center; font: 800 84px/1.05 'Inter Display', Inter, sans-serif; letter-spacing: -2px; text-shadow: 0 2px 30px #f6f1e7, 0 0 12px #f6f1e7; }
   #big small { display: block; margin-top: 16px; font: 600 38px/1 Inter, sans-serif; letter-spacing: 0; color: #4a5566; }
+  /* 4:5 vertical (?fmt=portrait): captions under the model, cards a little smaller. */
+  .pbr { display: none; } .portrait .pbr { display: inline; }
+  .portrait #cap { left: 72px; right: 72px; bottom: 96px; }
+  .portrait #cap .name { font-size: 84px; }
+  .portrait #cap .label { max-width: none; font-size: 36px; }
+  .portrait #act { left: 72px; top: 72px; font-size: 28px; }
+  .portrait .card { padding: 0 60px; }
+  .portrait .card h2 { font-size: 104px; }
+  .portrait .card p { font-size: 40px; }
+  .portrait .card .credit { font-size: 26px; }
+  .portrait #big { top: 96px; padding: 0 60px; font-size: 76px; }
+  .portrait #big small { font-size: 34px; line-height: 1.25; }
 </style>
 <script type="importmap">{"imports":{"three":"/qr/assets/three.module.min.js"}}</script>
 <div id="veil" class="ov"></div>
@@ -39,13 +51,13 @@
 <div id="title" class="ov card">
   <div class="day">7 days of vibes: <b>Day 3</b></div>
   <div class="brand"><img src="/qr/assets/icon.svg">QR Compass</div>
-  <h2>The economy, built in 3D.</h2>
+  <h2>The economy,<span class="pbr"><br></span> built in 3D.</h2>
   <p>All of the Fortune 500 and 81 top startups, each a living 3D world.<br><b>See why every company wins, then scan it.</b></p>
 </div>
 <div id="end" class="ov card">
   <div class="day">7 days of vibes: <b>Day 3</b></div>
   <div class="brand"><img src="/qr/assets/icon.svg">QR Compass</div>
-  <h2>The economy, built in 3D.</h2>
+  <h2>The economy,<span class="pbr"><br></span> built in 3D.</h2>
   <div class="url">ghanemja.github.io/qr</div>
   <p style="font-size:36px">Built by <b>Janelle Ghanem</b> · open source, every model free to download</p>
   <div class="credit">Soundtrack made in <b>Equalizer</b>, where every sound is an equation<br><span style="font-family:'JetBrains Mono',monospace;color:#e07a3f">ghanemja.github.io/equalizer</span></div>
@@ -57,7 +69,10 @@ const { centerpiece, modelMaterial, setBrands, motion, mountMovers, poseMovers, 
 const { RoomEnvironment } = await import('/qr/assets/RoomEnvironment.js');
 const IND = await (await fetch('heroes.json')).json(); // { id: [name, label] }
 
-const W = 1920, H = 1080, BG = '#f6f1e7';
+// 16:9 by default; ?fmt=portrait renders the 4:5 vertical cut for phone feeds.
+const PORTRAIT = new URLSearchParams(location.search).get('fmt') === 'portrait';
+const W = PORTRAIT ? 1080 : 1920, H = PORTRAIT ? 1350 : 1080, BG = '#f6f1e7';
+document.documentElement.classList.toggle('portrait', PORTRAIT);
 const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
 r.setPixelRatio(1); r.setSize(W, H); r.outputColorSpace = THREE.SRGBColorSpace;
 r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap; r.setClearColor(BG);
@@ -73,7 +88,7 @@ sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.
 scene.add(sun, sun.target);
 const floor = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshStandardMaterial({ color: '#e9e1d2' }));
 floor.rotation.x = -Math.PI / 2; floor.position.y = -0.02; floor.receiveShadow = true; scene.add(floor);
-const cam = new THREE.PerspectiveCamera(30, W / H, 0.5, 700);
+const cam = new THREE.PerspectiveCamera(PORTRAIT ? 50 : 30, W / H, 0.5, 700);
 
 const mat = modelMaterial();
 const mesh = (brand) => (geo, at) => {
@@ -147,7 +162,7 @@ let at = 0;
 const add = (len, s) => { shots.push({ t0: at, t1: at + len, ...s }); at += len; };
 add(2 * BAR, { kind: 'title', slug: 'walmart' });
 FEATURE.forEach((slug, i) => add(BAR, { kind: 'hero', slug, act: 'understand', first: i === 0 }));
-add(4 * BAR, { kind: 'qr', slug: 'starbucks', act: 'scan' });
+add(5 * BAR, { kind: 'qr', slug: 'starbucks', act: 'scan' });
 PAGES.forEach(([page, caption], i) => add(BAR, { kind: 'page', page, caption, act: 'explore', first: i === 0 }));
 QUICK1.forEach((slug) => add(BAR / 2, { kind: 'hero', slug, quick: true }));
 QUICK2.forEach((slug) => add(BAR / 4, { kind: 'hero', slug, quick: true }));
@@ -178,12 +193,34 @@ function orbit(target, dist, elev, az) {
 }
 
 // The grid: every signature model.
-const GRID = Object.keys(IND), COLS = 14, GAP = 13, WIDE = 300;
+// The grid: every signature model, plus the favourites that live on a shared scene. The cells the
+// camera glides past (just in front of its path) get the showpieces.
+// Not the ones the 32 s cut already shows: the grid is where people meet the others.
+const SHOWCASE = ['amazon', 'caterpillar', 'wells-fargo', 'rtx', 'valero-energy', 'delta-air-lines', 'exxon-mobil', 'general-dynamics', 'enterprise-products-partners', 'berkshire-hathaway', 'uber-technologies', 'home-depot', 'visa', 'fedex',
+  'cisco-systems', 'verizon-communications', 'oracle', 'airbnb', 'alaska-air-group', 'coca-cola', 'marathon-petroleum', 'mcdonalds', 'apple',
+  'plains-gp-holdings', 'costco-wholesale', 'northwestern-mutual', 'netflix', 'chs', 'meta-platforms', 'deere', 'chevron', 'boeing',
+  'united-parcel-service', 'lockheed-martin', 'nike', 'mastercard', 'microsoft'];
+await Promise.all(SHOWCASE.map(company));
+const shown2 = new Set(SHOWCASE.map((slug) => COMPANY.get(slug).model));
+const SEEN = new Set(['walmart', 'nvidia', 'tesla', 'spacex', 'anthropic', 'starbucks', 'openai', 'stripe', 'jpmorgan', 'alphabet', 'disney']);
+const GRID = [...SHOWCASE.map((slug) => ({ id: COMPANY.get(slug).model, look: COMPANY.get(slug).look, hi: true })),
+  ...Object.keys(IND).filter((id) => !shown2.has(id)).map((id) => ({ id }))
+    // and the ones the video already showed out at the far edges.
+    .sort((a, b) => SEEN.has(a.id) - SEEN.has(b.id))];
+const COLS = PORTRAIT ? 10 : 14, GAP = 13, WIDE = PORTRAIT ? 250 : 300;
 const ROWS = Math.ceil(GRID.length / COLS);
-const gridPos = (i) => {
+const cellPos = (i) => {
   const row = Math.floor(i / COLS), inRow = row === ROWS - 1 ? GRID.length - row * COLS : COLS; // centre a short last row
   return [((i % COLS) - (inRow - 1) / 2) * GAP, (row - (ROWS - 1) / 2) * GAP];
 };
+// Cells nearest the glide (its path, nudged toward the camera) come first.
+const G0 = [-45 + 7, 18 + 5], G1 = [25 + 7, -6 + 5];
+const toPath = ([x, z]) => {
+  const dx = G1[0] - G0[0], dz = G1[1] - G0[1], k = Math.max(0, Math.min(1, ((x - G0[0]) * dx + (z - G0[1]) * dz) / (dx * dx + dz * dz)));
+  return Math.hypot(x - G0[0] - k * dx, z - G0[1] - k * dz);
+};
+const CELLS = GRID.map((_, i) => cellPos(i)).sort((a, b) => toPath(a) - toPath(b));
+const gridPos = (i) => CELLS[i];
 
 window.frame = async (T) => {
   const s = shots.find((x) => T >= x.t0 && T < x.t1) || shots[shots.length - 1];
@@ -199,9 +236,9 @@ window.frame = async (T) => {
     if (s.kind === 'hero') {
       // Slow orbit and push-in; quick cuts swing a little harder.
       const sw = s.quick ? 0.5 : 0.38;
-      orbit(tgt, (FRAME[id]?.[1] ?? Math.max(27, m.h * 3.4)) - 3.5 * u, 0.5 - 0.06 * u, Math.PI / 4 + sw * (u - 0.5) + (s.no % 2 ? 0.12 : -0.12));
-      // Shift the framing so the model sits right of the caption.
-      cam.setViewOffset(W, H, -W * 0.08, 0, W, H);
+      orbit(tgt, ((FRAME[id]?.[1] ?? Math.max(27, m.h * 3.4)) - 3.5 * u) * (PORTRAIT ? 0.86 : 1), 0.5 - 0.06 * u, Math.PI / 4 + sw * (u - 0.5) + (s.no % 2 ? 0.12 : -0.12));
+      // Shift the framing so the model sits right of the caption (above it, in portrait).
+      if (PORTRAIT) cam.setViewOffset(W, H, 0, H * 0.1, W, H); else cam.setViewOffset(W, H, -W * 0.08, 0, W, H);
       $('cap').querySelector('.kick').textContent = C.kicker;
       $('cap').querySelector('.name').textContent = C.name;
       $('cap').querySelector('.label').textContent = CAPTION[s.slug] || IND[id]?.[1] || C.hint;
@@ -218,7 +255,7 @@ window.frame = async (T) => {
     }
   } else {
     cam.clearViewOffset();
-    const list = GRID.map((id, i) => { const m = model(id, 'low'); const [x, z] = gridPos(i); m.outer.position.set(x, 0, z); return m; });
+    const list = GRID.map((g, i) => { const m = model(g.id, 'low', g.look); const [x, z] = gridPos(i); m.outer.position.set(x, 0, z); return m; });
     show(list);
     list.forEach((m, i) => pose(m, (s.kind === 'end' ? lt + 8 : lt) + i * 0.37 + 3));
     lightFor(0, 0, 100);
@@ -233,12 +270,23 @@ window.frame = async (T) => {
     // Make room for the headline above the grid as it pulls back.
     const lift = s.kind === 'end' ? 1 : ease((u - 0.6) / 0.25);
     cam.setViewOffset(W, H, 0, -H * 0.07 * lift, W, H);
-    $('big').innerHTML = `${GRID.length} signature models<small>plus a living 3D world for all of the Fortune 500 and 81 top startups</small>`;
+    $('big').innerHTML = `${Object.keys(IND).length} signature models<small>plus a living 3D world for all of the Fortune 500 and 81 top startups</small>`;
     if (s.kind === 'grid') set('big', fade(u, 0.72, 0.82, 0.97, 1.01), (1 - ease((u - 0.72) / 0.1)) * -30);
     else { set('veil', ease(u / 0.15) * 0.88); set('end', ease((u - 0.06) / 0.15), (1 - ease((u - 0.06) / 0.15)) * 40); }
   }
   r.render(scene, cam);
   return s.kind;
+};
+// For covers: slide the picture over (in pixels) without changing the shot.
+window.shift = (dx, dy) => { const v = cam.view; cam.setViewOffset(W, H, (v?.enabled ? v.offsetX : 0) - dx, (v?.enabled ? v.offsetY : 0) - dy, W, H); r.render(scene, cam); };
+// For covers: put a company's model in place of the grid model nearest a point on screen
+// (NDC, -1..1), at full detail, posed at its own time t.
+window.feature = async (slug, sx, sy, t = 4.4) => {
+  const C = await company(slug), fm = model(C.model, 'high', C.look);
+  let best = null, bd = Infinity;
+  for (const m of shown) { if (m.featured) continue; const v = m.outer.position.clone().project(cam); const d = Math.hypot(v.x - sx, v.y - sy); if (v.z < 1 && d < bd) { bd = d; best = m; } }
+  shown.delete(best); scene.remove(best.outer); fm.outer.position.copy(best.outer.position); scene.add(fm.outer); fm.featured = true; shown.add(fm); pose(fm, t);
+  r.render(scene, cam);
 };
 document.title = 'ready';
 </script>
