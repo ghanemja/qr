@@ -91,10 +91,10 @@
   "oracle": "Where the records live",
   "cisco": "The internet runs through it",
   "stripe": "The payments layer underneath",
-  "kroger": "Robots in the back room"
+  "kroger": "Robots in the back room",
+  "citigroup": "A global network: money for the world's companies moves on Citi's own rails"
  },
  "bank": [
-  "Citigroup",
   "Morgan Stanley",
   "U.S. Bancorp",
   "PNC Financial Services",
@@ -1654,5 +1654,8 @@
  ],
  "kroger": [
   "Kroger"
+ ],
+ "citigroup": [
+  "Citigroup"
  ]
 }
