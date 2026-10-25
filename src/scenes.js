@@ -5,7 +5,7 @@
 // free spot on the slab) and topper (at topAt). Keyed `kind:variant` (see models.js).
 // Same conventions as the heroes: slab top y0 = 0.24, keep within ±5.2, rest height ≤ 6.8, the
 // camera looks from +x, +z.
-import { THREE, V, part, windy, rand, taper, shade, tuft, merge, place, box, cyl, lathe, tube, ball, capsule, cone, torus, extrude, prism, star, beam, ring, hi, TAU, clamp01, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, K } from './kit.js';
+import { THREE, V, part, windy, rand, taper, shade, tuft, bladeShape, merge, place, box, cyl, lathe, tube, ball, capsule, cone, torus, extrude, prism, star, beam, ring, hi, TAU, clamp01, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, K } from './kit.js';
 import { rbox, curve, tubeOn, along, miniTree, lampPost, sedan, cartGeo, walker, parcel, puff, flameGeo } from './heroes.js';
 
 const y0 = 0.24;
@@ -60,6 +60,30 @@ const frame = (W = 2.2, D = 1.8, H = 1.8) => {
   [-W / 2 + 0.1, -W / 2 + 0.55].forEach((x) => g.push(place(truss(D + 0.1), { p: [x, 0.4 + H, 0] })));
   return merge(g);
 };
+
+// A patch of ripe wheat w × d (centred on the origin, on y = 0): a golden mat with swaying stalks
+// and heavy heads on top (just the mat on the map).
+const GOLD = ['#e9c46a', '#f0cf73', '#dcb257', '#f3d98b'];
+const wheat = (R, w, d, h = 0.55) => {
+  const g = [part(new THREE.BoxGeometry(w, h * 0.55, d), '#d9b45a', { p: [0, h * 0.275, 0] })];
+  if (!hi()) return merge(g);
+  const n = Math.round(w * d * 26), head = new THREE.SphereGeometry(0.035, 5, 3);
+  for (let i = 0; i < n; i++) {
+    const x = (R() - 0.5) * w * 0.96, z = (R() - 0.5) * d * 0.96, hh = h * (0.85 + R() * 0.35), lean = (R() - 0.5) * 0.12, c = GOLD[Math.floor(R() * GOLD.length)];
+    g.push(windy(part(bladeShape(hh, lean), (X, Y) => shade(c, 0.8 + 0.3 * Math.min(1, Y / hh)), { p: [x, 0, z], r: [0, R() * TAU, 0], s: [0.6, 1, 0.6] }), (X, Y) => Math.min(1, Y / hh) ** 2 * 0.45));
+    g.push(windy(part(head, shade(c, 0.95), { p: [x + lean * 0.9, hh, z], s: [1, 2.6, 1] }), 0.45));
+  }
+  return merge(g);
+};
+// A wheel at the origin, axle along z.
+const tyre = (r, w, hub = K.steel) => merge(part(new THREE.CylinderGeometry(r, r, w, hi() ? 22 : 10), '#24262b', { r: [Math.PI / 2, 0, 0] }), part(new THREE.CylinderGeometry(r * 0.55, r * 0.55, w + 0.02, hi() ? 16 : 8), hub, { r: [Math.PI / 2, 0, 0] }),
+  hi() ? ring(8, (a) => part(box(0.06, r * 0.18, w + 0.03), '#1b1c20', { p: [Math.cos(a) * r * 0.95, Math.sin(a) * r * 0.95, 0], r: [0, 0, a] })) : []);
+// A corrugated steel grain bin (radius r, wall height h) with a conical roof, on y = 0.
+const bin = (r, h, band = 'A') => merge(
+  part(new THREE.CylinderGeometry(r, r, h, hi() ? 40 : 14, hi() ? 8 : 1), (x, y) => (Math.floor(y * 6) % 2 ? '#c9ced6' : '#b5bcc6'), { p: [0, h / 2, 0] }),
+  part(cone(r * 1.04, r * 0.55, 40), '#d8dde3', { p: [0, h + r * 0.27, 0] }), part(cyl(0.2, 0.25, 0.25, 12), '#a9b1bb', { p: [0, h + r * 0.6, 0] }),
+  part(new THREE.CylinderGeometry(r * 1.01, r * 1.01, 0.22, hi() ? 40 : 14), band, { p: [0, h * 0.8, 0] }), part(cyl(r + 0.08, r + 0.1, 0.12, 40), K.stoneDk, { p: [0, 0.06, 0] }),
+);
 
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
@@ -208,5 +232,90 @@ export const SCENES = {
     } });
     moving.push({ geo: merge(part(rbox(0.9, 0.3, 0.06, 0.03), 'A', { p: [0, -0.15, 0] }), part(box(0.56, 0.08, 0.07), K.white, { p: [0, -0.15, 0] })), pivot: [SX, y0 + 1.44, SZ + 0.04], anim: (t) => { const f = F(t); return { s: life(f, 0.5, 0.58, 0.94, 0.99), rx: (1 - back(win(f, 0.5, 0.6))) * 1.2 }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-4.1, y0, 0.6], topAt: [0, y0 + 2.95, HZ] };
+  },
+
+  // Harvest (grain, seed, fertiliser, farm machinery, tobacco): a combine cuts a swath through
+  // ripe wheat, the crop dropping to stubble as its header passes, and augers the grain into a
+  // cart running alongside; behind, a truck tips its load into the pit and the grain rides up the
+  // elevator leg and pours into the bins.
+  'farm:0': () => {
+    const R = rand(303), out = [], moving = [];
+    out.push(slab('#8a6a45'));
+    // Furrowed soil, a farm track, standing wheat behind the swath.
+    if (hi()) for (let i = 0; i < 14; i++) out.push(part(new THREE.BoxGeometry(10.2, 0.03, 0.08), '#7a5c3a', { p: [0, y0 + 0.015, -0.4 + i * 0.36] }));
+    out.push(part(box(10.4, 0.04, 0.9), '#b89b72', { p: [0, y0 + 0.02, 1.65] }), part(box(0.9, 0.04, 3.4), '#b89b72', { p: [0.9, y0 + 0.02, -0.4] }));
+    out.push(place(wheat(R, 5.6, 1.6), { p: [-2.3, y0, 0.2] }));
+    // ---- the farmstead: a red barn and the grain elevator with its bins
+    const BX = -2.8, BZ = -3.2;
+    out.push(part(rbox(3.0, 1.9, 2.2, 0.05), '#b5432f', { p: [BX, y0 + 0.95, BZ] }));
+    out.push(part(extrude([[-1.6, 0], [-1.6, 0.55], [-0.85, 1.25], [0.85, 1.25], [1.6, 0.55], [1.6, 0]], 2.4), '#5a4a42', { p: [BX, y0 + 1.9, BZ], r: [0, 0, 0] }).rotateY(0).translate(0, 0, 0));
+    out.push(part(rbox(1.1, 1.3, 0.06, 0.03), K.white, { p: [BX + 0.2, y0 + 0.66, BZ + 1.11] }), part(rbox(0.94, 1.14, 0.07, 0.03), '#8f3424', { p: [BX + 0.2, y0 + 0.66, BZ + 1.12] }), beam([BX - 0.27, y0 + 0.12, BZ + 1.16], [BX + 0.67, y0 + 1.2, BZ + 1.16], 0.06, K.white), beam([BX + 0.67, y0 + 0.12, BZ + 1.16], [BX - 0.27, y0 + 1.2, BZ + 1.16], 0.06, K.white));
+    out.push(part(rbox(0.5, 0.45, 0.06, 0.03), K.white, { p: [BX + 0.2, y0 + 2.35, BZ + 1.21] }), part(rbox(0.06, 0.5, 0.5, 0.03), K.white, { p: [BX + 1.51, y0 + 1.1, BZ] }));
+    const EX = 2.6, EZ = -2.6;
+    [[EX - 1.3, EZ - 1.4, 1.05, 2.6], [EX + 1.15, EZ - 1.35, 1.05, 2.6], [EX + 1.55, EZ + 0.95, 0.85, 2.0]].forEach(([x, z, r, h], i) => out.push(place(bin(r, h, i === 1 ? 'B' : 'A'), { p: [x, y0, z] })));
+    // The leg: a tall steel tower with the head house on top and spouts to the bins.
+    const LX = EX, LZ = EZ, LH = 5.2;
+    out.push(part(rbox(0.6, LH, 0.6, 0.05), '#d8dde3', { p: [LX, y0 + LH / 2, LZ] }), part(rbox(0.9, 0.7, 0.9, 0.06), 'A', { p: [LX, y0 + LH + 0.3, LZ] }), part(prism(1.0, 0.35, 1.0), 'Ad', { p: [LX, y0 + LH + 0.65, LZ] }));
+    for (let y = 0.6; y < LH; y += 0.6) out.push(part(box(0.66, 0.04, 0.66), '#a9b1bb', { p: [LX, y0 + y, LZ] }));
+    const spouts = [[EX - 1.3, EZ - 1.4, y0 + 3.2], [EX + 1.15, EZ - 1.35, y0 + 3.2], [EX + 1.55, EZ + 0.95, y0 + 2.5]];
+    spouts.forEach(([x, z, top]) => out.push(part(tube([[LX, y0 + LH, LZ], [(LX + x) / 2, y0 + LH - 0.3, (LZ + z) / 2], [x, top + 0.15, z]], 0.07), '#a9b1bb')));
+    // The pit and its grate at the foot of the leg, where the truck tips.
+    out.push(part(rbox(1.2, 0.08, 1.6, 0.03), '#5b616b', { p: [LX + 0.1, y0 + 0.04, LZ + 1.4] }));
+    if (hi()) for (let i = 0; i < 6; i++) out.push(part(box(1.0, 0.02, 0.04), '#2b2f36', { p: [LX + 0.1, y0 + 0.09, LZ + 0.8 + i * 0.24] }));
+    [[-4.6, -1.6], [-0.5, -4.6], [4.6, 0.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.6 + R() * 0.2)));
+    // ---- the swath being cut: ten patches that drop to stubble as the header passes
+    const P = 12, F = (t) => cyc(t, P), SZ = 3.45, NP = 10, PW = 10.2 / NP;
+    const cx = (f) => -5.6 + 11.2 * win(f, 0.04, 0.8);
+    for (let i = 0; i < NP; i++) {
+      const x = -5.1 + PW / 2 + i * PW;
+      moving.push({ geo: wheat(R, PW, 1.9), pivot: [x, y0, SZ], anim: (t) => {
+        const f = F(t), cut = cx(f) + 1.15 > x - PW / 2 + 0.1 && f < 0.92;
+        return { sy: cut ? 0.18 : 0.18 + 0.82 * easeOut(win(f, 0.92, 1) || 1) };
+      } });
+    }
+    // The combine: brand-coloured body, glass cab, grain tank, header with its turning reel.
+    const comb = moving.length;
+    const body = merge(
+      part(rbox(2.2, 1.1, 1.3, 0.12), 'A', { p: [-0.4, 0.95, 0] }), part(rbox(1.4, 0.65, 1.2, 0.12), 'Ad', { p: [-0.6, 1.8, 0] }),
+      part(rbox(0.75, 0.75, 0.85, 0.08), '#9fcdea', { p: [0.55, 1.85, 0] }), part(rbox(0.8, 0.08, 0.9, 0.04), 'A', { p: [0.55, 2.26, 0] }),
+      part(box(0.9, 0.5, 0.1), 'Ad', { p: [-0.5, 0.95, 0.66] }), part(cyl(0.09, 0.09, 0.7, 10), K.dark, { p: [-1.1, 2.3, -0.35] }),
+      // Feeder house down to the header, and the header itself across the swath.
+      part(rbox(0.9, 0.45, 0.8, 0.06), 'Ad', { p: [0.95, 0.75, 0], r: [0, 0, -0.35] }),
+      part(rbox(0.5, 0.35, 2.3, 0.06), K.dark, { p: [1.45, 0.42, 0] }), part(box(0.6, 0.06, 2.3), K.steel, { p: [1.6, 0.27, 0] }),
+      [-1.15, 1.15].map((z) => part(rbox(0.6, 0.5, 0.06, 0.03), 'A', { p: [1.5, 0.55, z] })),
+      hi() ? ring(14, (a, i) => part(cone(0.04, 0.22, 6), K.steelDk, { p: [1.92, 0.27, -1.05 + i * 0.16], r: [0, 0, -Math.PI / 2] })) : [],
+      // The unloading auger, folded out over the cart's side.
+      beam([-0.9, 1.9, -0.4], [-0.1, 2.5, -1.7], 0.12, 'Ad'), part(cyl(0.09, 0.05, 0.25, 10), K.dark, { p: [-0.1, 2.4, -1.75] }),
+    );
+    moving.push({ geo: body, pivot: [0, y0, SZ], anim: (t) => { const f = F(t), x = cx(f); return { x, y: Math.abs(Math.sin(t * 6)) * 0.015, s: clamp01((5.6 - Math.abs(x)) / 0.5) * 0.999 + 0.001 }; } });
+    [[0.2, 0.62, 0.68, 0.32], [0.2, 0.62, -0.68, 0.32], [-1.25, 0.38, 0.6, 0.24], [-1.25, 0.38, -0.6, 0.24]].forEach(([x, r, z, w]) => moving.push({ geo: tyre(r, w), pivot: [x, r, z], parent: comb, anim: (t) => ({ rz: -cx(F(t)) / r }) }));
+    moving.push({ geo: merge(part(cyl(0.05, 0.05, 2.3, 8), K.steelDk, { r: [Math.PI / 2, 0, 0] }), ring(5, (a) => part(box(0.04, 0.06, 2.2), 'B', { p: [Math.cos(a) * 0.3, Math.sin(a) * 0.3, 0] })), ring(5, (a) => beam([0, 0, -1.0], [Math.cos(a) * 0.3, Math.sin(a) * 0.3, -1.0], 0.03, K.steelDk))),
+      pivot: [1.75, 0.7, 0], parent: comb, anim: (t) => ({ rz: -t * 3 }) });
+    // The grain cart and its tractor, keeping pace alongside, and the stream of grain between.
+    const cart = moving.length, CZ = SZ - 1.75;
+    moving.push({ geo: merge(
+      part(rbox(1.5, 0.8, 1.0, 0.1), '#2f7d4f', { p: [-1.6, 0.85, 0] }), part(lathe([[0.62, 0], [0.75, 0.45], [0.75, 0.75], [0, 0.76]], 20), '#2f7d4f', { p: [-1.6, 1.25, 0], s: [1.15, 1, 0.75] }), part(box(1.4, 0.05, 0.8), '#e9c46a', { p: [-1.6, 1.98, 0] }),
+      part(rbox(1.0, 0.55, 0.8, 0.08), K.red, { p: [0.45, 0.75, 0] }), part(rbox(0.6, 0.6, 0.7, 0.06), '#9fcdea', { p: [0.25, 1.32, 0] }), part(rbox(0.66, 0.05, 0.76, 0.02), K.red, { p: [0.25, 1.64, 0] }), beam([-0.85, 0.5, 0], [-0.1, 0.5, 0], 0.08, K.dark),
+      place(tyre(0.48, 0.3), { p: [0.0, 0.48, 0.42] }), place(tyre(0.48, 0.3), { p: [0.0, 0.48, -0.42] }), place(tyre(0.28, 0.2), { p: [0.8, 0.28, 0.36] }), place(tyre(0.28, 0.2), { p: [0.8, 0.28, -0.36] }), place(tyre(0.4, 0.28), { p: [-1.6, 0.4, 0.55] }), place(tyre(0.4, 0.28), { p: [-1.6, 0.4, -0.55] })),
+      pivot: [0, y0, CZ], anim: (t) => { const f = F(t), x = cx(f) + 1.6; return { x, y: Math.abs(Math.sin(t * 5)) * 0.015, s: clamp01((5.4 - Math.abs(x)) / 0.5) * 0.999 + 0.001 }; } });
+    const grain = new THREE.SphereGeometry(0.06, 6, 4);
+    for (let k = 0; k < 8; k++) moving.push({ geo: part(grain, GOLD[k % 4]), pivot: [-0.1, 2.35, -1.75], parent: comb, anim: (t) => {
+      const u = cyc(t, 0.6, k / 8), f = F(t), on = f > 0.12 && f < 0.72 ? 1 : 0;
+      return { y: -u * u * 0.6, x: Math.sin(k * 2.1) * 0.04, z: Math.cos(k * 1.3) * 0.04, s: on * (1 - u * 0.4) + 0.001 };
+    } });
+    // Chaff puffing out behind the combine.
+    for (let k = 0; k < 3; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.2, 8, 6), '#e8d7a8'), pivot: [-1.6, 0.8, 0], parent: comb, anim: (t) => { const u = cyc(t, 1.1, k / 3); return { x: -u * 0.9, y: u * 0.5, s: (1 - u) * 1.1 + 0.001 }; } });
+    // The truck at the pit: its bed tips and grain slides out; the grain rides up the leg.
+    const tk = moving.length, TX = LX + 0.1, TZ = LZ + 2.9;
+    moving.push({ geo: merge(part(rbox(0.9, 0.85, 1.0, 0.1), K.white, { p: [0, 0.75, 1.3] }), part(box(0.05, 0.3, 0.8), '#26323f', { p: [0, 0.95, 1.81] }).rotateY(0), part(rbox(1.0, 0.2, 2.6, 0.04), K.dark, { p: [0, 0.38, 0.2] }),
+      [[0.45, 1.3], [-0.45, 1.3], [0.45, -0.4], [-0.45, -0.4], [0.45, -0.85], [-0.45, -0.85]].map(([x, z]) => part(new THREE.CylinderGeometry(0.24, 0.24, 0.16, 14), '#1d1f24', { p: [x, 0.24, z], r: [0, 0, Math.PI / 2] }))),
+      pivot: [TX, y0, TZ], anim: () => ({}) });
+    moving.push({ geo: merge(part(rbox(1.0, 0.6, 1.9, 0.05), 'B', { p: [0, 0.3, -0.95] }), part(box(0.9, 0.06, 1.8), '#e9c46a', { p: [0, 0.62, -0.95] })), pivot: [0, 0.5, 0.0], parent: tk, anim: (t) => { const f = cyc(t, 6); return { rx: 0.5 * easeIO(win(f, 0.1, 0.35)) * (1 - easeIO(win(f, 0.7, 0.9))) }; } });
+    for (let k = 0; k < 6; k++) moving.push({ geo: part(grain, GOLD[k % 4]), pivot: [TX, y0 + 0.6, TZ - 1.9], anim: (t) => { const f = cyc(t, 6), u = cyc(t, 0.5, k / 6), on = f > 0.3 && f < 0.75; return { y: -u * 0.5, z: u * 0.1, s: on ? 1.3 : 0.001 }; } });
+    for (let k = 0; k < 10; k++) moving.push({ geo: part(grain, GOLD[k % 4], { s: 1.4 }), pivot: [LX + 0.32, y0 + 0.3, LZ + 0.32], anim: (t) => { const u = cyc(t, 2.4, k / 10); return { y: u * (LH - 0.3), s: Math.min(1, u * 20, (1 - u) * 20) }; } });
+    // And pours from the spout into the nearest bin.
+    const [bx, bz, btop] = spouts[2];
+    for (let k = 0; k < 5; k++) moving.push({ geo: part(grain, GOLD[k % 4]), pivot: [bx, btop + 0.15, bz], anim: (t) => { const u = cyc(t, 0.7, k / 5); return { y: -u * 0.6, s: (1 - u) + 0.001 }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-4.0, y0, -0.9], topAt: [BX, y0 + 3.12, BZ] };
   },
 };
