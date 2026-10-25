@@ -198,6 +198,14 @@ const jigsaw = (edges, d = 0.16) => {
 // A little quadcopter, its rotors on top, hanging hook below.
 const drone = (c = 'A') => merge(part(rbox(0.36, 0.12, 0.36, 0.05), c), [[-1, -1], [1, -1], [1, 1], [-1, 1]].flatMap(([sx, sz]) => [beam([0, 0, 0], [sx * 0.3, 0.04, sz * 0.3], 0.03, K.dark), part(cyl(0.14, 0.14, 0.015, 16), '#c9ced6', { p: [sx * 0.3, 0.1, sz * 0.3] })]), part(cyl(0.05, 0.05, 0.03, 10), '#62d35f', { p: [0.19, 0, 0], r: [0, 0, Math.PI / 2] }));
 
+// A stethoscope lying over things: ear tips, the binaural Y, the long tube and the chestpiece,
+// laid out in the xz plane at about unit scale (pass a curve of the tube's run in the scene).
+const stethoscope = (run, c = 'A') => merge(part(tubeOn(run, 0.08, hi() ? 80 : 20), c),
+  (() => { const p = run.getPointAt(1); return [part(cyl(0.38, 0.38, 0.16, 28), K.steel, { p: [p.x, p.y, p.z] }), part(cyl(0.3, 0.3, 0.18, 28), '#e9ecef', { p: [p.x, p.y + 0.01, p.z] })]; })(),
+  (() => { const p = run.getPointAt(0), d = run.getTangentAt(0); return [[-1, 1].map((s) => part(tube([[p.x, p.y, p.z], [p.x - d.x * 0.5 + s * 0.35 * d.z, p.y + 0.5, p.z - d.z * 0.5 - s * 0.35 * d.x], [p.x - d.x * 0.6 + s * 0.6 * d.z, p.y + 1.0, p.z - d.z * 0.6 - s * 0.6 * d.x]], 0.05), K.steel)), [-1, 1].map((s) => part(new THREE.SphereGeometry(0.1, 12, 8), K.dark, { p: [p.x - d.x * 0.6 + s * 0.6 * d.z, p.y + 1.05, p.z - d.z * 0.6 - s * 0.6 * d.x] }))]; })());
+// A member card, flat face toward +z, centred on the origin.
+const cardGeo = (c = 'A') => merge(part(rbox(0.9, 0.56, 0.04, 0.06), c), part(box(0.86, 0.1, 0.045), shade('#ffffff', 0.95), { p: [0, 0.12, 0] }), part(box(0.3, 0.05, 0.05), K.white, { p: [-0.22, -0.12, 0] }), part(box(0.2, 0.15, 0.05), K.gold, { p: [0.25, -0.1, 0] }));
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -1610,5 +1618,45 @@ export const SCENES = {
     moving.push(...walker(moving.length, (t) => ({ x: W0 + 1.4, z: BZ + 0.3, ry: Math.sin(t * 0.6) * 0.3, still: true }), { shirt: K.orange, pants: '#2b3a55', y: DY + 0.24, carry: part(new THREE.SphereGeometry(0.19, 12, 8, 0, TAU, 0, Math.PI / 2), '#ffd23f', { p: [0, 1.62, 0] }) }));
     moving.push(...walker(moving.length, (t) => { const k = Math.sin(t * 0.4); return { x: 1.2, z: 2.0 + k * 1.2, ry: Math.cos(t * 0.4) > 0 ? -Math.PI / 2 : Math.PI / 2 }; }, { shirt: '#f2c94c', pants: '#2b3a55', y: y0, carry: part(new THREE.SphereGeometry(0.19, 12, 8, 0, TAU, 0, Math.PI / 2), K.white, { p: [0, 1.62, 0] }) }));
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.5, y0, -1.4], topAt: [-3.6, y0 + 1.0, 3.6] };
+  },
+
+  // Stethoscope (health insurers and managed care): coverage connects people to care. Families walk
+  // from their homes to the clinic under a giant stethoscope; a member card and a green tick pop up
+  // as each checks in; a car rolls through the pharmacy drive-through.
+  'health:4': () => {
+    const R = rand(2201), out = [], moving = [];
+    out.push(slab('#9fcf7a'));
+    // ---- the clinic, back right: a low building with a canopy, the stethoscope over its roof
+    const CX = 1.6, CZ = -2.8, W = 4.6, D = 2.6, H = 1.8;
+    out.push(part(rbox(W, H, D, 0.06), '#f4f5f6', { p: [CX, y0 + H / 2, CZ] }), part(box(W + 0.02, 0.3, D + 0.02), 'A', { p: [CX, y0 + H - 0.15, CZ] }));
+    for (let i = 0; i < 4; i++) out.push(part(rbox(0.7, 0.7, 0.05, 0.03), '#9fcdea', { p: [CX - 1.7 + i * 1.1, y0 + 0.9, CZ + D / 2 + 0.01] }));
+    out.push(part(rbox(1.0, 1.2, 0.06, 0.03), '#2a3c50', { p: [CX + 0.6, y0 + 0.6, CZ + D / 2 + 0.02] }), part(rbox(1.8, 0.1, 1.2, 0.03), 'A', { p: [CX + 0.6, y0 + 1.35, CZ + D / 2 + 0.55] }), [-0.8, 0.8].map((dx) => part(cyl(0.05, 0.05, 1.3, 8), K.white, { p: [CX + 0.6 + dx, y0 + 0.65, CZ + D / 2 + 1.05] })));
+    // A cross sign on the roof.
+    out.push(part(rbox(0.9, 0.3, 0.12, 0.03), K.white, { p: [CX - 1.6, y0 + H + 0.55, CZ + 0.4] }), part(rbox(0.3, 0.9, 0.12, 0.03), K.white, { p: [CX - 1.6, y0 + H + 0.55, CZ + 0.4] }), part(rbox(0.7, 0.18, 0.14, 0.03), 'B', { p: [CX - 1.6, y0 + H + 0.55, CZ + 0.4] }), part(rbox(0.18, 0.7, 0.14, 0.03), 'B', { p: [CX - 1.6, y0 + H + 0.55, CZ + 0.4] }), part(box(0.1, 0.3, 0.1), K.dark, { p: [CX - 1.6, y0 + H + 0.05, CZ + 0.4] }));
+    // The stethoscope draped over the roof and down the side.
+    const run = curve([[CX - 0.2, y0 + H + 0.15, CZ - 0.6], [CX + 1.2, y0 + H + 0.12, CZ - 0.2], [CX + 2.3, y0 + H - 0.1, CZ + 0.4], [CX + 2.42, y0 + 0.9, CZ + 1.0], [CX + 2.2, y0 + 0.12, CZ + 1.9], [CX + 1.4, y0 + 0.12, CZ + 2.4]]);
+    out.push(stethoscope(run, 'A'));
+    // ---- the pharmacy drive-through lane round the left end
+    const lane = curve([[-4.9, 0, -0.4], [-2.0, 0, -0.6], [CX - W / 2 - 0.5, 0, CZ + 0.4], [CX - W / 2 - 0.6, 0, CZ - 1.6], [-3.0, 0, -4.5], [-4.9, 0, -4.3]]);
+    for (let i = 0, n = hi() ? 50 : 14; i < n; i++) { const { p, ry } = along(lane, i / n); out.push(part(box(0.5, 0.02, 1.1), '#5b616b', { p: [p.x, y0 + 0.01, p.z], r: [0, ry, 0] })); }
+    out.push(part(rbox(0.5, 0.6, 0.06, 0.03), '#9fcdea', { p: [CX - W / 2 - 0.01, y0 + 1.0, CZ - 0.6], r: [0, Math.PI / 2, 0] }), part(rbox(0.8, 0.08, 0.4, 0.02), 'A', { p: [CX - W / 2 - 0.2, y0 + 1.45, CZ - 0.6] }));
+    // ---- the neighbourhood at the front: homes and the path to the clinic
+    const homes = [[-3.6, 2.2, 0.4], [-1.4, 3.8, 0.1], [1.0, 3.9, -0.1], [3.6, 3.4, -0.4]];
+    homes.forEach(([x, z, ry], i) => out.push(place(home(['#f3ead8', '#e4ecf0', '#efe2cc', '#f6f0e4'][i], ['#7d6a5a', '#5a6b7d', '#a35a3c', 'Bd'][i], 1.5, 1.3, 1.0), { p: [x, y0, z], r: [0, Math.PI + ry, 0] })));
+    const walk = curve([[-3.4, 0, 1.1], [-1.4, 0, 1.6], [0.6, 0, 1.0], [CX + 0.6, 0, CZ + D / 2 + 1.4], [CX + 0.6, 0, CZ + D / 2 + 0.3]]);
+    for (let i = 0, n = hi() ? 40 : 12; i < n; i++) { const { p, ry } = along(walk, i / n); out.push(part(rbox(0.5, 0.03, 0.5, 0.04), '#e6dcc8', { p: [p.x, y0 + 0.015, p.z], r: [0, ry, 0] })); }
+    [[4.5, -0.6], [-4.6, 4.5], [4.6, 1.4], [-0.2, -0.4]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.55 + R() * 0.2)));
+    // ---- moving parts
+    // Patients walk to the clinic one after another; at the door a card and a tick pop up.
+    for (let k = 0; k < 3; k++) {
+      const u = (t) => cyc(t, 12, k / 3);
+      moving.push(...walker(moving.length, (t) => { const f = u(t), { p, ry } = along(walk, Math.min(0.999, win(f, 0, 0.7))); return { x: p.x, z: p.z, ry, s: Math.max(0.001, Math.min(1, f / 0.04, (0.86 - f) / 0.04)), still: f > 0.7 }; }, { shirt: ['#e5533d', '#3d7be0', '#8a6cf0'][k], pants: '#2b3a55', y: y0 }));
+      moving.push({ geo: cardGeo('A'), pivot: [CX + 0.6, y0 + 2.2, CZ + D / 2 + 0.6], anim: (t) => { const f = u(t); return { y: easeOut(win(f, 0.7, 0.78)) * 0.3, ry: -0.5, s: life(f, 0.7, 0.75, 0.84, 0.88) }; } });
+      moving.push({ geo: tickGeo(0.22), pivot: [CX + 1.2, y0 + 2.5, CZ + D / 2 + 0.6], anim: (t) => { const f = u(t); return { y: easeOut(win(f, 0.74, 0.8)) * 0.3, ry: -0.5, s: life(f, 0.74, 0.78, 0.84, 0.88) }; } });
+    }
+    // A car rolls through the pharmacy drive-through, pausing at the window.
+    moving.push({ geo: sedan('B'), pivot: [0, y0, 0], anim: (t) => { const f = cyc(t, 14), u = f < 0.4 ? easeOut(f / 0.4) * 0.5 : f < 0.55 ? 0.5 : 0.5 + easeIn(win(f, 0.55, 1)) * 0.5, { p, ry } = along(lane, Math.min(0.999, u)); return { x: p.x, z: p.z, ry, s: Math.min(clamp01(f / 0.04), clamp01((1 - f) / 0.04)) * 0.85 + 0.001 }; } });
+    moving.push({ geo: merge(part(rbox(0.3, 0.2, 0.2, 0.03), K.white), part(box(0.1, 0.22, 0.04), 'A', { p: [0, 0, 0.11] })), pivot: [CX - W / 2 - 0.3, y0 + 1.0, CZ - 0.6], anim: (t) => { const f = cyc(t, 14); return { x: -easeOut(win(f, 0.42, 0.5)) * 0.6, s: f > 0.42 && f < 0.56 ? 1 : 0.001 }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.6, y0, -2.4], topAt: [CX + 1.4, y0 + H, CZ - 0.6] };
   },
 };
