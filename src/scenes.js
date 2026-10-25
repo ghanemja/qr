@@ -3631,4 +3631,66 @@ export const SCENES = {
     moving.push(...walker(moving.length, (t) => ({ x: L(-0.3, 0, 0.2).x, z: L(-0.3, 0, 0.2).z, ry: Math.PI / 2 + Math.sin(t * 0.5) * 0.4, still: true, push: Math.sin(t * 8) > 0 }), { shirt: '#3d7be0', pants: '#2b3a55', y: y0 + 0.39 * S, carry: hat(K.white) }));
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.8, y0, 2.6], topAt: [3.2, y0 + 2.2, -2.4] };
   },
+
+  // Packaging line (cans, labels, cartons and tools): the package around everything you buy. The
+  // aluminium coil unrolls into the press, which stamps out cans; they march through the labeller
+  // and come out dressed in the brand; the case packer boxes them, and the robot stacks the cases
+  // on the pallet for the forklift.
+  'industrial:6': () => {
+    const R = rand(5601), out = [], moving = [];
+    out.push(slab('#cfd2d6'));
+    out.push(part(rbox(10.0, 0.03, 10.0, 0.04), '#e3e6ea', { p: [0, y0 + 0.015, 0] }));
+    [-0.5, 1.5].forEach((z) => out.push(part(box(8.6, 0.012, 0.08), '#f2c94c', { p: [-0.6, y0 + 0.035, z] })));
+    // ---- the coil and the press (back left)
+    const CX = -4.1, CZ = -3.9;
+    out.push(part(cyl(0.9, 0.9, 1.0, 36), '#c9ced6', { p: [CX, y0 + 1.0, CZ], r: [Math.PI / 2, 0, 0] }), part(cyl(0.35, 0.35, 1.05, 20), '#7d8792', { p: [CX, y0 + 1.0, CZ], r: [Math.PI / 2, 0, 0] }), [-0.55, 0.55].map((dz) => part(box(0.3, 1.1, 0.12), '#5b616b', { p: [CX, y0 + 0.55, CZ + dz] })));
+    out.push(part(box(1.6, 0.02, 0.9), '#dfe3e8', { p: [CX + 1.1, y0 + 0.62, CZ + 0.2], r: [0, 0, -0.3] }));
+    const PX = -3.3, PZ = -2.2;
+    out.push(part(rbox(1.4, 0.6, 1.2, 0.05), '#5b616b', { p: [PX, y0 + 0.3, PZ] }), [[-0.55, -0.45], [0.55, -0.45], [-0.55, 0.45], [0.55, 0.45]].map(([dx, dz]) => part(cyl(0.09, 0.09, 2.4, 12), K.steel, { p: [PX + dx, y0 + 1.3, PZ + dz] })), part(rbox(1.5, 0.5, 1.3, 0.05), 'A', { p: [PX, y0 + 2.6, PZ] }));
+    // ---- the can line along x (z = 0.2): belt, labeller, case packer
+    const LZ = 0.5, X0 = -3.3, X1 = 2.5, BY = y0 + 0.62;
+    out.push(part(box(X1 - X0 + 0.4, 0.08, 0.6), '#3a3f47', { p: [(X0 + X1) / 2, BY - 0.04, LZ] }), part(box(0.6, 0.08, 2.4), '#3a3f47', { p: [X0, BY - 0.04, (PZ + LZ) / 2 + 0.2] }));
+    [LZ - 0.32, LZ + 0.32].forEach((z) => out.push(part(new THREE.BoxGeometry(X1 - X0 + 0.4, 0.12, 0.05), '#c9ced6', { p: [(X0 + X1) / 2, BY - 0.02, z] })));
+    for (let x = X0; x <= X1; x += 0.9) [LZ - 0.25, LZ + 0.25].forEach((z) => out.push(part(new THREE.BoxGeometry(0.06, BY - y0, 0.06), '#9aa1a9', { p: [x, y0 + (BY - y0) / 2, z] })));
+    const LBX = -0.8;
+    out.push(part(rbox(0.9, 1.1, 1.1, 0.05), '#eef0f2', { p: [LBX, y0 + 1.0, LZ - 0.2] }), part(cyl(0.3, 0.3, 0.14, 24), '#f4f1e4', { p: [LBX - 0.1, y0 + 1.6, LZ - 0.5] }), part(cyl(0.12, 0.12, 0.16, 12), 'B', { p: [LBX - 0.1, y0 + 1.6, LZ - 0.5] }));
+    const CPX = 2.4;
+    out.push(part(rbox(1.2, 1.3, 1.2, 0.05), '#e3e0da', { p: [CPX, y0 + 0.9, LZ] }), part(box(1.22, 0.2, 1.22), 'Bd', { p: [CPX, y0 + 1.45, LZ] }), part(rbox(0.5, 0.4, 0.06, 0.02), '#2a3c50', { p: [CPX, y0 + 0.9, LZ + 0.61] }));
+    // The case belt from the packer to the palletiser.
+    const CZ2 = 3.6, CBY = y0 + 0.45;
+    out.push(part(box(0.7, 0.08, CZ2 - LZ - 0.4), '#3a3f47', { p: [CPX, CBY - 0.04, (LZ + 0.6 + CZ2) / 2] }));
+    // ---- the palletiser (front right): robot arm on a plinth, the pallet
+    const RX = 3.9, RZ = 3.4, PLX = 3.9, PLZ = 1.8;
+    out.push(part(rbox(0.8, 0.5, 0.8, 0.06), '#5b616b', { p: [RX, y0 + 0.25, RZ] }), part(rbox(1.3, 0.14, 1.1, 0.03), K.wood, { p: [PLX, y0 + 0.07, PLZ] }));
+    // Finished goods: racking at the back right, a truck at the dock (front left).
+    out.push(place(racking(R, 3, 3, '#2a5bb0', K.orange, ['#c99a62', '#d9ab70', '#e8d3ad']), { p: [1.0, y0, -4.4] }));
+    out.push(place(semi('A', K.white, 'B'), { p: [-3.0, y0, 3.6], r: [0, Math.PI, 0] }), part(rbox(1.2, 0.14, 1.0, 0.03), K.wood, { p: [-0.6, y0 + 0.07, 2.4] }));
+    for (let i = 0; i < 4; i++) out.push(place(merge(part(rbox(0.6, 0.4, 0.45, 0.03), '#c99a62', { p: [0, 0.2, 0] }), part(box(0.62, 0.12, 0.47), 'A', { p: [0, 0.22, 0] })), { p: [-0.9 + (i % 2) * 0.6, y0 + 0.14 + Math.floor(i / 2) * 0.4, 2.4] }));
+    [[-4.6, 1.4], [4.6, -1.4], [-1.4, -1.0]].forEach(([x, z]) => out.push(part(cyl(0.3, 0.22, 0.4, 14), '#c99a62', { p: [x, y0 + 0.2, z] }), miniTree(R, x, y0 + 0.4, z, 0.45)));
+    // ---- moving parts (one 8 s cycle for the stack, a 2 s beat for the line)
+    const P = 8, F = (t) => cyc(t, P);
+    moving.push({ geo: part(cyl(0.9, 0.9, 1.0, 36), '#d8dde3', { r: [Math.PI / 2, 0, 0] }), pivot: [CX, y0 + 1.0, CZ], anim: (t) => ({ rz: -t * 0.6, s: 0.999 }) });
+    moving.push({ geo: merge(part(rbox(1.2, 0.3, 1.0, 0.04), '#9aa1a9'), part(cyl(0.2, 0.2, 0.3, 14), K.steel, { p: [0, -0.3, 0] })), pivot: [PX, y0 + 2.0, PZ], anim: (t) => ({ y: -Math.max(0, Math.sin(t * Math.PI)) * 1.0 }) });
+    // Cans: down from the press, then along the line; silver before the labeller, branded after.
+    const canG = (c) => merge(part(new THREE.CylinderGeometry(0.16, 0.16, 0.44, hi() ? 16 : 8), c, { p: [0, 0.22, 0] }), part(new THREE.CylinderGeometry(0.13, 0.16, 0.05, hi() ? 16 : 8), '#c9ced6', { p: [0, 0.46, 0] }));
+    const cp = (u) => { const L1 = 2.1, L2 = X1 - X0 - 0.3, s = u * (L1 + L2); return s < L1 ? new V(X0, BY, PZ + 0.6 + s * ((LZ - PZ - 0.6) / L1)) : new V(X0 + (s - L1), BY, LZ); };
+    for (let k = 0; k < 14; k++) {
+      const u = (t) => cyc(t, 7, k / 14);
+      moving.push({ geo: canG('#c9ced6'), pivot: [0, 0, 0], anim: (t) => { const p = cp(u(t)); return { x: p.x, y: p.y, z: p.z, s: p.x < LBX ? 1 : 0.001 }; } });
+      moving.push({ geo: canG('A'), pivot: [0, 0, 0], anim: (t) => { const p = cp(u(t)); return { x: p.x, y: p.y, z: p.z, s: p.x >= LBX && p.x < CPX - 0.5 ? 1 : 0.001 }; } });
+    }
+    // Cases come out of the packer and ride to the robot.
+    const caseG = merge(part(rbox(0.6, 0.4, 0.45, 0.03), '#c99a62', { p: [0, 0.2, 0] }), part(box(0.62, 0.12, 0.47), 'A', { p: [0, 0.22, 0] }));
+    for (let k = 0; k < 3; k++) moving.push({ geo: caseG, pivot: [CPX, CBY, 0], anim: (t) => { const u = cyc(t, 3, k / 3); return { z: LZ + 0.6 + u * (CZ2 - LZ - 1.0), s: Math.min(1, u / 0.06, (1 - u) / 0.06) * 0.999 + 0.001 }; } });
+    // The robot: picks at the belt's end, swings to the pallet, places; the stack grows by the cycle.
+    const slots = Array.from({ length: 8 }, (_, i) => new V(PLX - 0.3 + (i % 2) * 0.6, y0 + 0.14 + Math.floor(i / 4) * 0.4, PLZ - 0.24 + (Math.floor(i / 2) % 2) * 0.48));
+    const yawPick = Math.atan2(-(CZ2 - 0.4 - RZ), CPX - RX), yawPlace = Math.atan2(-(PLZ - RZ), PLX - RX);
+    const arm = (f) => { const k = (f * 8) % 1; return k < 0.4 ? yawPick + (yawPlace - yawPick) * easeIO(win(k, 0.05, 0.4)) : yawPlace + (yawPick - yawPlace) * easeIO(win(k, 0.55, 0.95)); };
+    const rb = moving.length;
+    moving.push({ geo: merge(part(cyl(0.3, 0.35, 0.3, 20), K.orange, { p: [0, 0.15, 0] }), part(cyl(0.11, 0.11, 1.1, 12), K.orange, { p: [0, 0.8, 0] }), part(box(1.4, 0.14, 0.14), K.orange, { p: [0.7, 1.35, 0] }), part(box(0.08, 0.5, 0.08), K.steelDk, { p: [1.35, 1.1, 0] }), part(box(0.5, 0.06, 0.4), K.dark, { p: [1.35, 0.85, 0] })).rotateY(Math.PI), pivot: [RX, y0 + 0.5, RZ], anim: (t) => ({ ry: arm(F(t)) - Math.PI }) });
+    slots.forEach((sp, i) => moving.push({ geo: caseG, pivot: sp.toArray(), anim: (t) => { const f = F(t); return { s: f > (i + 0.4) / 8 ? 1 : 0.001 }; } }));
+    // A forklift waits beside the pallet.
+    moving.push({ geo: merge(part(rbox(0.7, 0.5, 0.55, 0.05), '#f2c94c', { p: [0, 0.4, 0] }), part(box(0.06, 1.1, 0.4), K.dark, { p: [0.4, 0.7, 0] }), part(rbox(0.4, 0.4, 0.5, 0.05), '#9fcdea', { p: [-0.1, 0.85, 0] }), [[-0.25, 0.27], [0.25, 0.27], [-0.25, -0.27], [0.25, -0.27]].map(([x, z]) => part(new THREE.CylinderGeometry(0.12, 0.12, 0.08, 10), '#1d1f24', { p: [x, 0.12, z], r: [Math.PI / 2, 0, 0] }))), pivot: [0, y0, 2.4], anim: (t) => { const k = Math.sin(t * 0.5); return { x: -1.6 + k * 0.9, ry: Math.PI }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.9, y0, 2.6], topAt: [CPX, y0 + 1.55, LZ] };
+  },
 };
