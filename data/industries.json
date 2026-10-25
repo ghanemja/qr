@@ -150,7 +150,8 @@
   "perplexity": "An answer engine that shows its sources",
   "neuralink": "Thought into action, placed with a robot's precision",
   "scaleai": "The labelled data behind the models",
-  "huggingface": "Where the AI community shares its models"
+  "huggingface": "Where the AI community shares its models",
+  "runway": "Films from a sentence"
  },
  "bank": [
   "PNC Financial Services",
@@ -663,7 +664,6 @@
   "Sierra",
   "Mercor",
   "Safe Superintelligence",
-  "Runway",
   "Mistral AI",
   "Cohere",
   "Synthesia",
@@ -1406,7 +1406,6 @@
   "Omnicom Group": 0,
   "Interpublic Group": 0,
   "Lovable": 3,
-  "Runway": 3,
   "Synthesia": 3,
   "Harvey": 4,
   "Thinking Machines Lab": 5,
@@ -1809,5 +1808,8 @@
  ],
  "huggingface": [
   "Hugging Face"
+ ],
+ "runway": [
+  "Runway"
  ]
 }
