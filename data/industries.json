@@ -109,7 +109,8 @@
   "workday": "One system for a company's people and its pay",
   "motorolasolutions": "The radios first responders bet their lives on",
   "charter": "The cable already runs to every house on the street",
-  "lowes": "Everything for the job, from the store's lumber yard to the deck in your backyard"
+  "lowes": "Everything for the job, from the store's lumber yard to the deck in your backyard",
+  "bestbuy": "Try it in the store, and the Geek Squad sets it up at home"
  },
  "bank": [
   "PNC Financial Services",
@@ -320,7 +321,6 @@
  ],
  "retail": [
   "Albertsons",
-  "Best Buy",
   "TJX",
   "Publix Super Markets",
   "Macy's",
@@ -1196,7 +1196,6 @@
   "Costco Wholesale": 5,
   "BJ's Wholesale Club": 5,
   "Tractor Supply": 6,
-  "Best Buy": 7,
   "Foot Locker": 8,
   "Dick's Sporting Goods": 8,
   "Ulta Beauty": 9,
@@ -1706,5 +1705,8 @@
  ],
  "lowes": [
   "Lowe's"
+ ],
+ "bestbuy": [
+  "Best Buy"
  ]
 }

@@ -774,4 +774,37 @@ export const HEROES2 = {
     moving.push({ geo: pickup, pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.05, 0.35)), a = along(drive, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry, s: (f > 0.92 ? 1 - win(f, 0.92, 0.99) : 1) * 0.85 + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Best Buy: the store where you can try it, and the Geek Squad who set it up. The black and
+  // white Beetle leaves the blue store, an agent carries the new TV into the living room, it goes
+  // up on the wall and lights up.
+  bestbuy: { finder: '#0046be', build: () => {
+    const R = rand(122), out = [], BLUE = '#0046be', TAG = '#fff200';
+    out.push(ground('#8fc66f'), part(box(10.2, 0.03, 1.2), '#5b616b', { p: [0, y0 + 0.015, -0.2] }));
+    // ---- the store, back: blue box, the yellow tag
+    const SX = -1.6, SZ = -3.1;
+    out.push(part(rbox(5.4, 2.2, 2.6, 0.05), BLUE, { p: [SX, y0 + 1.1, SZ] }), part(box(2.0, 1.4, 0.04), '#9cc3e0', { p: [SX + 1.0, y0 + 0.7, SZ + 1.31] }));
+    const tagG = merge(part(extrude([[-1.1, -0.5], [0.8, -0.5], [1.2, 0], [0.8, 0.5], [-1.1, 0.5]], 0.14), TAG), part(cyl(0.08, 0.08, 0.16, 14), '#1d1f24', { p: [0.85, 0, 0], r: [Math.PI / 2, 0, 0] }), pixText('BEST BUY', 0.06, '#1d1f24', 0.18).translate(-0.15, 0, 0));
+    out.push(place(tagG, { p: [SX - 0.6, y0 + 1.6, SZ + 1.4] }));
+    // Products in the window: TVs, a laptop, a fridge.
+    [[SX + 0.4, 0.8], [SX + 1.2, 0.7]].forEach(([x, w]) => out.push(part(rbox(w, w * 0.6, 0.04, 0.02), '#1d1f24', { p: [x, y0 + 0.9, SZ + 1.2] })));
+    // ---- the living room across the road: a cut-away room with a sofa and the bare wall
+    const RX = 1.6, RZ = 2.8;
+    out.push(part(rbox(4.0, 0.12, 3.0, 0.03), '#d9c3a0', { p: [RX, y0 + 0.06, RZ] }), part(rbox(4.0, 2.2, 0.14, 0.03), '#f1e2c6', { p: [RX, y0 + 1.1, RZ - 1.5] }), part(rbox(0.14, 2.2, 3.0, 0.03), '#ebd6b4', { p: [RX - 2.0, y0 + 1.1, RZ] }));
+    out.push(part(rbox(2.0, 0.5, 0.8, 0.12), '#5b6b7d', { p: [RX + 0.2, y0 + 0.4, RZ + 0.9] }), part(rbox(2.0, 0.6, 0.25, 0.1), '#5b6b7d', { p: [RX + 0.2, y0 + 0.7, RZ + 1.25] }), part(rbox(1.0, 0.06, 0.5, 0.02), K.wood, { p: [RX + 0.2, y0 + 0.4, RZ - 0.1] }), part(cyl(1.0, 1.0, 0.02, 32), '#c97b5a', { p: [RX + 0.2, y0 + 0.13, RZ + 0.3] }));
+    out.push(place(fan('#e5533d'), { p: [RX - 0.3, y0 + 0.3, RZ + 0.9], s: 1.3 }), place(fan('#2f9e6e'), { p: [RX + 0.6, y0 + 0.3, RZ + 0.9], s: 1.1 }));
+    out.push(trees(R, [[4.6, 4.6], [4.6, -4.6], [-4.6, 2.0], [-4.4, 4.4], [3.6, 0.9]]));
+    // ---- moving parts
+    const moving = [], P = 12;
+    // The Beetle: out of the lot, along the road, parks by the room.
+    const beetle = merge(part(new THREE.SphereGeometry(0.6, hi() ? 24 : 10, hi() ? 16 : 6, 0, TAU, 0, Math.PI / 2), '#1d1f24', { s: [1.6, 1.0, 1.0], p: [0, 0.28, 0] }), part(rbox(1.9, 0.3, 1.0, 0.12), '#1d1f24', { p: [0, 0.3, 0] }), part(box(0.8, 0.3, 1.02), K.white, { p: [0, 0.5, 0] }), part(box(0.3, 0.12, 1.03), '#ff6a13', { p: [0, 0.55, 0] }), part(box(0.04, 0.22, 0.6), '#9fcdea', { p: [0.62, 0.62, 0], r: [0, 0, 0.6] }), [[-0.6, 0.48], [0.6, 0.48], [-0.6, -0.48], [0.6, -0.48]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.1, 14), '#3a3f47', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] })));
+    const drive = curve([[-2.0, y0, -1.4], [-1.0, y0, -0.2], [1.5, y0, -0.2], [3.6, y0, -0.1], [4.2, y0, 1.2]]);
+    moving.push({ geo: beetle, pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.0, 0.25)), a = along(drive, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry, s: (f > 0.93 ? 1 - win(f, 0.93, 1) : Math.min(1, f / 0.03)) + 0.001 }; } });
+    // The agent carrying the TV from the car to the wall.
+    const tvBox = place(merge(part(rbox(1.0, 0.6, 0.12, 0.03), '#1d1f24')), { p: [0.45, 1.15, 0], r: [0, Math.PI / 2, 0] });
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.28, 0.5)); return { x: 4.0 - u * 2.2, z: 1.6 + u * -0.1, ry: Math.PI, still: f < 0.28 || f > 0.5, s: f < 0.26 || f > 0.92 ? 0.001 : 1 }; }, { shirt: K.white, pants: '#1d1f24', y: y0 + 0.12, carry: null }));
+    moving.push({ geo: part(rbox(1.0, 0.6, 0.1, 0.03), '#1d1f24'), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P); if (f < 0.26) return { s: 0.001 }; if (f < 0.5) { const u = easeIO(win(f, 0.28, 0.5)); return { x: 4.0 - u * 2.2 - 0.45, y: y0 + 1.3, z: 1.6 }; } const u = easeIO(win(f, 0.5, 0.62)); return { x: 1.35 + (RX - 1.35) * u, y: y0 + 1.3 + u * 0.15, z: 1.6 + (RZ - 1.42 - 1.6) * u, s: f > 0.95 ? 1 - win(f, 0.95, 1) + 0.001 : 1 }; } });
+    // The screen lighting up once it is on the wall.
+    moving.push({ geo: merge(part(box(0.9, 0.5, 0.02), '#4fc3f7'), part(box(0.9, 0.18, 0.025), '#5fae45', { p: [0, -0.16, 0] }), part(new THREE.CircleGeometry(0.08, 12), '#ffd23f', { p: [0.25, 0.12, 0.015] })), pivot: [RX, y0 + 1.45, RZ - 1.36], anim: (t) => { const f = cyc(t, P); return f > 0.64 && f < 0.95 ? { s: Math.min(1, win(f, 0.64, 0.68)) + 0.001 } : { s: 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
