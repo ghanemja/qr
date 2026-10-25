@@ -2073,35 +2073,41 @@ export const HEROES2 = {
     moving.push({ geo: part(extrude([[0, 0], [0, -0.3], [0.08, -0.22], [0.15, -0.34], [0.2, -0.32], [0.13, -0.2], [0.22, -0.2]], 0.02), K.white), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 6) * 4, i = Math.floor(f), u = easeIO(Math.min(1, (f - i) / 0.6)), a = tgt[(i + 3) % 4], b = tgt[i], x = a[0] + (b[0] - a[0]) * u, y = a[1] + (b[1] - a[1]) * u, p = sc(x, 1.7 + y, 0.09); return { x: p[0], y: p[1], z: p[2], q: DQ }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // Scale AI: the data behind the models. Pictures roll down the belt past the labellers, who
-  // box every car, sign and person; the labelled data feeds the model, which grows brighter.
+  // Scale AI: the data behind the models. The self-driving car's cameras send their pictures
+  // down the belt; the labellers box every car, sign and person; the labelled data feeds the
+  // model, which grows brighter, and the car drives off on what it learned.
   scaleai: { finder: '#6c47ff', build: () => {
-    const R = rand(161), out = [], PURP = '#6c47ff';
-    out.push(ground('#8fc66f'), part(rbox(8.0, 0.08, 6.4, 0.03), '#eceaf6', { p: [-0.6, y0 + 0.04, -0.8] }));
-    // ---- the belt along x, the labellers' desks behind it
-    const LZ = 0.2;
-    out.push(part(rbox(7.4, 0.5, 1.0, 0.05), '#5b616b', { p: [-0.9, y0 + 0.25, LZ] }), part(box(7.3, 0.03, 0.9), '#2b2f36', { p: [-0.9, y0 + 0.52, LZ] }));
-    [-3.6, -1.8, 0.0].forEach((x, i) => out.push(place(desk(K.white, '#2b2f36'), { p: [x, y0, LZ - 1.4] }), place(fan(['#3d7be0', '#e5533d', '#2f9e6e'][i]), { p: [x, y0, LZ - 2.0], s: 1.3 })));
-    out.push(part(rbox(8.0, 2.4, 0.2, 0.03), '#e6e2f6', { p: [-0.6, y0 + 1.2, -4.0] }), place(pixText('SCALE', 0.1, PURP, 0.03), { p: [-2.6, y0 + 1.6, -3.88] }));
-    // ---- the model: a glowing core on a plinth at the end of the line, front right
-    const MX = 3.4, MZ = 2.4;
-    out.push(part(cyl(0.9, 1.0, 0.5, 32), '#2b2f36', { p: [MX, y0 + 0.25, MZ] }), part(torus(0.95, 0.06, TAU, 40), PURP, { p: [MX, y0 + 0.5, MZ], r: [Math.PI / 2, 0, 0] }));
-    out.push(trees(R, [[-4.6, 4.6], [-1.6, 4.6], [4.6, -1.6], [4.6, -4.6]], 0.55));
+    const R = rand(236), out = [], PURP = '#6c47ff';
+    out.push(ground('#8fc66f'), part(rbox(9.6, 0.06, 7.2, 0.03), '#eceaf6', { p: [-0.2, y0 + 0.03, -1.3] }), part(rbox(9.6, 2.6, 0.2, 0.03), '#e6e2f6', { p: [-0.2, y0 + 1.3, -4.9] }), place(pixText('SCALE', 0.12, PURP, 0.03), { p: [-2.6, y0 + 1.8, -4.78] }));
+    // ---- the belt across the middle and five labellers behind it
+    const LZ = -0.6;
+    out.push(part(rbox(8.4, 0.55, 1.2, 0.05), '#5b616b', { p: [-0.2, y0 + 0.28, LZ] }), part(box(8.3, 0.03, 1.1), '#2b2f36', { p: [-0.2, y0 + 0.57, LZ] }));
+    [-3.4, -1.8, -0.2, 1.4].forEach((x, i) => out.push(place(desk(K.white, '#2b2f36'), { p: [x, y0, LZ - 1.8] }), part(rbox(0.9, 0.55, 0.05, 0.03), '#1d1f24', { p: [x, y0 + 1.15, LZ - 2.05] }), part(box(0.8, 0.45, 0.01), ['#9fd0ff', '#bfe6b0', '#ffe0a8', '#f8c4d4'][i], { p: [x, y0 + 1.15, LZ - 2.02] }), part(box(0.3, 0.2, 0.012), '#62d35f', { p: [x + 0.1, y0 + 1.15, LZ - 2.0] })));
+    // ---- the model's plinth, right
+    const MX = 3.6, MZ = -2.6;
+    out.push(part(cyl(1.0, 1.1, 0.6, 32), '#2b2f36', { p: [MX, y0 + 0.3, MZ] }), part(torus(1.05, 0.07, TAU, 40), PURP, { p: [MX, y0 + 0.6, MZ], r: [Math.PI / 2, 0, 0] }));
+    // ---- the test road along the front
+    out.push(part(box(10.2, 0.03, 1.3), '#5b616b', { p: [0, y0 + 0.015, 3.6] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(0.6, 0.01, 0.06), '#f2c94c', { p: [-4.6 + i * 1.3, y0 + 0.035, 3.6] }));
+    out.push(trees(R, [[-4.6, 1.6], [0.0, 1.8], [4.6, 1.4]], 0.5));
     // ---- moving parts
-    const moving = [], T = 2.0;
-    // Picture tiles stepping along the belt: plain until they pass a desk, then boxed.
-    const pic = (k) => merge(part(rbox(0.8, 0.04, 0.6, 0.02), K.white), part(box(0.7, 0.045, 0.5), ['#9fd0ff', '#bfe6b0', '#ffe0a8'][k % 3]), k % 3 === 0 ? part(rbox(0.3, 0.06, 0.16, 0.03), '#e5533d', { p: [0.05, 0, 0.05] }) : k % 3 === 1 ? part(cyl(0.1, 0.1, 0.06, 8), '#e5533d', { p: [0, 0, 0] }) : part(capsule(0.06, 0.12), '#3d7be0', { p: [0, 0.02, 0], r: [Math.PI / 2, 0, 0] }));
-    const frameG = merge([[0, 0.12, 0.42, 0.03], [0, -0.12, 0.42, 0.03], [0.2, 0, 0.03, 0.27], [-0.2, 0, 0.03, 0.27]].map(([x, z, w, d]) => part(box(w, 0.06, d), '#62d35f', { p: [x, 0.04, z] })));
-    for (let k = 0; k < 6; k++) {
-      const st = (t) => { const s = t / T + k, n = ((Math.floor(s) % 6) + 6) % 6, u = s - Math.floor(s); return { n, u, x: -4.2 + 1.3 * (n + easeIO(clamp01(u / 0.4))) }; };
+    const moving = [], T = 1.8;
+    // The labellers at work.
+    [-3.4, -1.8, -0.2, 1.4].forEach((x, i) => moving.push(...walker(moving.length, (t) => ({ x, z: LZ - 2.6, ry: -Math.PI / 2, still: true, push: Math.sin(t * 3 + i) > 0.3 }), { shirt: ['#3d7be0', '#e5533d', '#2f9e6e', '#f29a3a'][i], pants: '#2b3a55', y: y0 + 0.03 })));
+    // Pictures stepping down the belt; boxed once they pass a labeller.
+    const pic = (k) => merge(part(rbox(1.1, 0.05, 0.8, 0.02), K.white), part(box(1.0, 0.055, 0.7), ['#9fd0ff', '#bfe6b0', '#ffe0a8'][k % 3]), k % 3 === 0 ? part(rbox(0.4, 0.07, 0.22, 0.03), '#e5533d', { p: [0.05, 0, 0.05] }) : k % 3 === 1 ? part(cyl(0.14, 0.14, 0.07, 8), '#e5533d') : part(capsule(0.08, 0.16), '#3d7be0', { p: [0, 0.03, 0], r: [Math.PI / 2, 0, 0] }));
+    const frameG = merge([[0, 0.16, 0.56, 0.04], [0, -0.16, 0.56, 0.04], [0.27, 0, 0.04, 0.36], [-0.27, 0, 0.04, 0.36]].map(([x, z, w, d]) => part(box(w, 0.08, d), '#62d35f', { p: [x, 0.05, z] })));
+    for (let k = 0; k < 7; k++) { const st = (t) => { const s = t / T + k, n = ((Math.floor(s) % 7) + 7) % 7, u = s - Math.floor(s); return { n, u, x: -4.1 + 1.3 * (n + easeIO(clamp01(u / 0.4))) }; };
       const it = moving.length;
-      moving.push({ geo: pic(k), pivot: [0, y0 + 0.56, LZ], anim: (t) => { const s = st(t); return { x: s.x, s: s.n === 5 ? Math.max(0.001, 1 - win(s.u, 0, 0.4)) : s.n === 0 ? Math.min(1, win(s.u, 0.4, 0.7)) + 0.001 : 1 }; } });
-      moving.push({ geo: frameG, pivot: [0, 0, 0], parent: it, anim: (t) => { const s = st(t); return s.n >= 2 ? {} : { s: 0.001 }; } });
-    }
-    // Labelled data hopping into the model; the core brightens and grows with it.
-    const toModel = curve([[3.0, y0 + 0.7, LZ], [3.6, y0 + 2.0, 1.2], [MX, y0 + 1.4, MZ]]);
-    moving.push(rider(part(new THREE.BoxGeometry(0.2, 0.2, 0.2), PURP), toModel, T, 0.45, 0, 0.6, (t) => ({ rx: t * 3, ry: t * 2 })));
-    moving.push({ geo: part(new THREE.IcosahedronGeometry(0.7, hi() ? 2 : 1), (x, y, z) => (Math.floor((x + y + z) * 6) % 2 ? '#a58bff' : PURP)), pivot: [MX, y0 + 1.4, MZ], anim: (t) => { const f = cyc(t, T * 6); return { ry: t * 0.6, rx: t * 0.3, s: 0.7 + f * 0.45 + bump(cyc(t, T), 0.75, 0.05) * 0.06 }; } });
+      moving.push({ geo: pic(k), pivot: [0, y0 + 0.6, LZ], anim: (t) => { const s = st(t); return { x: s.x, s: s.n === 6 ? Math.max(0.001, 1 - win(s.u, 0, 0.4)) : s.n === 0 ? Math.min(1, win(s.u, 0.4, 0.7)) + 0.001 : 1 }; } });
+      moving.push({ geo: frameG, pivot: [0, 0, 0], parent: it, anim: (t) => (st(t).n >= 2 ? {} : { s: 0.001 }) }); }
+    // The car's camera feeding the belt, and the model it trains.
+    const P = T * 7;
+    moving.push({ geo: merge(sedan('#f4f5f6'), part(cyl(0.18, 0.18, 0.2, 14), '#2b2f36', { p: [0.1, 1.25, 0] }), part(box(0.1, 0.12, 0.3), PURP, { p: [0.3, 1.3, 0] })), pivot: [0, y0, 3.5], anim: (t) => { const f = cyc(t, P), x = f < 0.6 ? -3.4 : -3.4 + easeIn(win(f, 0.6, 1)) * 9; return { x, s: clamp01((5.2 - Math.abs(x)) / 0.6) + 0.001 }; } });
+    moving.push(rider(part(new THREE.BoxGeometry(0.22, 0.22, 0.22), '#9fd0ff'), curve([[-3.3, y0 + 1.5, 3.5], [-3.9, y0 + 2.4, 1.6], [-4.1, y0 + 1.0, LZ]]), T, 0.6, 0, 0.5));
+    moving.push(rider(part(new THREE.BoxGeometry(0.22, 0.22, 0.22), PURP), curve([[3.6, y0 + 0.9, LZ], [3.8, y0 + 2.6, -1.4], [MX, y0 + 2.0, MZ]]), T, 0.45, 0, 0.6, (t) => ({ rx: t * 3, ry: t * 2 })));
+    moving.push({ geo: part(new THREE.IcosahedronGeometry(0.85, hi() ? 2 : 1), (x, y, z) => (Math.floor((x + y + z) * 6) % 2 ? '#a58bff' : PURP)), pivot: [MX, y0 + 1.8, MZ], anim: (t) => { const f = cyc(t, P); return { ry: t * 0.6, rx: t * 0.3, s: 0.7 + f * 0.4 + bump(cyc(t, T), 0.75, 0.05) * 0.06 }; } });
+    moving.push(rider(part(new THREE.SphereGeometry(0.15, 10, 8), PURP), curve([[MX, y0 + 1.8, MZ], [2.0, y0 + 3.0, 1.0], [1.0, y0 + 1.4, 3.5]]), P, 0, 0.5, 0.62));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // Hugging Face: where the AI community shares its models. Builders upload model boxes onto the
