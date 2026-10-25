@@ -34,10 +34,17 @@ const miniTree = (R, x, y, z, s = 1, greens = ['#6fbf4c', '#86cc5f', '#5fae45', 
 // A street lamp at (x, y, z), its arm reaching along angle a.
 const lampPost = (x, y, z, a) => (!hi() ? [] : [part(cyl(0.06, 0.08, 3.4, 12), '#5b616b', { p: [x, y + 1.7, z] }), beam([x, y + 3.35, z], [x + Math.cos(a) * 0.7, y + 3.45, z + Math.sin(a) * 0.7], 0.06, '#5b616b'),
   part(rbox(0.45, 0.12, 0.22, 0.05), '#3a3f47', { p: [x + Math.cos(a) * 0.75, y + 3.42, z + Math.sin(a) * 0.75], r: [0, -a, 0] }), part(box(0.38, 0.02, 0.16), '#fff6d8', { p: [x + Math.cos(a) * 0.75, y + 3.35, z + Math.sin(a) * 0.75], r: [0, -a, 0] })]);
-// A family car, nose along +x, sitting on y = 0, about 2.3 long.
-const sedan = (color) => (!hi() ? merge(part(new THREE.BoxGeometry(2.3, 0.6, 1.05), color, { p: [0, 0.4, 0] }), part(new THREE.BoxGeometry(1.2, 0.45, 0.95), '#26323f', { p: [-0.15, 0.9, 0] })) : merge(part(rbox(2.3, 0.55, 1.05, 0.22), color, { p: [0, 0.48, 0] }), part(rbox(1.25, 0.5, 0.95, 0.22), color, { p: [-0.15, 0.95, 0] }),
-  part(box(1.18, 0.36, 0.97), '#26323f', { p: [-0.15, 0.98, 0] }), part(box(0.04, 0.08, 0.8), '#fff2c6', { p: [1.16, 0.55, 0] }), part(box(0.04, 0.08, 0.8), '#b8202a', { p: [-1.16, 0.55, 0] }),
-  [[-0.72, 0.5], [0.72, 0.5], [-0.72, -0.5], [0.72, -0.5]].flatMap(([x, z]) => [part(cyl(0.22, 0.22, 0.16, 18), '#1d1f24', { p: [x, 0.22, z], r: [Math.PI / 2, 0, 0] }), part(cyl(0.12, 0.12, 0.17, 14), '#c9ced6', { p: [x, 0.22, z], r: [Math.PI / 2, 0, 0] })])));
+// A family car, nose along +x, sitting on y = 0, about 2.3 long: a side profile with a curved
+// roofline, extruded and bevelled, with glass, lamps and wheels.
+const profile = (pts) => { const sh = new THREE.Shape(); sh.moveTo(...pts[0]); for (let i = 1; i < pts.length; i += 2) sh.quadraticCurveTo(...pts[i], ...pts[i + 1]); return sh; };
+const sedan = (color) => {
+  if (!hi()) return merge(part(new THREE.BoxGeometry(2.3, 0.6, 1.05), color, { p: [0, 0.4, 0] }), part(new THREE.BoxGeometry(1.2, 0.45, 0.95), '#26323f', { p: [-0.15, 0.9, 0] }));
+  const ex = (pts, d, b) => new THREE.ExtrudeGeometry(profile(pts), { depth: d - b * 2, bevelEnabled: true, bevelThickness: b, bevelSize: b, bevelSegments: 2, curveSegments: 6 }).translate(0, 0, -d / 2 + b);
+  return merge(part(ex([[-1.12, 0.2], [-1.17, 0.2], [-1.16, 0.45], [-1.15, 0.68], [-0.8, 0.7], [-0.45, 1.1], [0.0, 1.12], [0.4, 1.1], [0.6, 0.72], [1.12, 0.66], [1.16, 0.45], [1.17, 0.2], [1.1, 0.2], [0, 0.2], [-1.12, 0.2]], 1.02, 0.06), color),
+    part(ex([[-0.7, 0.74], [-0.5, 0.74], [-0.38, 1.04], [0.0, 1.06], [0.36, 1.04], [0.47, 0.74], [0.5, 0.74], [0, 0.74], [-0.7, 0.74]], 1.04, 0.03), '#26323f'),
+    part(box(0.03, 0.08, 0.8), '#fff2c6', { p: [1.16, 0.56, 0] }), part(box(0.03, 0.08, 0.84), '#b8202a', { p: [-1.17, 0.6, 0] }), part(box(0.04, 0.1, 0.7), '#3a3f47', { p: [1.17, 0.32, 0] }),
+    [[-0.72, 0.5], [0.72, 0.5], [-0.72, -0.5], [0.72, -0.5]].flatMap(([x, z]) => [part(new THREE.CylinderGeometry(0.22, 0.22, 0.16, 18), '#1d1f24', { p: [x, 0.22, z], r: [Math.PI / 2, 0, 0] }), part(new THREE.CylinderGeometry(0.13, 0.13, 0.17, 14), '#c9ced6', { p: [x, 0.22, z], r: [Math.PI / 2, 0, 0] })]));
+};
 // A shopping cart, handle at -x, about 1 long.
 const cartGeo = (handle = '#0071ce') => (!hi() ? part(new THREE.BoxGeometry(1.1, 0.5, 0.8), '#aab3bc', { p: [0, 0.65, 0] }) : merge(
   [[-0.45, -0.32], [0.45, -0.32], [0.45, 0.32], [-0.45, 0.32]].map(([x, z], i, a) => beam([x, 0.42, z], [a[(i + 1) % 4][0], 0.42, a[(i + 1) % 4][1]], 0.04, '#aab3bc')),
@@ -1097,23 +1104,69 @@ export const HEROES = {
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 
-  // McDonald's: the system that serves billions. Ingredients drop into place under the golden
-  // arches and the burger assembles itself, again and again.
+  // McDonald's: the system that serves billions, fast and the same everywhere. Cars roll through the
+  // drive-thru one slot at a time, each handed a bag at the window; the golden arches stand on
+  // their pylon, and on the roof the burger keeps assembling itself.
   mcdonalds: { finder: '#ffbc0d', build: () => {
-    const arch = (x) => tube(Array.from({ length: 13 }, (_, i) => { const u = i / 12; return [x + (u - 0.5) * 3.2, 0.6 + 6.4 * (1 - (2 * u - 1) ** 2) ** 0.75, -1.2]; }), 0.42);
-    const stack = [['bun', '#e2a65a', 0.55], ['patty', '#5a3420', 0.5], ['cheese', '#ffc83d', 0.12], ['lettuce', '#5fae45', 0.18], ['patty', '#5a3420', 0.5], ['top', '#e8a84e', 1.2]];
-    let y = 0.9;
-    const layers = stack.map(([kind, c, h]) => { const at = y; y += h; return { kind, c, h, at }; });
-    const geoOf = ({ kind, c, h }) => kind === 'top' ? merge(part(new THREE.SphereGeometry(1.75, 32, 16, 0, TAU, 0, Math.PI / 2), c, { s: [1, h / 1.75, 1] }), ring(10, (a, i) => part(ball(0.08), '#fdf3dc', { p: [Math.cos(a) * (0.5 + (i % 3) * 0.35), h * (0.95 - (i % 3) * 0.12), Math.sin(a) * (0.5 + (i % 3) * 0.35)], s: [1.6, 0.6, 1] })))
-      : kind === 'cheese' ? part(box(3.3, h, 3.3), c, { p: [0, h / 2, 0], r: [0, Math.PI / 4, 0] }) : kind === 'lettuce' ? part(cyl(1.95, 1.9, h, 14), c, { p: [0, h / 2, 0] }) : part(cyl(1.75, 1.75, h, 40), c, { p: [0, h / 2, 0] });
-    return {
-      bare: true, move: () => ({}),
-      geo: merge(part(cyl(4.6, 4.8, 0.5, 56), '#da291c', { p: [0, 0.25, 0] }), part(cyl(4.62, 4.62, 0.06, 56), '#ffbc0d', { p: [0, 0.5, 0] }), part(arch(-1.6), '#ffbc0d'), part(arch(1.6), '#ffbc0d'),
-        part(rbox(1.2, 1.3, 0.9, 0.15), '#da291c', { p: [3.3, 1.15, 1.6] }), ring(9, (a, i) => part(box(0.16, 1.2, 0.16), '#ffc83d', { p: [2.95 + (i % 5) * 0.18, 2, 1.45 + Math.floor(i / 5) * 0.3], r: [0, 0, (i % 3 - 1) * 0.12] }))),
-      moving: layers.map((l, i) => ({ geo: geoOf(l), pivot: [0, l.at, 1], anim: (t) => {
-        const f = cyc(t, 5), d = win(f, 0.05 + i * 0.1, 0.13 + i * 0.1);
-        return { y: (1 - easeIn(d)) * 6, s: d > 0 ? (f > 0.88 ? 1 - easeIn(win(f, 0.88, 0.97)) : 1) : 0, sy: 1 - bump(f, 0.13 + i * 0.1, 0.012) * 0.25, ry: (1 - d) * 1.5 };
-      } })),
-    };
+    const R = rand(77), out = [], y0 = 0.24, RED = '#da291c', GOLD = '#ffbc0d';
+    const arches = (w, h, r, n = hi() ? 17 : 9) => merge([-1, 1].map((k) => part(tube(Array.from({ length: n }, (_, i) => { const u = i / (n - 1); return [k * w / 4 + (u - 0.5) * w / 2, h * (1 - (2 * u - 1) ** 2) ** 0.7, 0]; }), r), GOLD)));
+    // ---- the lot, the lane and the planting
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#4f545c', { p: [0, 0.12, 0] }));
+    const lane = curve([[4.9, 0, 4.7], [3.6, 0, 3.4], [2.75, 0, 1.6], [2.75, 0, -0.5], [2.6, 0, -2.6], [1.4, 0, -3.65], [-1.2, 0, -3.7], [-3.1, 0, -3.3], [-3.75, 0, -1.6], [-3.75, 0, 1.4], [-4.3, 0, 3.4], [-5.0, 0, 4.6]].map(([x, , z]) => [x, y0, z]));
+    lane.curveType = 'centripetal';
+    for (const s of [-0.68, 0.68]) out.push(part(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(lane.getSpacedPoints(80).map((p, i, a) => { const d = lane.getTangentAt(Math.min(i / 80, 1)); return new V(p.x - d.z * s, y0 + 0.01, p.z + d.x * s); })), hi() ? 160 : 40, 0.03, 4), '#f2c94c'));
+    const strip = (x, z, w, d) => out.push(part(rbox(w, 0.18, d, 0.06), '#c9c4b8', { p: [x, y0 + 0.09, z] }), part(box(w - 0.16, 0.1, d - 0.16), '#6aa84f', { p: [x, y0 + 0.16, z] }));
+    strip(-4.85, -2.2, 0.6, 5.6); strip(0.2, -4.85, 6.4, 0.6); strip(4.85, -1.6, 0.6, 6.6); strip(0, 4.85, 5.6, 0.6);
+    [[-4.85, -4.0], [-4.85, -1.2], [-2.0, -4.85], [1.4, -4.85], [4.85, 0.6], [4.85, -3.2], [-1.6, 4.85], [1.8, 4.85]].forEach(([x, z]) => out.push(miniTree(R, x, y0 + 0.2, z, 0.75 + R() * 0.25)));
+    // ---- the restaurant: brick walls, big windows, the mansard roof with its arches
+    const BX = -0.5, BZ = -1.1, W = 4.0, D = 2.8;
+    out.push(part(rbox(W + 0.6, 0.12, D + 0.6, 0.04), '#d6d0c4', { p: [BX, y0 + 0.06, BZ] }));
+    out.push(part(rbox(W, 1.5, D, 0.05), '#b8452f', { p: [BX, y0 + 0.87, BZ] }), part(rbox(W + 0.05, 0.12, D + 0.05, 0.03), '#e9e4da', { p: [BX, y0 + 1.66, BZ] }));
+    const mansard = new THREE.CylinderGeometry(0.62, 1, 1, 4, 1).rotateY(Math.PI / 4); mansard.deleteAttribute('normal');
+    out.push(part(mansard.toNonIndexed(), '#5a3a2a', { p: [BX, y0 + 2.1, BZ], s: [(W + 0.5) / Math.SQRT2, 0.8, (D + 0.5) / Math.SQRT2] }), part(box(W * 0.62 + 0.25, 0.06, D * 0.62 + 0.25), '#c9c4b8', { p: [BX, y0 + 2.52, BZ] }), part(rbox(W + 0.62, 0.1, D + 0.62, 0.03), GOLD, { p: [BX, y0 + 1.72, BZ] }));
+    out.push(place(arches(1.6, 0.9, 0.08), { p: [BX, y0 + 1.75, BZ + D / 2 + 0.35], r: [-0.45, 0, 0] }));
+    for (const x of [-1.4, -0.45, 0.5]) out.push(part(rbox(0.8, 0.85, 0.06, 0.03), '#24384d', { p: [BX + x, y0 + 0.95, BZ + D / 2 + 0.01] }), part(box(0.86, 0.06, 0.08), '#e9e4da', { p: [BX + x, y0 + 1.4, BZ + D / 2 + 0.02] }));
+    out.push(part(rbox(0.6, 1.1, 0.08, 0.03), '#24384d', { p: [BX + 1.45, y0 + 0.66, BZ + D / 2 + 0.01] }), part(rbox(0.9, 0.08, 0.5, 0.03), RED, { p: [BX + 1.45, y0 + 1.3, BZ + D / 2 + 0.24] }));
+    for (const z of [-0.8, 0.3]) out.push(part(rbox(0.06, 0.85, 0.8, 0.03), '#24384d', { p: [BX - W / 2 - 0.01, y0 + 0.95, BZ + z] }));
+    // The drive-thru window on the lane side, with its awning, and the menu board and speaker.
+    out.push(part(rbox(0.06, 0.6, 0.7, 0.03), '#9cc4dd', { p: [BX + W / 2 + 0.01, y0 + 1.0, -0.5] }), part(rbox(0.5, 0.06, 1.1, 0.03), (px, py, pz) => (Math.floor((pz + 2) * 7) % 2 ? '#ffffff' : RED), { p: [BX + W / 2 + 0.22, y0 + 1.45, -0.5], r: [0, 0, -0.3] }));
+    out.push(part(rbox(0.12, 1.1, 1.3, 0.04), '#2b2f36', { p: [1.95, y0 + 1.0, 1.9] }), part(box(0.02, 0.9, 1.12), '#3d4450', { p: [2.02, y0 + 1.0, 1.9] }), part(cyl(0.05, 0.05, 0.45, 10), '#5b616b', { p: [1.95, y0 + 0.22, 1.9] }));
+    if (hi()) for (let i = 0; i < 6; i++) out.push(part(box(0.02, 0.1, 0.42), i % 2 ? GOLD : '#f4f5f6', { p: [2.04, y0 + 1.3 - (i >> 1) * 0.25, 1.68 + (i % 2) * 0.48] }));
+    out.push(part(rbox(0.25, 0.9, 0.25, 0.06), '#2b2f36', { p: [2.0, y0 + 0.45, 3.0] }), part(cyl(0.08, 0.08, 0.04, 16), '#5b616b', { p: [2.13, y0 + 0.7, 3.0], r: [0, 0, Math.PI / 2] }));
+    // The pylon with the golden arches.
+    out.push(part(cyl(0.16, 0.2, 3.8, 20), '#c9ced6', { p: [3.9, y0 + 1.9, -4.0] }), part(rbox(1.9, 0.7, 0.3, 0.1), RED, { p: [3.9, y0 + 4.1, -4.0], r: [0, 0.6, 0] }), place(arches(2.2, 1.3, 0.15), { p: [3.9, y0 + 4.42, -4.0], r: [0, 0.6, 0] }));
+    // The patio: tables under red and yellow umbrellas.
+    [[-2.2, 1.6], [-0.7, 1.9]].forEach(([x, z], i) => out.push(part(cyl(0.35, 0.35, 0.05, 20), '#f4f5f6', { p: [x, y0 + 0.62, z] }), part(cyl(0.04, 0.04, 1.5, 8), '#5b616b', { p: [x, y0 + 0.75, z] }),
+      part(lathe([[0.95, 0], [0.7, 0.18], [0, 0.32]], 24), (px, py, pz) => (Math.floor((Math.atan2(pz - z, px - x) / TAU + 0.5) * 8) % 2 ? (i ? GOLD : RED) : '#ffffff'), { p: [x, y0 + 1.45, z] }),
+      [0, 1, 2].map((k) => part(rbox(0.22, 0.38, 0.22, 0.05), RED, { p: [x + Math.cos(k * 2.1) * 0.6, y0 + 0.19, z + Math.sin(k * 2.1) * 0.6] }))));
+    out.push(lampPost(-4.3, y0, 2.4, 0.5), lampPost(4.3, y0, 3.4, Math.PI - 0.4));
+    // ---- moving parts
+    const moving = [];
+    // The drive-thru queue: every 3.2 s each car moves up one slot, and waits.
+    const N = 7, P = 3.2, gap = 1 / N, uw = (() => { let best = 0, bd = 1e9; for (let i = 0; i <= 400; i++) { const p = lane.getPointAt(i / 400), d = (p.x - 2.75) ** 2 + (p.z + 0.5) ** 2; if (d < bd) { bd = d; best = i / 400; } } return best; })();
+    const shift = uw - Math.round(uw / gap) * gap;
+    const paints = ['#3d6ea8', '#f4f5f6', '#c0392b', '#2b2f36', '#7a8a6a', '#e0a33a', '#9aa1a9'];
+    for (let k = 0; k < N; k++) moving.push({ geo: sedan(paints[k]), pivot: [0, y0, 0], anim: (t) => {
+      const slot = Math.floor(t / P), frac = easeIO(win((t / P) % 1, 0, 0.4)), u = ((((slot + frac + k) * gap + shift) % 1) + 1) % 1, a = along(lane, u);
+      return { x: a.p.x, z: a.p.z, ry: a.ry, s: clamp01(Math.min(u, 1 - u) / 0.03) || 0.001 };
+    } });
+    // A bag passes out of the window to whoever is there.
+    moving.push({ geo: merge(part(rbox(0.26, 0.32, 0.18, 0.03), '#a8743f'), part(box(0.27, 0.06, 0.19), GOLD, { p: [0, 0.04, 0] })), pivot: [BX + W / 2, y0 + 0.95, -0.5], anim: (t) => { const f = (t / P) % 1; return f < 0.45 || f > 0.95 ? { s: 0.001 } : { x: easeOut(win(f, 0.45, 0.7)) * 0.42, y: -bump(f, 0.85, 0.06) * 0.1, s: f > 0.88 ? 1 - win(f, 0.88, 0.95) : 1 }; } });
+    // The burger, assembling itself on the roof.
+    const stack = [['bun', '#e2a65a', 0.18], ['patty', '#5a3420', 0.16], ['cheese', '#ffc83d', 0.04], ['lettuce', '#5fae45', 0.06], ['patty', '#5a3420', 0.16], ['top', '#e8a84e', 0.4]];
+    let y = y0 + 2.6;
+    stack.forEach(([kind, c, h], i) => {
+      const at = y; y += h;
+      const geo = kind === 'top' ? merge(part(new THREE.SphereGeometry(0.6, hi() ? 32 : 12, hi() ? 16 : 6, 0, TAU, 0, Math.PI / 2), c, { s: [1, h / 0.6, 1] }), hi() ? ring(14, (a, j) => part(new THREE.SphereGeometry(0.03, 6, 4), '#fdf3dc', { p: [Math.cos(a + j) * (0.15 + (j % 3) * 0.13), h * (0.96 - (j % 3) * 0.13), Math.sin(a + j) * (0.15 + (j % 3) * 0.13)], s: [1.6, 0.6, 1] })) : [])
+        : kind === 'cheese' ? part(new THREE.BoxGeometry(1.1, h, 1.1), c, { p: [0, h / 2, 0], r: [0, Math.PI / 4, 0] }) : kind === 'lettuce' ? part(cyl(0.66, 0.64, h, 14), c, { p: [0, h / 2, 0] }) : part(cyl(0.6, 0.6, h, 40), c, { p: [0, h / 2, 0] });
+      moving.push({ geo, pivot: [BX, at, BZ], anim: (t) => {
+        const f = cyc(t, 6.4), d = win(f, 0.05 + i * 0.1, 0.13 + i * 0.1);
+        return { y: (1 - easeIn(d)) * 3.2, s: d > 0 ? (f > 0.88 ? Math.max(0.001, 1 - easeIn(win(f, 0.88, 0.97))) : 1) : 0.001, sy: 1 - bump(f, 0.13 + i * 0.1, 0.012) * 0.25, ry: (1 - d) * 1.5 };
+      } });
+    });
+    // A guest heading in with a drink.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 9), x = -4.2 + f * 5.0; return { x, z: 1.0, ry: 0, s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: '#2f8f5b', pants: '#2b3a55', y: y0, carry: part(cyl(0.07, 0.06, 0.2, 12), RED, { p: [0.25, 1.05, 0.28] }) }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 };
+
