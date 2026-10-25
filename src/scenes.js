@@ -1307,4 +1307,60 @@ export const SCENES = {
     moving.push(...walker(moving.length, (t) => ({ x: MX + 1.1, z: MZ + 0.4, ry: Math.PI - 0.4 + Math.sin(t * 0.5) * 0.15, still: true }), { shirt: K.white, pants: '#3b4a5c', y: y0 }));
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.4, y0, 0.0], topAt: [0.0, y0 + 1.6, -0.4] };
   },
+
+  // Lab (chemicals, materials, industrial gases, flavours): molecules into materials. Distillation
+  // columns vent steam and the cracker's flame flickers; product pulses along the pipe rack from the
+  // reactor, its agitator turning, to the silo, which pours pellets into a hopper car; out front a
+  // big ball-and-stick molecule turns.
+  'chem:0': () => {
+    const R = rand(1701), out = [], moving = [];
+    out.push(slab('#c4c1ba'));
+    // ---- distillation columns with platforms and ladders, back left
+    const cols = [[-3.7, -3.6, 0.55, 4.9], [-2.3, -4.0, 0.42, 4.1], [-1.3, -3.2, 0.32, 3.3]];
+    cols.forEach(([x, z, r, h], i) => {
+      out.push(part(cyl(r, r, h, 24), '#e3e6ea', { p: [x, y0 + h / 2, z] }), part(new THREE.SphereGeometry(r, 20, 10, 0, TAU, 0, Math.PI / 2), '#e3e6ea', { p: [x, y0 + h, z] }), part(cyl(r * 1.02, r * 1.02, 0.25, 24), i === 0 ? 'A' : 'B', { p: [x, y0 + h * 0.75, z] }));
+      for (let y = 1.4; y < h - 0.4; y += 1.4) out.push(part(new THREE.CylinderGeometry(r + 0.35, r + 0.35, 0.06, 24, 1, false, -0.4, Math.PI * 1.2), '#7d8792', { p: [x, y0 + y, z] }), part(new THREE.CylinderGeometry(r + 0.35, r + 0.35, 0.35, 24, 1, true, -0.4, Math.PI * 1.2), '#f2c94c', { p: [x, y0 + y + 0.18, z] }));
+      out.push(part(box(0.3, h - 0.3, 0.04), K.steelDk, { p: [x + r + 0.05, y0 + h / 2, z + 0.1], r: [0, 0, 0] }), part(cyl(0.06, 0.06, 0.6, 8), K.steelDk, { p: [x, y0 + h + r + 0.2, z] }));
+    });
+    // The cracker furnace with its stack.
+    out.push(part(rbox(1.6, 1.4, 1.0, 0.04), '#b0643c', { p: [-3.5, y0 + 0.7, -1.4] }), part(rbox(1.7, 0.2, 1.1, 0.03), '#3a3f47', { p: [-3.5, y0 + 1.5, -1.4] }), part(cyl(0.2, 0.25, 2.2, 14), '#9aa1a9', { p: [-3.0, y0 + 2.6, -1.4] }));
+    for (let i = 0; i < 4; i++) out.push(part(rbox(0.22, 0.22, 0.04, 0.02), '#ff9a3a', { p: [-4.0 + i * 0.32, y0 + 0.45, -0.89] }));
+    // ---- pressure spheres on legs, back right
+    [[2.0, -3.6, 1.05], [3.8, -2.6, 0.85]].forEach(([x, z, r], i) => {
+      ring(6, (a) => out.push(part(cyl(0.06, 0.06, r + 0.5, 8), '#7d8792', { p: [x + Math.cos(a) * r * 0.85, y0 + (r + 0.5) / 2, z + Math.sin(a) * r * 0.85] })));
+      out.push(part(new THREE.SphereGeometry(r, 28, 18), K.white, { p: [x, y0 + r + 0.6, z] }), part(torus(r * 1.0, 0.04, TAU, 40), i ? 'B' : 'A', { p: [x, y0 + r + 0.6, z], r: [Math.PI / 2, 0, 0] }));
+    });
+    // ---- the reactor, centre
+    const RX = 0.4, RZ = -1.0;
+    out.push(part(lathe([[0, 0], [0.7, 0.05], [0.85, 0.35], [0.85, 1.7], [0.6, 2.05], [0, 2.1]], 32), '#d8dde3', { p: [RX, y0 + 0.5, RZ] }), ring(4, (a) => part(box(0.12, 0.6, 0.12), '#7d8792', { p: [RX + Math.cos(a) * 0.7, y0 + 0.3, RZ + Math.sin(a) * 0.7] })), part(cyl(0.87, 0.87, 0.18, 32), 'A', { p: [RX, y0 + 1.6, RZ] }));
+    out.push(part(rbox(0.4, 0.4, 0.4, 0.06), K.dark, { p: [RX, y0 + 2.85, RZ] }), part(rbox(1.0, 0.12, 0.12, 0.03), '#f2c94c', { p: [RX - 0.6, y0 + 2.3, RZ + 0.75] }));
+    // ---- the pipe rack from the reactor to the silo at the front left, with a hopper car
+    const rack = curve([[RX - 0.9, y0 + 1.3, RZ], [-1.0, y0 + 1.6, 0.6], [-2.6, y0 + 1.6, 1.4], [-3.4, y0 + 2.6, 2.4]]);
+    [-0.15, 0, 0.15].forEach((d, i) => out.push(part(tubeOn(curve(rack.points.map((p) => [p.x + d, p.y, p.z + d])), 0.07), ['#9aa1a9', 'B', '#d8a33a'][i])));
+    [[-1.0, 0.6], [-2.6, 1.4]].forEach(([x, z]) => out.push(part(box(0.1, 1.6, 0.1), K.steelDk, { p: [x, y0 + 0.8, z] })));
+    const SX = -3.6, SZ = 2.7;
+    out.push(part(lathe([[0.15, 0], [0.7, 0.6], [0.75, 0.65], [0.75, 2.5], [0.5, 2.85], [0, 2.9]], 28), '#eef0f2', { p: [SX, y0 + 1.0, SZ] }), ring(4, (a) => part(box(0.1, 1.2, 0.1), '#7d8792', { p: [SX + Math.cos(a) * 0.65, y0 + 0.6, SZ + Math.sin(a) * 0.65] })), part(cyl(0.77, 0.77, 0.2, 28), 'B', { p: [SX, y0 + 3.0, SZ] }));
+    out.push(part(box(10.4, 0.06, 1.0), '#7a6a5a', { p: [0, y0 + 0.03, 4.35] }), [3.95, 4.75].map((z) => part(new THREE.BoxGeometry(10.4, 0.08, 0.06), K.steel, { p: [0, y0 + 0.1, z] })));
+    // ---- the molecule sign's plinth, front right
+    const NX = 2.6, NZ = 1.8;
+    out.push(part(cyl(0.9, 1.0, 0.5, 28), K.stone, { p: [NX, y0 + 0.25, NZ] }), part(cyl(1.02, 1.04, 0.14, 28), 'A', { p: [NX, y0 + 0.07, NZ] }), part(cyl(0.06, 0.06, 0.8, 8), K.steelDk, { p: [NX, y0 + 0.9, NZ] }));
+    // ---- moving parts
+    // The molecule: a ring of carbon with its neighbours, turning slowly.
+    const atoms = [], bonds = [], ringPts = ring(6, (a) => new V(Math.cos(a) * 0.75, Math.sin(a) * 0.75, 0));
+    ringPts.forEach((p, i) => { atoms.push(part(new THREE.SphereGeometry(0.26, 18, 12), K.dark, { p: p.toArray() })); bonds.push(beam(p.toArray(), ringPts[(i + 1) % 6].toArray(), 0.08, '#c9ced6')); const out2 = p.clone().multiplyScalar(1.75); atoms.push(part(new THREE.SphereGeometry(0.2, 16, 10), i % 3 ? K.white : i === 0 ? 'A' : 'B', { p: out2.toArray() })); bonds.push(beam(p.toArray(), out2.toArray(), 0.07, '#c9ced6')); });
+    moving.push({ geo: merge(atoms, bonds), pivot: [NX, y0 + 2.6, NZ], anim: (t) => ({ ry: t * 0.6, rx: Math.sin(t * 0.4) * 0.3 }) });
+    // Steam from the column vents, flame in the furnace stack.
+    cols.forEach(([x, z, r, h], i) => { for (let k = 0; k < 3; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.25, 10, 7), '#f4f2ee'), pivot: [x, y0 + h + r + 0.5, z], anim: (t) => { const u = cyc(t, 2.6, k / 3 + i * 0.2); return { y: u * 0.9, x: u * 0.5, s: (0.5 + u) * (1 - u) * 1.8 + 0.001 }; } }); });
+    moving.push({ geo: flameGeo(), pivot: [-3.0, y0 + 3.7, -1.4], anim: (t) => ({ s: 0.35 + Math.sin(t * 11) * 0.04, sy: 0.4 + Math.sin(t * 7) * 0.06 }) });
+    // The reactor's agitator: its shaft and paddles turn; product pulses along the rack.
+    moving.push({ geo: merge(part(cyl(0.05, 0.05, 0.6, 8), K.steel), part(box(0.5, 0.1, 0.06), K.steel, { p: [0, 0.3, 0] })), pivot: [RX, y0 + 3.2, RZ], anim: (t) => ({ ry: t * 4 }) });
+    for (let k = 0; k < 4; k++) moving.push({ geo: merge(part(cyl(0.1, 0.1, 0.24, 12), 'B', { r: [0, 0, Math.PI / 2] }), part(torus(0.09, 0.02, TAU, 12), K.white, { r: [0, Math.PI / 2, 0] })), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 4, k / 4), p = rack.getPointAt(u), d = rack.getTangentAt(u); return { x: p.x, y: p.y, z: p.z, q: new THREE.Quaternion().setFromUnitVectors(new V(1, 0, 0), d) }; } });
+    // The silo pours pellets into the hopper car; the car rolls on when full and the next comes in.
+    const pellet = new THREE.SphereGeometry(0.04, 5, 4);
+    for (let k = 0; k < 10; k++) moving.push({ geo: part(pellet, k % 2 ? K.white : 'A'), pivot: [SX, y0 + 0.95, SZ], anim: (t) => { const f = cyc(t, 12), u = cyc(t, 0.5, k / 10); return { y: -u * 0.4, x: Math.sin(k * 2.4) * 0.06, z: Math.cos(k * 2.4) * 0.06, s: f > 0.2 && f < 0.6 ? 1 : 0.001 }; } });
+    moving.push({ geo: merge(part(extrude([[-1.2, 0.35], [1.2, 0.35], [1.0, 1.25], [-1.0, 1.25]], 0.9), '#eef0f2', { r: [0, 0, 0] }), part(box(2.0, 0.12, 0.92), 'A', { p: [0, 1.0, 0] }), [-0.8, 0.8].map((x) => part(lathe([[0, 0], [0.3, 0.25], [0, 0.26]], 12), '#9aa1a9', { p: [x, 0.1, 0] })), [-0.8, 0.8].flatMap((x) => [-0.4, 0.4].map((z) => part(new THREE.CylinderGeometry(0.16, 0.16, 0.08, 12), '#1d1f24', { p: [x, 0.16, z], r: [Math.PI / 2, 0, 0] })))),
+      pivot: [0, y0 + 0.08, 4.35], anim: (t) => { const f = cyc(t, 12), x = f < 0.15 ? SX - 6 + 6 * easeOut(f / 0.15) : f < 0.65 ? SX : SX + 10 * easeIn(win(f, 0.65, 1)); return { x, s: clamp01((5.0 - Math.abs(x)) / 0.8) * 0.999 + 0.001 }; } });
+    moving.push(...walker(moving.length, (t) => { const k = Math.sin(t * 0.35); return { x: 0.6 + k * 1.4, z: 0.6, ry: Math.cos(t * 0.35) > 0 ? 0 : Math.PI }; }, { shirt: K.orange, pants: '#2b3a55', y: y0, carry: part(cyl(0.05, 0.08, 0.2, 10), K.white, { p: [0.25, 0.95, 0.2] }) }));
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [3.4, y0, -0.4], topAt: [RX, y0 + 3.05, RZ] };
+  },
 };
