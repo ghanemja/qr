@@ -172,6 +172,15 @@ const bed = (blanket = 'A') => merge(part(rbox(2.0, 0.3, 1.0, 0.05), '#c9ced6', 
   part(rbox(0.08, 0.7, 1.0, 0.03), '#9aa1a9', { p: [-1.0, 0.8, 0] }), part(rbox(1.9, 0.2, 0.95, 0.08), K.white, { p: [0, 0.78, 0] }), part(rbox(1.3, 0.22, 0.98, 0.08), blanket, { p: [0.3, 0.86, 0] }),
   part(rbox(0.4, 0.14, 0.6, 0.06), K.white, { p: [-0.7, 0.92, 0] }), part(new THREE.SphereGeometry(0.17, 14, 10), '#e9b98f', { p: [-0.62, 1.08, 0] }), part(new THREE.SphereGeometry(0.175, 14, 10), '#5a3a28', { p: [-0.68, 1.12, 0], s: [1, 0.7, 1] }));
 
+// A lattice transmission pylon on y = 0, h tall, cross-arms along z.
+const pylon = (h = 3.2, c = '#9aa1a9') => {
+  const g = [], w = 0.45;
+  [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sz]) => g.push(beam([sx * w, 0, sz * w], [sx * 0.12, h, sz * 0.12], 0.05, c)));
+  if (hi()) for (let y = 0.4; y < h - 0.3; y += 0.55) { const k = 1 - (y / h) * 0.74; g.push(beam([-w * k, y, -w * k], [w * k, y + 0.5, w * k], 0.025, c), beam([w * k, y, -w * k], [-w * k, y + 0.5, w * k], 0.025, c)); }
+  [h * 0.72, h * 0.92].forEach((y, i) => g.push(beam([0, y, -0.9 + i * 0.25], [0, y, 0.9 - i * 0.25], 0.05, c), ...[-1, 1].map((sz) => part(cyl(0.04, 0.04, 0.2, 8), '#d8dde3', { p: [0, y - 0.12, sz * (0.85 - i * 0.25)] }))));
+  return merge(g);
+};
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -1416,5 +1425,59 @@ export const SCENES = {
       [[-0.25, 0.42, 'A'], [0.2, 0.42, K.white], [-0.2, 0.87, K.white], [0.25, 0.87, 'B']].map(([x, y, c]) => part(rbox(0.38, 0.22, 0.45, 0.03), c, { p: [x, y, 0] }))),
       pivot: [0, y0, 0], anim: (t) => { const { p, ry } = along(cartPath, cyc(t, 20)); return { x: p.x, z: p.z, ry }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.6, y0, 2.2], topAt: [BX + 1.6, y0 + 0.4, BZ + 0.2] };
+  },
+
+  // Light bulb (utilities, nuclear and gas generation, fusion): power on demand. The plant's
+  // cooling tower steams beside its glowing reactor ring and pulses of power run along the pylons
+  // into town; as the sun sets and the moon rises, windows and street lamps come on house by house
+  // and the giant bulb glows, then the day comes back.
+  'power:2': () => {
+    const R = rand(1901), out = [], moving = [];
+    out.push(slab('#9fcf7a'));
+    // ---- the plant, back left: cooling tower, reactor hall with its ring, a fence
+    const CX = -3.5, CZ = -3.3;
+    out.push(part(lathe([[1.5, 0], [1.2, 1.4], [1.0, 2.6], [1.1, 3.4]], 40), '#d8dde3', { p: [CX, y0, CZ] }), part(new THREE.CylinderGeometry(1.09, 1.09, 0.3, 40, 1, true), 'A', { p: [CX, y0 + 3.1, CZ] }));
+    const RX = -1.2, RZ = -3.8;
+    out.push(part(rbox(2.2, 1.4, 1.8, 0.06), '#eef0f2', { p: [RX, y0 + 0.7, RZ] }), part(new THREE.SphereGeometry(0.9, 28, 14, 0, TAU, 0, Math.PI / 2), '#e3e6ea', { p: [RX, y0 + 1.4, RZ] }), part(box(2.22, 0.2, 1.82), 'A', { p: [RX, y0 + 1.2, RZ] }));
+    // ---- pylons from the plant to the substation to town, with sagging lines
+    const pyl = [[1.2, -2.4], [2.9, -0.9], [3.6, 1.0]], PH = 3.0;
+    pyl.forEach(([x, z]) => out.push(place(pylon(PH), { p: [x, y0, z], r: [0, -1.1, 0] })));
+    const attach = [[RX + 1.0, y0 + 1.1, RZ + 0.4], ...pyl.map(([x, z]) => [x, y0 + PH * 0.72 - 0.12, z]), [3.9, y0 + 0.9, 2.6]];
+    const lines = [];
+    for (let i = 0; i < attach.length - 1; i++) { const a = new V(...attach[i]), b = new V(...attach[i + 1]), m = a.clone().lerp(b, 0.5).add(new V(0, -0.35, 0)); lines.push(curve([a.toArray(), m.toArray(), b.toArray()])); }
+    lines.forEach((c) => out.push(part(tubeOn(c, 0.018, 24), '#3a3f47')));
+    // The substation by the town.
+    out.push(part(rbox(1.4, 0.06, 1.0, 0.02), '#9aa1a9', { p: [4.0, y0 + 0.03, 2.8] }), part(rbox(0.6, 0.7, 0.5, 0.04), '#7d8792', { p: [4.2, y0 + 0.4, 3.0] }), part(cyl(0.12, 0.12, 0.5, 10), '#d8dde3', { p: [3.9, y0 + 0.6, 2.6] }), part(cyl(0.12, 0.12, 0.5, 10), '#d8dde3', { p: [3.9, y0 + 0.6, 2.95] }));
+    // ---- the town at the front left, its windows to light
+    const homes = [[0.0, 1.6, 0.2], [1.8, 2.4, 0.0], [0.2, 3.5, 0.3], [2.0, 3.9, -0.2], [3.6, 3.9, 0]];
+    homes.forEach(([x, z, ry], i) => out.push(place(home(['#f3ead8', '#e4ecf0', '#efe2cc', '#f6f0e4', '#e9eef2'][i], ['#7d6a5a', '#5a6b7d', '#a35a3c', 'Bd', '#5a6b7d'][i], 1.4, 1.2, 0.9), { p: [x, y0, z], r: [0, ry, 0] })));
+    const lamps = [[1.0, 0.6], [3.0, 1.8], [-0.9, 2.8]];
+    lamps.forEach(([x, z]) => out.push(lampPost(x, y0, z, -Math.PI / 2)));
+    // ---- the giant bulb on its plinth, centre
+    const GX = -2.6, GZ = 2.0;
+    out.push(part(cyl(0.8, 0.9, 0.4, 28), K.stone, { p: [GX, y0 + 0.2, GZ] }), part(cyl(0.92, 0.94, 0.12, 28), 'A', { p: [GX, y0 + 0.06, GZ] }));
+    out.push(part(cyl(0.38, 0.38, 0.55, 24), '#b5bcc6', { p: [GX, y0 + 0.68, GZ] }));
+    if (hi()) for (let i = 0; i < 5; i++) out.push(part(torus(0.39, 0.03, TAU, 24), '#9aa1a9', { p: [GX, y0 + 0.47 + i * 0.1, GZ], r: [Math.PI / 2, 0, 0] }));
+    out.push(part(lathe([[0.38, 0], [0.42, 0.25], [0.85, 0.85], [0.9, 1.35], [0.6, 1.85], [0, 2.0]], 36), '#f4f7fa', { p: [GX, y0 + 0.95, GZ] }));
+    [[-4.4, 4.3], [4.5, -4.4], [-0.4, -1.4], [-4.5, 0.2]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.55 + R() * 0.2)));
+    // ---- moving parts: one 14 s day
+    const P = 14, F = (t) => cyc(t, P), night = (f) => clamp01(win(f, 0.38, 0.5) - win(f, 0.86, 0.96));
+    // Sun and moon arc across the back.
+    const arc = (u) => new V(-4.2 + u * 8.4, y0 + 2.5 + Math.sin(u * Math.PI) * 3.0, -4.6);
+    moving.push({ geo: part(new THREE.SphereGeometry(0.42, 20, 14), '#ffd23f'), pivot: [0, 0, 0], anim: (t) => { const f = F(t), p = arc(clamp01(((f + 0.06) % 1) / 0.56)); return { x: p.x, y: p.y, z: p.z, s: night(f) < 0.5 ? 1 : 0.001 }; } });
+    moving.push({ geo: merge(part(new THREE.SphereGeometry(0.34, 20, 14), '#eef2f7'), part(new THREE.SphereGeometry(0.1, 10, 8), '#cfd6de', { p: [0.1, 0.1, 0.3] })), pivot: [0, 0, 0], anim: (t) => { const f = F(t), p = arc(win(f, 0.46, 0.94)); return { x: p.x, y: p.y, z: p.z, s: night(f) > 0.5 ? 1 : 0.001 }; } });
+    // Windows light up house by house at dusk; the lamps come on.
+    homes.forEach(([x, z, ry], i) => { const c = Math.cos(ry), s2 = Math.sin(ry); moving.push({ geo: merge(part(box(0.44, 0.38, 0.06), '#ffd23f', { p: [0.28, 0.62, 0.62] }), part(box(0.3, 0.6, 0.06), '#ffd23f', { p: [-0.25, 0.32, 0.62] }), part(box(0.06, 0.38, 0.44), '#ffd23f', { p: [0.72, 0.62, 0] })), pivot: [x, y0, z], anim: (t) => { const f = F(t); return { ry, s: night(f - i * 0.012) > 0.5 ? 1 : 0.001 }; } }); });
+    lamps.forEach(([x, z]) => moving.push({ geo: merge(part(new THREE.SphereGeometry(0.16, 12, 8), '#fff2b0', { p: [0, 3.3, -0.75], s: [1.3, 0.5, 1.3] }), part(cyl(0.9, 0.9, 0.01, 24), '#fbe7a1', { p: [0, 0.015, -0.75] })), pivot: [x, y0, z], anim: (t) => ({ s: night(F(t)) > 0.3 ? 1 : 0.001 }) }));
+    // The bulb's filament and glow.
+    moving.push({ geo: merge(part(tube([[-0.25, 0, 0], [-0.12, 0.25, 0], [0, 0, 0], [0.12, 0.25, 0], [0.25, 0, 0]], 0.025), '#ffb02e'), part(cyl(0.02, 0.02, 0.6, 6), K.steelDk, { p: [-0.25, -0.3, 0] }), part(cyl(0.02, 0.02, 0.6, 6), K.steelDk, { p: [0.25, -0.3, 0] })), pivot: [GX, y0 + 2.0, GZ], anim: (t) => ({ ry: t * 0.3 }) });
+    moving.push({ geo: merge(part(lathe([[0.4, 0], [0.44, 0.25], [0.87, 0.85], [0.92, 1.35], [0.62, 1.87], [0, 2.02]], 36), '#ffe27a'), ring(10, (a) => part(cone(0.07, 0.5, 6), '#fff2b0', { p: [Math.cos(a) * 1.25, 1.2 + Math.sin(a) * 1.25, 0], r: [0, 0, a - Math.PI / 2] }))), pivot: [GX, y0 + 0.94, GZ], anim: (t) => { const k = night(F(t)); return { s: k > 0.05 ? 1.0 + Math.sin(t * 6) * 0.02 : 0.001, ry: Math.PI / 4 }; } });
+    // Power pulses run down the lines into town.
+    lines.forEach((c, i) => { for (let k = 0; k < 2; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.08, 10, 8), '#ffe27a'), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 1.6, k / 2 + i * 0.2), p = c.getPointAt(u); return { x: p.x, y: p.y, z: p.z, s: 0.6 + night(F(t)) * 0.8 }; } }); });
+    // Steam from the cooling tower; the reactor ring glows and turns.
+    for (let k = 0; k < 4; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.6, 14, 10), '#f4f2ee'), pivot: [CX, y0 + 3.3, CZ], anim: (t) => { const u = cyc(t, 3.6, k / 4); return { y: u * 1.6, x: u * 0.8, s: (0.4 + u) * (1 - u * 0.8) * 1.5 + 0.001 }; } });
+    moving.push({ geo: part(torus(0.62, 0.12, TAU, 40), 'A'), pivot: [RX, y0 + 1.9, RZ], anim: (t) => ({ rx: Math.PI / 2, rz: t * 0.8, s: 1 + Math.sin(t * 3) * 0.04 }) });
+    moving.push({ geo: part(torus(0.62, 0.06, TAU, 40), '#ff8fd0'), pivot: [RX, y0 + 1.9, RZ], anim: (t) => ({ rx: Math.PI / 2, rz: -t * 2, s: 1.0 + Math.sin(t * 5) * 0.06 }) });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [3.4, y0, -3.0], topAt: [3.4, y0 + 0.75, 3.8] };
   },
 };
