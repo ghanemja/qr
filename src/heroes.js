@@ -324,27 +324,56 @@ export const HEROES = {
     };
   } },
 
-  // Apple: the ecosystem. The iPhone sits at the centre while the apps and devices that keep
-  // people inside it (Watch, AirPods, Mac) orbit around it.
+  // Apple: the ecosystem, a closed loop people stay inside. Apple Park's ring, glass walls under a
+  // solar roof around an orchard courtyard, with the iPhone floating at the centre and the Mac,
+  // iPad, Watch and AirPods orbiting it.
   apple: { finder: '#a3aaae', build: () => {
-    const phone = merge(part(rbox(3.4, 7, 0.42, 0.5), '#1d1d1f'), part(rbox(3.12, 6.7, 0.05, 0.4), (x, y) => (y > 1.2 ? '#4b6cf2' : y > -1.5 ? '#7b5ce6' : '#c35fd1'), { p: [0, 0, 0.22] }),
-      part(rbox(1, 0.28, 0.06, 0.14), K.ink, { p: [0, 3.05, 0.26] }), part(rbox(1.3, 1.3, 0.2, 0.3), '#2b2b2e', { p: [-0.85, 2.5, -0.28] }),
-      [[-1.15, 2.8], [-0.55, 2.8], [-0.85, 2.2]].map(([x, y]) => part(cyl(0.22, 0.22, 0.12, 20), '#11161c', { p: [x, y, -0.4], r: [Math.PI / 2, 0, 0] })),
-      ring(16, (a, i) => part(rbox(0.6, 0.6, 0.08, 0.16), ['#34c759', '#ff9500', '#ff2d55', '#5ac8fa', '#ffcc00', '#af52de', K.white, '#007aff'][i % 8], { p: [-1.05 + (i % 4) * 0.7, 2.2 - Math.floor(i / 4) * 0.9, 0.27] })));
-    const watch = merge(part(rbox(1, 1.2, 0.4, 0.28), '#1d1d1f'), part(rbox(0.86, 1.04, 0.05, 0.22), '#ff375f', { p: [0, 0, 0.2] }), part(tube([[0, 0.6, 0], [0, 1.3, -0.3], [0, 1.4, -1], [0, 0.6, -1.4]], 0.17), '#e5533d'), part(tube([[0, -0.6, 0], [0, -1.3, -0.3], [0, -1.4, -1], [0, -0.6, -1.4]], 0.17), '#e5533d'));
-    const pods = merge(part(rbox(1.3, 1, 0.6, 0.3), K.white), part(box(1.32, 0.03, 0.62), '#d6d6d6', { p: [0, 0.18, 0] }), part(cyl(0.05, 0.05, 0.03, 10), '#5fd08f', { p: [0, -0.05, 0.31], r: [Math.PI / 2, 0, 0] }));
-    const mac = merge(part(rbox(2.6, 0.12, 1.8, 0.1), '#c9ced6'), part(rbox(2.6, 1.7, 0.08, 0.1), '#c9ced6', { p: [0, 0.85, -0.9], r: [-0.25, 0, 0] }), part(box(2.4, 1.5, 0.02), '#2c3e55', { p: [0, 0.86, -0.85], r: [-0.25, 0, 0] }));
-    const orbit = (r, speed, y, tilt, off) => (t) => { const a = t * speed + off; return { x: Math.cos(a) * r, z: Math.sin(a) * r, y: y + Math.sin(a * 2) * tilt, ry: -a + Math.PI / 2 }; };
+    const R = rand(17), y0 = 0.3, out = [];
+    // ---- the campus
+    out.push(part(cyl(5.1, 5.25, 0.3, 64), '#7cbf5a', { p: [0, 0.15, 0] }), part(lathe([[4.62, y0 + 0.005], [4.95, y0 + 0.005], [4.95, y0 + 0.02], [4.62, y0 + 0.02]], hi() ? 96 : 32), '#e8e4da'));
+    // Glass walls inside and out, with the floor slabs showing as white bands, and mullions.
+    const segs = hi() ? 128 : 40;
+    out.push(part(lathe([[4.3, y0], [4.3, y0 + 1.06]], segs), '#9fc3d8'), part(lathe([[3.25, y0 + 1.06], [3.25, y0]], segs), '#9fc3d8'));
+    [0.02, 0.36, 0.7, 1.04].forEach((h) => out.push(part(lathe([[3.19, y0 + h], [4.36, y0 + h], [4.36, y0 + h + 0.05], [3.19, y0 + h + 0.05], [3.19, y0 + h]], segs), '#f4f5f6')));
+    for (let i = 0, n = hi() ? 120 : 0; i < n; i++) { const a = (i / n) * TAU; out.push(part(box(0.02, 1.0, 0.02), '#dfe6ea', { p: [Math.cos(a) * 4.31, y0 + 0.53, Math.sin(a) * 4.31] })); }
+    out.push(part(lathe([[3.05, y0 + 1.06], [4.5, y0 + 1.06], [4.5, y0 + 1.14], [3.05, y0 + 1.14], [3.05, y0 + 1.06]], hi() ? 128 : 40), (x, y) => (y > y0 + 1.13 ? '#2d3a4a' : '#f4f5f6')));
+    for (let i = 0, n = hi() ? 72 : 24; i < n; i++) { const a = (i / n) * TAU; out.push(part(box(0.025, 0.02, 1.3), '#5b6b7c', { p: [Math.cos(a) * 3.78, y0 + 1.155, Math.sin(a) * 3.78], r: [0, -a, 0] })); }
+    // The courtyard: a pond and an orchard.
+    out.push(part(cyl(1.0, 1.0, 0.06, 40), 'W', { p: [0.7, y0 + 0.03, -0.5] }), part(torus(1.0, 0.06, TAU, 40), '#d9d4c7', { p: [0.7, y0 + 0.04, -0.5], r: [Math.PI / 2, 0, 0] }));
+    for (let i = 0; i < 9; i++) { const a = (i / 9) * TAU + R() * 0.4, d = 1.9 + R() * 0.9; out.push(miniTree(R, Math.cos(a) * d, y0, Math.sin(a) * d, 0.62, ['#6fbf4c', '#86cc5f', '#9bd85f', '#f2a6c1'])); }
+    for (let i = 0; i < 10; i++) { const a = (i / 10) * TAU + 0.3; out.push(miniTree(R, Math.cos(a) * 4.85, y0, Math.sin(a) * 4.85, 0.5)); }
+    // ---- the devices
+    const icons = ['#34c759', '#ff9500', '#ff2d55', '#5ac8fa', '#ffcc00', '#af52de', '#f4f5f6', '#007aff', '#ff3b30', '#30b0c7', '#a2845e', '#64d2ff'];
+    const phone = merge(part(rbox(1.72, 3.5, 0.22, 0.3), '#8e9196'), part(rbox(1.6, 3.38, 0.04, 0.27), (x, y) => (y > 0.6 ? '#4b6cf2' : y > -0.6 ? '#7457e0' : '#b45fd1'), { p: [0, 0, 0.11] }),
+      part(new THREE.CapsuleGeometry(0.06, 0.3, 4, 10), '#0b0b0d', { p: [0, 1.48, 0.135], r: [0, 0, Math.PI / 2] }),
+      Array.from({ length: 16 }, (_, i) => part(rbox(0.28, 0.28, 0.04, 0.08), icons[i % icons.length], { p: [-0.54 + (i % 4) * 0.36, 1.05 - Math.floor(i / 4) * 0.46, 0.14] })),
+      part(rbox(1.42, 0.42, 0.03, 0.14), '#c9b9f2', { p: [0, -1.38, 0.135] }), Array.from({ length: 4 }, (_, i) => part(rbox(0.28, 0.28, 0.04, 0.08), icons[(i * 5 + 3) % icons.length], { p: [-0.54 + i * 0.36, -1.38, 0.16] })),
+      part(rbox(0.78, 0.78, 0.08, 0.2), '#7d8187', { p: [-0.38, 1.22, -0.14] }), [[-0.56, 1.4], [-0.2, 1.4], [-0.38, 1.04]].flatMap(([x, y]) => [part(cyl(0.15, 0.15, 0.08, 20), '#55595f', { p: [x, y, -0.2], r: [Math.PI / 2, 0, 0] }), part(cyl(0.1, 0.1, 0.09, 20), '#0d1117', { p: [x, y, -0.21], r: [Math.PI / 2, 0, 0] })]),
+      part(box(0.04, 0.4, 0.06), '#8e9196', { p: [0.88, 0.7, 0] }));
+    const mac = merge(part(rbox(2.1, 0.08, 1.45, 0.06), '#c9ced6'), part(rbox(1.8, 0.01, 0.75, 0.04), '#2b2f36', { p: [0, 0.045, -0.15] }), part(rbox(0.75, 0.01, 0.45, 0.04), '#b9bec6', { p: [0, 0.045, 0.45] }),
+      place(merge(part(rbox(2.1, 1.4, 0.05, 0.06), '#c9ced6', { p: [0, 0.7, 0] }), part(rbox(1.96, 1.26, 0.01, 0.05), (x, y) => (y > 0.75 ? '#2e5ea8' : '#c06b4c'), { p: [0, 0.71, 0.03] })), { p: [0, 0.04, -0.72], r: [-0.25, 0, 0] }));
+    const pad = merge(part(rbox(1.6, 2.2, 0.09, 0.14), '#d7d9dc'), part(rbox(1.48, 2.08, 0.01, 0.12), (x, y) => (y > 0.2 ? '#ff9f6b' : '#e8577a'), { p: [0, 0, 0.05] }), Array.from({ length: 8 }, (_, i) => part(rbox(0.22, 0.22, 0.03, 0.06), icons[(i * 3) % icons.length], { p: [-0.48 + (i % 4) * 0.32, 0.7 - Math.floor(i / 4) * 0.36, 0.065] })));
+    const watch = merge(part(rbox(0.58, 0.7, 0.2, 0.16), '#1d1f24'), part(rbox(0.5, 0.62, 0.02, 0.14), '#0b0b0d', { p: [0, 0, 0.1] }),
+      [['#ff2d55', 0.2], ['#a3f75b', 0.15], ['#3ce3f5', 0.1]].map(([c, r], i) => part(torus(r, 0.022, TAU * (0.85 - i * 0.15), 24), c, { p: [0, 0, 0.115], r: [0, 0, Math.PI / 2] })),
+      part(cyl(0.05, 0.05, 0.08, 12), '#e5533d', { p: [0.31, 0.12, 0], r: [0, 0, Math.PI / 2] }),
+      [1, -1].map((sy) => part(tube([[0, sy * 0.32, -0.04], [0, sy * 0.62, -0.12], [0, sy * 0.82, -0.36], [0, sy * 0.86, -0.62]], 0.045), '#e5533d', { s: [5.2, 1, 1] })));
+    const podsCase = merge(part(rbox(0.66, 0.42, 0.34, 0.14), '#f8f8f8'), part(cyl(0.025, 0.025, 0.02, 10), '#5fd08f', { p: [0, 0.02, 0.17], r: [Math.PI / 2, 0, 0] }),
+      [-0.13, 0.13].flatMap((x) => [part(ball(0.1), '#ffffff', { p: [x, 0.25, 0] }), part(new THREE.CapsuleGeometry(0.035, 0.16, 4, 10), '#ffffff', { p: [x, 0.36, 0.02] })]));
+    const podsLid = part(rbox(0.66, 0.16, 0.34, 0.12), '#f8f8f8', { p: [0, 0.08, 0.17] });
+    // Each device rides the orbit, facing outwards, with its own little bob.
+    const orbit = (k) => (t) => { const a = t * 0.38 + (k / 4) * TAU; return { x: Math.cos(a) * 3.3, z: Math.sin(a) * 3.3, y: Math.sin(t * 1.2 + k) * 0.25, ry: -a + Math.PI / 2, rx: -0.15 }; };
     return {
       bare: true, move: () => ({}),
-      geo: merge(part(cyl(2.4, 2.6, 0.5, 48), '#f5f5f7', { p: [0, 0.25, 0] }), part(cyl(2.42, 2.42, 0.06, 48), '#d2d2d7', { p: [0, 0.5, 0] })),
+      geo: merge(out),
       moving: [
-        { geo: phone, pivot: [0, 4.6, 0], anim: (t) => ({ ry: Math.sin(t * 0.5) * 0.5, y: Math.sin(t * 1.2) * 0.15, rx: -0.08 }) },
-        { geo: watch, pivot: [0, 0, 0], anim: orbit(4.3, 0.55, 5.2, 0.5, 0) },
-        { geo: pods, pivot: [0, 0, 0], anim: orbit(4.3, 0.55, 3, 0.4, 2.1) },
-        { geo: mac, pivot: [0, 0, 0], anim: orbit(4.3, 0.55, 6.9, 0.3, 4.2) },
-        // Apps lift off the screen and come back.
-        ...[0, 1, 2].map((i) => ({ geo: part(rbox(0.75, 0.75, 0.16, 0.2), ['#34c759', '#ff9500', '#007aff'][i]), pivot: [-0.7 + i * 0.7, 6.8, 0.3], parent: undefined, anim: (t) => { const f = cyc(t, 3.6, i * 0.2), k = hop(win(f, 0, 0.5)); return { y: k * 2.2, z: k * 0.8, rz: k * (i - 1) * 0.6, s: 1 + k * 0.4 }; } })),
+        { geo: phone, pivot: [0, 5.6, 0], anim: (t) => ({ ry: Math.sin(t * 0.45) * 0.7, y: Math.sin(t * 1.1) * 0.18, rx: -0.12 }) },
+        { geo: mac, pivot: [0, 4.4, 0], anim: orbit(0) },
+        { geo: pad, pivot: [0, 5.2, 0], anim: orbit(1) },
+        { geo: watch, pivot: [0, 5.0, 0], anim: (t) => ({ ...orbit(2)(t), s: 1.3 }) },
+        { geo: podsCase, pivot: [0, 4.6, 0], anim: (t) => ({ ...orbit(3)(t), s: 1.5 }) },
+        { geo: podsLid, pivot: [0, 0.21, -0.17], parent: 4, anim: (t) => ({ rx: -1.9 * easeIO(win(cyc(t, 4), 0.1, 0.25)) * (1 - easeIO(win(cyc(t, 4), 0.65, 0.8))) }) },
+        // Apps lift off the phone's screen and settle back.
+        ...[0, 1, 2].map((i) => ({ geo: part(rbox(0.32, 0.32, 0.05, 0.09), ['#34c759', '#ff9500', '#007aff'][i]), pivot: [-0.36 + i * 0.36, 1.05, 0.15], parent: 0, anim: (t) => { const k = hop(win(cyc(t, 3.4, i * 0.18), 0, 0.5)); return { z: k * 0.9, y: k * 0.4, rz: k * (i - 1) * 0.5, s: 1 + k * 0.6 }; } })),
       ],
     };
   } },
