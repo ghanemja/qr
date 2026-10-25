@@ -513,26 +513,62 @@ export const HEROES = {
     };
   } },
 
-  // Alphabet: search. The query box under the turning lens, with Google's four colours bouncing
-  // in their loading wave and results stacking up below.
+  // Alphabet: organising the world's information. On the campus, queries fly from the search bar
+  // into the data centre's famous colour-coded pipes and racks and come back as results; the
+  // Android statue waves, a Maps pin drops, YouTube plays, and people ride the campus bikes.
   alphabet: { finder: '#4285f4', build: () => {
-    const cols = ['#4285f4', '#ea4335', '#fbbc05', '#34a853'];
-    return {
-      bare: true, move: () => ({}),
-      geo: merge(part(cyl(4.4, 4.6, 0.5, 48), K.white, { p: [0, 0.25, 0] }), ring(4, (a, i) => part(cyl(4.62, 4.62, 0.08, 48, 1), cols[i], { p: [0, 0.1 + i * 0.001, 0] })),
-        part(rbox(8, 1.5, 1, 0.75), K.white, { p: [0, 1.5, 1.2] }), part(rbox(7.6, 1.2, 0.06, 0.6), '#f1f3f4', { p: [0, 1.5, 1.72] }),
-        part(torus(0.32, 0.08, TAU, 24), '#9aa0a6', { p: [-3.1, 1.6, 1.78] }), beam([-2.88, 1.38, 1.78], [-2.62, 1.12, 1.78], 0.1, '#9aa0a6'),
-        part(box(3.2, 0.14, 0.06), '#5f6368', { p: [-0.6, 1.5, 1.78] }), part(cyl(0.25, 0.25, 0.1, 20), cols[0], { p: [3.2, 1.5, 1.78], r: [Math.PI / 2, 0, 0] })),
-      moving: [
-        ...cols.map((c, i) => ({ geo: part(ball(0.62), c), pivot: [-2.1 + i * 1.4, 3.4, 1.2], anim: (t) => { const f = cyc(t, 1.4, -i * 0.12), k = win(f, 0, 0.5); return { y: hop(k) * 1.7, sy: 1 - bump(f, 0.5, 0.04) * 0.25 + bump(f, 0.25, 0.08) * 0.1 }; } })),
-        { geo: merge(part(torus(1.5, 0.26, TAU, 48), K.ink), part(cyl(1.38, 1.38, 0.06, 40), '#cfe9f7', { r: [Math.PI / 2, 0, 0] }), part(cyl(0.22, 0.28, 2.4, 16), K.ink, { p: [1.6, -1.6, 0], r: [0, 0, 0.785] })), pivot: [0, 7.6, -0.8],
-          anim: (t) => ({ x: Math.sin(t * 0.8) * 2.4, y: Math.sin(t * 1.6) * 0.4, rz: Math.sin(t * 0.8) * 0.2, ry: Math.sin(t * 0.8) * 0.3 }) },
-        { geo: part(box(0.08, 0.9, 0.08), K.ink), pivot: [1.1, 1.5, 1.8], anim: (t) => ({ s: cyc(t, 0.9) < 0.5 ? 1 : 0 }) },
-        // Results appear under the box one after another.
-        ...[0, 1, 2].map((i) => ({ geo: merge(part(rbox(6.4, 0.16, 1.1, 0.08), K.white), part(box(2.4, 0.04, 0.16), '#1a0dab', { p: [-1.6, 0.1, -0.25] }), part(box(4, 0.04, 0.1), '#9aa0a6', { p: [-0.8, 0.1, 0.15] }), part(box(1.6, 0.04, 0.1), '#188038', { p: [-2, 0.1, 0.4] })),
-          pivot: [0, 0.6 + i * 0.2, -0.6 - i * 1.25], anim: (t) => { const f = cyc(t, 4.2); return { s: back(win(f, 0.2 + i * 0.1, 0.32 + i * 0.1)) * (1 - win(f, 0.9, 0.97)) }; } })),
-      ],
-    };
+    const R = rand(81), out = [], y0 = 0.3, G = ['#4285f4', '#ea4335', '#fbbc05', '#34a853'];
+    out.push(part(rbox(10.4, 0.3, 10.4, 0.08), '#7cbf5a', { p: [0, 0.15, 0] }));
+    // A loop path the bikes ride, and paving under the sculptures.
+    const loopPts = Array.from({ length: 32 }, (_, i) => { const a = (i / 32) * TAU; return [0.6 + Math.cos(a) * 3.7, y0, 1.2 + Math.sin(a) * 2.6]; });
+    const loop = new THREE.CatmullRomCurve3(loopPts.map((p) => new V(...p)), true);
+    for (let i = 0; i < 64; i++) { const u = i / 64, p = loop.getPointAt(u), d = loop.getTangentAt(u); out.push(part(box(0.5, 0.02, 0.7), '#e9e4d8', { p: [p.x, y0 + 0.01, p.z], r: [0, Math.atan2(-d.z, d.x), 0] })); }
+    [[-4.2, 4.3], [4.4, -0.8], [4.5, 4.4], [-1.0, 4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.75)));
+    // ---- the data centre with its colour-coded pipes, cut away
+    const D = { x0: -4.9, x1: 0.2, z0: -4.9, z1: -1.6 };
+    out.push(part(box(D.x1 - D.x0, 0.2, D.z1 - D.z0), '#9aa1a9', { p: [(D.x0 + D.x1) / 2, y0 + 0.1, (D.z0 + D.z1) / 2] }), part(box(D.x1 - D.x0, 3.0, 0.2), '#d6d9dd', { p: [(D.x0 + D.x1) / 2, y0 + 1.5, D.z0] }), part(box(0.2, 3.0, D.z1 - D.z0), '#d6d9dd', { p: [D.x0, y0 + 1.5, (D.z0 + D.z1) / 2] }), part(box(D.x1 - D.x0 + 0.2, 0.2, D.z1 - D.z0 + 0.2), '#bfc3c8', { p: [(D.x0 + D.x1) / 2, y0 + 3.1, (D.z0 + D.z1) / 2] }));
+    G.forEach((c, k) => {
+      const yy = y0 + 0.6 + k * 0.55, zz = D.z0 + 0.35 + k * 0.05;
+      out.push(part(cyl(0.12, 0.12, D.x1 - D.x0 - 0.6, 16), c, { p: [(D.x0 + D.x1) / 2, yy, zz], r: [0, 0, Math.PI / 2] }));
+      [D.x0 + 0.6 + k * 0.4, D.x1 - 0.5 - k * 0.3].forEach((x) => out.push(part(torus(0.25, 0.12, Math.PI / 2, 12), c, { p: [x, yy - 0.25, zz + 0.25], r: [0, Math.PI / 2, Math.PI] }), part(cyl(0.12, 0.12, yy - y0 - 0.45, 12), c, { p: [x, (yy + y0) / 2 - 0.05, zz + 0.5] })));
+      for (let x = D.x0 + 0.5; x < D.x1 - 0.3; x += 0.9) out.push(part(box(0.06, 0.34, 0.34), '#7d8792', { p: [x, yy, zz] }));
+    });
+    for (let k = 0; k < 4; k++) { const x = D.x0 + 0.9 + k * 1.1; out.push(part(rbox(0.8, 1.9, 0.6, 0.04), '#2b2f36', { p: [x, y0 + 1.15, -2.3] })); for (let u = 0; u < 8; u++) out.push(part(box(0.7, 0.03, 0.01), '#3a3f47', { p: [x, y0 + 0.4 + u * 0.2, -1.995] })); }
+    // ---- the search bar sculpture with its query box
+    const S = [0.6, 1.2];
+    out.push(part(rbox(4.6, 1.0, 0.7, 0.5), K.white, { p: [S[0], y0 + 1.2, S[1]] }), part(rbox(4.3, 0.75, 0.05, 0.38), '#f1f3f4', { p: [S[0], y0 + 1.2, S[1] + 0.36] }),
+      part(torus(0.17, 0.05, TAU, 24), '#9aa0a6', { p: [S[0] - 1.75, y0 + 1.24, S[1] + 0.39] }), beam([S[0] - 1.63, y0 + 1.12, S[1] + 0.39], [S[0] - 1.5, y0 + 0.99, S[1] + 0.39], 0.06, '#9aa0a6'),
+      part(box(1.8, 0.08, 0.03), '#5f6368', { p: [S[0] - 0.4, y0 + 1.2, S[1] + 0.39] }), part(cyl(0.16, 0.16, 0.06, 20), G[0], { p: [S[0] + 1.8, y0 + 1.2, S[1] + 0.39], r: [Math.PI / 2, 0, 0] }),
+      part(rbox(0.5, 0.7, 0.4, 0.06), '#e9e6df', { p: [S[0] - 1.6, y0 + 0.35, S[1]] }), part(rbox(0.5, 0.7, 0.4, 0.06), '#e9e6df', { p: [S[0] + 1.6, y0 + 0.35, S[1]] }));
+    // ---- the Android statue on its plinth
+    const A = [3.6, -2.8];
+    out.push(part(rbox(1.2, 0.5, 1.2, 0.08), '#e9e6df', { p: [A[0], y0 + 0.25, A[1]] }), part(new THREE.CapsuleGeometry(0.55, 0.5, 8, 24), '#3ddc84', { p: [A[0], y0 + 1.45, A[1]] }),
+      part(new THREE.SphereGeometry(0.55, 32, 16, 0, TAU, 0, Math.PI / 2), '#3ddc84', { p: [A[0], y0 + 2.12, A[1]] }), [-0.2, 0.2].map((dx) => part(ball(0.06), K.white, { p: [A[0] + dx, y0 + 2.35, A[1] + 0.47] })),
+      [-0.22, 0.22].map((dx) => beam([A[0] + dx * 0.9, y0 + 2.55, A[1]], [A[0] + dx * 1.8, y0 + 2.85, A[1]], 0.05, '#3ddc84')), [-0.2, 0.2].map((dx) => part(new THREE.CapsuleGeometry(0.13, 0.3, 6, 12), '#3ddc84', { p: [A[0] + dx, y0 + 0.75, A[1]] })),
+      part(new THREE.CapsuleGeometry(0.12, 0.45, 6, 12), '#3ddc84', { p: [A[0] - 0.72, y0 + 1.5, A[1]] }));
+    // ---- the map tile with its pin, and the play button
+    const M = [3.9, 0.9];
+    out.push(part(rbox(1.6, 0.12, 1.6, 0.04), '#e8f0e0', { p: [M[0], y0 + 0.06, M[1]] }), part(box(1.5, 0.02, 0.18), '#fbbc05', { p: [M[0], y0 + 0.13, M[1] + 0.2], r: [0, 0.3, 0] }), part(box(0.14, 0.02, 1.5), K.white, { p: [M[0] - 0.3, y0 + 0.13, M[1]] }), part(box(0.5, 0.025, 0.4), '#a8d5ff', { p: [M[0] + 0.45, y0 + 0.13, M[1] - 0.45] }));
+    out.push(part(cyl(0.05, 0.05, 1.6, 8), '#9aa1a9', { p: [-3.8, y0 + 0.8, 0.6] }), part(rbox(1.3, 0.9, 0.14, 0.22), '#ff0000', { p: [-3.8, y0 + 1.9, 0.6], r: [0, Math.PI / 4, 0] }), part(extrude([[-0.2, 0.25], [0.28, 0], [-0.2, -0.25]], 0.06), K.white, { p: [-3.8 + 0.06, y0 + 1.9, 0.6 + 0.06], r: [0, Math.PI / 4, 0] }));
+    // ---- moving parts
+    const bike = (c) => merge(part(torus(0.3, 0.04, TAU, 20), '#1d1f24', { p: [-0.5, 0.33, 0] }), part(torus(0.3, 0.04, TAU, 20), '#1d1f24', { p: [0.5, 0.33, 0] }), beam([-0.5, 0.33, 0], [0, 0.4, 0], 0.06, c), beam([0, 0.4, 0], [0.4, 0.8, 0], 0.06, c), beam([-0.5, 0.33, 0], [-0.15, 0.8, 0], 0.06, c), beam([-0.15, 0.8, 0], [0.4, 0.8, 0], 0.06, c), beam([0.4, 0.8, 0], [0.5, 0.33, 0], 0.05, c),
+      part(rbox(0.12, 0.2, 0.55, 0.04), '#1d1f24', { p: [0.42, 0.95, 0] }), part(rbox(0.3, 0.06, 0.18, 0.03), '#1d1f24', { p: [-0.18, 0.86, 0] }), part(rbox(0.35, 0.2, 0.3, 0.04), c, { p: [0.62, 0.72, 0] }),
+      part(new THREE.CapsuleGeometry(0.15, 0.32, 6, 12), '#5b6470', { p: [-0.1, 1.22, 0], r: [0, 0, -0.3] }), part(ball(0.13), '#e9b98f', { p: [0.0, 1.55, 0] }), part(ball(0.14), '#3a2a20', { p: [-0.02, 1.6, 0], s: [1, 0.7, 1] }),
+      beam([-0.05, 1.3, 0.12], [0.4, 1.0, 0.25], 0.07, '#5b6470'), beam([-0.05, 1.3, -0.12], [0.4, 1.0, -0.25], 0.07, '#5b6470'), beam([-0.15, 0.95, 0.1], [0, 0.55, 0.15], 0.08, '#2b3a55'), beam([-0.15, 0.95, -0.1], [0, 0.55, -0.15], 0.08, '#2b3a55'));
+    const qFrom = [S[0] - 0.4, y0 + 1.8, S[1]], into = [-2.4, y0 + 3.4, -3.2];
+    const moving = [
+      ...G.map((c, i) => ({ geo: part(ball(0.36), c), pivot: [S[0] - 1.05 + i * 0.7, y0 + 2.2, S[1]], anim: (t) => { const f = cyc(t, 1.4, -i * 0.12), k = win(f, 0, 0.5); return { y: hop(k) * 1.1, sy: 1 - bump(f, 0.5, 0.04) * 0.25 }; } })),
+      { geo: part(box(0.04, 0.5, 0.04), K.ink), pivot: [S[0] + 0.55, y0 + 1.2, S[1] + 0.39], anim: (t) => ({ s: cyc(t, 0.9) < 0.5 ? 1 : 0.001 }) },
+      // Queries out to the data centre, results back.
+      ...Array.from({ length: 6 }, (_, i) => ({ geo: part(ball(0.13), G[i % 4]), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 3, i / 6), back = f > 0.5, k = easeIO(back ? (f - 0.5) * 2 : f * 2), a = back ? into : qFrom, b = back ? qFrom : into; return { x: a[0] + (b[0] - a[0]) * k, y: a[1] + (b[1] - a[1]) * k + Math.sin(Math.PI * k) * 1.6, z: a[2] + (b[2] - a[2]) * k, s: back ? 0.8 : 1 }; } })),
+      // The Android waves.
+      { geo: part(new THREE.CapsuleGeometry(0.12, 0.45, 6, 12), '#3ddc84', { p: [0, 0.3, 0] }), pivot: [A[0] + 0.72, y0 + 1.7, A[1]], anim: (t) => ({ rz: 2.6 + Math.sin(t * 6) * 0.35 * (cyc(t, 4) < 0.5 ? 1 : 0) }) },
+      // The Maps pin drops and bounces.
+      { geo: merge(part(lathe([[0, 0], [0.12, 0.28], [0.3, 0.62], [0.34, 0.85], [0.26, 1.05], [0, 1.13]], 32), '#ea4335'), part(cyl(0.12, 0.12, 0.08, 20), '#a50e0e', { p: [0, 0.82, 0.24], r: [Math.PI / 2, 0, 0] })), pivot: [M[0] + 0.1, y0 + 0.14, M[1] + 0.1], anim: (t) => { const f = cyc(t, 3.2), d = win(f, 0, 0.25); return { y: (1 - easeIn(d)) * 2.2 + bump(f, 0.3, 0.04) * 0.25, sy: 1 - bump(f, 0.26, 0.02) * 0.25, ry: t * 0.6 }; } },
+      // Riders on the campus bikes.
+      ...G.slice(0, 3).map((c, i) => ({ geo: bike(c), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 14, i / 3), p = loop.getPointAt(u), d = loop.getTangentAt(u); return { x: p.x, y: p.y + Math.abs(Math.sin(t * 6 + i)) * 0.02, z: p.z, ry: Math.atan2(-d.z, d.x) }; } })),
+    ];
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 
   // ExxonMobil: integration, from the well to the pump. An offshore platform drills and flares at
