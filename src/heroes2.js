@@ -579,4 +579,42 @@ export const HEROES2 = {
     moving.push({ geo: part(capsule(0.03, 0.3), '#2b2f36'), pivot: [2.0, y0 + 0.95, 1.6], anim: (t) => ({ rz: 0.6 + Math.sin(t * 6) * 0.2, rx: Math.cos(t * 5) * 0.2 }) });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Intuit: the money software for households and small businesses. The family's forms and the
+  // bakery's receipts fly into the laptop in the middle; out come the family's refund (TurboTax)
+  // and the bakery's books, its profit chart rising (QuickBooks).
+  intuit: { finder: '#236cff', build: () => {
+    const R = rand(117), out = [], BLUE = '#236cff', TT = '#d52b1e', QB = '#2ca01c';
+    out.push(ground('#8fc66f'), part(cyl(1.9, 1.9, 0.04, 48), '#e8e3d8', { p: [0.2, y0 + 0.02, -0.2] }));
+    // ---- the office, back left
+    out.push(place(block(2.2, 3.6, 1.8, '#eef0f2', '#4a6a9a', 0.32), { p: [-3.4, y0, -3.4] }), part(box(2.24, 0.4, 1.84), BLUE, { p: [-3.4, y0 + 3.4, -3.4] }), place(pixText('INTUIT', 0.07, K.white, 0.03), { p: [-3.4, y0 + 3.4, -2.47] }));
+    // ---- the family's home and their kitchen table, front left
+    out.push(place(house2('#fbf3e3', '#a35a3c', TT), { p: [-3.1, y0, 1.6], r: [0, Math.PI / 2, 0], s: 0.8 }));
+    out.push(part(rbox(1.2, 0.06, 0.8, 0.03), K.wood, { p: [-1.6, y0 + 0.7, 3.4] }), [[-0.5, -0.32], [0.5, -0.32], [-0.5, 0.32], [0.5, 0.32]].map(([x, z]) => part(box(0.05, 0.68, 0.05), K.dark, { p: [-1.6 + x, y0 + 0.34, 3.4 + z] })));
+    out.push(part(rbox(0.5, 0.25, 0.35, 0.03), '#c99a62', { p: [-1.9, y0 + 0.86, 3.4] }), place(fan('#3d7be0'), { p: [-1.0, y0, 3.9], s: 1.3 }), place(fan('#d6336c'), { p: [-2.3, y0, 3.9], s: 1.3 }));
+    // ---- the bakery, back right: awning, display window, and its chart board
+    const BX = 3.0, BZ = -2.6;
+    out.push(part(rbox(2.4, 1.7, 1.6, 0.05), '#f6efe2', { p: [BX, y0 + 0.85, BZ] }), [0, 1, 2, 3, 4].map((i) => part(box(0.48, 0.05, 0.5), i % 2 ? K.white : QB, { p: [BX - 0.96 + i * 0.48, y0 + 1.55, BZ + 1.02], r: [0.45, 0, 0] })), part(box(1.4, 0.7, 0.04), '#9cc3e0', { p: [BX - 0.3, y0 + 0.75, BZ + 0.81] }));
+    [0, 1, 2].forEach((i) => out.push(part(torus(0.12, 0.05, TAU, 16), '#d9a05b', { p: [BX - 0.75 + i * 0.4, y0 + 0.5, BZ + 0.86], r: [Math.PI / 2, 0, 0] })));
+    out.push(part(rbox(1.6, 1.2, 0.08, 0.03), K.white, { p: [3.9, y0 + 0.9, 0.4], r: [0, -Math.PI / 4, 0] }), part(box(0.05, 0.9, 0.05), K.dark, { p: [3.9, y0 + 0.3, 0.4] }), place(fan('#f29a3a'), { p: [2.0, y0, -0.8], s: 1.3 }));
+    // ---- the laptop in the middle: base, open screen with the check
+    const LX = 0.2, LZ = -0.2, LQ = Math.PI / 4;
+    out.push(part(rbox(2.4, 0.12, 1.6, 0.05), '#c9ced6', { p: [LX, y0 + 0.3, LZ], r: [0, LQ, 0] }), part(cyl(0.5, 0.6, 0.24, 24), '#2b3440', { p: [LX, y0 + 0.12, LZ] }));
+    const scrQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.25, LQ, 0, 'YXZ')), off = new V(0, 0.8, -0.78).applyQuaternion(new THREE.Quaternion().setFromEuler(new THREE.Euler(0, LQ, 0)));
+    out.push(part(rbox(2.4, 1.6, 0.08, 0.06), '#2b3440', { p: [LX + off.x, y0 + 0.36 + off.y, LZ + off.z], q: scrQ }), part(box(2.2, 1.4, 0.02), K.white, { p: [LX + off.x * 0.95, y0 + 0.36 + off.y, LZ + off.z * 0.95], q: scrQ }));
+    out.push(trees(R, [[4.6, 4.6], [1.6, 4.4], [4.6, 2.4], [-0.6, -4.6], [0.6, 2.4]]));
+    // ---- moving parts
+    const moving = [], P = 10, top = [LX + off.x, y0 + 1.4, LZ + off.z];
+    // The check on the screen pops when each return is done.
+    moving.push({ geo: tickGeo(0.4), pivot: [LX + off.x * 0.9, y0 + 0.36 + off.y, LZ + off.z * 0.9], anim: (t) => { const f = cyc(t, P / 2); return f > 0.4 && f < 0.95 ? { q: scrQ, s: back(win(f, 0.4, 0.5)) } : { s: 0.001 }; } });
+    const form = merge(part(box(0.4, 0.52, 0.02), K.white), part(box(0.4, 0.1, 0.025), TT, { p: [0, 0.2, 0] }), [0, 1, 2].map((i) => part(box(0.26, 0.03, 0.025), '#c9ced6', { p: [0, 0.02 - i * 0.09, 0] })));
+    const receipt = merge(part(box(0.3, 0.5, 0.02), '#fbf3e3'), part(box(0.3, 0.06, 0.025), QB, { p: [0, 0.2, 0] }), [0, 1, 2].map((i) => part(box(0.2, 0.025, 0.025), '#9aa1a9', { p: [0, 0.05 - i * 0.08, 0] })));
+    const inF = curve([[-1.9, y0 + 1.1, 3.4], [-1.2, y0 + 2.6, 1.8], top]), inR = curve([[BX - 0.4, y0 + 1.4, BZ + 1.0], [1.6, y0 + 2.8, -1.2], top]);
+    for (let k = 0; k < 3; k++) { moving.push(rider(form, inF, P / 2, -k * 0.08, 0, 0.35, (t, u) => ({ ry: Math.PI / 4, rz: u * 3 }))); moving.push(rider(receipt, inR, P / 2, -k * 0.08 - 0.5, 0, 0.35, (t, u) => ({ ry: Math.PI / 4, rz: -u * 3 }))); }
+    // The refund back to the family.
+    const outF = curve([top, [-0.9, y0 + 2.8, 2.0], [-1.6, y0 + 1.0, 3.4]]);
+    moving.push(rider(merge(part(rbox(0.6, 0.3, 0.04, 0.03), '#7cbf7d'), pixText('$', 0.04, '#2f6f3a', 0.05)), outF, P / 2, 0, 0.55, 0.9, () => ({ ry: Math.PI / 4 })));
+    // The bakery's chart rising, bar by bar.
+    for (let k = 0; k < 4; k++) moving.push({ geo: part(box(0.22, 0.8, 0.03), QB, { p: [0, 0.4, 0] }), pivot: [3.9 - 0.42 * Math.cos(Math.PI / 4) + k * 0.28 * Math.cos(Math.PI / 4), y0 + 0.4, 0.4 + 0.42 * Math.sin(Math.PI / 4) - k * 0.28 * Math.sin(Math.PI / 4) + 0.06], anim: (t) => { const f = cyc(t, P); return { ry: -Math.PI / 4, sy: (0.2 + k * 0.2) * (0.4 + 0.6 * easeOut(win(f, 0.1 + k * 0.15, 0.3 + k * 0.15))) + 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
