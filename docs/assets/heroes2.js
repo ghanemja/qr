@@ -1523,4 +1523,28 @@ export const HEROES2 = {
     for (let k = 0; k < N; k++) { const u = k / (N - 1); moving.push({ geo: part(new THREE.SphereGeometry(0.045, 8, 6), gl(u) > 0.13 ? '#f29a3a' : '#2f9e6e'), pivot: pp(-0.5 + u * 1.0, 1.55 + gl(u), 0.1), anim: (t) => { const f = cyc(t, P); return f > u * 0.85 && f < 0.97 ? { s: 1 } : { s: 0.001 }; } }); }
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Marriott International: thirty brands, one membership. Travellers check in at the Ritz, the
+  // Sheraton, the Courtyard and the rest; every stay sends points to the Bonvoy card in the
+  // middle, which climbs from silver to gold to platinum.
+  marriott: { finder: '#b5121b', build: () => {
+    const R = rand(145), out = [], RED = '#b5121b', INK = '#1c1c1c';
+    out.push(ground('#8fc66f'), part(cyl(2.0, 2.0, 0.05, 48), '#e8e3d8', { p: [0.2, y0 + 0.025, 0.4] }));
+    // ---- the hotels round the edge, each its own brand
+    const hotels = [[-3.4, -3.4, 4.6, '#1f3a5f', 'RITZ'], [-0.4, -3.8, 3.6, '#7a6a4f', 'JW'], [2.8, -3.4, 3.0, '#2b2f36', 'W'], [3.8, 0.4, 2.4, '#3f6f8f', 'SHERATON'], [-3.8, 0.6, 2.8, '#8a3a2a', 'WESTIN'], [3.2, 3.6, 1.6, '#2f7a6a', 'COURTYARD']];
+    hotels.forEach(([x, z, h, c, name]) => { const w = name.length > 5 ? 1.7 : 1.5; out.push(place(block(w, h, w, '#eef0f2', shade(c, 1.3), 0.3), { p: [x, y0, z] }), part(box(w + 0.04, 0.4, w + 0.04), c, { p: [x, y0 + h - 0.2, z] }), place(pixText(name, 0.045, K.white, 0.02), { p: [x, y0 + h - 0.2, z + w / 2 + 0.03] }), part(rbox(w * 0.7, 0.08, 0.5, 0.03), c, { p: [x, y0 + 0.7, z + w / 2 + 0.25] })); });
+    // ---- the card's plinth
+    out.push(part(cyl(0.7, 0.8, 0.3, 32), INK, { p: [0.2, y0 + 0.15, 0.4] }), part(cyl(0.12, 0.12, 0.5, 12), '#c9ced6', { p: [0.2, y0 + 0.55, 0.4] }));
+    out.push(trees(R, [[-1.6, 4.4], [1.0, 4.6], [-4.6, 3.6], [4.6, -1.6], [-1.8, -1.4]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 12;
+    // The Bonvoy card, its colour climbing the tiers through the cycle.
+    const tiers = ['#c9ced6', '#d9a93a', '#9fa8b3', '#3a3f47'];
+    tiers.forEach((c, i) => moving.push({ geo: merge(part(rbox(2.0, 1.25, 0.08, 0.12), c), part(box(2.0, 0.22, 0.09), INK, { p: [0, 0.3, 0] }), pixText('BONVOY', 0.06, K.white, 0.1).translate(0, -0.15, 0), part(rbox(0.3, 0.22, 0.1, 0.04), K.gold, { p: [-0.65, 0.0, 0] })), pivot: [0.2, y0 + 1.5, 0.4], anim: (t) => { const f = cyc(t, P), k = Math.min(3, Math.floor(f * 4)); return k === i ? { ry: Math.PI / 4 + Math.sin(t * 0.8) * 0.3, s: 1 + bump(f, (i + 0.0) / 4, 0.02) * 0.15 } : { s: 0.001 }; } }));
+    // Travellers walking between hotels with their bags.
+    const pathFor = (a, b) => (t, o) => { const f = cyc(t, 6, o), u = easeIO(win(f, 0.05, 0.85)); return { x: a[0] + (b[0] - a[0]) * u, z: a[1] + (b[1] - a[1]) * u + 1.2, ry: Math.atan2(-(b[1] - a[1]), b[0] - a[0]), s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; };
+    [[0, 3], [4, 5], [1, 4]].forEach(([a, b], i) => { const fn = pathFor(hotels[a], hotels[b]); moving.push(...walker(moving.length, (t) => fn(t, i / 3), { shirt: ['#3d7be0', '#d6336c', '#f29a3a'][i], pants: '#2b3a55', y: y0, carry: part(rbox(0.3, 0.4, 0.18, 0.04), INK, { p: [0, 0.3, 0.35] }) })); });
+    // Points from each stay to the card.
+    hotels.forEach(([x, z, h], i) => moving.push(rider(merge(part(cyl(0.16, 0.16, 0.05, 16), RED, { r: [Math.PI / 2, 0, 0] }), part(cyl(0.1, 0.1, 0.055, 12), K.white, { r: [Math.PI / 2, 0, 0] })), curve([[x, y0 + h * 0.6, z + 0.9], [(x + 0.2) / 2, y0 + 3.6, (z + 0.4) / 2], [0.2, y0 + 1.6, 0.4]]), P / 4, i / 6, 0, 0.8, (t) => ({ ry: t * 4 }))));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

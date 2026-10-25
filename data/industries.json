@@ -132,7 +132,8 @@
   "monster": "A brand riders wear, carried by Coca-Cola's trucks",
   "chipotle": "A fresh line that never stops, straight out to the Chipotlane",
   "doordash": "The most dashers on the most streets",
-  "abbott": "Medicine you can wear: the sensor that reads glucose all day"
+  "abbott": "Medicine you can wear: the sensor that reads glucose all day",
+  "marriott": "Thirty brands, one membership: every stay builds the Bonvoy card"
  },
  "bank": [
   "PNC Financial Services",
@@ -435,7 +436,6 @@
   "Rockwell Collins",
   "Expedia Group",
   "Booking Holdings",
-  "Marriott International",
   "Hilton Worldwide Holdings"
  ],
  "casino": [
@@ -1762,5 +1762,8 @@
  ],
  "abbott": [
   "Abbott Laboratories"
+ ],
+ "marriott": [
+  "Marriott International"
  ]
 }
