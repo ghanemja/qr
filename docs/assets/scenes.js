@@ -2323,4 +2323,65 @@ export const SCENES = {
     cables.forEach((c, i) => { for (let k = 0; k < 2; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.08, 8, 6), i ? '#62d35f' : 'B'), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 2.4, k / 2 + i * 0.13), p = c.getPointAt(u); return { x: p.x, y: p.y + 0.04, z: p.z }; } }); });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-0.4, y0, 2.0], topAt: [GX, y0 + 0.3, GZ + 1.2] };
   },
+
+  // Laptop (IT hardware, distributors and solution providers): the right machine on every desk.
+  // Boxed laptops roll out of the distribution centre onto the van; it drives to the office, the
+  // tech carries them in, and each desk's laptop powers up; on the giant laptop at the back, the
+  // fleet dashboard ticks each one off as it comes online.
+  'computer:0': () => {
+    const R = rand(3201), out = [], moving = [];
+    out.push(slab('#cdd3d9'));
+    out.push(part(box(1.1, 0.03, 10.4), '#6b7078', { p: [0.6, y0 + 0.015, 0] }), part(box(4.4, 0.03, 1.1), '#6b7078', { p: [2.9, y0 + 0.015, -1.3] }));
+    // ---- the giant laptop (back left), facing the camera
+    const LX = -2.5, LZ = -2.5, LA = Math.PI / 4, W = 3.6, DD = 2.4, TILT = -0.28, HB = 0.18;
+    const M = new THREE.Matrix4().makeTranslation(LX, y0, LZ).multiply(new THREE.Matrix4().makeRotationY(LA));
+    const SM = M.clone().multiply(new THREE.Matrix4().makeTranslation(0, HB, -DD / 2 + 0.08)).multiply(new THREE.Matrix4().makeRotationX(TILT));
+    const lap = [part(rbox(W, HB, DD, 0.08), '#c9ced6', { p: [0, HB / 2, 0] }), part(rbox(W * 0.86, 0.02, DD * 0.5, 0.02), '#3a3f47', { p: [0, HB + 0.005, -0.15] }), part(rbox(W * 0.3, 0.02, DD * 0.22, 0.04), '#b8bec6', { p: [0, HB + 0.005, DD * 0.33] })];
+    if (hi()) for (let r = 0; r < 4; r++) for (let c = 0; c < 12; c++) lap.push(part(box(0.22, 0.04, 0.2), '#2b2f36', { p: [-W * 0.4 + c * 0.265 + (r % 2) * 0.06, HB + 0.02, -0.65 + r * 0.26] }));
+    out.push(merge(lap).applyMatrix4(M));
+    const SH = 2.5;
+    out.push(merge(part(rbox(W, SH, 0.12, 0.08), '#c9ced6', { p: [0, SH / 2, -0.06] }), part(box(W - 0.3, SH - 0.3, 0.02), '#141a22', { p: [0, SH / 2, 0.01] }), part(rbox(0.6, 0.12, 0.02, 0.03), 'A', { p: [0, SH - 0.1, -0.13] })).applyMatrix4(SM));
+    const onScreen = (x, y) => new V(x, y, 0.03).applyMatrix4(SM);
+    // ---- the distribution centre (back right): racking inside, a roll door, the dock
+    const WX = 2.9, WZ = -3.4, WW = 4.2, WD = 2.2, WH = 2.2;
+    out.push(part(rbox(WW, WH, WD, 0.06), '#e3e0da', { p: [WX, y0 + WH / 2, WZ] }), part(box(WW + 0.02, 0.3, WD + 0.02), 'A', { p: [WX, y0 + WH - 0.25, WZ] }));
+    out.push(part(rbox(1.3, 1.5, 0.06, 0.03), '#3a3f47', { p: [WX - 0.2, y0 + 0.75, WZ + WD / 2 + 0.02] }), part(rbox(1.8, 0.1, 0.8, 0.03), 'Ad', { p: [WX - 0.2, y0 + 1.65, WZ + WD / 2 + 0.4] }));
+    for (let i = 0; i < 3; i++) out.push(part(rbox(0.5, 0.36, 0.05, 0.02), '#9fcdea', { p: [WX + 0.9 + (i % 2) * 0.6, y0 + 0.9 + Math.floor(i / 2) * 0.6, WZ + WD / 2 + 0.01] }));
+    const CY = y0 + 0.55, C0 = new V(WX - 0.2, CY, WZ + WD / 2 + 0.1), C1 = new V(WX - 0.2, CY, -1.9);
+    out.push(part(box(0.7, 0.06, C1.z - C0.z), '#3a3f47', { p: [C0.x, CY - 0.03, (C0.z + C1.z) / 2] }), [-0.38, 0.38].map((dx) => part(box(0.05, 0.1, C1.z - C0.z), '#c9ced6', { p: [C0.x + dx, CY - 0.02, (C0.z + C1.z) / 2] })));
+    [C0.z + 0.2, C1.z - 0.1].forEach((z) => [-0.3, 0.3].forEach((dx) => out.push(part(box(0.06, CY - y0, 0.06), K.steelDk, { p: [C0.x + dx, y0 + (CY - y0) / 2, z] }))));
+    // ---- the office (front left): a cut-open floor with three desks
+    const OX = -2.4, OZ = 2.5;
+    out.push(part(rbox(4.6, 0.12, 3.2, 0.04), '#e9e2d6', { p: [OX, y0 + 0.06, OZ] }), part(rbox(4.6, 1.5, 0.15, 0.04), '#f4f5f6', { p: [OX, y0 + 0.75, OZ - 1.55] }), part(rbox(0.15, 1.5, 3.2, 0.04), '#f4f5f6', { p: [OX - 2.25, y0 + 0.75, OZ] }), part(box(4.6, 0.16, 0.17), 'A', { p: [OX, y0 + 1.42, OZ - 1.55] }));
+    out.push(part(rbox(1.2, 0.8, 0.04, 0.02), '#9fcdea', { p: [OX - 0.8, y0 + 0.85, OZ - 1.46] }), part(rbox(1.2, 0.8, 0.04, 0.02), '#9fcdea', { p: [OX + 0.8, y0 + 0.85, OZ - 1.46] }));
+    const desks = [[-3.4, 1.8], [-1.6, 1.8], [-2.5, 3.3]].map(([x, z]) => new V(x, y0 + 0.12, z));
+    desks.forEach((d) => out.push(place(merge(part(rbox(1.3, 0.06, 0.66, 0.02), K.wood, { p: [0, 0.72, 0] }), [[-0.58, -0.26], [0.58, -0.26], [-0.58, 0.26], [0.58, 0.26]].map(([x, z]) => part(box(0.05, 0.7, 0.05), K.dark, { p: [x, 0.35, z] })), part(rbox(0.46, 0.06, 0.46, 0.03), K.dark, { p: [0, 0.44, 0.55] }), part(rbox(0.46, 0.5, 0.06, 0.03), K.dark, { p: [0, 0.7, 0.78] })), { p: [d.x, d.y, d.z] })));
+    out.push(part(cyl(0.3, 0.22, 0.4, 14), '#c99a62', { p: [OX + 1.9, y0 + 0.32, OZ + 1.1] }), part(new THREE.SphereGeometry(0.42, 12, 8), '#5fae5b', { p: [OX + 1.9, y0 + 0.8, OZ + 1.1] }));
+    [[2.0, 4.5], [4.5, 3.6], [-0.3, -0.4]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.5 + R() * 0.15)));
+    // ---- moving parts (one 12 s cycle)
+    const P = 12, F = (t) => cyc(t, P);
+    const boxG = merge(part(rbox(0.6, 0.18, 0.44, 0.03), K.white), part(box(0.3, 0.19, 0.2), 'A', { p: [0.05, 0, 0] }), part(box(0.62, 0.02, 0.08), '#c9ced6', { p: [0, 0.09, 0] }));
+    // Boxes ride the conveyor out of the door.
+    for (let k = 0; k < 3; k++) moving.push({ geo: boxG, pivot: [C0.x, CY + 0.09, 0], anim: (t) => { const u = cyc(t, 4, k / 3); return { z: C0.z + (C1.z - C0.z) * u, s: Math.min(1, u / 0.06, (1 - u) / 0.06) * 0.999 + 0.001 }; } });
+    // The van: dock, office, back.
+    const route = curve([[C1.x + 1.1, 0, -1.3], [0.6, 0, -0.4], [0.6, 0, 1.6], [-0.2, 0, 2.6]]);
+    const vu = (f) => (f < 0.15 ? 0 : f < 0.32 ? easeIO(win(f, 0.15, 0.32)) : f < 0.7 ? 1 : 1 - easeIO(win(f, 0.7, 0.92)));
+    moving.push({ geo: merge(van(K.white, 'A'), place(boxG, { p: [-0.2, 1.21, 0] })), pivot: [0, y0, 0], anim: (t) => { const f = F(t), { p, ry } = along(route, Math.min(0.999, Math.max(0.001, vu(f)))); return { x: p.x, z: p.z, ry: ry + (f > 0.7 ? Math.PI : 0), s: 0.85 }; } });
+    // The tech carries each laptop to its desk.
+    const van0 = new V(-0.2, 0, 2.6);
+    moving.push(...walker(moving.length, (t) => { const f = F(t), k = Math.min(2, Math.floor(Math.max(0, f - 0.34) / 0.12)), g = win(f, 0.34 + k * 0.12, 0.4 + k * 0.12), b = win(f, 0.4 + k * 0.12, 0.46 + k * 0.12), d = desks[k], to = new V(d.x + 0.4, 0, d.z + 0.5), p = van0.clone().lerp(to, g - b), dir = to.clone().sub(van0); const ry = Math.atan2(-dir.z, dir.x) + (b > 0 ? Math.PI : 0); return { x: p.x, z: p.z, ry, s: f > 0.33 && f < 0.7 ? 1 : 0.001, still: g >= 1 && b <= 0 }; }, { shirt: '#3d7be0', pants: '#2b3a55', y: y0 + 0.12, carry: place(boxG, { p: [0.35, 0.95, 0], s: [0.6, 0.6, 0.6] }) }));
+    // Each desk's laptop opens and its screen lights; the dashboard tile turns green with a tick.
+    desks.forEach((d, i) => {
+      const on = (f) => win(f, 0.4 + i * 0.12, 0.43 + i * 0.12) * (1 - win(f, 0.95, 0.99));
+      moving.push({ geo: merge(part(rbox(0.5, 0.03, 0.34, 0.01), '#3a3f47', { p: [0, 0.015, 0.17] }), part(rbox(0.5, 0.34, 0.02, 0.01), '#3a3f47', { p: [0, 0.17, 0] }), part(box(0.44, 0.28, 0.01), 'A', { p: [0, 0.17, 0.012] })), pivot: [d.x, d.y + 0.75, d.z - 0.1], anim: (t) => ({ s: on(F(t)) * 0.999 + 0.001 }) });
+      const tp = onScreen(-W / 2 + 0.75 + i * 1.05, SH * 0.5);
+      moving.push({ geo: merge(part(rbox(0.8, 0.8, 0.03, 0.05), '#28c840'), place(tickGeo(0.26), { p: [0, 0, 0.04] })).applyMatrix4(new THREE.Matrix4().extractRotation(SM)), pivot: tp.toArray(), anim: (t) => ({ s: on(F(t)) * 0.999 + 0.001 }) });
+    });
+    // The dashboard's idle tiles and its progress bar.
+    for (let i = 0; i < 3; i++) out.push(merge(part(rbox(0.8, 0.8, 0.02, 0.05), '#2c3644')).applyMatrix4(new THREE.Matrix4().extractRotation(SM)).translate(...onScreen(-W / 2 + 0.75 + i * 1.05, SH * 0.5).toArray()));
+    const bp = onScreen(-W / 2 + 0.3, SH * 0.2);
+    out.push(merge(part(box(W - 0.6, 0.14, 0.02), '#2c3644', { p: [(W - 0.6) / 2, 0, 0] })).applyMatrix4(new THREE.Matrix4().extractRotation(SM)).translate(...bp.toArray()));
+    moving.push({ geo: part(box(W - 0.6, 0.14, 0.03), '#28c840', { p: [(W - 0.6) / 2, 0, 0] }).applyMatrix4(new THREE.Matrix4().extractRotation(SM)), pivot: bp.toArray(), anim: (t) => { const f = F(t); return { sx: (win(f, 0.4, 0.43) + win(f, 0.52, 0.55) + win(f, 0.64, 0.67)) / 3 * (1 - win(f, 0.95, 0.99)) * 0.999 + 0.001 }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [3.6, y0, 0.9], topAt: [WX + 1.2, y0 + WH, WZ] };
+  },
 };
