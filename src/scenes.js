@@ -124,6 +124,18 @@ const van = (body = K.white, panel = 'A') => merge(part(rbox(1.5, 0.95, 0.85, 0.
 // A crowd member (cheap: body and head), standing on y = 0.
 const fan = (shirt, skin = '#e9b98f') => merge(part(new THREE.CapsuleGeometry(0.13, 0.32, 3, 8), shirt, { p: [0, 0.38, 0] }), part(new THREE.SphereGeometry(0.12, 10, 7), skin, { p: [0, 0.75, 0] }));
 
+// A humanoid robot walking path(t) → { x, z, ry } (facing +x), like walker() but taller, in
+// white shells with brand-coloured joints. Returns 5 moving parts; base = moving.length.
+const humanoid = (base, path, { y = 0, shell = '#f4f5f6', joint = 'A', s = 1.25 } = {}) => {
+  const step = (t, k) => Math.sin(t * 5 + k) * 0.5;
+  return [
+    { geo: merge(part(rbox(0.3, 0.5, 0.42, 0.1), shell, { p: [0, 1.2, 0] }), part(rbox(0.26, 0.18, 0.36, 0.06), joint, { p: [0, 0.92, 0] }), part(rbox(0.24, 0.24, 0.24, 0.08), shell, { p: [0, 1.62, 0] }), part(rbox(0.05, 0.1, 0.2, 0.03), '#1d1f24', { p: [0.12, 1.63, 0] }), part(cyl(0.08, 0.08, 0.06, 12), joint, { p: [0, 1.25, 0.0], r: [0, 0, Math.PI / 2] }).translate(0.15, 0, 0)).scale(s, s, s),
+      pivot: [0, y, 0], anim: (t) => { const p = path(t); return { x: p.x, z: p.z, ry: p.ry, y: Math.abs(Math.sin(t * 5)) * 0.03 }; } },
+    ...[-0.11, 0.11].map((z, i) => ({ geo: merge(part(capsule(0.07, 0.36), '#c9ced6', { p: [0, -0.27, 0] }), part(rbox(0.2, 0.06, 0.12, 0.03), joint, { p: [0.04, -0.52, 0] })).scale(s, s, s), pivot: [0, 0.86 * s, z * s], parent: base, anim: (t) => ({ rz: step(t, i * Math.PI) }) })),
+    ...[-0.27, 0.27].map((z, i) => ({ geo: merge(part(cyl(0.07, 0.07, 0.1, 10), joint, { r: [Math.PI / 2, 0, 0] }), part(capsule(0.055, 0.32), '#c9ced6', { p: [0, -0.24, 0] })).scale(s, s, s), pivot: [0, 1.38 * s, z * s], parent: base, anim: (t) => ({ rz: -step(t, i * Math.PI) * 0.7 }) })),
+  ];
+};
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -914,5 +926,78 @@ export const SCENES = {
       moving.push({ geo: part(box(0.36, 0.26, 0.04), '#7cc7ff'), pivot: [x + 0.48, y0 + 0.55, z - 0.48], anim: (t) => ({ ry: Math.PI * 0.75, s: Math.floor(t * 6 + i) % 4 ? 1 : 0.85 }) });
     });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.7, y0, 3.4], topAt: [SX + SW / 2 + 0.4, y0 + 1.66, SZ + 0.3] };
+  },
+
+  // Robot lab (robotics, surgical robots, robot learning, 3D printing): machines that learn to do
+  // physical work. A humanoid walks its test loop, a robot dog trots over steps and a ramp, an arm
+  // sorts blocks while a tele-operator in a headset shows it how, and a resin printer draws a part
+  // up out of its tank.
+  'robot:0': () => {
+    const R = rand(1101), out = [], moving = [];
+    out.push(slab('#d9dde2'));
+    // Lab floor grid and the two back walls with screens.
+    if (hi()) for (let i = -4; i <= 4; i++) out.push(part(box(10.2, 0.006, 0.02), '#c3c9d0', { p: [0, y0 + 0.003, i * 1.1] }), part(box(0.02, 0.006, 10.2), '#c3c9d0', { p: [i * 1.1, y0 + 0.003, 0] }));
+    out.push(part(rbox(10.4, 2.4, 0.2, 0.04), '#eef0f2', { p: [0, y0 + 1.2, -5.1] }), part(rbox(0.2, 2.4, 10.0, 0.04), '#eef0f2', { p: [-5.1, y0 + 1.2, 0.1] }), part(box(10.4, 0.2, 0.22), 'A', { p: [0, y0 + 2.3, -5.1] }), part(box(0.22, 0.2, 10.0), 'A', { p: [-5.1, y0 + 2.3, 0.1] }));
+    [[-1.2, 0], [0.6, 0], [2.4, 0]].forEach(([x]) => out.push(part(rbox(1.5, 0.9, 0.05, 0.03), '#1d2a33', { p: [x, y0 + 1.4, -4.97] })));
+    // ---- the humanoid's loop, painted on the floor
+    const HX = 1.6, HZ = 0.6, ax = 2.3, az = 1.4;
+    for (let i = 0; i < (hi() ? 40 : 12); i++) { const a = (i / (hi() ? 40 : 12)) * TAU; out.push(part(box(0.22, 0.008, 0.06), '#f2c94c', { p: [HX + Math.cos(a) * ax, y0 + 0.005, HZ + Math.sin(a) * az], r: [0, -a - Math.PI / 2, 0] })); }
+    // ---- the dog's course: steps up, a platform, a ramp down
+    const DZ = 3.6;
+    out.push(part(rbox(0.6, 0.2, 1.0, 0.03), '#9aa1a9', { p: [-2.6, y0 + 0.1, DZ] }), part(rbox(0.6, 0.4, 1.0, 0.03), '#9aa1a9', { p: [-2.0, y0 + 0.2, DZ] }), part(rbox(1.2, 0.6, 1.0, 0.03), '#9aa1a9', { p: [-1.1, y0 + 0.3, DZ] }), part(extrude([[0, 0], [1.6, 0], [0, 0.6]], 1.0), '#aab3bc', { p: [-0.5, y0, DZ] }));
+    const ground = (x) => (x < -2.9 ? 0 : x < -2.3 ? 0.2 : x < -1.7 ? 0.4 : x < -0.5 ? 0.6 : x < 1.1 ? 0.6 * (1 - (x + 0.5) / 1.6) : 0);
+    // ---- the arm's bench: tray of blocks, bins, the operator's station
+    const AX = -3.2, AZ = -2.6;
+    out.push(part(rbox(2.6, 0.8, 1.3, 0.05), '#c9ced6', { p: [AX, y0 + 0.4, AZ] }), part(rbox(2.7, 0.06, 1.4, 0.03), '#3a3f47', { p: [AX, y0 + 0.83, AZ] }));
+    const blockC = ['#e5533d', '#3d7be0', '#f2c94c'];
+    out.push(part(rbox(0.8, 0.08, 0.6, 0.03), '#5b616b', { p: [AX - 0.8, y0 + 0.9, AZ + 0.1] }));
+    blockC.forEach((c, i) => out.push(part(rbox(0.36, 0.22, 0.36, 0.03), c, { p: [AX + 0.4 + i * 0.42, y0 + 0.97, AZ + 0.3] }), part(rbox(0.12, 0.12, 0.12, 0.02), c, { p: [AX + 0.4 + i * 0.42, y0 + 1.0, AZ + 0.3] })));
+    out.push(part(rbox(0.5, 0.75, 0.4, 0.04), '#3a3f47', { p: [AX + 0.3, y0 + 0.38, AZ + 1.3] }), part(rbox(0.9, 0.55, 0.05, 0.03), '#1d2a33', { p: [AX + 0.3, y0 + 1.1, AZ + 1.1], r: [0.2, 0, 0] }));
+    // ---- the resin printer at the back right
+    const PX = 3.6, PZ = -3.7;
+    out.push(part(rbox(1.2, 0.5, 1.2, 0.06), '#3a3f47', { p: [PX, y0 + 0.25, PZ] }), [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([sx, sz]) => part(box(0.06, 1.4, 0.06), '#f29a3a', { p: [PX + sx * 0.52, y0 + 1.2, PZ + sz * 0.52] })), part(rbox(1.1, 0.1, 1.1, 0.03), '#f29a3a', { p: [PX, y0 + 1.9, PZ] }), part(rbox(0.9, 0.12, 0.9, 0.03), '#b35a1f', { p: [PX, y0 + 0.56, PZ] }), part(box(0.1, 1.3, 0.1), K.steelDk, { p: [PX, y0 + 1.15, PZ - 0.45] }));
+    // The orange cover is see-through on the front: leave it open with a frame.
+    out.push(part(box(0.84, 0.04, 0.84), '#f29a3a', { p: [PX, y0 + 0.63, PZ] }));
+    [[4.5, 4.4], [-4.4, 1.2]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.55)));
+    out.push(part(cyl(0.3, 0.25, 0.4, 16), '#c9ced6', { p: [4.5, y0 + 0.2, 4.4] }), part(cyl(0.3, 0.25, 0.4, 16), '#c9ced6', { p: [-4.4, y0 + 0.2, 1.2] }));
+    // ---- moving parts
+    // The humanoid on its loop.
+    moving.push(...humanoid(moving.length, (t) => { const a = t * 0.32, dx = -Math.sin(a) * ax, dz = Math.cos(a) * az; return { x: HX + Math.cos(a) * ax, z: HZ + Math.sin(a) * az, ry: Math.atan2(-dz, dx) }; }, { y: y0, joint: 'A', s: 1.7 }));
+    // A second humanoid carrying a box across the back.
+    moving.push(...humanoid(moving.length, (t) => { const f = cyc(t, 12), k = f < 0.5 ? easeIO(f * 2) : 1 - easeIO((f - 0.5) * 2), x = -0.8 + k * 3.4; return { x, z: -3.6, ry: f < 0.5 ? 0 : Math.PI }; }, { y: y0, joint: 'B', s: 1.5 }));
+    moving.push({ geo: part(rbox(0.6, 0.5, 0.6, 0.04), '#c99a62'), pivot: [0, y0 + 1.6, -3.6], anim: (t) => { const f = cyc(t, 12), k = f < 0.5 ? easeIO(f * 2) : 1 - easeIO((f - 0.5) * 2); return { x: -0.8 + k * 3.4 + (f < 0.5 ? 0.5 : -0.5) }; } });
+    // The dog trots over the course and back.
+    const dogX = (t) => { const f = cyc(t, 10); return -4.3 + 5.8 * (f < 0.5 ? easeIO(f * 2) : 1 - easeIO((f - 0.5) * 2)); };
+    const dogDir = (t) => (cyc(t, 10) < 0.5 ? 0 : Math.PI);
+    const dog = moving.length;
+    moving.push({ geo: merge(part(rbox(0.9, 0.24, 0.36, 0.08), '#f2c94c'), part(rbox(0.3, 0.18, 0.3, 0.06), '#2b2f36', { p: [0.52, 0.06, 0] }), part(box(0.5, 0.05, 0.3), '#2b2f36', { p: [0, 0.14, 0] }), part(cyl(0.04, 0.04, 0.02, 8), '#62d35f', { p: [0.68, 0.06, 0.09], r: [0, 0, Math.PI / 2] })),
+      pivot: [0, y0 + 0.74, DZ], anim: (t) => { const x = dogX(t), gy = (ground(x - 0.45) + ground(x + 0.45)) / 2; return { x, y: gy + Math.abs(Math.sin(t * 9)) * 0.03, ry: dogDir(t), rz: (ground(x + 0.45) - ground(x - 0.45)) * 0.5 * (dogDir(t) ? -1 : 1), s: 1.4 }; } });
+    [[0.35, 0.2, 0], [0.35, -0.2, 1], [-0.35, 0.2, 1], [-0.35, -0.2, 0]].forEach(([x, z, ph]) => moving.push({ geo: merge(part(capsule(0.05, 0.22), '#3a3f47', { p: [0, -0.15, 0] }), part(capsule(0.04, 0.22), '#9aa1a9', { p: [0.06, -0.38, 0], r: [0, 0, 0.4] })), pivot: [x, -0.05, z], parent: dog, anim: (t) => ({ rz: Math.sin(t * 9 + ph * Math.PI) * 0.45 }) }));
+    // The arm sorts blocks from the tray into their bins.
+    const RB = new V(AX, y0 + 0.86, AZ - 0.35), L1 = 0.75, L2 = 0.7, P = 6;
+    const TRAY = new V(AX - 0.8, y0 + 1.05, AZ + 0.1);
+    const binOf = (k) => new V(AX + 0.4 + (k % 3) * 0.42, y0 + 1.05, AZ + 0.3);
+    const wrist = (t) => { const f = cyc(t, P), k = Math.floor(t / P) % 3, up = (p) => p.clone().add(new V(0, 0.4, 0)), A = TRAY, B = binOf(k);
+      const keys = [[0, up(A)], [0.15, A], [0.25, A], [0.35, up(A)], [0.6, up(B)], [0.7, B], [0.75, B], [0.85, up(B)], [1, up(A)]];
+      for (let i = 1; i < keys.length; i++) if (f <= keys[i][0]) return keys[i - 1][1].clone().lerp(keys[i][1], easeIO(win(f, keys[i - 1][0], keys[i][0])));
+      return up(A); };
+    const pose = (t) => { const w = wrist(t), dx = w.x - RB.x, dz = w.z - RB.z, j = reach2(Math.hypot(dx, dz), w.y + 0.28 - (RB.y + 0.3), L1, L2); return { yaw: Math.atan2(-dz, dx), s: j.s, e: j.e, wr: -Math.PI / 2 - j.s - j.e }; };
+    const ab = moving.length;
+    moving.push({ geo: merge(part(cyl(0.18, 0.2, 0.2, 18), K.dark, { p: [0, 0.1, 0] }), part(rbox(0.26, 0.2, 0.26, 0.06), 'A', { p: [0, 0.25, 0] })), pivot: RB.toArray(), anim: (t) => ({ ry: pose(t).yaw }) });
+    moving.push({ geo: merge(part(cyl(0.1, 0.1, 0.26, 14), K.dark, { r: [Math.PI / 2, 0, 0] }), part(rbox(L1, 0.14, 0.15, 0.06), K.white, { p: [L1 / 2, 0, 0] })), pivot: [0, 0.3, 0], parent: ab, anim: (t) => ({ rz: pose(t).s }) });
+    moving.push({ geo: merge(part(cyl(0.08, 0.08, 0.22, 12), 'A', { r: [Math.PI / 2, 0, 0] }), part(rbox(L2, 0.12, 0.13, 0.05), K.white, { p: [L2 / 2, 0, 0] })), pivot: [L1, 0, 0], parent: ab + 1, anim: (t) => ({ rz: pose(t).e }) });
+    moving.push({ geo: merge(part(cyl(0.06, 0.06, 0.16, 10), K.dark, { r: [Math.PI / 2, 0, 0] }), part(rbox(0.16, 0.08, 0.12, 0.03), K.steelDk, { p: [0.1, 0, 0] }), [-0.05, 0.05].map((z) => part(box(0.1, 0.03, 0.03), K.steel, { p: [0.22, 0, z] }))), pivot: [L2, 0, 0], parent: ab + 2, anim: (t) => ({ rz: pose(t).wr }) });
+    for (let k = 0; k < 3; k++) moving.push({ geo: part(rbox(0.12, 0.12, 0.12, 0.02), blockC[k]), pivot: [0, 0, 0], anim: (t) => {
+      const f = cyc(t, P), cur = Math.floor(t / P) % 3, held = cur === k && f > 0.25 && f < 0.75, w = wrist(t);
+      const p = held ? w.clone().add(new V(0, -0.06, 0)) : cur === k && f <= 0.25 ? TRAY.clone().add(new V(0, -0.06, 0)) : binOf(k).add(new V(0, -0.08, 0));
+      return { x: p.x, y: p.y, z: p.z, s: cur === k || (cur + 2) % 3 === k ? 1 : (f < 0.1 ? 1 - f * 10 : 0.001) };
+    } });
+    // The tele-operator in a headset, mirroring the arm.
+    moving.push(...walker(moving.length, () => ({ x: AX + 0.3, z: AZ + 1.75, ry: Math.PI / 2, still: true }), { shirt: K.dark, pants: '#2b3a55', y: y0, carry: part(rbox(0.12, 0.1, 0.26, 0.03), '#1d1f24', { p: [0.1, 1.58, 0] }) }));
+    // The printer: the build plate rises from the tank as the part grows beneath it.
+    const PP = 8;
+    moving.push({ geo: merge(part(rbox(0.6, 0.06, 0.6, 0.02), K.steel), part(box(0.08, 0.1, 0.5), K.steelDk, { p: [0, 0.08, -0.3] })), pivot: [PX, y0 + 0.66, PZ], anim: (t) => ({ y: easeIO(win(cyc(t, PP), 0.05, 0.85)) * 0.9 }) });
+    moving.push({ geo: part(lathe([[0, 0], [0.18, 0.02], [0.08, 0.3], [0.2, 0.6], [0, 0.62]], 16), '#f29a3a', { r: [Math.PI, 0, 0] }), pivot: [PX, y0 + 0.63, PZ], anim: (t) => { const k = easeIO(win(cyc(t, PP), 0.05, 0.85)); return { y: k * 0.9, sy: Math.max(0.001, Math.min(1, k * 1.5)), s: cyc(t, PP) > 0.97 ? 0.001 : 1 }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [3.6, y0, 3.2], topAt: [PX, y0 + 1.9, PZ] };
   },
 };
