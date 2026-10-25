@@ -56,7 +56,8 @@
   "homedepot": "Built by the pros",
   "netflix": "Made for streaming",
   "starbucks": "The third place",
-  "visa": "The network"
+  "visa": "The network",
+  "chevron": "Barrels from the Permian"
  },
  "bank": [
   "Bank of America",
@@ -215,7 +216,6 @@
   "Whoop"
  ],
  "oil": [
-  "Chevron",
   "Phillips 66",
   "Valero Energy",
   "Marathon Petroleum",
@@ -1284,7 +1284,6 @@
   "EnLink Midstream": 2,
   "NGL Energy Partners": 2,
   "Global Partners": 2,
-  "Chevron": 2,
   "Exxon Mobil": 0,
   "Halliburton": 0,
   "National Oilwell Varco": 0,
@@ -1561,5 +1560,8 @@
  ],
  "visa": [
   "Visa"
+ ],
+ "chevron": [
+  "Chevron"
  ]
 }

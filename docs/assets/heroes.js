@@ -1685,5 +1685,66 @@ export const HEROES = {
     moving.push({ geo: merge(part(rbox(1.2, 0.22, 0.38, 0.08), '#c0392b', { p: [0, 0.11, 0] }), part(box(0.7, 0.18, 0.3), '#3d6ea8', { p: [-0.1, 0.3, 0] }), part(rbox(0.22, 0.32, 0.3, 0.04), '#f4f5f6', { p: [-0.48, 0.38, 0] })), pivot: [0, y0 + 0.05, 0], anim: (t) => { const f = cyc(t, 20), x = -4.6 + f * 9.2; return { x, z: 0.9 + Math.sin(f * 6) * 0.15, ry: 0, s: Math.min(1, f / 0.05, (1 - f) / 0.05) + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Chevron: barrels from the Permian, cheap to find and quick to pump. The block is cut open to
+  // show the rock: a rig's well turns sideways along the shale and oil climbs it; pumpjacks nod,
+  // a tanker truck runs to the tank farm, and cars fill up under the chevrons.
+  chevron: { finder: '#0054a4', build: () => {
+    const R = rand(71), out = [], BLUE = '#0054a4', RED = '#e51937';
+    // ---- the cut-away block of rock; the desert sits on top
+    const layers = [['#8a6a4a', 0.32], ['#cfc6b4', 0.3], ['#4a3d34', 0.34], ['#e0c08a', 0.3], ['#c9a26b', 0.3]];
+    let yb = 0;
+    const layerY = [];
+    for (const [c, h] of layers) { out.push(part(box(10.4, h, 10.4), c, { p: [0, yb + h / 2, 0] })); layerY.push(yb + h / 2); yb += h; }
+    const y0 = yb;
+    out.push(part(rbox(10.42, 0.06, 10.42, 0.02), '#d9b77e', { p: [0, y0 - 0.02, 0] }));
+    if (hi()) for (let i = 0; i < 26; i++) { const x = (R() - 0.5) * 9.6, z = (R() - 0.5) * 9.6; out.push(part(ball(0.12 + R() * 0.1), shade('#8f9a5a', 0.8 + R() * 0.4), { p: [x, y0 + 0.06, z], s: [1, 0.6, 1] })); }
+    // Flecks in the shale, and the oil-bearing seam.
+    if (hi()) for (let i = 0; i < 40; i++) { const onX = i % 2, u = (R() - 0.5) * 10; out.push(part(box(0.18, 0.02, 0.02), '#2a221c', onX ? { p: [5.21, layerY[2] + (R() - 0.5) * 0.25, u], r: [0, Math.PI / 2, 0] } : { p: [u, layerY[2] + (R() - 0.5) * 0.25, 5.21] })); }
+    // ---- the drilling rig at the front edge, with its well drawn on the cut face
+    const DX = -1.8, DZ = 4.2;
+    out.push(part(rbox(1.8, 0.3, 1.4, 0.04), '#5b616b', { p: [DX, y0 + 0.15, DZ] }));
+    const H = 3.4;
+    for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) out.push(beam([DX + sx * 0.55, y0 + 0.3, DZ + sz * 0.45], [DX + sx * 0.12, y0 + 0.3 + H, DZ + sz * 0.1], 0.04, '#e9ecef'));
+    for (let j = 1; j < 7; j++) { const k = j / 7, w = 0.55 - 0.43 * k, d = 0.45 - 0.35 * k, y = y0 + 0.3 + H * k; out.push(part(box(w * 2, 0.03, 0.03), '#e9ecef', { p: [DX, y, DZ + d] }), part(box(w * 2, 0.03, 0.03), '#e9ecef', { p: [DX, y, DZ - d] }), part(box(0.03, 0.03, d * 2), '#e9ecef', { p: [DX - w, y, DZ] }), part(box(0.03, 0.03, d * 2), '#e9ecef', { p: [DX + w, y, DZ] })); }
+    out.push(part(rbox(0.4, 0.2, 0.36, 0.04), '#e9ecef', { p: [DX, y0 + 0.3 + H + 0.1, DZ] }), part(rbox(0.8, 0.5, 0.6, 0.05), BLUE, { p: [DX + 1.3, y0 + 0.55, DZ - 0.2] }));
+    const well = curve([[DX, y0, 5.22], [DX, layerY[3], 5.22], [DX + 0.15, layerY[2] + 0.05, 5.22], [DX + 1.2, layerY[2], 5.22], [DX + 4.6, layerY[2], 5.22], [DX + 6.4, layerY[2] - 0.02, 5.22]]);
+    out.push(part(tubeOn(well, 0.05, hi() ? 80 : 20), '#2b2f36'));
+    for (let i = 0; i < 7; i++) { const x = DX + 1.6 + i * 0.65; out.push(beam([x, layerY[2], 5.22], [x + 0.1, layerY[2] + 0.12, 5.22], 0.012, '#f2c94c'), beam([x, layerY[2], 5.22], [x - 0.08, layerY[2] - 0.13, 5.22], 0.012, '#f2c94c')); }
+    // ---- the tank farm and a pipeline
+    [[3.4, -3.6, 0.8], [1.6, -3.9, 0.65], [3.8, -1.7, 0.6]].forEach(([x, z, r]) => out.push(part(cyl(r, r, 0.9, 32), '#eef0f2', { p: [x, y0 + 0.45, z] }), part(lathe([[r, 0], [r * 0.6, 0.12], [0, 0.16]], 32), '#dfe3e8', { p: [x, y0 + 0.9, z] }), part(box(r * 0.5, 0.18, 0.02), BLUE, { p: [x, y0 + 0.55, z + r] })));
+    out.push(part(tube([[-3.4, y0 + 0.15, -1.6], [-1.0, y0 + 0.15, -2.6], [1.6, y0 + 0.15, -3.2]], 0.07), '#7b828c'));
+    // ---- the Chevron station
+    const GX = 2.6, GZ = 2.0;
+    out.push(part(rbox(3.0, 0.08, 2.4, 0.03), '#9aa1a9', { p: [GX, y0 + 0.04, GZ] }), part(rbox(2.8, 0.22, 1.7, 0.05), '#f4f5f6', { p: [GX, y0 + 1.6, GZ] }));
+    out.push(part(box(2.82, 0.08, 1.72), BLUE, { p: [GX, y0 + 1.53, GZ] }), part(box(2.82, 0.06, 1.72), RED, { p: [GX, y0 + 1.46, GZ] }));
+    for (const x of [-0.8, 0.8]) out.push(part(cyl(0.07, 0.07, 1.45, 12), '#c9ced6', { p: [GX + x, y0 + 0.73, GZ] }), part(rbox(0.32, 0.6, 0.22, 0.05), '#f4f5f6', { p: [GX + x, y0 + 0.38, GZ + 0.2] }), part(box(0.2, 0.15, 0.01), '#2a3c50', { p: [GX + x, y0 + 0.5, GZ + 0.31] }));
+    // The chevron sign on its pole.
+    out.push(part(cyl(0.06, 0.06, 2.6, 12), '#c9ced6', { p: [GX + 1.9, y0 + 1.3, GZ + 1.2] }), part(rbox(0.9, 0.9, 0.08, 0.06), '#f4f5f6', { p: [GX + 1.9, y0 + 2.6, GZ + 1.2], r: [0, Math.PI / 4, 0] }));
+    const chev = (c, y) => part(extrude([[-0.35, 0], [0, -0.16], [0.35, 0], [0.35, 0.12], [0, -0.04], [-0.35, 0.12]], 0.04), c, { p: [GX + 1.9 + 0.035, y, GZ + 1.2 + 0.035], r: [0, Math.PI / 4, 0] });
+    out.push(chev(BLUE, y0 + 2.75), chev(RED, y0 + 2.5));
+    // ---- moving parts
+    const moving = [];
+    // Pumpjacks: the beam rocks on its post, the crank and weights turn.
+    const jack = (x, z, ry, ph) => {
+      out.push(part(rbox(1.6, 0.12, 0.5, 0.03), '#5b616b', { p: [x, y0 + 0.06, z], r: [0, ry, 0] }));
+      const c = Math.cos(ry), s = Math.sin(ry), at = (u, h) => [x + u * c, y0 + h, z - u * s];
+      out.push(beam(at(0.0, 0.1), at(0.1, 1.0), 0.04, '#3a3f47'), beam(at(0.0, 0.1), at(-0.15, 1.0), 0.04, '#3a3f47'), beam(at(0.25, 0.1), at(0.0, 1.0), 0.04, '#3a3f47'), part(rbox(0.3, 0.3, 0.3, 0.04), '#3a3f47', { p: at(-0.55, 0.3) }));
+      const beamI = moving.length;
+      moving.push({ geo: merge(part(box(1.5, 0.12, 0.12), '#2b2f36'), part(extrude([[0, -0.25], [0.2, -0.2], [0.26, 0.05], [0.1, 0.14], [0, 0.12]], 0.16), BLUE, { p: [0.72, 0, 0] })), pivot: at(0, 1.05), anim: (t) => ({ ry, rz: Math.sin(t * 1.8 + ph) * 0.25 }) });
+      moving.push({ geo: merge(part(box(0.5, 0.08, 0.04), '#e51937', { p: [0, 0, 0.12] }), part(box(0.5, 0.08, 0.04), '#e51937', { p: [0, 0, -0.12] }), part(rbox(0.22, 0.3, 0.06, 0.03), '#3a3f47', { p: [-0.22, 0, 0.14] }), part(rbox(0.22, 0.3, 0.06, 0.03), '#3a3f47', { p: [-0.22, 0, -0.14] })), pivot: at(-0.55, 0.45), anim: (t) => ({ ry, rz: -(t * 1.8 + ph) }) });
+      return beamI;
+    };
+    jack(-3.6, 1.6, 0.4, 0); jack(-3.2, -2.6, -0.3, 1.7); jack(0.4, -0.4, 0.9, 3.1);
+    // The drill turning in the derrick, and the oil climbing the well.
+    moving.push({ geo: merge(part(cyl(0.05, 0.05, H - 0.4, 10), '#c9ced6', { p: [0, (H - 0.4) / 2, 0] }), part(rbox(0.22, 0.22, 0.22, 0.04), '#f2c94c', { p: [0, H - 0.6, 0] })), pivot: [DX, y0 + 0.3, DZ], anim: (t) => ({ ry: t * 4 }) });
+    for (let k = 0; k < 9; k++) moving.push({ geo: part(ball(0.08), '#ffb000'), pivot: [0, 0, 0], anim: (t) => { const u = 1 - cyc(t, 4.5, k / 9), p = well.getPointAt(u); return { x: p.x, y: p.y, z: p.z + 0.03 }; } });
+    // A tanker truck shuttling to the tank farm.
+    moving.push({ geo: merge(part(rbox(0.8, 0.8, 0.95, 0.1), BLUE, { p: [1.3, 0.6, 0] }), part(box(0.04, 0.32, 0.8), '#26323f', { p: [1.71, 0.8, 0] }), part(cyl(0.42, 0.42, 1.9, 24), '#e9ecef', { p: [-0.2, 0.75, 0], r: [0, 0, Math.PI / 2] }), part(box(1.9, 0.08, 0.9), '#3a3f47', { p: [-0.2, 0.3, 0] }),
+      [[-0.9, 0.45], [-0.4, 0.45], [1.3, 0.45], [-0.9, -0.45], [-0.4, -0.45], [1.3, -0.45]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.14, 14), '#1d1f24', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] }))),
+      pivot: [0, y0, -0.9], anim: (t) => { const f = cyc(t, 12), x = -4.0 + 6.4 * (easeIO(win(f, 0, 0.4)) - easeIO(win(f, 0.55, 0.95))); return { x, ry: f < 0.5 ? 0 : Math.PI }; } });
+    // A car filling up at the station.
+    moving.push({ geo: sedan('#c0392b'), pivot: [GX - 0.0, y0 + 0.08, GZ + 0.85], anim: (t) => { const f = cyc(t, 10), x = f < 0.3 ? -4 * (1 - easeOut(f / 0.3)) : f < 0.7 ? 0 : 4 * easeIn(win(f, 0.7, 0.95)); return { x, s: clamp01((2.9 - Math.abs(x)) / 0.5) + 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
