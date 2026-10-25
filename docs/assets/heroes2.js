@@ -211,4 +211,44 @@ export const HEROES2 = {
     moving.push({ geo: house2('#fbf3e3', '#a35a3c', NAVY), pivot: [HX, y0, HZ], anim: (t) => { const f = cyc(t, P); return f < 0.55 ? { s: 0.001 } : { sy: easeOut(win(f, 0.55, 0.7)) * Math.min(1, (1 - f) / 0.04) + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Moody's: no bond sells without a grade. Bonds from a city, a company and a country ride the
+  // line under the press, come out stamped with their rating, and go on to the investors who
+  // wait for it; the scale stands over everything.
+  moodys: { finder: '#0a2f7a', build: () => {
+    const R = rand(108), out = [], BLUE = '#0a2f7a';
+    out.push(ground('#8fc66f'));
+    // ---- the line along x, with the press in the middle
+    const LZ = 0.6, slots = [3.8, 1.9, 0, -1.9, -3.8];
+    out.push(part(rbox(9.4, 0.5, 1.0, 0.05), '#5b616b', { p: [0, y0 + 0.25, LZ] }), part(box(9.3, 0.04, 0.9), '#2b2f36', { p: [0, y0 + 0.52, LZ] }));
+    if (hi()) for (let x = -4.5; x <= 4.5; x += 0.3) out.push(part(new THREE.CylinderGeometry(0.04, 0.04, 0.92, 8), '#9aa1a9', { p: [x, y0 + 0.5, LZ], r: [Math.PI / 2, 0, 0] }));
+    [-0.75, 0.75].forEach((dx) => out.push(part(rbox(0.25, 2.6, 1.3, 0.04), BLUE, { p: [dx, y0 + 1.3, LZ] })));
+    out.push(part(rbox(1.8, 0.5, 1.4, 0.05), BLUE, { p: [0, y0 + 2.75, LZ] }), place(pixText("MOODY'S", 0.05, K.white, 0.02), { p: [0, y0 + 2.75, LZ + 0.71] }));
+    // ---- the issuers, behind the start of the line: a city hall, a company and a country's flag
+    out.push(part(rbox(1.6, 1.0, 1.1, 0.04), '#efe9dc', { p: [1.5, y0 + 0.5, -2.6] }), part(cyl(0.3, 0.35, 0.3, 20), '#efe9dc', { p: [1.5, y0 + 1.15, -2.6] }), part(new THREE.SphereGeometry(0.34, 20, 10, 0, TAU, 0, Math.PI / 2), '#9fb7c9', { p: [1.5, y0 + 1.3, -2.6] }), [0, 1, 2, 3].map((i) => part(cyl(0.05, 0.05, 0.8, 8), K.white, { p: [1.05 + i * 0.3, y0 + 0.4, -1.98] })));
+    out.push(place(block(1.3, 2.2, 1.1, '#e3e6ea', '#5b7fa6', 0.3), { p: [3.5, y0, -2.3] }), part(box(1.32, 0.3, 1.12), '#e5533d', { p: [3.5, y0 + 2.05, -2.3] }), part(cyl(0.04, 0.04, 2.6, 8), '#c9ced6', { p: [3.9, y0 + 1.3, -4.2] }), part(box(0.8, 0.5, 0.02), (x) => (x < 4.26 ? '#2f9e6e' : x < 4.53 ? K.white : '#e5533d'), { p: [4.4, y0 + 2.3, -4.2] }));
+    out.push(part(rbox(1.2, 0.08, 0.35, 0.03), K.wood, { p: [2.6, y0 + 0.4, 3.0] }), [-0.5, 0.5].map((dx) => part(box(0.06, 0.4, 0.3), K.dark, { p: [2.6 + dx, y0 + 0.2, 3.0] })));
+    // ---- the rating scale, back left: a board of grades with a pointer
+    const SX = -3.4, SZ = -3.3, grades = [['AAA', '#2f9e6e'], ['AA', '#5fae5b'], ['A', '#9bc53d'], ['BAA', '#f2c94c'], ['BA', '#f29a3a'], ['B', '#e5533d']];
+    out.push(part(rbox(2.2, 4.2, 0.25, 0.06), '#f4f5f6', { p: [SX, y0 + 2.3, SZ], r: [0, Math.PI / 4, 0] }), part(rbox(0.6, 0.2, 0.6, 0.04), '#c9ced6', { p: [SX, y0 + 0.1, SZ] }));
+    grades.forEach(([g, c], i) => { const y = y0 + 3.9 - i * 0.62; out.push(place(merge(part(rbox(1.6, 0.48, 0.06, 0.04), c), pixText(g, 0.07, K.white, 0.03).translate(0, 0, 0.04)), { p: [SX + 0.1, y, SZ + 0.1], r: [0, Math.PI / 4, 0] })); });
+    // ---- the investors, front left
+    [[-3.4, 2.2, '#3d7be0'], [-2.7, 2.5, '#e5533d'], [-3.9, 2.9, '#2f9e6e'], [-3.1, 3.2, '#8a6cf0'], [-2.3, 3.1, '#f29a3a'], [-1.6, 2.4, '#d6336c'], [-2.0, 3.8, '#3fb8a8']].forEach(([x, z, c]) => out.push(place(fan(c), { p: [x, y0, z], s: 1.5 })));
+    out.push(part(rbox(1.5, 1.1, 1.2, 0.05), '#c9ced6', { p: [-4.3, y0 + 0.55, 1.9] }), part(cyl(0.38, 0.38, 0.08, 24), '#9aa1a9', { p: [-4.3, y0 + 0.6, 2.52], r: [Math.PI / 2, 0, 0] }), part(torus(0.38, 0.05, TAU, 24), K.gold, { p: [-4.3, y0 + 0.6, 2.56] }));
+    trees(R, [[4.7, 2.2], [-0.6, -4.6], [0.6, 3.8], [4.4, 4.4], [-4.6, 4.6], [1.8, 4.6], [-1.0, -2.4]]);
+    // ---- moving parts
+    const moving = [], T = 2.4;
+    // The press ram stamps once every step, while the line is still.
+    moving.push({ geo: merge(part(cyl(0.12, 0.12, 1.4, 14), '#c9ced6', { p: [0, 0.7, 0] }), part(rbox(1.0, 0.25, 0.8, 0.05), BLUE)), pivot: [0, y0 + 1.15, LZ], anim: (t) => { const u = cyc(t, T); return { y: -bump(u, 0.65, 0.07) * 0.45 }; } });
+    // Bonds step along the line: unrated on the right, stamped from the press on.
+    grades.slice(0, 5).forEach(([g, c], i) => {
+      const st = (t) => { const s = t / T + i, n = ((Math.floor(s) % 5) + 5) % 5, u = s - Math.floor(s); return { n, u, x: 3.8 - 1.9 * (n + easeIO(clamp01(u / 0.4))) }; };
+      const bond = moving.length;
+      moving.push({ geo: merge(part(rbox(1.4, 0.06, 0.85, 0.02), '#fbf3e3'), part(box(1.3, 0.065, 0.04), '#c99a62', { p: [0, 0, 0.36] }), part(box(1.3, 0.065, 0.04), '#c99a62', { p: [0, 0, -0.36] }), [0, 1, 2].map((k) => part(box(0.5, 0.068, 0.04), '#b9b4aa', { p: [-0.35, 0, -0.18 + k * 0.12] }))),
+        pivot: [0, y0 + 0.58, LZ], anim: (t) => { const s = st(t); return { x: s.x, s: s.n === 4 ? Math.max(0.001, 1 - win(s.u, 0, 0.4)) : s.n === 0 ? Math.min(1, win(s.u, 0.4, 0.7) + 0.001) : 1 }; } });
+      moving.push({ geo: merge(part(rbox(0.8, 0.08, 0.46, 0.04), c), pixText(g, 0.07, K.white, 0.04).rotateX(-Math.PI / 2).translate(0, 0.05, 0)), pivot: [0.25, 0.05, 0.05], parent: bond, anim: (t) => { const s = st(t); return s.n >= 2 || (s.n === 1 && s.u > 0.66) ? { ry: 0.3 } : { s: 0.001 }; } });
+    });
+    // The pointer on the scale picks out each grade as it is stamped.
+    moving.push({ geo: part(cone(0.16, 0.36, 3), '#1d1f24', { r: [0, 0, -Math.PI / 2] }), pivot: [SX - 0.53, 0, SZ + 0.81], anim: (t) => { const s = t / T, i = (((1 - Math.floor(s - 0.66)) % 5) + 5) % 5; return { y: y0 + 3.9 - i * 0.62, ry: Math.PI / 4 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

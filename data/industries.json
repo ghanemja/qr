@@ -95,7 +95,8 @@
   "citigroup": "A global network: money for the world's companies moves on Citi's own rails",
   "morganstanley": "Wealth that stays: families' savings, guided by an advisor, compounding",
   "capitalone": "A bank run on data, with its own payments network",
-  "usbancorp": "Main Street deposits in, loans back out to build homes"
+  "usbancorp": "Main Street deposits in, loans back out to build homes",
+  "moodys": "No bond sells without a grade: every issue passes under Moody's stamp"
  },
  "bank": [
   "PNC Financial Services",
@@ -1665,5 +1666,8 @@
  ],
  "usbancorp": [
   "U.S. Bancorp"
+ ],
+ "moodys": [
+  "Moody's"
  ]
 }
