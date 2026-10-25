@@ -136,7 +136,8 @@
   "marriott": "Thirty brands, one membership: every stay builds the Bonvoy card",
   "southwest": "One kind of plane, point to point, turned around fast",
   "lasvegassands": "The integrated resort: Marina Bay Sands and its SkyPark",
-  "mgm": "The Strip's biggest landlord, and BetMGM in every pocket"
+  "mgm": "The Strip's biggest landlord, and BetMGM in every pocket",
+  "caesars": "One rewards card across a whole Strip of casinos"
  },
  "bank": [
   "PNC Financial Services",
@@ -441,7 +442,6 @@
   "Hilton Worldwide Holdings"
  ],
  "casino": [
-  "Caesars Entertainment",
   "Wynn Resorts"
  ],
  "rocket": [
@@ -1774,5 +1774,8 @@
  ],
  "mgm": [
   "MGM Resorts International"
+ ],
+ "caesars": [
+  "Caesars Entertainment"
  ]
 }

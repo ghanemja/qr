@@ -1643,4 +1643,38 @@ export const HEROES2 = {
     moving.push({ geo: place(sedan('#e5533d'), { s: 0.75 }), pivot: [0, y0, 1.5], anim: (t) => { const x = 5.6 - cyc(t, 10, 0.5) * 11.2; return { x, ry: Math.PI, s: clamp01((5.0 - Math.abs(x)) / 0.5) + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Caesars Entertainment: one rewards card across a whole Strip of casinos. The fountains play
+  // in front of Caesars Palace, and points from Harrah's, the Flamingo and Horseshoe all land on
+  // the same Caesars Rewards card.
+  caesars: { finder: '#a6894b', build: () => {
+    const R = rand(149), out = [], GOLD = '#a6894b', MARBLE = '#efe9dc';
+    out.push(ground('#8fc66f'), part(box(10.2, 0.03, 1.2), '#5b616b', { p: [0, y0 + 0.015, 3.9] }));
+    // ---- Caesars Palace, back left: a curved tower with gold trim and a colonnade
+    const CX = -2.4, CZ = -3.2;
+    out.push(part(new THREE.CylinderGeometry(2.6, 2.6, 4.6, hi() ? 40 : 14, 1, false, Math.PI * 0.1, Math.PI * 0.55), MARBLE, { p: [CX - 1.4, y0 + 2.3, CZ - 0.2] }));
+    for (let y = 0.6; y < 4.5; y += 0.38) out.push(part(new THREE.CylinderGeometry(2.62, 2.62, 0.08, hi() ? 40 : 14, 1, true, Math.PI * 0.1, Math.PI * 0.55), '#7a9cb8', { p: [CX - 1.4, y0 + y, CZ - 0.2] }));
+    out.push(part(new THREE.CylinderGeometry(2.64, 2.64, 0.3, hi() ? 40 : 14, 1, true, Math.PI * 0.1, Math.PI * 0.55), GOLD, { p: [CX - 1.4, y0 + 4.5, CZ - 0.2] }));
+    for (let k = 0; k < 8; k++) out.push(part(cyl(0.12, 0.14, 1.4, 16), K.white, { p: [-4.4 + k * 0.6, y0 + 0.7, -0.9] }));
+    out.push(part(rbox(5.0, 0.3, 0.6, 0.04), MARBLE, { p: [-2.3, y0 + 1.55, -0.9] }), place(pixText("CAESARS", 0.08, GOLD, 0.03), { p: [-2.3, y0 + 1.55, -0.58] }));
+    // ---- the fountain pool in front, with a statue
+    const FX = -1.6, FZ = 1.4;
+    out.push(part(cyl(1.8, 1.9, 0.3, 40), MARBLE, { p: [FX, y0 + 0.15, FZ] }), part(cyl(1.65, 1.65, 0.05, 40), 'W', { p: [FX, y0 + 0.29, FZ] }), part(cyl(0.3, 0.4, 0.8, 16), MARBLE, { p: [FX, y0 + 0.6, FZ] }), part(capsule(0.18, 0.5), K.white, { p: [FX, y0 + 1.35, FZ] }), part(ball(0.13), K.white, { p: [FX, y0 + 1.8, FZ] }));
+    // ---- the sister casinos, right: Harrah's, the Flamingo (pink), Horseshoe
+    const sis = [[3.4, -3.4, '#8a1538', "HARRAH'S"], [3.8, -0.4, '#f39ab8', 'FLAMINGO'], [3.0, 2.4, '#1d3557', 'HORSESHOE']];
+    sis.forEach(([x, z, c, n]) => out.push(place(block(1.8, 2.0, 1.4, '#f4efe6', shade(c, 1.2), 0.32), { p: [x, y0, z] }), part(box(1.84, 0.35, 1.44), c, { p: [x, y0 + 1.85, z] }), place(pixText(n, 0.04, K.white, 0.02), { p: [x, y0 + 1.85, z + 0.73] })));
+    out.push(trees(R, [[0.6, -4.6], [-4.6, 2.6], [0.8, 2.4], [-4.4, 4.4]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 8;
+    // The fountain jets.
+    for (let k = 0; k < 8; k++) { const a = k * TAU / 8; moving.push({ geo: part(cyl(0.05, 0.1, 1.0, 8), '#d6f0fb', { p: [0, 0.5, 0] }), pivot: [FX + Math.cos(a) * 1.2, y0 + 0.3, FZ + Math.sin(a) * 1.2], anim: (t) => ({ sy: 0.6 + Math.max(0, Math.sin(t * 2 + k * 0.8)) * 1.2, rx: Math.sin(a) * 0.3, rz: -Math.cos(a) * 0.3 }) }); }
+    // The rewards card, turning on its stand by the road.
+    const card = merge(part(rbox(1.5, 0.95, 0.06, 0.1), '#1d1f24'), part(box(1.5, 0.15, 0.07), GOLD, { p: [0, 0.2, 0] }), pixText('REWARDS', 0.045, GOLD, 0.08).translate(0, -0.15, 0), part(rbox(0.25, 0.18, 0.08, 0.03), K.gold, { p: [-0.5, 0.0, 0] }));
+    out.push(part(cyl(0.06, 0.06, 1.4, 8), '#9aa1a9', { p: [0.8, y0 + 0.7, 0.2] }));
+    moving.push({ geo: card, pivot: [0.8, y0 + 1.9, 0.2], anim: (t) => ({ ry: Math.PI / 4 + Math.sin(t * 0.9) * 0.5 }) });
+    // Points from every casino onto the one card.
+    [...sis.map(([x, z]) => [x, z]), [CX, CZ + 1.4]].forEach(([x, z], i) => moving.push(rider(merge(part(cyl(0.15, 0.15, 0.05, 16), GOLD, { r: [Math.PI / 2, 0, 0] }), part(cyl(0.09, 0.09, 0.055, 12), K.white, { r: [Math.PI / 2, 0, 0] })), curve([[x, y0 + 2.2, z + 0.8], [(x + 0.8) / 2, y0 + 3.4, (z + 0.2) / 2], [0.8, y0 + 2.0, 0.2]]), P / 2, i / 4, 0, 0.8, (t) => ({ ry: t * 4 }))));
+    // Cars along the Strip.
+    moving.push({ geo: place(sedan('#f4f5f6'), { s: 0.7 }), pivot: [0, y0, 3.7], anim: (t) => { const x = -5.6 + cyc(t, 9) * 11.2; return { x, s: clamp01((5.0 - Math.abs(x)) / 0.5) + 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
