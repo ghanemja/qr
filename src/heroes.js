@@ -1,7 +1,7 @@
 // Signature models for the biggest names: each one shows the thing that put the company where it
 // is (its moat), not just what it sells. Built with the same kit as the kinds of company, about
 // 10 units tall at the origin; each is its own kind in models.js, with a finder colour and label.
-import { THREE, V, part, windy, rand, taper, leafShape, shade, tuft, merge, place, box, cyl, lathe, tube, ball, capsule, cone, torus, extrude, prism, beam, ring, hi, TAU, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, K } from './kit.js';
+import { THREE, V, part, windy, rand, taper, leafShape, shade, tuft, merge, place, box, cyl, lathe, tube, ball, capsule, cone, torus, extrude, prism, beam, ring, hi, TAU, clamp01, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, K } from './kit.js';
 import { RoundedBoxGeometry } from './RoundedBoxGeometry.js';
 
 // A box with a chosen corner radius (the kit's boxes pick a modest one themselves).
@@ -953,29 +953,59 @@ export const HEROES = {
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 
-  // Tesla: electric cars that refuel at their own network. The car charges at a Supercharger,
-  // the battery fills, and it glides away and back.
+  // Tesla: electric cars that fuel on their own network, powered by its own energy business. Under
+  // a solar canopy, cars charge at a row of Superchargers, their charge bars filling; one drives in,
+  // charges and glides away; Megapacks stand by and a Cybertruck is parked out front.
   tesla: { finder: '#cc0000', build: () => {
-    const car = merge(
-      part(lathe([[0, -2.4], [0.5, -2.35], [0.7, -2.1], [0.78, -1], [0.8, 0.6], [0.72, 1.8], [0.5, 2.3], [0, 2.4]], hi() ? 40 : 14).rotateZ(Math.PI / 2).scale(1, 0.7, 1.35), '#cc0000', { p: [0, 0.95, 0] }),
-      part(ball(1), '#1e2a36', { p: [-0.25, 1.45, 0], s: [1.55, 0.55, 0.95] }),
-      [[-1.45, 0.92], [1.45, 0.92], [-1.45, -0.92], [1.45, -0.92]].flatMap(([x, z]) => [part(cyl(0.48, 0.48, 0.32, 24), K.ink, { p: [x, 0.48, z], r: [Math.PI / 2, 0, 0] }), part(cyl(0.3, 0.3, 0.34, 20), '#c9ced6', { p: [x, 0.48, z], r: [Math.PI / 2, 0, 0] })]),
-      part(box(0.05, 0.12, 0.9), '#d9d9d9', { p: [2.38, 0.95, 0] }), part(box(0.05, 0.14, 1.4), '#8a1010', { p: [-2.38, 1.05, 0] }));
-    const drive = (t) => { const f = cyc(t, 8); return f < 0.55 ? 0 : 4.5 * easeIO(win(f, 0.55, 0.75)) * (1 - easeIO(win(f, 0.8, 1))); };
-    const charge = (t) => { const f = cyc(t, 8); return f < 0.5 ? win(f, 0.03, 0.48) : f < 0.8 ? 1 - win(f, 0.55, 0.8) * 0.4 : 0.6 - win(f, 0.8, 1) * 0.6; };
-    return {
-      bare: true, move: () => ({}),
-      geo: merge(part(box(10, 0.16, 7), '#3a3f47', { p: [0, 0.08, 0] }), part(box(5.6, 0.02, 0.15), K.white, { p: [0.4, 0.17, 1.9] }), part(box(5.6, 0.02, 0.15), K.white, { p: [0.4, 0.17, -1.9] }),
-        part(rbox(1, 4.6, 0.8, 0.45), '#f4f5f6', { p: [-3.4, 2.4, -2.6] }), part(rbox(1.04, 1.2, 0.84, 0.4), '#cc0000', { p: [-3.4, 4.1, -2.6] }), part(rbox(0.6, 0.8, 0.06, 0.1), '#1e2a36', { p: [-3.4, 2.9, -2.18] }),
-        // Battery gauge beside the stall.
-        part(rbox(0.9, 4.4, 0.4, 0.15), '#2b2f36', { p: [-4.4, 2.4, 0.4] }), part(rbox(0.74, 4.1, 0.05, 0.1), '#11161c', { p: [-4.4, 2.4, 0.62] })),
-      moving: [
-        { geo: car, pivot: [-0.6, 0.16, 0], anim: (t) => ({ x: drive(t), y: Math.abs(Math.sin(t * 9)) * 0.02 * Math.min(1, drive(t)), s: 1.35 }) },
-        { geo: part(tube([[0, 0, 0], [0.6, -0.8, 0.6], [1.3, -1.2, 1.4], [1.3, -1.6, 2.2]], 0.09), K.ink), pivot: [-3.3, 2.6, -2.2], anim: (t) => ({ s: drive(t) < 0.05 ? 1 : 0 }) },
-        { geo: part(rbox(0.56, 1, 0.08, 0.06), '#5fd08f', { p: [0, 0.5, 0] }), pivot: [-4.4, 0.5, 0.66], anim: (t) => ({ sy: Math.max(0.02, charge(t)) * 3.8 }) },
-        { geo: merge(part(extrude([[0.1, 0.5], [-0.25, -0.05], [0.02, -0.05], [-0.1, -0.5], [0.25, 0.05], [-0.02, 0.05]], 0.12), K.yellow)), pivot: [-4.4, 5.1, 0.4], anim: (t) => ({ s: charge(t) < 0.99 && drive(t) < 0.05 ? 1 + Math.sin(t * 8) * 0.15 : 0, ry: t * 2 }) },
-      ],
+    const R = rand(97), out = [], y0 = 0.24, RED = '#cc0000';
+    // A car from its side silhouette, extruded and bevelled; nose along +x, 0.9 wide.
+    const sideShape = (pts) => { const sh = new THREE.Shape(); sh.moveTo(...pts[0]); for (let i = 1; i < pts.length; i += 2) sh.quadraticCurveTo(...pts[i], ...pts[i + 1]); return sh; };
+    const carGeo = (paint) => {
+      const body = new THREE.ExtrudeGeometry(sideShape([[-1.15, 0.18], [-1.2, 0.18], [-1.2, 0.35], [-1.22, 0.55], [-1.05, 0.62], [-0.5, 0.95], [0.05, 0.98], [0.55, 0.95], [0.85, 0.65], [1.15, 0.58], [1.2, 0.42], [1.22, 0.18], [1.15, 0.18], [0, 0.18], [-1.15, 0.18]]), { depth: 0.82, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.06, bevelSegments: hi() ? 4 : 1, curveSegments: hi() ? 10 : 3 }).translate(0, 0, -0.41);
+      const glass = new THREE.ExtrudeGeometry(sideShape([[-0.95, 0.66], [-0.6, 0.66], [-0.45, 0.9], [0.05, 0.93], [0.5, 0.9], [0.62, 0.72], [0.75, 0.64], [0, 0.64], [-0.95, 0.66]]), { depth: 0.8, bevelEnabled: true, bevelThickness: 0.04, bevelSize: 0.03, bevelSegments: hi() ? 3 : 1, curveSegments: hi() ? 8 : 3 }).translate(0, 0.02, -0.4);
+      return merge(part(body, paint), part(glass, '#1e2a36'), part(box(0.02, 0.05, 0.75), '#e8f4ff', { p: [1.24, 0.5, 0] }), part(box(0.02, 0.06, 0.82), '#d1101a', { p: [-1.25, 0.52, 0] }),
+        [[0.78, 0.47], [-0.72, 0.47], [0.78, -0.47], [-0.72, -0.47]].flatMap(([x, z]) => [part(cyl(0.2, 0.2, 0.14, 24), '#1d1f24', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] }), part(cyl(0.13, 0.13, 0.15, 20), '#b9bec6', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] }), ring(5, (a) => part(box(0.03, 0.2, 0.02), '#5b616b', { p: [x, 0.2, z + Math.sign(z) * 0.08], r: [0, 0, a] }))]));
     };
+    const cyber = merge(part(extrude([[-1.4, 0.25], [1.45, 0.25], [1.5, 0.5], [1.3, 0.72], [-0.1, 1.15], [-1.45, 0.82]], 1.0), '#c9ced6'), part(extrude([[-0.75, 0.85], [-0.1, 1.08], [0.9, 0.78], [-0.75, 0.78]], 1.02), '#1e2a36'),
+      part(box(0.02, 0.04, 0.95), '#e8f4ff', { p: [1.49, 0.62, 0] }), part(box(0.02, 0.04, 0.95), '#d1101a', { p: [-1.46, 0.78, 0] }),
+      [[0.95, 0.5], [-0.95, 0.5], [0.95, -0.5], [-0.95, -0.5]].flatMap(([x, z]) => [part(cyl(0.27, 0.27, 0.2, 18), '#1d1f24', { p: [x, 0.27, z], r: [Math.PI / 2, 0, 0] }), part(cyl(0.16, 0.16, 0.21, 6), '#7d8792', { p: [x, 0.27, z], r: [Math.PI / 2, 0, 0] })]));
+    // ---- the lot
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#4b5059', { p: [0, 0.12, 0] }));
+    for (let i = 0; i < 5; i++) out.push(part(box(0.05, 0.012, 2.3), '#e9e6df', { p: [-3.6 + i * 1.6, y0 + 0.006, -1.2] }));
+    out.push(part(box(9.6, 0.012, 0.06), '#e9e6df', { p: [0, y0 + 0.006, 0.2] }), part(rbox(0.7, 0.18, 9.8, 0.06), '#c9c4b8', { p: [4.95, y0 + 0.09, 0] }), part(box(0.5, 0.1, 9.6), '#6aa84f', { p: [4.95, y0 + 0.16, 0] }));
+    [-3.8, -0.4, 3.2].forEach((z) => out.push(miniTree(R, 4.95, y0 + 0.2, z, 0.8)));
+    // ---- the solar canopy and the stalls
+    const stalls = [-2.8, -1.2, 0.4, 2.0];
+    [-3.7, 2.9].forEach((x) => out.push(part(box(0.14, 2.7, 0.14), '#c9ced6', { p: [x, y0 + 1.35, -3.6] }), part(box(0.1, 0.1, 1.6), '#c9ced6', { p: [x, y0 + 2.62, -2.9] })));
+    out.push(part(rbox(7.4, 0.12, 2.0, 0.04), '#e9ecef', { p: [-0.4, y0 + 2.75, -2.85] }));
+    for (let i = 0; i < 8; i++) for (let j = 0; j < 2; j++) out.push(part(box(0.86, 0.03, 0.88), '#1f3550', { p: [-3.85 + i * 0.92, y0 + 2.83, -3.3 + j * 0.93] }), part(box(0.86, 0.032, 0.02), '#5b7aa0', { p: [-3.85 + i * 0.92, y0 + 2.83, -3.3 + j * 0.93] }));
+    stalls.forEach((x) => out.push(part(rbox(0.32, 1.4, 0.22, 0.12), '#f4f5f6', { p: [x, y0 + 0.7, -2.95] }), part(rbox(0.33, 0.32, 0.23, 0.12), RED, { p: [x, y0 + 1.3, -2.95] }), part(rbox(0.18, 0.05, 0.05, 0.02), '#1d1f24', { p: [x, y0 + 0.9, -2.83] }), part(box(0.5, 0.06, 0.4), '#3a3f47', { p: [x, y0 + 0.03, -2.95] })));
+    // Megapacks humming beside the canopy.
+    [-4.4, -3.7].forEach((z, k) => { out.push(part(rbox(1.6, 1.3, 0.62, 0.05), '#f4f5f6', { p: [-3.4 + k * 0.0, y0 + 0.65, 3.6 + k * 0.75] })); for (let v = 0; v < 6; v++) out.push(part(box(0.18, 1.1, 0.01), '#d6d9dd', { p: [-3.95 + v * 0.22, y0 + 0.65, 3.92 + k * 0.75] })); });
+    out.push(part(rbox(0.6, 0.9, 0.5, 0.05), '#d6d9dd', { p: [-1.9, y0 + 0.45, 4.1] }));
+    // Parked cars charging, with their cables.
+    const parked = [[stalls[0], '#f4f5f6'], [stalls[2], RED], [stalls[3], '#1d1f24']];
+    parked.forEach(([x, paint]) => { out.push(place(carGeo(paint), { p: [x, y0, -1.3], r: [0, Math.PI / 2, 0] })); out.push(part(tube([[x, y0 + 0.9, -2.83], [x + 0.15, y0 + 0.6, -2.55], [x + 0.35, y0 + 0.5, -2.35], [x + 0.42, y0 + 0.55, -2.25]], 0.035), '#1d1f24')); });
+    out.push(part(rbox(0.5, 2.2, 0.16, 0.06), '#f4f5f6', { p: [3.9, y0 + 1.1, 4.3] }), part(extrude([[-0.16, 0.12], [0.16, 0.12], [0.14, 0.06], [0.03, 0.06], [0.03, -0.2], [-0.03, -0.2], [-0.03, 0.06], [-0.14, 0.06]], 0.04), RED, { p: [3.9, y0 + 1.75, 4.37], s: 1.1 }));
+    out.push(place(cyber, { p: [1.6, y0, 2.2], r: [0, -0.3, 0], s: 0.95 }));
+    // ---- moving parts
+    const charge = (i) => (t) => 0.25 + 0.75 * cyc(t, 9 + i * 2, i * 0.3);
+    const moving = [
+      // Charge bars over each charging car, and their glowing ports.
+      ...parked.flatMap(([x], i) => [
+        { geo: part(rbox(1.2, 0.2, 0.06, 0.06), '#2b2f36'), pivot: [x, y0 + 1.75, -1.3], anim: () => ({ ry: Math.PI / 4 }) },
+        { geo: part(rbox(1.12, 0.14, 0.08, 0.05), '#3ddc84', { p: [0.56, 0, 0] }), pivot: [x - 0.396, y0 + 1.75, -1.3 + 0.396], anim: (t) => ({ ry: Math.PI / 4, sx: charge(i)(t) }) },
+        { geo: part(ball(0.06), '#3ddc84'), pivot: [x + 0.42, y0 + 0.56, -2.25], anim: (t) => ({ s: 0.8 + Math.max(0, Math.sin(t * 4 + i)) * 0.6 }) },
+      ]),
+      { geo: part(rbox(1.2, 0.2, 0.06, 0.06), '#2b2f36'), pivot: [stalls[1], y0 + 1.75, -1.3], anim: (t) => { const f = cyc(t, 12); return f > 0.24 && f < 0.68 ? { ry: Math.PI / 4 } : { s: 0.001 }; } },
+      // A car arrives at the free stall, charges, and glides away.
+      { geo: carGeo('#3d6ea8'), pivot: [stalls[1], y0, -1.3], anim: (t) => { const f = cyc(t, 12), z = f < 0.22 ? (1 - easeOut(win(f, 0, 0.22))) * 6.4 : easeIn(win(f, 0.7, 0.92)) * 6.4; return { z, ry: Math.PI / 2, s: clamp01((6.3 - z) / 0.6) || 0.001 }; } },
+      { geo: part(tube([[0, 0, 0], [0.15, -0.3, 0.28], [0.35, -0.4, 0.48], [0.42, -0.35, 0.58]], 0.035), '#1d1f24'), pivot: [stalls[1], y0 + 0.9, -2.83], anim: (t) => { const f = cyc(t, 12); return { s: f > 0.24 && f < 0.68 ? 1 : 0.001 }; } },
+      { geo: part(rbox(1.12, 0.14, 0.08, 0.05), '#3ddc84', { p: [0.56, 0, 0] }), pivot: [stalls[1] - 0.396, y0 + 1.75, -1.3 + 0.396], anim: (t) => { const f = cyc(t, 12); return f > 0.24 && f < 0.68 ? { ry: Math.PI / 4, sx: 0.15 + 0.85 * win(f, 0.24, 0.66) } : { s: 0.001 }; } },
+      // The Megapacks' cooling fans.
+      ...[0, 1].map((k) => ({ geo: merge(part(cyl(0.22, 0.22, 0.04, 20), '#9aa1a9'), ring(5, (a) => part(box(0.18, 0.015, 0.06), '#5b616b', { p: [Math.cos(a) * 0.1, 0.03, Math.sin(a) * 0.1], r: [0.3, -a, 0] }))), pivot: [-3.4, y0 + 1.33, 3.6 + k * 0.75], anim: (t) => ({ ry: t * 9 }) })),
+    ];
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 
   // Disney: storytelling magic. The castle, with fireworks blooming over its spires.
