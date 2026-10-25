@@ -1,7 +1,7 @@
 // Signature models for the biggest names: each one shows the thing that put the company where it
 // is (its moat), not just what it sells. Built with the same kit as the kinds of company, about
 // 10 units tall at the origin; each is its own kind in models.js, with a finder colour and label.
-import { THREE, V, part, windy, rand, taper, leafShape, shade, tuft, merge, place, box, cyl, lathe, tube, ball, capsule, cone, torus, extrude, beam, ring, hi, TAU, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, K } from './kit.js';
+import { THREE, V, part, windy, rand, taper, leafShape, shade, tuft, merge, place, box, cyl, lathe, tube, ball, capsule, cone, torus, extrude, prism, beam, ring, hi, TAU, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, K } from './kit.js';
 import { RoundedBoxGeometry } from './RoundedBoxGeometry.js';
 
 // A box with a chosen corner radius (the kit's boxes pick a modest one themselves).
@@ -888,28 +888,69 @@ export const HEROES = {
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 
-  // Ford: the moving assembly line it invented. Bodies ride the line; a robot welds, a cab drops
-  // on, the wheels go on, and a finished truck rolls off.
+  // Ford: industrial scale, from the moving assembly line it pioneered. In the plant, F-150s move
+  // down the line: a bare frame, the cab lowered on by the hoist, through the paint booth, wheels
+  // fitted by robot arms, and off; a Model T stands by the door and the Blue Oval on the wall.
   ford: { finder: '#003478', build: () => {
-    const truck = (stage) => merge(part(rbox(3.2, 0.5, 1.5, 0.12), '#3a3f47', { p: [0, 0.55, 0] }),
-      stage >= 1 ? [part(rbox(1.4, 1.2, 1.5, 0.25), '#003478', { p: [0.55, 1.4, 0] }), part(box(1.42, 0.5, 1.3), '#9dd0f2', { p: [0.65, 1.7, 0] }), part(rbox(1.7, 0.6, 1.5, 0.12), '#003478', { p: [-0.85, 1.05, 0] }), part(rbox(0.9, 0.55, 1.45, 0.15), '#003478', { p: [1.4, 1.05, 0] })] : [],
-      stage >= 2 ? [[-1, 0.8], [1.05, 0.8], [-1, -0.8], [1.05, -0.8]].map(([x, z]) => part(cyl(0.38, 0.38, 0.3, 18), K.ink, { p: [x, 0.4, z], r: [Math.PI / 2, 0, 0] })) : []);
-    const line = (i) => (t) => { const f = cyc(t, 7.5, i / 3), x = -5 + f * 10; return { x, s: f < 0.04 ? f / 0.04 : f > 0.95 ? (1 - f) / 0.05 : 1 }; };
-    const stageOf = (x) => (x < -1.5 ? 0 : x < 1.6 ? 1 : 2);
-    return {
-      bare: true, move: () => ({}),
-      geo: merge(part(box(10, 0.16, 6), '#cfd4da', { p: [0, 0.08, 0] }), part(rbox(10, 0.7, 2.2, 0.2), '#3a3f47', { p: [0, 0.5, 0] }), ring(10, (a, i) => part(box(0.06, 0.02, 2.1), '#5b6470', { p: [-4.5 + i, 0.86, 0] })),
-        part(box(0.3, 5.2, 0.3), '#7d8792', { p: [-1.6, 2.6, -1.7] }), part(box(0.3, 5.2, 0.3), '#7d8792', { p: [-1.6, 2.6, 1.7] }), part(box(0.4, 0.4, 3.8), '#7d8792', { p: [-1.6, 5.2, 0] }),
-        part(cyl(0.7, 0.8, 0.5, 24), '#f29a3a', { p: [1.6, 0.25, -2.2] }), part(rbox(5.4, 1.4, 0.2, 0.1), '#003478', { p: [0.4, 4.5, -2.9] }), part(cyl(0.65, 0.65, 0.22, 40), K.white, { p: [0.4, 4.5, -2.75], r: [Math.PI / 2, 0, 0], s: [1.6, 1, 1] }), part(cyl(0.6, 0.6, 0.24, 40), '#003478', { p: [0.4, 4.5, -2.74], r: [Math.PI / 2, 0, 0], s: [1.55, 1, 1] })),
-      moving: [
-        // Three trucks on the line, each shown at the stage it has reached.
-        ...[0, 1, 2].flatMap((i) => [0, 1, 2].map((st) => ({ geo: truck(st), pivot: [0, 0.85, 0], anim: (t) => { const p = line(i)(t); return stageOf(p.x) === st ? p : { s: 0 }; } }))),
-        // The robot arm at the welding station.
-        { geo: merge(part(cyl(0.35, 0.35, 1.6, 16), '#f29a3a', { p: [0, 0.8, 0] }), part(ball(0.36), '#3a3f47', { p: [0, 1.6, 0] })), pivot: [1.6, 0.5, -2.2], anim: (t) => ({ ry: Math.sin(t * 1.4) * 0.5 }) },
-        { geo: merge(beam([0, 0, 0], [0, 1.6, 1], 0.32, '#f29a3a'), part(ball(0.3), '#3a3f47', { p: [0, 1.6, 1] }), beam([0, 1.6, 1], [0, 1.2, 2.2], 0.24, '#f29a3a'), part(cone(0.15, 0.4, 12), K.steel, { p: [0, 1.05, 2.4], r: [Math.PI * 0.8, 0, 0] })), pivot: [0, 1.6, 0], parent: 9, anim: (t) => ({ rx: Math.sin(t * 2.8) * 0.2 }) },
-        ...Array.from({ length: 6 }, (_, i) => ({ geo: part(box(0.12, 0.12, 0.12), i % 2 ? K.yellow : K.orange), pivot: [1.6, 2.2, 0.2], anim: (t) => { const f = cyc(t, 0.7, i / 6), a = i * 2.3; return { x: Math.cos(a) * f * 1.4, z: Math.sin(a) * f * 1.4, y: f * 1.4 - 3 * f * f, s: (1 - f) * (Math.sin(t * 2.8) > 0 ? 1 : 0) }; } })),
-      ],
-    };
+    const out = [], y0 = 0.24, BLUE = '#003478', lineY = y0 + 0.55, XS = [-4.6, -2.3, 0.0, 2.1, 4.8];
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#c9ccd0', { p: [0, 0.12, 0] }));
+    for (let i = -4; i <= 4; i++) out.push(part(box(0.02, 0.01, 10), '#b9bdc2', { p: [i * 1.15, y0 + 0.005, 0] }));
+    out.push(part(box(10, 0.012, 0.1), K.yellow, { p: [0, y0 + 0.01, 1.4] }), part(box(10, 0.012, 0.1), K.yellow, { p: [0, y0 + 0.01, -1.4] }));
+    // ---- the plant: back and side walls, a sawtooth skylight roof over the back half
+    out.push(part(box(10.4, 4.6, 0.25), '#c9b8a0', { p: [0, y0 + 2.3, -5.05] }), part(box(0.25, 4.6, 10.4), '#c9b8a0', { p: [-5.05, y0 + 2.3, 0] }));
+    for (let y = 0.3; y < 4.4; y += 0.22) out.push(part(box(10.4, 0.02, 0.27), '#b5a38a', { p: [0, y0 + y, -5.05] }), part(box(0.27, 0.02, 10.4), '#b5a38a', { p: [-5.05, y0 + y, 0] }));
+    for (let k = 0; k < 6; k++) { const x = -4.4 + k * 1.75; out.push(part(prism(1.75, 0.9, 3.4), '#9aa1a9', { p: [x, y0 + 4.6, -3.3], r: [0, Math.PI / 2, 0] }), part(box(0.04, 0.9, 3.4), '#9fc3d8', { p: [x - 0.85, y0 + 5.05, -3.3], r: [0, 0, 0.2] })); }
+    for (let x = -4.6; x < 5; x += 1.75) out.push(beam([x, y0, -1.7], [x, y0 + 4.6, -1.7], 0.12, '#5b616b'), beam([x, y0 + 4.6, -1.7], [x, y0 + 4.6, -5.0], 0.1, '#5b616b'));
+    // The Blue Oval on the back wall.
+    // The Blue Oval on the side wall, facing the floor.
+    out.push(place(merge(part(cyl(0.95, 0.95, 0.12, 48), K.white, { r: [Math.PI / 2, 0, 0], s: [1.8, 1, 1] }), part(cyl(0.85, 0.85, 0.14, 48), BLUE, { p: [0, 0, 0.02], r: [Math.PI / 2, 0, 0], s: [1.8, 1, 1] }),
+      part(tube([[-0.9, -0.05, 0.1], [-0.4, 0.15, 0.1], [0.2, -0.15, 0.1], [0.9, 0.1, 0.1]], 0.07), K.white)), { p: [-4.86, y0 + 3.0, 0.2], r: [0, Math.PI / 2, 0] }));
+    // ---- the line: a slat conveyor on legs
+    out.push(part(rbox(10, 0.3, 2.0, 0.06), '#3a3f47', { p: [0, lineY - 0.15, 0] }));
+    for (let x = -4.9; x < 5; x += 0.25) out.push(part(box(0.2, 0.02, 1.9), '#5b616b', { p: [x, lineY + 0.01, 0] }));
+    for (let x = -4.4; x < 5; x += 1.4) [-0.8, 0.8].forEach((z) => out.push(part(box(0.1, lineY - y0 - 0.3, 0.1), '#2b2f36', { p: [x, (lineY + y0 - 0.3) / 2, z] })));
+    // Station 2: the body-drop hoist gantry.
+    [-0.95, 0.95].forEach((z) => out.push(part(box(0.15, 3.6, 0.15), K.yellow, { p: [XS[1] + 0.6, y0 + 1.8, z] }), part(box(0.15, 3.6, 0.15), K.yellow, { p: [XS[1] - 0.6, y0 + 1.8, z] })));
+    out.push(part(box(1.4, 0.2, 2.1), K.yellow, { p: [XS[1], y0 + 3.6, 0] }));
+    // Station 3: the paint booth.
+    out.push(part(box(1.6, 2.6, 0.12), '#e9ecef', { p: [XS[2] + 0.4, y0 + 1.3, -1.05] }), part(box(1.6, 0.25, 2.2), '#e9ecef', { p: [XS[2] + 0.4, y0 + 2.6, 0] }), part(box(1.62, 0.1, 2.22), '#3d7be0', { p: [XS[2] + 0.4, y0 + 2.5, 0] }));
+    for (let k = 0; k < 3; k++) out.push(part(box(0.1, 0.1, 0.1), '#5b616b', { p: [XS[2] - 0.1 + k * 0.5, y0 + 2.4, -0.98] }));
+    [XS[2] - 0.4, XS[2] + 1.2].forEach((x) => [-1.05, 1.05].forEach((z) => out.push(part(box(0.14, 2.6, 0.14), '#3d7be0', { p: [x, y0 + 1.3, z] }))));
+    // Station 4: robot arm bases.
+    [-1.3, 1.3].forEach((z) => out.push(part(cyl(0.35, 0.42, 0.4, 20), '#f29a3a', { p: [XS[3], y0 + 0.2, z] })));
+    // ---- a Model T on its pedestal by the door
+    const T = [3.6, 3.4];
+    out.push(part(rbox(2.6, 0.4, 1.6, 0.06), '#5b616b', { p: [T[0], y0 + 0.2, T[1]] }), part(rbox(0.6, 0.35, 0.05, 0.03), K.gold, { p: [T[0], y0 + 0.25, T[1] + 0.83] }));
+    const ty = y0 + 0.4;
+    out.push(part(rbox(1.0, 0.45, 0.8, 0.08), '#1d1f24', { p: [T[0] + 0.55, ty + 0.75, T[1]] }), part(rbox(0.8, 0.7, 0.85, 0.06), '#1d1f24', { p: [T[0] - 0.35, ty + 0.95, T[1]] }), part(box(0.85, 0.06, 0.95), '#1d1f24', { p: [T[0] - 0.35, ty + 1.62, T[1]] }),
+      [[-0.75, 0.42], [-0.75, -0.42], [0.05, 0.42], [0.05, -0.42]].map(([dx, dz]) => beam([T[0] - 0.35 + dx * 0.5 + (dx < -0.5 ? 0.0 : 0), ty + 1.3, T[1] + dz], [T[0] - 0.35 + dx * 0.5, ty + 1.6, T[1] + dz], 0.03, '#1d1f24')),
+      part(box(0.1, 0.4, 0.75), '#2c3e55', { p: [T[0] + 0.05, ty + 1.3, T[1]] }), part(box(1.9, 0.06, 0.3), '#1d1f24', { p: [T[0], ty + 0.45, T[1] + 0.55] }), part(box(1.9, 0.06, 0.3), '#1d1f24', { p: [T[0], ty + 0.45, T[1] - 0.55] }),
+      [[-0.75, 0.48], [0.75, 0.48], [-0.75, -0.48], [0.75, -0.48]].flatMap(([dx, dz]) => [part(torus(0.34, 0.05, TAU, 24), '#1d1f24', { p: [T[0] + dx, ty + 0.36, T[1] + dz] }), ring(8, (a) => part(box(0.03, 0.6, 0.03), '#c9a227', { p: [T[0] + dx, ty + 0.36, T[1] + dz], r: [0, 0, a] }))]),
+      part(cyl(0.08, 0.08, 0.06, 12), '#f2e6b8', { p: [T[0] + 1.06, ty + 0.85, T[1] + 0.3], r: [0, 0, Math.PI / 2] }), part(cyl(0.08, 0.08, 0.06, 12), '#f2e6b8', { p: [T[0] + 1.06, ty + 0.85, T[1] - 0.3], r: [0, 0, Math.PI / 2] }));
+    // ---- the F-150, built up in stages
+    const frame = merge([-0.42, 0.42].map((z) => part(box(4.0, 0.14, 0.12), '#2b2f36', { p: [0, 0.35, z] })), [-1.3, 0, 1.3].map((x) => part(box(0.1, 0.1, 0.9), '#2b2f36', { p: [x, 0.35, 0] })), [-1.25, 1.25].map((x) => part(cyl(0.06, 0.06, 1.6, 10), '#5b616b', { p: [x, 0.42, 0], r: [Math.PI / 2, 0, 0] })));
+    const bodyOf = (c, cd) => merge(part(rbox(1.5, 0.6, 1.6, 0.12), c, { p: [1.25, 0.8, 0] }), part(rbox(1.5, 1.0, 1.6, 0.16), c, { p: [0.1, 1.0, 0] }), part(box(1.3, 0.42, 1.62), '#22303e', { p: [0.15, 1.28, 0] }),
+      part(rbox(1.9, 0.62, 1.6, 0.08), c, { p: [-1.65, 0.86, 0] }), part(box(1.75, 0.5, 1.4), '#2b2f36', { p: [-1.65, 0.95, 0] }), part(box(0.06, 0.4, 1.3), '#1d1f24', { p: [2.0, 0.85, 0] }), [-0.45, 0.45].map((z) => part(box(0.07, 0.12, 0.3), '#f4f5f6', { p: [2.01, 0.98, z] })), part(box(0.07, 0.06, 1.3), '#c9ced6', { p: [2.02, 0.85, 0] }),
+      [[1.25, 0.82], [-1.3, 0.82], [1.25, -0.82], [-1.3, -0.82]].map(([x, z]) => part(torus(0.38, 0.08, Math.PI, 16), cd, { p: [x, 0.62, z] })));
+    const wheels = merge([[1.25, 0.8], [-1.3, 0.8], [1.25, -0.8], [-1.3, -0.8]].flatMap(([x, z]) => [part(cyl(0.36, 0.36, 0.26, 20), '#1d1f24', { p: [x, 0.36, z], r: [Math.PI / 2, 0, 0] }), part(cyl(0.2, 0.2, 0.27, 16), '#c9ced6', { p: [x, 0.36, z], r: [Math.PI / 2, 0, 0] })]));
+    const stageGeos = [frame, merge(frame, bodyOf('#9aa1a9', '#7d8792')), merge(frame, bodyOf(BLUE, '#00244f')), merge(frame, bodyOf(BLUE, '#00244f'), wheels)];
+    const N = 4, period = 10, xAt = (t, i) => -5.0 + cyc(t, period, i / N) * 10.2;
+    const stageOf = (x) => (x < XS[1] + 0.1 ? 0 : x < XS[2] + 0.4 ? 1 : x < XS[3] ? 2 : 3);
+    const moving = [];
+    for (let i = 0; i < N; i++) stageGeos.forEach((g, st) => moving.push({ geo: g, pivot: [0, lineY - 0.3, 0], anim: (t) => { const x = xAt(t, i); return stageOf(x) === st ? { x, s: 0.85 * Math.min(1, (x + 5.0) / 0.4, (5.2 - x) / 0.4) } : { s: 0.001 }; } }));
+    // The hoist lowers a cab towards the line, again and again.
+    moving.push({ geo: merge(part(box(0.06, 1.0, 0.06), '#2b2f36', { p: [0, 0.5, 0] }), place(bodyOf('#9aa1a9', '#7d8792'), { p: [0, -1.3, 0], s: 0.85 })), pivot: [XS[1], y0 + 2.5, 0], anim: (t) => { const f = cyc(t, period / N, 0.5); return { y: -easeIO(win(f, 0, 0.45)) * 0.6 + easeIO(win(f, 0.55, 1)) * 0.6, s: f < 0.48 ? 1 : 0.001 }; } });
+    // Robot arms fitting wheels, and the paint spray.
+    [-1.3, 1.3].forEach((z, k) => {
+      const me = moving.length;
+      moving.push({ geo: merge(part(ball(0.28), '#3a3f47'), beam([0, 0, 0], [0, 1.1, z > 0 ? -0.5 : 0.5], 0.22, '#f29a3a'), part(ball(0.2), '#3a3f47', { p: [0, 1.1, z > 0 ? -0.5 : 0.5] })), pivot: [XS[3], y0 + 0.45, z], anim: (t) => ({ ry: Math.sin(t * 1.6 + k) * 0.5 }) });
+      moving.push({ geo: merge(beam([0, 0, 0], [0, -0.6, z > 0 ? -0.7 : 0.7], 0.16, '#f29a3a'), part(cyl(0.12, 0.12, 0.2, 12), '#5b616b', { p: [0, -0.65, z > 0 ? -0.78 : 0.78], r: [Math.PI / 2, 0, 0] })), pivot: [0, 1.1, z > 0 ? -0.5 : 0.5], parent: me, anim: (t) => ({ rx: Math.sin(t * 3.2 + k) * 0.35 }) });
+    });
+    for (let k = 0; k < (hi() ? 6 : 2); k++) moving.push({ geo: part(ball(0.12), '#7fa8e0'), pivot: [XS[2] + 0.4, y0 + 2.2, -0.9], anim: (t) => { const f = cyc(t, 0.8, k / 6); return { y: -f * 0.9, z: f * 1.2, x: (k - 2.5) * 0.15, s: (1 - f) * 1.4 }; } });
+    // A worker checks the line.
+    const wb = moving.length;
+    moving.push(...walker(wb, (t) => { const f = cyc(t, 9), x = -3.8 + 7.2 * (f < 0.5 ? f * 2 : 2 - f * 2); return { x, z: 1.85, ry: f < 0.5 ? 0 : Math.PI }; }, { shirt: '#3d7be0', pants: '#2b2f36', hair: '#f2c94c', y: y0 }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 
   // Tesla: electric cars that refuel at their own network. The car charges at a Supercharger,

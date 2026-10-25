@@ -1398,8 +1398,10 @@ export function poseMovers(nodes, t) {
     o.position.set(mv.pivot[0] + (p.x || 0), mv.pivot[1] + (p.y || 0), mv.pivot[2] + (p.z || 0));
     if (p.q) o.quaternion.copy(p.q);
     else o.rotation.set(p.rx || 0, p.ry || 0, p.rz || 0, p.order || 'XYZ');
-    const s = p.s ?? 1;
-    o.scale.set(Math.max(1e-3, p.sx ?? s), Math.max(1e-3, p.sy ?? s), Math.max(1e-3, p.sz ?? s));
+    const s = p.s ?? 1, sx = p.sx ?? s, sy = p.sy ?? s, sz = p.sz ?? s;
+    o.scale.set(Math.max(1e-3, sx), Math.max(1e-3, sy), Math.max(1e-3, sz));
+    // A part scaled away to nothing isn't drawn at all (several stages of a thing can share a spot).
+    o.visible = Math.min(sx, sy, sz) > 2e-3;
   }
 }
 // Where each moving part sits at rest, in the model's frame (for fitting and for the QR pixels).
