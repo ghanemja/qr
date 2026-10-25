@@ -131,7 +131,8 @@
   "keurigdrpepper": "The brewer in the kitchen and the pods that keep coming",
   "monster": "A brand riders wear, carried by Coca-Cola's trucks",
   "chipotle": "A fresh line that never stops, straight out to the Chipotlane",
-  "doordash": "The most dashers on the most streets"
+  "doordash": "The most dashers on the most streets",
+  "abbott": "Medicine you can wear: the sensor that reads glucose all day"
  },
  "bank": [
   "PNC Financial Services",
@@ -242,7 +243,6 @@
   "HCA Healthcare",
   "Merck",
   "AbbVie",
-  "Abbott Laboratories",
   "Bristol-Myers Squibb",
   "Amgen",
   "Gilead Sciences",
@@ -1759,5 +1759,8 @@
  ],
  "doordash": [
   "DoorDash"
+ ],
+ "abbott": [
+  "Abbott Laboratories"
  ]
 }

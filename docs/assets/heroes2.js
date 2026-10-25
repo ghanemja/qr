@@ -1491,4 +1491,36 @@ export const HEROES2 = {
     });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Abbott: medicine you can wear. The FreeStyle Libre sensor on the arm reads glucose all day
+  // and sends it to the phone, whose line draws itself as the day goes; the lab behind runs the
+  // tests the world relies on.
+  abbott: { finder: '#009cde', build: () => {
+    const R = rand(144), out = [], BLUE = '#009cde', NAVY = '#00205b';
+    out.push(ground('#8fc66f'), part(cyl(2.8, 2.8, 0.05, 48), '#e8ecef', { p: [-0.6, y0 + 0.025, 0.4] }));
+    // ---- the lab, back left
+    out.push(place(block(3.0, 2.6, 2.0, K.white, '#7fb7d8', 0.35), { p: [-3.0, y0, -3.4] }), part(box(3.04, 0.35, 2.04), NAVY, { p: [-3.0, y0 + 2.45, -3.4] }), place(pixText('ABBOTT', 0.07, K.white, 0.03), { p: [-3.0, y0 + 2.45, -2.37] }));
+    for (let k = 0; k < 5; k++) out.push(place(tubeGeo(['#e5533d', BLUE, '#f2c94c', '#2f9e6e', '#8a6cf0'][k]), { p: [-4.0 + k * 0.4, y0, -2.0], s: 1.3 }));
+    out.push(part(rbox(2.2, 0.8, 0.9, 0.04), K.white, { p: [-3.0, y0 + 0.4, -1.8] }));
+    // ---- the giant arm, resting on its stand: skin, elbow, hand, with the round sensor
+    // ---- the sensor as a monument: the round FreeStyle Libre, as big as a table, tilted to the sky
+    const AX = -0.8, AZ = 0.6, AQ = Math.PI / 4;
+    const sensor = merge(part(cyl(1.3, 1.3, 0.35, 48), K.white), part(cyl(1.1, 1.1, 0.37, 48), '#e9ecef'), part(torus(1.3, 0.06, TAU, 48), '#c9ced6', { p: [0, 0.17, 0], r: [Math.PI / 2, 0, 0] }), part(cyl(0.18, 0.18, 0.4, 20), BLUE), place(pixText('LIBRE', 0.06, '#7b828c', 0.03), { p: [0, 0.2, 0.6], r: [-Math.PI / 2, 0, 0] }));
+    out.push(part(cyl(0.6, 0.7, 0.6, 24), '#c9ced6', { p: [AX, y0 + 0.3, AZ] }), place(sensor, { p: [AX, y0 + 1.4, AZ], r: [0.7, AQ, 0, 'YXZ'] }));
+    // A wearer with the small one on her arm, checking her phone.
+    out.push(place(fan('#d6336c'), { p: [1.4, y0, 2.6], s: 1.5 }), part(cyl(0.07, 0.07, 0.03, 14), K.white, { p: [1.62, y0 + 0.95, 2.6], r: [0, 0, Math.PI / 2] }));
+    // ---- the phone, front right, with its chart frame
+    const PX = 3.0, PZ = 2.6, PQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 4, 0)), pp = (dx, dy, dz = 0.07) => { const v = new V(dx, dy, dz).applyQuaternion(PQ); return [PX + v.x, y0 + v.y, PZ + v.z]; };
+    out.push(part(rbox(1.5, 2.8, 0.14, 0.2), '#1d1f24', { p: pp(0, 1.6, 0), q: PQ }), part(rbox(1.34, 2.56, 0.02, 0.14), K.white, { p: pp(0, 1.6), q: PQ }), part(box(1.1, 0.5, 0.02), '#d9f0e0', { p: pp(0, 1.55, 0.08), q: PQ }), part(box(1.1, 0.02, 0.025), '#9aa1a9', { p: pp(0, 1.3, 0.09), q: PQ }), place(pixText('108', 0.07, NAVY, 0.03), { p: pp(-0.15, 2.4, 0.09), q: PQ }), part(rbox(0.6, 0.12, 0.6, 0.04), '#c9ced6', { p: [PX, y0 + 0.06, PZ] }));
+    out.push(trees(R, [[4.6, -4.6], [1.6, -4.6], [4.6, -1.6], [-4.6, 4.6], [-1.6, 4.6]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 8;
+    // Signal rings from the sensor to the phone.
+    const sense = [AX, y0 + 2.0, AZ];
+    for (let k = 0; k < 3; k++) moving.push({ geo: part(torus(0.5, 0.03, TAU, 32), BLUE, { r: [Math.PI / 2, 0, 0] }), pivot: sense, anim: (t) => { const u = cyc(t, 2, k / 3); return { s: 0.6 + u * 1.6, y: u * 0.3 }; } });
+    moving.push(rider(part(new THREE.SphereGeometry(0.1, 10, 8), BLUE), curve([sense, [(sense[0] + PX) / 2, y0 + 3.4, (sense[2] + PZ) / 2], pp(0, 2.0, 0.1)]), 2, 0, 0, 1));
+    // The glucose line drawing itself across the screen: dots appear left to right.
+    const N = 14, gl = (u) => 0.12 * Math.sin(u * 9) + 0.08 * Math.sin(u * 23 + 1);
+    for (let k = 0; k < N; k++) { const u = k / (N - 1); moving.push({ geo: part(new THREE.SphereGeometry(0.045, 8, 6), gl(u) > 0.13 ? '#f29a3a' : '#2f9e6e'), pivot: pp(-0.5 + u * 1.0, 1.55 + gl(u), 0.1), anim: (t) => { const f = cyc(t, P); return f > u * 0.85 && f < 0.97 ? { s: 1 } : { s: 0.001 }; } }); }
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
