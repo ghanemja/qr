@@ -110,7 +110,8 @@
   "motorolasolutions": "The radios first responders bet their lives on",
   "charter": "The cable already runs to every house on the street",
   "lowes": "Everything for the job, from the store's lumber yard to the deck in your backyard",
-  "bestbuy": "Try it in the store, and the Geek Squad sets it up at home"
+  "bestbuy": "Try it in the store, and the Geek Squad sets it up at home",
+  "tjx": "The treasure hunt: brand surplus, a new mix every day, at a fraction of the price"
  },
  "bank": [
   "PNC Financial Services",
@@ -321,7 +322,6 @@
  ],
  "retail": [
   "Albertsons",
-  "TJX",
   "Publix Super Markets",
   "Macy's",
   "Dollar General",
@@ -1181,7 +1181,6 @@
   "Kohl's": 4,
   "J.C. Penney": 4,
   "Dillard's": 4,
-  "TJX": 13,
   "Ross Stores": 13,
   "Burlington Stores": 13,
   "Gap": 14,
@@ -1708,5 +1707,8 @@
  ],
  "bestbuy": [
   "Best Buy"
+ ],
+ "tjx": [
+  "TJX"
  ]
 }

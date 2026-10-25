@@ -807,4 +807,37 @@ export const HEROES2 = {
     moving.push({ geo: merge(part(box(0.9, 0.5, 0.02), '#4fc3f7'), part(box(0.9, 0.18, 0.025), '#5fae45', { p: [0, -0.16, 0] }), part(new THREE.CircleGeometry(0.08, 12), '#ffd23f', { p: [0.25, 0.12, 0.015] })), pivot: [RX, y0 + 1.45, RZ - 1.36], anim: (t) => { const f = cyc(t, P); return f > 0.64 && f < 0.95 ? { s: Math.min(1, win(f, 0.64, 0.68)) + 0.001 } : { s: 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // TJX (T.J. Maxx): the treasure hunt. Trucks bring the brands' surplus straight from their
+  // warehouses, a different mix every day; the racks fill, the tags flip from the full price to
+  // the much lower one, and shoppers leave with their bags.
+  tjx: { finder: '#a6192e', build: () => {
+    const R = rand(123), out = [], RED = '#a6192e';
+    out.push(ground('#8fc66f'), part(rbox(6.6, 0.08, 4.4, 0.03), '#e9e2d4', { p: [-0.6, y0 + 0.04, 0.2] }));
+    // ---- the brands' warehouses, back: each in its own colour
+    const brands = ['#1d3557', '#2f9e6e', '#e5533d', '#8a6cf0'];
+    brands.forEach((c, i) => { const x = -3.8 + i * 2.3; out.push(part(rbox(1.9, 1.4, 1.4, 0.04), '#d8dde3', { p: [x, y0 + 0.7, -4.2] }), part(box(1.92, 0.3, 1.42), c, { p: [x, y0 + 1.25, -4.2] }), part(box(0.9, 0.8, 0.04), '#7b828c', { p: [x, y0 + 0.45, -3.48] })); });
+    // ---- the store floor: open cut-away walls with the sign, racks of everything
+    out.push(part(rbox(0.2, 2.0, 4.4, 0.03), '#eee6d8', { p: [-3.9, y0 + 1.0, 0.2] }), part(rbox(6.6, 2.0, 0.2, 0.03), '#eee6d8', { p: [-0.6, y0 + 1.0, -2.0] }), part(box(6.62, 0.4, 0.22), RED, { p: [-0.6, y0 + 1.8, -2.0] }), place(pixText('T.J.MAXX', 0.07, K.white, 0.03), { p: [-0.6, y0 + 1.8, -1.88] }));
+    const rackXs = [-2.8, -1.2, 0.4, 2.0];
+    rackXs.forEach((x, i) => {
+      out.push(part(cyl(0.03, 0.03, 1.2, 8), '#9aa1a9', { p: [x - 0.6, y0 + 0.6, 0.4] }), part(cyl(0.03, 0.03, 1.2, 8), '#9aa1a9', { p: [x + 0.6, y0 + 0.6, 0.4] }), part(cyl(0.025, 0.025, 1.3, 8), '#9aa1a9', { p: [x, y0 + 1.2, 0.4], r: [0, 0, Math.PI / 2] }));
+      for (let k = 0; k < 7; k++) out.push(part(rbox(0.12, 0.7, 0.45, 0.04), ['#e5533d', '#3d7be0', '#f2c94c', '#2f9e6e', '#8a6cf0', '#d6336c', '#f29a3a', '#1d3557', K.white][(i * 3 + k * 2) % 9], { p: [x - 0.48 + k * 0.16, y0 + 0.82, 0.4] }));
+    });
+    // Shelves of shoes and home goods along the back wall.
+    for (let k = 0; k < 10; k++) out.push(part(rbox(0.4, 0.3, 0.3, 0.04), brands[k % 4], { p: [-3.4 + k * 0.58, y0 + 0.3, -1.65] }), part(rbox(0.35, 0.25, 0.25, 0.04), ['#f2c94c', '#d6336c', K.white][k % 3], { p: [-3.4 + k * 0.58, y0 + 0.6, -1.65] }));
+    out.push(trees(R, [[4.6, 4.6], [-4.6, 4.6], [4.6, -1.8], [0.6, 4.6]]));
+    // ---- moving parts
+    const moving = [], P = 10;
+    // Boxes of mixed brands coming in from the warehouses, a different mix every day.
+    for (let k = 0; k < 4; k++) moving.push({ geo: merge(part(rbox(0.5, 0.4, 0.5, 0.04), brands[k], { p: [0, 0.2, 0] }), part(box(0.52, 0.06, 0.15), K.white, { p: [0, 0.4, 0] })), pivot: [0, y0, 0], anim: (t) => { const f = cyc(t, P, k / 4), u = easeIO(win(f, 0, 0.5)), x = -3.8 + k * 2.3 * 0.75, path = curve([[x, 0.1, -3.3], [x, 0.3, -2.6], [x * 0.5, 0.2, -1.2], [-1.0 + k * 0.6, 0.0, 1.4]]), p = path.getPointAt(u); return f > 0.6 ? { s: 0.001 } : { x: p.x, y: p.y, z: p.z, s: Math.min(1, f / 0.05, (0.6 - f) / 0.05) + 0.001 }; } });
+    // Tags on each rack: the full price swings down to show the lower one.
+    rackXs.forEach((x, i) => {
+      const tag = moving.length;
+      moving.push({ geo: merge(part(rbox(0.6, 0.36, 0.03, 0.04), K.white), part(box(0.5, 0.04, 0.035), '#c9ced6', { p: [0, 0.08, 0] }), part(box(0.5, 0.05, 0.04), '#e5533d', { p: [0, -0.06, 0], r: [0, 0, 0.3] })), pivot: [x, y0 + 1.65, 0.7], anim: (t) => { const f = cyc(t, P, -i * 0.12); return { s: f < 0.5 ? 1 : 0.001 }; } });
+      moving.push({ geo: merge(part(rbox(0.6, 0.36, 0.03, 0.04), RED), pixText('$' + [9, 12, 7, 15][i], 0.05, K.white, 0.04)), pivot: [x, y0 + 1.65, 0.7], anim: (t) => { const f = cyc(t, P, -i * 0.12); return f < 0.5 ? { s: 0.001 } : { s: back(win(f, 0.5, 0.58)) * Math.min(1, (1 - f) / 0.04) + 0.001 }; } });
+    });
+    // Shoppers leaving with bags.
+    [0, 0.5].forEach((o, i) => moving.push(...walker(moving.length, (t) => { const f = cyc(t, P, o), u = win(f, 0, 0.8); return { x: -1.8 + u * 5.0 + i * 0.4, z: 2.0 + u * 2.0 - i * 0.6, ry: -0.4, s: f > 0.8 ? 0.001 : Math.min(1, u / 0.05, (1 - u) / 0.05) }; }, { shirt: ['#d6336c', '#3d7be0'][i], pants: '#2b3a55', y: y0, carry: part(rbox(0.3, 0.35, 0.12, 0.03), RED, { p: [0.05, 0.75, 0.32] }) })));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
