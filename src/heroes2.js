@@ -1355,4 +1355,44 @@ export const HEROES2 = {
     moving.push({ geo: merge(part(rbox(1.6, 0.6, 0.8, 0.08), '#a33a2a', { p: [0, 0.6, 0] }), part(box(1.4, 0.06, 0.82), K.white, { p: [0, 0.95, 0] }), part(rbox(1.6, 0.06, 0.9, 0.03), '#5b3a2a', { p: [0, 1.25, 0] }), [[-0.55, 0.42], [0.55, 0.42], [-0.55, -0.42], [0.55, -0.42]].map(([x, z]) => part(new THREE.CylinderGeometry(0.18, 0.18, 0.1, 12), '#1d1f24', { p: [x, 0.18, z], r: [Math.PI / 2, 0, 0] }))), pivot: [0, y0, 3.4], anim: (t) => { const x = -5.6 + cyc(t, 12) * 11.2; return { x, s: clamp01((5.2 - Math.abs(x)) / 0.5) + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Keurig Dr Pepper: the brewer in the kitchen and the pods that keep coming, plus its own
+  // trucks for the drinks. A pod drops in, the lid closes and a mug fills; the delivery truck
+  // tops up the store's Dr Pepper cooler.
+  keurigdrpepper: { finder: '#8a1538', build: () => {
+    const R = rand(140), out = [], MAROON = '#8a1538', KG = '#2b2f36';
+    out.push(ground('#8fc66f'), part(rbox(6.4, 0.08, 5.0, 0.03), '#e9e2d4', { p: [-1.2, y0 + 0.04, -1.6] }));
+    // ---- the kitchen: two walls, the counter, a window
+    out.push(part(rbox(6.4, 2.6, 0.2, 0.03), '#f1ebe0', { p: [-1.2, y0 + 1.3, -4.2] }), part(rbox(0.2, 2.6, 5.0, 0.03), '#ebe3d4', { p: [-4.4, y0 + 1.3, -1.6] }), part(rbox(1.4, 0.9, 0.04, 0.03), '#a8d4f0', { p: [0.8, y0 + 1.8, -4.08] }));
+    out.push(part(rbox(5.6, 1.0, 1.0, 0.04), '#f4f5f6', { p: [-1.4, y0 + 0.5, -3.5] }), part(rbox(5.7, 0.08, 1.1, 0.03), '#3a3f47', { p: [-1.4, y0 + 1.04, -3.5] }));
+    // The brewer.
+    const KX = -1.6, KZ = -3.4, top = y0 + 1.08;
+    out.push(part(rbox(1.0, 1.7, 1.1, 0.12), KG, { p: [KX, top + 0.85, KZ] }), part(rbox(0.8, 0.12, 0.7, 0.04), '#1d1f24', { p: [KX, top + 0.06, KZ + 0.35] }), part(rbox(0.6, 0.3, 0.6, 0.05), '#4a4f57', { p: [KX, top + 1.2, KZ + 0.55] }), part(rbox(0.3, 0.1, 0.02, 0.02), '#4fc3f7', { p: [KX, top + 1.5, KZ + 0.56] }), part(rbox(0.9, 0.5, 0.06, 0.04), MAROON, { p: [KX, top + 0.85, KZ - 0.58] }));
+    // The pod carousel on the counter.
+    for (let k = 0; k < 8; k++) { const a = k * TAU / 8; out.push(part(cyl(0.11, 0.09, 0.14, 12), ['#6f4a2c', '#2b2f36', MAROON, '#2f9e6e'][k % 4], { p: [-3.3 + Math.cos(a) * 0.35, top + 0.35 + (k % 2) * 0.16, -3.4 + Math.sin(a) * 0.35] })); }
+    out.push(part(cyl(0.05, 0.05, 0.5, 8), '#9aa1a9', { p: [-3.3, top + 0.25, -3.4] }));
+    // ---- the store's cooler, right
+    out.push(part(rbox(1.6, 2.2, 1.0, 0.05), MAROON, { p: [3.4, y0 + 1.1, -2.4] }), part(box(1.3, 1.8, 0.04), '#cfe6f2', { p: [3.4, y0 + 1.1, -1.89] }));
+    for (let r = 0; r < 4; r++) for (let k = 0; k < 5; k++) out.push(part(cyl(0.09, 0.09, 0.3, 10), ['#8a1538', '#2f9e6e', '#e5533d', '#f2c94c'][r], { p: [3.0 + k * 0.2, y0 + 0.45 + r * 0.45, -2.2] }));
+    out.push(place(pixText('DR PEPPER', 0.04, K.white, 0.02), { p: [3.4, y0 + 2.05, -1.88] }));
+    // The kitchen island with the family's mugs, and a giant pod by the door.
+    out.push(part(rbox(2.4, 0.9, 1.0, 0.04), '#5b6b7d', { p: [-1.2, y0 + 0.45, -0.8] }), part(rbox(2.5, 0.08, 1.1, 0.03), '#e9e6df', { p: [-1.2, y0 + 0.94, -0.8] }), [-0.6, 0.2].map((dx) => part(cyl(0.15, 0.12, 0.6, 14), '#3a3f47', { p: [-1.2 + dx, y0 + 0.3, 0.0] })), place(fan('#3d7be0'), { p: [-1.6, y0, 0.3], s: 1.3 }), place(fan('#f29a3a'), { p: [-0.8, y0, 0.4], s: 1.1 }));
+    [-1.8, -1.0, -0.4].forEach((x, i) => out.push(part(cyl(0.12, 0.1, 0.22, 16), ['#e5533d', K.white, '#2f9e6e'][i], { p: [x, y0 + 1.09, -0.8] })));
+    out.push(part(lathe([[0, 0], [0.6, 0], [0.75, 1.0], [0.8, 1.0], [0.8, 1.08], [0, 1.08]], 32), '#6f4a2c', { p: [-3.4, y0, 2.6] }), part(cyl(0.82, 0.82, 0.04, 32), K.white, { p: [-3.4, y0 + 1.1, 2.6] }), part(cyl(0.3, 0.3, 0.05, 20), MAROON, { p: [-3.4, y0 + 1.13, 2.6] }));
+    out.push(trees(R, [[4.6, 4.6], [-4.6, 4.6], [1.6, 4.6], [4.6, 0.6]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 8;
+    // A pod from the carousel into the brewer.
+    moving.push(rider(part(cyl(0.11, 0.09, 0.14, 12), '#6f4a2c'), curve([[-3.3, top + 0.7, -3.4], [-2.4, top + 2.4, -3.0], [KX, top + 1.6, KZ + 0.55], [KX, top + 1.25, KZ + 0.55]]), P, 0, 0.02, 0.2));
+    // The lid closing on it.
+    moving.push({ geo: part(rbox(0.62, 0.08, 0.62, 0.03), '#4a4f57', { p: [0, 0, 0.3] }), pivot: [KX, top + 1.38, KZ + 0.25], anim: (t) => { const f = cyc(t, P); return { rx: -1.2 * (1 - easeIO(win(f, 0.2, 0.28))) * (f < 0.9 ? 1 : 0) - 1.2 * easeIO(win(f, 0.9, 1)) }; } });
+    // The coffee stream and the mug filling.
+    moving.push({ geo: part(cyl(0.03, 0.03, 0.5, 8), '#5a3221', { p: [0, -0.25, 0] }), pivot: [KX, top + 0.82, KZ + 0.45], anim: (t) => { const f = cyc(t, P); return f > 0.32 && f < 0.7 ? { sy: 1 + Math.sin(t * 30) * 0.03 } : { s: 0.001 }; } });
+    out.push(part(lathe([[0, 0], [0.18, 0], [0.2, 0.35], [0.18, 0.35], [0.16, 0.03], [0, 0.03]], 24), K.white, { p: [KX, top + 0.12, KZ + 0.45] }), part(torus(0.08, 0.025, Math.PI, 12), K.white, { p: [KX + 0.2, top + 0.3, KZ + 0.45], r: [0, 0, -Math.PI / 2] }));
+    moving.push({ geo: part(cyl(0.165, 0.165, 0.3, 20), '#5a3221', { p: [0, 0.15, 0] }), pivot: [KX, top + 0.14, KZ + 0.45], anim: (t) => { const f = cyc(t, P); return { sy: f < 0.32 ? 0.001 : Math.min(1, win(f, 0.32, 0.7)) + 0.001 }; } });
+    for (let k = 0; k < 3; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.1, 8, 6), '#f4f1ea'), pivot: [KX + (k - 1) * 0.07, top + 0.5, KZ + 0.45], anim: (t) => { const f = cyc(t, P), u = cyc(t, 1.6, k / 3); return f > 0.4 && f < 0.95 ? { y: u * 0.9, s: Math.sin(u * Math.PI) + 0.001 } : { s: 0.001 }; } });
+    // The Dr Pepper truck pulling up to the store.
+    moving.push({ geo: place(merge(part(rbox(0.8, 0.9, 0.9, 0.08), MAROON, { p: [0.9, 0.6, 0] }), part(box(0.04, 0.3, 0.75), '#26323f', { p: [1.31, 0.75, 0] }), part(rbox(1.8, 1.1, 0.95, 0.05), MAROON, { p: [-0.4, 0.75, 0] }), part(box(1.4, 0.4, 0.02), K.white, { p: [-0.4, 0.8, 0.48] }), [[-0.8, 0.45], [0.8, 0.45], [-0.8, -0.45], [0.8, -0.45]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.12, 14), '#1d1f24', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] }))), { r: [0, Math.PI / 2, 0], s: 0.8 }), pivot: [3.4, y0, 0], anim: (t) => { const f = cyc(t, P * 1.5), z = 5.8 - easeOut(win(f, 0, 0.3)) * 4.4 + easeIn(win(f, 0.65, 0.95)) * 4.4; return { z, s: clamp01((5.4 - z) / 0.6) + 0.001 }; } });
+    out.push(place(fan(MAROON), { p: [2.2, y0, -1.2], s: 1.3 }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

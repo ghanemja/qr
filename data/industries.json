@@ -127,7 +127,8 @@
   "kraftheinz": "The brands already in every pantry",
   "generalmills": "From the mill by the river to the breakfast bowl",
   "mondelez": "The snacks the world reaches for: twist, lick, dunk",
-  "hershey": "America's chocolate town: every Kiss wrapped in silver"
+  "hershey": "America's chocolate town: every Kiss wrapped in silver",
+  "keurigdrpepper": "The brewer in the kitchen and the pods that keep coming"
  },
  "bank": [
   "PNC Financial Services",
@@ -552,7 +553,6 @@
   "Aramark"
  ],
  "drink": [
-  "Keurig Dr Pepper",
   "Molson Coors Brewing",
   "Constellation Brands"
  ],
@@ -1744,5 +1744,8 @@
  ],
  "hershey": [
   "Hershey"
+ ],
+ "keurigdrpepper": [
+  "Keurig Dr Pepper"
  ]
 }
