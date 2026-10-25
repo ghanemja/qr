@@ -1575,4 +1575,37 @@ export const HEROES2 = {
     moving.push({ geo: part(box(0.05, 0.45, 0.04), RED, { p: [0, 0.2, 0] }), pivot: [CX + 0.05, y0 + 2.2, CZ + 0.05], anim: (t) => { const f = cyc(t, P); return { ry: Math.PI / 4, rz: -easeIO(win(f, 0.28, 0.68)) * TAU * 0.25 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Las Vegas Sands: the integrated resort, Marina Bay Sands. Three towers carry the SkyPark
+  // with its infinity pool; boats cross the bay below and the lotus museum opens on the shore.
+  lasvegassands: { finder: '#0b2d5b', build: () => {
+    const R = rand(147), out = [], NAVY = '#0b2d5b';
+    out.push(ground('#8fc66f'), part(box(10.2, 0.05, 4.2), 'W', { p: [0, y0 + 0.02, 3.0] }), part(box(10.2, 0.2, 0.2), '#c9c4b8', { p: [0, y0 + 0.1, 0.85] }));
+    // ---- the three towers, back, each leaning out at the base
+    const tx = [-2.6, -0.6, 1.4], TZ = -2.8, TH = 5.2;
+    tx.forEach((x) => {
+      out.push(part(extrude([[-0.9, 0], [0.4, 0], [0.4, TH], [-0.3, TH], [-0.55, TH * 0.4]], 1.4), '#dfe6ec', { p: [x, y0, TZ], r: [0, Math.PI / 2, 0] }));
+      for (let y = 0.3; y < TH - 0.1; y += 0.28) out.push(part(new THREE.BoxGeometry(1.42, 0.1, 0.02), '#7f9fbf', { p: [x, y0 + y, TZ + 0.42] }));
+    });
+    // The SkyPark: the ship along the tops with its cantilevered prow, the pool on top.
+    out.push(part(rbox(6.8, 0.35, 1.2, 0.1), '#e9ecef', { p: [-0.4, y0 + TH + 0.17, TZ] }), part(extrude([[0, 0], [1.4, 0.1], [1.4, 0.35], [0, 0.35]], 1.2), '#e9ecef', { p: [2.95, y0 + TH, TZ] }));
+    out.push(part(box(4.6, 0.06, 0.6), 'W', { p: [-0.6, y0 + TH + 0.37, TZ + 0.2] }), place(pixText('MARINA BAY SANDS', 0.04, NAVY, 0.02), { p: [-0.4, y0 + TH + 0.17, TZ + 0.62] }));
+    for (let k = 0; k < 8; k++) out.push(part(new THREE.SphereGeometry(0.12, 10, 7), '#4f8f3f', { p: [-3.2 + k * 0.75, y0 + TH + 0.48, TZ - 0.35] }));
+    // The podium mall in front of the towers.
+    out.push(part(rbox(6.4, 0.9, 1.2, 0.1), '#c9d4dc', { p: [-0.6, y0 + 0.45, -1.2] }), part(box(6.2, 0.4, 0.02), '#5d7fa3', { p: [-0.6, y0 + 0.5, -0.59] }));
+    // ---- the lotus museum on the shore, right
+    const LX = 3.6, LZ = -0.4;
+    out.push(part(cyl(0.6, 0.7, 0.4, 24), '#e9ecef', { p: [LX, y0 + 0.2, LZ] }));
+    for (let k = 0; k < 9; k++) { const a = k * TAU / 9; out.push(part(cone(0.32, 1.6, 12), K.white, { p: [LX + Math.cos(a) * 0.45, y0 + 1.0, LZ + Math.sin(a) * 0.45], r: [Math.sin(a) * 0.5, 0, -Math.cos(a) * 0.5] })); }
+    out.push(trees(R, [[-4.6, -0.2], [4.6, -2.6], [4.6, -4.6], [-4.6, -4.6]], 0.55));
+    // ---- moving parts
+    const moving = [];
+    // Swimmers on the edge of the infinity pool.
+    for (let k = 0; k < 4; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.07, 8, 6), '#e9b98f'), pivot: [-2.4 + k * 1.1, y0 + TH + 0.42, TZ + 0.25], anim: (t) => ({ x: Math.sin(t * 0.6 + k) * 0.4, y: Math.abs(Math.sin(t * 2 + k)) * 0.02 }) });
+    // Boats on the bay.
+    const boat = merge(part(rbox(1.0, 0.25, 0.45, 0.1), K.white, { p: [0, 0.12, 0] }), part(rbox(0.4, 0.25, 0.35, 0.05), '#3d7be0', { p: [-0.1, 0.35, 0] }));
+    [[2.2, 9], [3.8, 13]].forEach(([z, P], i) => moving.push({ geo: boat, pivot: [0, y0 + 0.04, z], anim: (t) => { const x = (i ? 5.6 : -5.6) + (i ? -1 : 1) * cyc(t, P) * 11.2; return { x, ry: i ? Math.PI : 0, rz: Math.sin(t * 2) * 0.04, s: clamp01((5.0 - Math.abs(x)) / 0.5) + 0.001 }; } }));
+    // Visitors along the promenade.
+    [0, 0.33, 0.66].forEach((o, i) => moving.push(...walker(moving.length, (t) => { const u = cyc(t, 14, o); return { x: -4.6 + u * 9.2, z: 0.4, ry: 0, s: Math.min(1, u / 0.05, (1 - u) / 0.05) * 0.8 }; }, { shirt: ['#e5533d', '#2f9e6e', '#f2c94c'][i], pants: '#2b3a55', y: y0 })));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

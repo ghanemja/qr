@@ -134,7 +134,8 @@
   "doordash": "The most dashers on the most streets",
   "abbott": "Medicine you can wear: the sensor that reads glucose all day",
   "marriott": "Thirty brands, one membership: every stay builds the Bonvoy card",
-  "southwest": "One kind of plane, point to point, turned around fast"
+  "southwest": "One kind of plane, point to point, turned around fast",
+  "lasvegassands": "The integrated resort: Marina Bay Sands and its SkyPark"
  },
  "bank": [
   "PNC Financial Services",
@@ -439,7 +440,6 @@
   "Hilton Worldwide Holdings"
  ],
  "casino": [
-  "Las Vegas Sands",
   "MGM Resorts International",
   "Caesars Entertainment",
   "Wynn Resorts"
@@ -1768,5 +1768,8 @@
  ],
  "southwest": [
   "Southwest Airlines"
+ ],
+ "lasvegassands": [
+  "Las Vegas Sands"
  ]
 }
