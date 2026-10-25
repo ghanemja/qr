@@ -15,15 +15,15 @@ Notes for the next session working on this repo. Live site: https://ghanemja.git
 1. **Bespoke models (done for now).** The user will post on LinkedIn next. More heroes are welcome if asked. Candidates: Citigroup, Adobe, Broadcom, Qualcomm, Dell, HP, Marriott, Micron, Databricks, Anduril, Figure AI, Zipline.
 2. **Upgrade the 137 shared shapes** to the same standard. Start with the shapes that cover the most companies, since they change the most of the map.
 3. **Advertisement video** of the coolest models, set to music "from Equalizer" (the user wants to advertise Equalizer too).
-   - **Open question:** nobody has asked the user what Equalizer is (their app or site?) or for the tracks. Ask before starting.
+   - Equalizer is the user's own music-making app: https://github.com/ghanemja/equalizer. Make the soundtrack with it (or use tracks from it) and credit/advertise it in the video.
    - **Requested finale:** stack all the models in a grid and do a camera pan, then a zoom-out over all of them.
    - **Possible approach:** a Playwright-driven headless page that renders heroes, captured frame by frame, then encoded with ffmpeg if it's available.
 4. **"Access 3D asset library" button** next to **About** in the header.
    - It should open a page where people can download the 3D models (for example GLB via three's `GLTFExporter`).
-   - Every model file must **credit the project and authors** and **embed the open-source licence**. In GLB, use `asset.copyright` and `asset.extras`, and add a LICENSE text alongside. Check the repo for a LICENSE file first; there isn't one yet, so ask the user which licence they want.
+   - Every model file must **credit the project and authors** and **embed the open-source licence**. In GLB, use `asset.copyright` and `asset.extras`, and add a LICENSE text alongside. The repo is MIT-licensed (`LICENSE`, chosen by the user); embed that text and the copyright line.
 5. **Small fixes:** tidy the Apple Watch strap; tree shadows don't sway with the leaves.
 
-**Unresolved git note:** the user said they pushed a fix for Walmart's position on the map. It is **not on `main`**. The only candidate is branch `claude/stoic-johnson-dw692f` ("Keep region-view lots fully on their piece", which touches `tools/build.mjs` and `docs/index.html`). The user hasn't yet answered whether to merge it into `main`, so ask them.
+The Walmart "falling off the edge" fix (region-view lots kept fully on their piece, `tools/build.mjs`) has been merged to `main`.
 
 ## How the models work
 
