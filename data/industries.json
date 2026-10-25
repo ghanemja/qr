@@ -117,7 +117,8 @@
   "lululemon": "A brand built on a community: the free yoga class and the run club",
   "ulta": "Every price point under one roof, and the points that bring members back",
   "dollargeneral": "The store close to everyone in rural America",
-  "dollartree": "One low price on everything, from candy to party balloons"
+  "dollartree": "One low price on everything, from candy to party balloons",
+  "autozone": "The right part today, and help fitting it in the lot"
  },
  "bank": [
   "PNC Financial Services",
@@ -345,7 +346,6 @@
   "Ascena Retail Group",
   "Dillard's",
   "Williams-Sonoma",
-  "AutoZone",
   "O'Reilly Automotive",
   "Advance Auto Parts",
   "Qurate Retail",
@@ -1196,7 +1196,6 @@
   "Tractor Supply": 6,
   "Foot Locker": 8,
   "Dick's Sporting Goods": 8,
-  "AutoZone": 10,
   "O'Reilly Automotive": 10,
   "Advance Auto Parts": 10,
   "GameStop": 12,
@@ -1724,5 +1723,8 @@
  ],
  "dollartree": [
   "Dollar Tree"
+ ],
+ "autozone": [
+  "AutoZone"
  ]
 }
