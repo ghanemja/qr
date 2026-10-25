@@ -2866,4 +2866,53 @@ export const SCENES = {
     moving.push({ geo: part(extrude([[0, -0.05], [0.33, -0.12], [1.3, -0.03], [1.3, 0.02], [0.26, 0.08], [0, 0.06]], 0.04), (X, Y) => (Math.hypot(X, Y) > 1.1 ? K.red : K.white), { r: [Math.PI / 2, Math.PI / 2, 0] }), pivot: [0, 0, 0], anim: (t) => { const f = F(t), k = lift(f), y = y0 + 0.4 + k * (NH - 0.6 - y0 - 0.4), on = f < 0.5; return { x: tipC.x - 0.65 * (1 - k), y, z: tipC.z, rz: (1 - k) * Math.PI / 2, s: on ? 1 : 0.001 }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [2.0, y0, 0.3], topAt: [SX - 0.5, y0 + 0.7, SZ - 0.3] };
   },
+
+  // Memory (memory, analog and equipment makers): every byte remembered, every signal sensed. The
+  // whole slab is a motherboard: the two giant memory sticks light up cell by cell as data is
+  // written and read; pulses race along the gold traces between them and the processor, whose fan
+  // spins; the sensor chip draws its live wave, and the phone fills with photos.
+  'chip:2': () => {
+    const R = rand(4101), out = [], moving = [];
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#1f6f4a', { p: [0, 0.12, 0] }));
+    if (hi()) for (let i = 0; i < 18; i++) { const z = -4.6 + i * 0.55, w = R() * 3 + 1; out.push(part(box(w, 0.012, 0.04), K.gold, { p: [-4.9 + w / 2 + R() * (9.8 - w), y0 + 0.006, z] })); }
+    [[-4.8, -4.8], [4.8, -4.8], [4.8, 4.8], [-4.8, 4.8]].forEach(([x, z]) => out.push(part(torus(0.18, 0.05, TAU, 20), K.gold, { p: [x, y0 + 0.01, z], r: [Math.PI / 2, 0, 0] })));
+    // ---- the memory sticks (back left), standing in their slots
+    const DX0 = -4.4, DX1 = -0.3, DH = 2.0, DW = DX1 - DX0, sticks = [-3.6, -2.5], CB = y0 + 0.36;
+    sticks.forEach((z) => {
+      out.push(part(rbox(DW + 0.4, 0.36, 0.36, 0.04), '#141619', { p: [(DX0 + DX1) / 2, y0 + 0.18, z] }), [-1, 1].map((s) => part(box(0.12, 0.42, 0.4), K.white, { p: [s > 0 ? DX1 + 0.14 : DX0 - 0.14, y0 + 0.21, z] })));
+      out.push(part(rbox(DW, DH, 0.08, 0.04), '#2a8a5a', { p: [(DX0 + DX1) / 2, CB + DH / 2, z] }), part(box(DW * 0.96, 0.14, 0.09), K.gold, { p: [(DX0 + DX1) / 2, CB + 0.08, z] }), part(rbox(DW * 0.3, 0.2, 0.1, 0.03), 'A', { p: [DX1 - DW * 0.2, CB + DH - 0.2, z] }));
+      for (let i = 0; i < 4; i++) out.push(part(rbox(0.8, 1.2, 0.1, 0.03), '#141619', { p: [DX0 + 0.55 + i * 1.0, CB + 0.95, z + 0.06] }));
+    });
+    // ---- the processor (middle right) under its heat sink and fan
+    const PX = 1.6, PZ = -1.6;
+    out.push(part(rbox(2.0, 0.2, 2.0, 0.04), '#d8dde3', { p: [PX, y0 + 0.1, PZ] }), part(rbox(1.4, 0.16, 1.4, 0.04), '#c9ced6', { p: [PX, y0 + 0.28, PZ] }));
+    for (let i = 0; i < 9; i++) out.push(part(box(0.06, 0.6, 1.4), '#b8bec6', { p: [PX - 0.6 + i * 0.15, y0 + 0.66, PZ] }));
+    out.push(part(rbox(1.5, 0.14, 1.5, 0.04), 'A', { p: [PX, y0 + 1.02, PZ] }), part(torus(0.62, 0.04, TAU, 40), '#3a3f47', { p: [PX, y0 + 1.12, PZ], r: [Math.PI / 2, 0, 0] }));
+    // Capacitors and coils (back right), the ports along the right edge.
+    for (let i = 0; i < 7; i++) { const x = 3.0 + (i % 4) * 0.6, z = -4.4 + Math.floor(i / 4) * 0.7, h = 0.6 + R() * 0.5; out.push(part(cyl(0.22, 0.22, h, 20), '#2b2f36', { p: [x, y0 + h / 2, z] }), part(cyl(0.22, 0.22, 0.04, 20), i % 2 ? 'A' : '#c9ced6', { p: [x, y0 + h + 0.02, z] })); }
+    [[4.7, -0.8, 'B'], [4.7, 0.4, '#3a3f47'], [4.7, 1.5, '#c9ced6']].forEach(([x, z, c]) => out.push(part(rbox(0.6, 0.6, 0.9, 0.04), '#9aa1a9', { p: [x, y0 + 0.3, z] }), part(box(0.05, 0.3, 0.6), c, { p: [x - 0.31, y0 + 0.35, z] })));
+    // ---- the sensor chip and its scope (front left), the phone (front right)
+    const AX = -3.0, AZ = 2.4;
+    const sq = new THREE.Quaternion().setFromAxisAngle(new V(0, 1, 0), Math.PI / 4), S0 = new V(AX - 0.9, 0, AZ - 0.9), sat = (x, y, z) => new V(x, y, z).applyQuaternion(sq).add(S0);
+    out.push(place(chipGeo(0.9), { p: [AX, y0, AZ] }), place(merge(part(rbox(2.0, 1.2, 0.12, 0.05), K.dark, { p: [0, y0 + 1.1, 0] }), part(box(1.8, 1.0, 0.02), '#0d1a12', { p: [0, y0 + 1.1, 0.07] }), part(box(0.1, 0.5, 0.1), K.steelDk, { p: [0, y0 + 0.25, 0] })), { p: [S0.x, 0, S0.z], r: [0, Math.PI / 4, 0] }));
+    const HX = 2.8, HZ = 2.6, hq = new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.15, Math.PI / 4, 0));
+    out.push(part(rbox(1.3, 2.4, 0.14, 0.14), '#24272d', { p: [HX, y0 + 1.25, HZ], q: hq }), part(rbox(0.8, 0.12, 0.6, 0.04), K.steelDk, { p: [HX - 0.1, y0 + 0.06, HZ - 0.1] }));
+    // ---- traces between the parts
+    const traces = [curve([[DX1 + 0.3, y0 + 0.03, -3.6], [0.4, y0 + 0.03, -3.0], [PX - 1.0, y0 + 0.03, PZ - 0.2]]), curve([[DX1 + 0.3, y0 + 0.03, -2.5], [0.2, y0 + 0.03, -2.0], [PX - 1.0, y0 + 0.03, PZ + 0.3]]), curve([[AX + 0.5, y0 + 0.03, AZ], [-0.6, y0 + 0.03, 1.4], [PX - 0.4, y0 + 0.03, PZ + 1.0]]), curve([[PX + 0.4, y0 + 0.03, PZ + 1.0], [2.4, y0 + 0.03, 0.8], [HX - 0.1, y0 + 0.03, HZ - 0.5]])];
+    traces.forEach((c) => out.push(part(tubeOn(c, 0.06), K.gold)));
+    // ---- moving parts (one 8 s cycle)
+    const P = 8, F = (t) => cyc(t, P);
+    moving.push({ geo: merge(part(cyl(0.12, 0.12, 0.1, 14), '#2b2f36'), ring(7, (a) => part(box(0.5, 0.03, 0.18), '#4a4f58', { p: [Math.cos(a) * 0.32, 0, Math.sin(a) * 0.32], r: [0.4, -a, 0] }))), pivot: [PX, y0 + 1.14, PZ], anim: (t) => ({ ry: t * 9 }) });
+    // Memory cells: a 4 × 6 grid on each chip lights in a sweep (write), then flickers (read).
+    sticks.forEach((z, si) => { for (let i = 0; i < 4; i++) { const cells = []; for (let r = 0; r < 6; r++) for (let c = 0; c < 4; c++) cells.push(part(box(0.12, 0.12, 0.02), '#62d35f', { p: [-0.27 + c * 0.18, -0.45 + r * 0.18, 0] })); const geo = merge(cells); moving.push({ geo, pivot: [DX0 + 0.55 + i * 1.0, CB + 0.95, z + 0.12], anim: (t) => { const f = F(t), w = win(f, 0.05 + (i + si * 4) * 0.04, 0.12 + (i + si * 4) * 0.04), rd = f > 0.55 && f < 0.9 ? (Math.sin(t * 12 + i * 2 + si) > -0.3 ? 1 : 0.6) : 1; return { sy: w * rd * (1 - win(f, 0.92, 0.98)) * 0.999 + 0.001 }; } }); } });
+    // Pulses along the traces.
+    traces.forEach((c, i) => { for (let k = 0; k < 3; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.09, 8, 6), '#fff3b0'), pivot: [0, 0, 0], anim: (t) => { const u0 = cyc(t, 1.6, k / 3 + i * 0.2), u = i === 1 ? 1 - u0 : u0, p = c.getPointAt(u); return { x: p.x, y: p.y + 0.05, z: p.z }; } }); });
+    // The scope's live wave.
+    for (let k = 0; k < 14; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.05, 8, 6), '#62d35f'), pivot: sat(-0.8 + k * (1.6 / 13), y0 + 1.1, 0.1).toArray(), anim: (t) => ({ y: Math.sin(k * 0.7 - t * 4) * 0.32 * (0.7 + 0.3 * Math.sin(t * 0.7)) }) });
+    // The phone's photos fill in, row by row.
+    const scr = merge(part(rbox(1.14, 2.2, 0.02, 0.1), 'A')).applyQuaternion(hq);
+    moving.push({ geo: scr, pivot: new V(0, 0, 0.08).applyQuaternion(hq).add(new V(HX, y0 + 1.25, HZ)).toArray(), anim: () => ({}) });
+    for (let i = 0; i < 9; i++) { const lp = new V(-0.34 + (i % 3) * 0.34, 0.65 - Math.floor(i / 3) * 0.4, 0.1).applyQuaternion(hq).add(new V(HX, y0 + 1.25, HZ)); moving.push({ geo: merge(part(rbox(0.28, 0.3, 0.02, 0.03), ['#f2c94c', '#9ad0f0', '#e5533d', '#5fae5b', '#c3b4ff', '#f29a3a'][i % 6])).applyQuaternion(hq), pivot: lp.toArray(), anim: (t) => { const f = F(t); return { s: life(f, 0.1 + i * 0.06, 0.13 + i * 0.06, 0.9, 0.96) + 0.001 }; } }); }
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.6, y0, 0.8], topAt: [PX, y0 + 1.12, PZ] };
+  },
 };
