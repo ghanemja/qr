@@ -3535,4 +3535,55 @@ export const SCENES = {
     moving.push(...walker(moving.length, (t) => { const k = Math.sin(t * 0.4); return { x: 1.0 + k * 1.2, z: 2.6, ry: Math.cos(t * 0.4) > 0 ? 0 : Math.PI }; }, { shirt: '#f2c94c', pants: '#2b3a55', y: y0, carry: hat(K.white) }));
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-0.6, y0, 2.6], topAt: [-3.4, y0 + 1.0, 2.6] };
   },
+
+  // Dashboard (payroll, HR and business software): the numbers that run every business, and
+  // everyone paid on time. The giant dashboard's widgets tick over (bars grow, the line runs on, the
+  // ring fills); when the pay run completes it flashes a tick, and pay envelopes fly out to the
+  // café, the shop, the workshop and the office, where the staff cheer.
+  'software:4': () => {
+    const R = rand(5401), out = [], moving = [];
+    out.push(slab('#d5dbe2'));
+    out.push(part(rbox(10.0, 0.03, 10.0, 0.04), '#e8ecf0', { p: [0, y0 + 0.015, 0] }));
+    // ---- the giant dashboard (back left), facing the camera
+    const DX = -2.3, DZ = -2.6, DA = Math.PI / 4, q = new THREE.Quaternion().setFromAxisAngle(new V(0, 1, 0), DA), W = 4.2, H = 2.7, BY = y0 + 0.7;
+    const at = (lx, ly, lz = 0.12) => new V(lx, ly, lz).applyQuaternion(q).add(new V(DX, 0, DZ));
+    out.push(place(merge(part(rbox(W + 0.3, H + 0.3, 0.2, 0.08), K.dark, { p: [0, BY + H / 2, 0] }), part(box(W, H, 0.02), '#f4f6f9', { p: [0, BY + H / 2, 0.1] }), part(box(W, 0.34, 0.03), 'A', { p: [0, BY + H - 0.17, 0.11] }), part(box(0.9, H - 0.4, 0.03), '#e3e8ef', { p: [-W / 2 + 0.45, BY + (H - 0.4) / 2, 0.11] }),
+      [-1, 1].map((s2) => part(rbox(0.2, BY - y0, 0.2, 0.04), K.steelDk, { p: [s2 * 1.4, (BY - y0) / 2, 0] })), [0, 1, 2, 3].map((i) => part(rbox(0.6, 0.12, 0.02, 0.02), '#c9d1db', { p: [-W / 2 + 0.45, BY + H - 0.7 - i * 0.4, 0.12] }))), { p: [DX, 0, DZ], r: [0, DA, 0] }));
+    const bars = [0.5, 0.8, 0.65, 1.0, 0.9], card = (x, y, w, h) => out.push(merge(part(rbox(w, h, 0.02, 0.04), K.white)).applyQuaternion(q).translate(...at(x, y, 0.115).toArray()));
+    card(-0.25, BY + 1.35, 1.4, 1.5); card(1.25, BY + 1.75, 1.2, 0.7); card(1.25, BY + 0.85, 1.2, 0.9);
+    // ---- the businesses: café (front left), shop (front), workshop (right), office (back right)
+    const biz = [new V(-3.6, 0, 2.6), new V(-0.4, 0, 3.6), new V(3.4, 0, 1.4), new V(2.8, 0, -2.6)];
+    out.push(part(rbox(1.8, 1.2, 1.3, 0.05), '#f3e6d0', { p: [biz[0].x, y0 + 0.6, biz[0].z] }), part(extrude([[0, 0], [0.6, -0.3], [0.6, -0.36], [0, -0.06]], 1.8), (x, y, z) => (Math.floor((z + 3) * 3) % 2 ? 'B' : K.white), { p: [biz[0].x, y0 + 1.05, biz[0].z + 0.65], r: [0, -Math.PI / 2, 0] }), part(cyl(0.25, 0.25, 0.04, 16), K.white, { p: [biz[0].x + 0.6, y0 + 0.7, biz[0].z + 1.3] }), part(cyl(0.04, 0.04, 0.7, 8), K.dark, { p: [biz[0].x + 0.6, y0 + 0.35, biz[0].z + 1.3] }));
+    out.push(part(rbox(1.8, 1.3, 1.2, 0.05), K.cream, { p: [biz[1].x, y0 + 0.65, biz[1].z] }), part(rbox(1.3, 0.6, 0.04, 0.02), '#9fcdea', { p: [biz[1].x, y0 + 0.5, biz[1].z + 0.61] }), part(rbox(1.9, 0.25, 1.3, 0.04), 'A', { p: [biz[1].x, y0 + 1.3, biz[1].z] }));
+    out.push(part(rbox(2.0, 1.4, 1.6, 0.05), '#d8dde3', { p: [biz[2].x, y0 + 0.7, biz[2].z] }), part(prism(2.1, 0.5, 1.7), '#9aa1a9', { p: [biz[2].x, y0 + 1.4, biz[2].z], r: [0, 0, 0] }), part(rbox(0.9, 1.0, 0.05, 0.02), '#3a3f47', { p: [biz[2].x - 0.3, y0 + 0.5, biz[2].z + 0.81] }));
+    out.push(part(rbox(1.8, 2.2, 1.6, 0.05), '#e4e9ee', { p: [biz[3].x, y0 + 1.1, biz[3].z] }), part(box(1.82, 0.2, 1.62), 'A', { p: [biz[3].x, y0 + 2.0, biz[3].z] }));
+    for (let f = 0; f < 2; f++) for (let i = 0; i < 3; i++) out.push(part(rbox(0.4, 0.4, 0.05, 0.02), '#9fcdea', { p: [biz[3].x - 0.55 + i * 0.55, y0 + 0.6 + f * 0.75, biz[3].z + 0.81] }));
+    biz.forEach((b) => { const c = curve([[DX + 0.8, 0, DZ + 0.9], [(DX + b.x) / 2 + 0.3, 0, (DZ + b.z) / 2 + 0.6], [b.x, 0, b.z + 0.9]]); for (let i = 0, n = hi() ? 26 : 8; i <= n; i++) { const { p: pp, ry } = along(c, Math.min(0.999, i / n)); out.push(part(rbox(0.55, 0.03, 0.5, 0.05), '#d4dae1', { p: [pp.x, y0 + 0.03, pp.z], r: [0, ry, 0] })); } });
+    out.push(lampPost(-0.6, y0, 0.4, 0), lampPost(1.8, y0, 2.4, Math.PI));
+    [[4.6, 4.4], [0.6, -0.6], [-4.6, 0.4]].forEach(([x, z]) => out.push(part(cyl(0.3, 0.22, 0.4, 14), '#c99a62', { p: [x, y0 + 0.2, z] }), miniTree(R, x, y0 + 0.4, z, 0.45)));
+    // ---- moving parts (one 10 s cycle)
+    const P = 10, F = (t) => cyc(t, P);
+    // Bars grow.
+    bars.forEach((h, i) => moving.push({ geo: merge(part(box(0.18, 1, 0.03), i === 3 ? 'A' : '#7fa7d9', { p: [0, 0.5, 0] })).applyQuaternion(q), pivot: at(-0.75 + i * 0.25, BY + 0.7, 0.13).toArray(), anim: (t) => { const f = F(t); return { sy: h * (0.3 + 0.7 * easeOut(win(f, 0.05 + i * 0.05, 0.3 + i * 0.05))) * 0.999 + 0.001 }; } }));
+    // The line runs on: a dot traces the trend across the top-right card.
+    const lineY = (u) => BY + 1.6 + Math.sin(u * 7) * 0.1 + u * 0.25;
+    for (let i = 0; i < 9; i++) out.push(merge(part(new THREE.SphereGeometry(0.025, 6, 4), '#9aa1a9')).translate(...at(0.75 + i * 0.12, lineY(i / 8), 0.13).toArray()));
+    moving.push({ geo: part(new THREE.SphereGeometry(0.07, 10, 8), 'A'), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 3), p = at(0.75 + u * 0.96, lineY(u), 0.15); return { x: p.x, y: p.y, z: p.z }; } });
+    // The ring fills on the lower-right card.
+    moving.push({ geo: merge(part(torus(0.3, 0.07, TAU, 32), '#e3e8ef')).applyQuaternion(q), pivot: at(1.25, BY + 0.85, 0.13).toArray(), anim: () => ({}) });
+    moving.push({ geo: merge(part(torus(0.3, 0.08, TAU * 0.999, 32), '#46d36b')).applyQuaternion(q), pivot: at(1.25, BY + 0.85, 0.14).toArray(), anim: (t) => { const f = F(t), k = easeIO(win(f, 0.05, 0.5)); return { s: Math.max(0.001, k) }; } });
+    // Pay run complete: a big tick on the screen.
+    moving.push({ geo: tickGeo(0.4).applyQuaternion(q), pivot: at(-0.25, BY + 1.6, 0.2).toArray(), anim: (t) => { const f = F(t); return { s: life(f, 0.5, 0.54, 0.85, 0.9) + 0.001 }; } });
+    // Envelopes fly to each business, and the staff cheer.
+    const env = merge(part(rbox(0.5, 0.32, 0.04, 0.02), K.white), part(prism(0.5, 0.16, 0.05), '#e3e8ef', { p: [0, 0.16, 0], r: [Math.PI, 0, 0] }), part(cyl(0.05, 0.05, 0.05, 10), 'A', { p: [0, 0.04, 0.03], r: [Math.PI / 2, 0, 0] }));
+    const src = at(0, BY + H, 0.2);
+    biz.forEach((b, i) => {
+      const a = 0.55 + i * 0.05, to = new V(b.x, y0 + 1.8, b.z + 0.4);
+      moving.push({ geo: env, pivot: [0, 0, 0], anim: (t) => { const f = F(t), u = easeIO(win(f, a, a + 0.15)), p = src.clone().lerp(to, u); return { x: p.x, y: p.y + hop(u) * 1.8, z: p.z, ry: Math.PI / 4 + u * 6, s: f > a && f < a + 0.18 ? 1 : 0.001 }; } });
+      moving.push(...walker(moving.length, (t) => { const f = F(t), c = f > a + 0.15 && f < a + 0.35; return { x: b.x + 0.8, z: b.z + 0.9, ry: Math.PI / 2 + 0.6, still: true, push: c && Math.sin(t * 10) > 0 }; }, { shirt: ['#e5533d', '#8a6cf0', K.orange, '#3fb8a8'][i], pants: '#2b3a55', y: y0 }));
+      const wi = moving.length - 5, base = moving[wi].anim;
+      moving[wi].anim = (t) => { const r = base(t), f = F(t), c = f > a + 0.15 && f < a + 0.35; return { ...r, y: y0 + (c ? Math.abs(Math.sin(t * 10)) * 0.25 : 0) }; };
+    });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-1.2, y0, 1.4], topAt: [biz[3].x, y0 + 2.2, biz[3].z] };
+  },
 };
