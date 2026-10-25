@@ -97,7 +97,8 @@
   "capitalone": "A bank run on data, with its own payments network",
   "usbancorp": "Main Street deposits in, loans back out to build homes",
   "moodys": "No bond sells without a grade: every issue passes under Moody's stamp",
-  "nasdaq": "Where the next big company lists, beside the giants already there"
+  "nasdaq": "Where the next big company lists, beside the giants already there",
+  "ice": "The exchange behind the exchanges: stocks, oil and mortgages in one data cube"
  },
  "bank": [
   "PNC Financial Services",
@@ -129,7 +130,6 @@
   "Icahn Enterprises",
   "Loews",
   "Alleghany",
-  "Intercontinental Exchange",
   "S&P Global",
   "Voya Financial",
   "TIAA",
@@ -1363,7 +1363,6 @@
   "Raymond James Financial": 8,
   "Charles Schwab": 8,
   "S&P Global": 11,
-  "Intercontinental Exchange": 12,
   "INTL FCStone": 11,
   "Jefferies Financial Group": 11,
   "Blackstone Group": 11,
@@ -1673,5 +1672,8 @@
  ],
  "nasdaq": [
   "Nasdaq"
+ ],
+ "ice": [
+  "Intercontinental Exchange"
  ]
 }

@@ -299,4 +299,45 @@ export const HEROES2 = {
     [0, 0.5].forEach((o, i) => moving.push({ geo: merge(sedan('#f6c437'), part(rbox(0.3, 0.12, 0.2, 0.03), K.white, { p: [-0.1, 1.17, 0] })), pivot: [0, y0, 4.0 + (i ? 0.45 : -0.45)], anim: (t) => { const f = cyc(t, 7, o), x = i ? 5.6 - f * 11.2 : -5.6 + f * 11.2; return { x, ry: i ? Math.PI : 0, s: clamp01((5.2 - Math.abs(x)) / 0.5) * 0.6 + 0.001 }; } }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // ICE (Intercontinental Exchange): the exchange behind the exchanges. The New York Stock
+  // Exchange, oil futures and the American mortgage all feed one cube of market data, and it
+  // streams to every trading desk.
+  ice: { finder: '#1e4a8c', build: () => {
+    const R = rand(110), out = [], BLUE = '#1e4a8c', ICEB = '#bfe6ff';
+    out.push(ground('#8fc66f'));
+    // ---- the New York Stock Exchange, back left: steps, six columns, pediment, the big flag
+    const NX = -2.8, NZ = -3.5;
+    out.push(part(rbox(3.6, 3.2, 1.6, 0.04), '#e9e2d0', { p: [NX, y0 + 1.6, NZ - 0.2] }), part(rbox(3.8, 0.25, 0.7, 0.04), '#ddd5c2', { p: [NX, y0 + 0.12, NZ + 0.85] }));
+    for (let i = 0; i < 6; i++) out.push(part(cyl(0.15, 0.17, 2.5, 20), '#f4efe2', { p: [NX - 1.4 + i * 0.56, y0 + 1.45, NZ + 0.75] }));
+    out.push(part(rbox(3.7, 0.35, 0.5, 0.03), '#e9e2d0', { p: [NX, y0 + 2.85, NZ + 0.75] }), part(prism(3.8, 0.75, 0.6), '#e9e2d0', { p: [NX, y0 + 3.02, NZ + 0.75] }), place(pixText('NYSE', 0.06, '#5b5040', 0.02), { p: [NX, y0 + 2.85, NZ + 1.01] }));
+    const stripes = [];
+    for (let k = 0; k < 7; k++) stripes.push(part(box(2.2, 0.16, 0.02), k % 2 ? K.white : '#c8102e', { p: [0, -k * 0.16, 0] }));
+    stripes.push(part(box(0.9, 0.64, 0.025), '#3c3b6e', { p: [-0.65, -0.24, 0] }));
+    out.push(place(merge(stripes), { p: [NX, y0 + 2.4, NZ + 0.55] }));
+    // ---- the oil: a tanker on a strip of sea, right
+    out.push(part(box(2.2, 0.04, 6.0), 'W', { p: [4.0, y0 + 0.02, -0.4] }), part(rbox(0.5, 0.3, 2.6, 0.05), '#a33a2a', { p: [4.0, y0 + 0.2, -0.6] }), part(rbox(0.5, 0.12, 2.6, 0.04), '#2b3440', { p: [4.0, y0 + 0.4, -0.6] }), part(rbox(0.4, 0.4, 0.4, 0.04), K.white, { p: [4.0, y0 + 0.65, -1.7] }));
+    [-1.0, -0.3, 0.4].forEach((z) => out.push(part(cyl(0.13, 0.13, 0.3, 14), '#2b2f36', { p: [4.0, y0 + 0.6, z] }), part(cyl(0.135, 0.135, 0.04, 14), '#e5533d', { p: [4.0, y0 + 0.62, z] })));
+    // ---- the homes and their mortgages, front left
+    out.push(place(home('#fbf3e3', '#8a5a36', 1.4, 1.2, 0.95), { p: [-3.6, y0, 1.6] }), place(home('#e8eef4', '#5b6b7d', 1.4, 1.2, 0.95), { p: [-3.4, y0, 3.8] }), place(home('#f6e7e1', '#a35a3c', 1.4, 1.2, 0.95), { p: [-1.2, y0, 3.9] }));
+    // ---- the trading desks, front right
+    [[1.6, 3.4], [2.9, 2.9]].forEach(([x, z]) => out.push(place(desk(K.white, '#3a3f47'), { p: [x, y0, z], r: [0, Math.PI / 4, 0] }), part(rbox(0.6, 0.38, 0.04, 0.02), '#1d1f24', { p: [x - 0.1, y0 + 1.15, z - 0.1], r: [0, Math.PI / 4, 0] }), place(fan('#3d7be0'), { p: [x + 0.35, y0, z + 0.35], s: 1.3 })));
+    // ---- the cube's plinth, centre
+    const CX = 0.2, CZ = -0.2;
+    out.push(part(cyl(1.0, 1.1, 0.35, 32), BLUE, { p: [CX, y0 + 0.17, CZ] }), place(pixText('ICE', 0.08, K.white, 0.03), { p: [CX + 0.73, y0 + 0.2, CZ + 0.73], r: [0, Math.PI / 4, 0] }));
+    out.push(trees(R, [[4.6, 4.6], [-0.6, -4.6], [1.6, -4.4], [-4.6, -1.2], [0.4, 2.0]]));
+    // ---- moving parts
+    const moving = [], P = 6;
+    // The ice cube: a pale block with bright edges, turning and floating.
+    const cube = merge(part(rbox(1.5, 1.5, 1.5, 0.18), ICEB), [[-1, -1], [1, -1], [1, 1], [-1, 1]].flatMap(([a, b]) => [part(box(0.06, 1.42, 0.06), K.white, { p: [a * 0.7, 0, b * 0.7] }), part(box(1.42, 0.06, 0.06), K.white, { p: [0, a * 0.7, b * 0.7] }), part(box(0.06, 0.06, 1.42), K.white, { p: [a * 0.7, b * 0.7, 0] })]), part(box(0.5, 0.5, 1.52), '#e6f6ff', { p: [-0.3, 0.3, 0] }));
+    moving.push({ geo: cube, pivot: [CX, y0 + 1.6, CZ], anim: (t) => ({ ry: t * 0.4, y: Math.sin(t * 1.2) * 0.12 }) });
+    // Data in from the exchange, the oil and the homes; data out to the desks.
+    const pkt = (c) => part(new THREE.BoxGeometry(0.15, 0.15, 0.15), c), C = [CX, y0 + 1.6, CZ];
+    const feeds = [[[NX + 0.6, y0 + 2.0, NZ + 1.2], '#c8102e'], [[4.0, y0 + 0.9, -0.3], '#2b2f36'], [[-3.4, y0 + 1.6, 1.8], '#7cbf7d'], [[-1.2, y0 + 1.6, 3.6], '#7cbf7d']];
+    feeds.forEach(([a, c], i) => { const path = curve([a, [(a[0] + C[0]) / 2, y0 + 3.0, (a[2] + C[2]) / 2], C]); out.push(part(tubeOn(path, 0.02, hi() ? 40 : 10), '#9ccbe8')); for (let k = 0; k < 3; k++) moving.push(rider(pkt(c), path, P, i / 4 + k / 3, 0, 0.6, (t) => ({ rx: t * 3 }))); });
+    [[1.5, 3.3], [2.8, 2.8]].forEach(([x, z], i) => { const path = curve([C, [(x + C[0]) / 2 + 0.3, y0 + 2.8, (z + C[2]) / 2 + 0.3], [x, y0 + 1.4, z]]); out.push(part(tubeOn(path, 0.02, hi() ? 40 : 10), '#9ccbe8')); for (let k = 0; k < 4; k++) moving.push(rider(pkt(ICEB), path, P / 2, i / 2 + k / 4, 0, 0.7)); });
+    // The tanker rocking and the bell ringing on the exchange's balcony.
+    moving.push({ geo: part(rbox(0.3, 0.06, 2.3, 0.02), '#7b828c'), pivot: [4.0, y0 + 0.48, -0.6], anim: (t) => ({ rz: Math.sin(t * 1.3) * 0.04 }) });
+    moving.push({ geo: merge(part(lathe([[0, -0.3], [0.2, -0.28], [0.18, -0.1], [0.1, 0], [0, 0.02]], 20), K.gold), part(cyl(0.02, 0.02, 0.2, 6), K.dark, { p: [0, 0.1, 0] })), pivot: [NX + 1.4, y0 + 3.5, NZ + 0.6], anim: (t) => ({ rz: Math.sin(t * 9) * 0.35 * bump(cyc(t, P), 0.1, 0.08) }) });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
