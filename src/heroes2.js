@@ -2059,36 +2059,46 @@ export const HEROES2 = {
       moving.push(rider(box2(c), up, P, i / 5, 0, 0.4, (t) => ({ ry: t * 2 }))); moving.push(rider(box2(c), down, P, i / 5, 0.5, 0.9, (t) => ({ ry: t * 2 }))); });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // Runway: films from a sentence. The prompt card feeds the machine, the film strip runs out of
-  // it, and the big screen plays the scene it describes: mountains, then a sunset, then the sea.
+  // Runway: a film from a sentence. The director types the prompt, and on the stage the world it
+  // describes builds itself: mountains rise, the river runs, pines and a cabin appear and the sun
+  // comes up, while the camera dollies round it and the big screen shows the shot.
   runway: { finder: '#111111', build: () => {
-    const R = rand(163), out = [], INK = '#111111';
-    out.push(ground('#8fc66f'), part(rbox(7.6, 0.08, 6.4, 0.03), '#2b2f36', { p: [-0.6, y0 + 0.04, -0.8] }));
-    // ---- the big screen, back, on a frame
-    const SQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 4, 0)), at = (dx, dy, dz = 0) => { const v = new V(dx, dy, dz).applyQuaternion(SQ); return [-2.0 + v.x, y0 + dy, -2.0 + v.z]; };
-    out.push(part(rbox(4.6, 2.8, 0.15, 0.05), INK, { p: at(0, 2.6), q: SQ }), part(box(0.15, 1.2, 0.15), INK, { p: at(-1.6, 0.6) }), part(box(0.15, 1.2, 0.15), INK, { p: at(1.6, 0.6) }));
-    // ---- the generator: a sleek box with a slot, and the director's chair
-    const GX = 1.6, GZ = 0.6;
-    out.push(part(rbox(1.6, 1.0, 1.2, 0.15), '#f4f5f6', { p: [GX, y0 + 0.5, GZ] }), part(box(0.8, 0.04, 0.6), INK, { p: [GX, y0 + 1.01, GZ] }), place(pixText('RUNWAY', 0.05, INK, 0.03), { p: [GX, y0 + 0.5, GZ + 0.62] }));
-    out.push(part(rbox(0.7, 0.06, 0.6, 0.02), '#c9a36b', { p: [3.0, y0 + 0.75, 2.6] }), part(rbox(0.7, 0.5, 0.06, 0.02), INK, { p: [3.0, y0 + 1.05, 2.9] }), [[-0.3, -0.25], [0.3, -0.25], [-0.3, 0.25], [0.3, 0.25]].map(([x, z]) => beam([3.0 + x, y0, 2.6 + z], [3.0 - x, y0 + 0.75, 2.6 + z], 0.04, '#c9a36b')));
-    out.push(place(fan('#e5533d'), { p: [3.0, y0 + 0.3, 2.5], s: 1.2 }));
-    // A camera on its tripod, front left.
-    out.push([[0, 0.35], [0.3, -0.2], [-0.3, -0.2]].map(([x, z]) => beam([-3.2 + x, y0, 2.4 + z], [-3.2, y0 + 1.3, 2.4], 0.04, '#3a3f47')), part(rbox(0.6, 0.4, 0.35, 0.05), INK, { p: [-3.2, y0 + 1.5, 2.4] }), part(cyl(0.12, 0.14, 0.3, 14), '#3a3f47', { p: [-2.95, y0 + 1.5, 2.15], r: [Math.PI / 2, 0, Math.PI / 4] }));
-    out.push(trees(R, [[4.6, -4.6], [4.6, -1.6], [-4.6, 4.6], [0.6, 4.6]], 0.55));
+    const R = rand(216), out = [], INK = '#111111';
+    out.push(ground('#8fc66f'), part(rbox(9.8, 0.08, 9.8, 0.06), '#2b2f36', { p: [0, y0 + 0.04, 0] }));
+    // ---- the big screen, back left, facing the camera
+    const SQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 4, 0)), at = (dx, dy, dz = 0) => { const v = new V(dx, dy, dz).applyQuaternion(SQ); return [-2.6 + v.x, y0 + dy, -2.6 + v.z]; };
+    out.push(part(rbox(4.4, 2.7, 0.15, 0.05), INK, { p: at(0, 2.9), q: SQ }), beam(at(-1.5, 0), at(-1.5, 1.6), 0.14, INK), beam(at(1.5, 0), at(1.5, 1.6), 0.14, INK));
+    // ---- the stage: a round platform, centre right
+    const SX = 1.4, SZ = 0.8;
+    out.push(part(cyl(2.0, 2.1, 0.3, 48), '#3a3f47', { p: [SX, y0 + 0.15, SZ] }), part(cyl(1.85, 1.85, 0.04, 48), '#7fbf5a', { p: [SX, y0 + 0.31, SZ] }));
+    // The dolly track round it.
+    out.push(part(torus(2.6, 0.04, TAU, 64), '#9aa1a9', { p: [SX, y0 + 0.1, SZ], r: [Math.PI / 2, 0, 0] }), part(torus(2.8, 0.04, TAU, 64), '#9aa1a9', { p: [SX, y0 + 0.1, SZ], r: [Math.PI / 2, 0, 0] }));
+    // ---- the director's desk with the laptop, front left
+    out.push(place(desk(K.white, INK), { p: [-3.0, y0 + 0.08, 2.6], r: [0, Math.PI / 4, 0] }), place(fan('#e5533d'), { p: [-2.6, y0 + 0.08, 3.0], s: 1.4 }));
+    // Studio lights on stands and a clapperboard.
+    [[4.0, -1.6], [-0.6, 3.9], [4.0, 3.4]].forEach(([x, z]) => { const a = Math.atan2(SZ - z, SX - x); out.push([[0.3, 0], [-0.15, 0.26], [-0.15, -0.26]].map(([dx, dz]) => beam([x + dx, y0, z + dz], [x, y0 + 2.0, z], 0.04, '#3a3f47')), part(cyl(0.3, 0.22, 0.45, 16), '#2b2f36', { p: [x + Math.cos(a) * 0.15, y0 + 2.15, z + Math.sin(a) * 0.15], r: [0, -a, Math.PI / 2 + 0.4] }), part(cyl(0.27, 0.27, 0.02, 16), '#fff2b0', { p: [x + Math.cos(a) * 0.38, y0 + 2.05, z + Math.sin(a) * 0.38], r: [0, -a, Math.PI / 2 + 0.4] })); });
+    out.push(part(rbox(0.7, 0.5, 0.05, 0.02), INK, { p: [-1.4, y0 + 0.35, 3.6], r: [0, Math.PI / 4, 0] }), part(box(0.72, 0.12, 0.06), (x) => (Math.floor(x * 10) % 2 ? K.white : INK), { p: [-1.4, y0 + 0.66, 3.6], r: [0, Math.PI / 4, 0.15] }));
+    out.push(trees(R, [[4.7, -4.7], [-4.7, 4.7], [4.7, 4.7]], 0.5));
     // ---- moving parts
-    const moving = [], P = 9;
-    // The three scenes on the screen, one after another.
-    const scenes = [
-      merge(part(box(4.3, 2.5, 0.02), '#9fd0ff'), part(extrude([[-2.15, -1.25], [2.15, -1.25], [2.15, -0.4], [1.0, 0.6], [0.2, -0.2], [-0.8, 0.8], [-2.15, -0.3]], 0.02), '#5b6b7d', { p: [0, 0, 0.01] }), part(extrude([[0.7, 0.3], [1.0, 0.6], [1.3, 0.3]], 0.02), K.white, { p: [0, 0, 0.02] })),
-      merge(part(box(4.3, 2.5, 0.02), '#f29a3a'), part(box(4.3, 1.0, 0.025), '#d6336c', { p: [0, 0.75, 0] }), part(new THREE.CircleGeometry(0.5, 24), '#ffd23f', { p: [0.3, -0.1, 0.02] }), part(box(4.3, 0.8, 0.03), '#3a2a40', { p: [0, -0.85, 0] })),
-      merge(part(box(4.3, 2.5, 0.02), '#bfe6ff'), part(box(4.3, 1.2, 0.025), '#2b7bb9', { p: [0, -0.65, 0] }), part(extrude([[-0.4, -0.3], [0.4, -0.3], [0.3, -0.1], [-0.3, -0.1]], 0.02), K.white, { p: [-0.6, 0, 0.03] }), part(extrude([[-0.05, -0.1], [0.05, -0.1], [0, 0.5]], 0.02), K.white, { p: [-0.6, 0, 0.03] })),
-    ];
-    scenes.forEach((g, i) => moving.push({ geo: g, pivot: at(0, 2.6, 0.09), anim: (t) => { const f = cyc(t, P), k = Math.floor(f * 3); return k === i ? { q: SQ, s: 1, sx: Math.min(1, win(f * 3 - i, 0, 0.12)) + 0.001 } : { s: 0.001 }; } }));
-    // The prompt card dropping into the slot each scene.
-    moving.push({ geo: merge(part(rbox(0.7, 0.04, 0.45, 0.02), K.white), [0, 1, 2].map((k) => part(box(0.5, 0.045, 0.04), '#9aa1a9', { p: [0, 0, -0.12 + k * 0.12] }))), pivot: [GX, y0 + 1.04, GZ], anim: (t) => { const f = cyc(t, P / 3); return f < 0.3 ? { y: (1 - easeOut(win(f, 0, 0.3))) * 1.2, ry: Math.PI / 4 } : { s: 0.001 }; } });
-    // The film strip running from the machine up to the screen.
-    const strip = curve([[GX - 0.4, y0 + 0.9, GZ - 0.4], [0.2, y0 + 1.6, -0.6], ...[at(1.2, 1.1, 0.4)]]);
-    for (let k = 0; k < 8; k++) moving.push(rider(merge(part(box(0.32, 0.24, 0.02), INK), part(box(0.24, 0.16, 0.025), ['#9fd0ff', '#f29a3a', '#bfe6ff'][k % 3])), strip, 2.4, k / 8, 0, 1));
+    const moving = [], P = 12, t0 = (f, a, b) => win(f, a, b);
+    // The prompt: a card rising off the laptop with the words of the shot.
+    moving.push({ geo: merge(part(rbox(2.9, 0.5, 0.06, 0.12), K.white), pixText('A CABIN BY A RIVER', 0.035, INK, 0.08)), pivot: [-2.6, y0 + 1.4, 2.2], anim: (t) => { const f = cyc(t, P); return f < 0.85 ? { ry: Math.PI / 4, y: easeOut(t0(f, 0, 0.12)) * 1.4, s: Math.min(1, f / 0.04) + 0.001 } : { s: 0.001 }; } });
+    // The world on the stage, element by element.
+    const grow = (a, b) => (t) => { const f = cyc(t, P); return f < a || f > 0.94 ? { s: 0.001 } : { s: back(win(f, a, b)) }; };
+    const mtn = (r, h, c) => merge(part(cone(r, h, 20), c), part(cone(r * 0.4, h * 0.4, 20), K.white, { p: [0, h * 0.3, 0] }));
+    [[-0.7, -0.9, 1.0, 2.2, '#6b7a8f'], [0.6, -1.1, 0.8, 1.6, '#7b8aa0'], [-1.3, 0.0, 0.6, 1.2, '#8a98ab']].forEach(([x, z, r, h, c], k) => moving.push({ geo: mtn(r, h, c), pivot: [SX + x, y0 + 0.33 + h / 2, SZ + z], anim: (t) => { const f = cyc(t, P); return f < 0.12 + k * 0.03 || f > 0.94 ? { s: 0.001 } : { sy: easeOut(win(f, 0.12 + k * 0.03, 0.24 + k * 0.03)) + 0.001 }; } }));
+    moving.push({ geo: part(tubeOn(curve([[-1.6, 0, 0.6], [-0.5, 0, 0.2], [0.4, 0, 0.8], [1.6, 0, 0.5]]), 0.18, hi() ? 40 : 10), 'W', { s: [1, 0.15, 1] }), pivot: [SX, y0 + 0.34, SZ], anim: (t) => { const f = cyc(t, P); return f < 0.3 || f > 0.94 ? { s: 0.001 } : { sx: easeOut(win(f, 0.3, 0.4)) + 0.001 }; } });
+    [[0.9, -0.2], [1.2, 0.3], [-0.4, 1.1], [0.2, 1.3], [-1.0, 0.9]].forEach(([x, z], k) => moving.push({ geo: merge(part(cyl(0.04, 0.05, 0.25, 6), '#6f4a2c', { p: [0, 0.12, 0] }), part(cone(0.22, 0.6, 8), '#2f6f3a', { p: [0, 0.5, 0] })), pivot: [SX + x, y0 + 0.33, SZ + z], anim: grow(0.42 + k * 0.025, 0.47 + k * 0.025) }));
+    moving.push({ geo: merge(part(rbox(0.6, 0.4, 0.5, 0.04), '#8a5a36', { p: [0, 0.2, 0] }), part(prism(0.75, 0.35, 0.6), '#5b3a2a', { p: [0, 0.4, 0] }), part(box(0.15, 0.25, 0.02), '#ffd479', { p: [0.1, 0.15, 0.26] })), pivot: [SX + 0.1, y0 + 0.33, SZ + 0.5], anim: grow(0.58, 0.64) });
+    moving.push({ geo: part(new THREE.SphereGeometry(0.35, 20, 14), '#ffcf3f'), pivot: [SX - 0.3, y0 + 0.4, SZ - 1.5], anim: (t) => { const f = cyc(t, P); return f < 0.62 || f > 0.94 ? { s: 0.001 } : { y: easeOut(win(f, 0.62, 0.8)) * 2.4 }; } });
+    // The camera on its dolly, circling the stage, its light blinking while it rolls.
+    const cam = moving.length;
+    moving.push({ geo: merge(part(rbox(0.6, 0.12, 0.6, 0.04), '#5b616b', { p: [0, 0.08, 0] }), part(cyl(0.05, 0.05, 1.0, 8), '#3a3f47', { p: [0, 0.6, 0] }), part(rbox(0.6, 0.4, 0.35, 0.05), INK, { p: [0, 1.25, 0] }), part(cyl(0.14, 0.16, 0.35, 14), '#3a3f47', { p: [-0.45, 1.25, 0], r: [0, 0, Math.PI / 2] })), pivot: [SX, y0 + 0.1, SZ], anim: (t) => { const a = cyc(t, P) * TAU * 0.6 + 0.3; return { x: Math.cos(a) * 2.7, z: Math.sin(a) * 2.7, ry: -a }; } });
+    moving.push({ geo: part(new THREE.SphereGeometry(0.06, 8, 6), '#ff3b30'), pivot: [0.2, 1.5, 0.15], parent: cam, anim: (t) => ({ s: Math.sin(t * 8) > 0 ? 1 : 0.3 }) });
+    // The screen: blank, then the shot appearing when the world is built.
+    const shot = merge(part(box(4.1, 2.4, 0.02), '#f6b26b'), part(box(4.1, 0.9, 0.025), '#f9d29d', { p: [0, 0.75, 0] }), part(extrude([[-2.05, -0.3], [-1.0, 0.7], [-0.2, -0.1], [0.6, 0.5], [2.05, -0.3], [2.05, -1.2], [-2.05, -1.2]], 0.02), '#6b7a8f', { p: [0, 0, 0.01] }), part(box(4.1, 0.3, 0.03), '#4fb3c9', { p: [0, -0.85, 0] }), part(new THREE.CircleGeometry(0.3, 20), '#ffcf3f', { p: [1.2, 0.65, 0.03] }), part(box(0.5, 0.35, 0.03), '#8a5a36', { p: [-0.3, -0.5, 0.03] }));
+    out.push(shot.clone().applyQuaternion(SQ).translate(...at(0, 2.9, 0.08)));
+    moving.push({ geo: part(box(4.1, 2.4, 0.02), K.white), pivot: at(0, 2.9, 0.11), anim: (t) => { const f = cyc(t, P), u = win(f, 0.66, 0.78); return u > 0 && u < 1 ? { q: SQ, sx: 1 - u + 0.001, x: 0 } : { s: 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // Discord: where communities hang out. Round the big controller face float the servers, each
