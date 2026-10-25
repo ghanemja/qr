@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import { V, part, windy, rand, taper, leafShape, shade, tuft, merge, place, box, cyl, lathe, tube, ball, cone, torus, extrude, prism, star, beam, ring, faceted, hi, TAU, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, legacy, K, withDetail } from './kit.js';
 import { HEROES } from './heroes.js';
+import { SCENES } from './scenes.js';
 
 
 // ---------- centerpieces (≈10 units tall) ----------
@@ -1357,11 +1358,13 @@ export function centerpiece(id, variant = 0, base = 0, detail = 'high') {
 }
 function build(id, variant, base) {
   {
-    const builders = [CENTER[id] || CENTER.tree, ...(EXTRA[id] || [])];
-    const c = { ...builders[variant % builders.length]() };
+    const builders = [CENTER[id] || CENTER.tree, ...(EXTRA[id] || [])], v = variant % builders.length;
+    // An upgraded shape (src/scenes.js) is a whole scene on its own slab, like a signature model,
+    // but still takes the company's colours, companion prop and topper (at its propAt / topAt).
+    const c = { ...(SCENES[`${CENTER[id] ? id : 'tree'}:${v}`] || builders[v])() };
     if (c.spin) c.moving = [{ ...c.spin, mode: 'spin' }];
     c.moving = (c.moving || []).map((mv) => ({ ...mv, anim: mv.anim || legacy(mv) }));
-    const make = c.bare ? null : BASES[base % BASES.length]; // a signature scene brings its own ground
+    const make = c.bare || c.slab ? null : BASES[base % BASES.length]; // a scene brings its own ground
     if (make) {
       const bb = new THREE.Box3().setFromBufferAttribute(c.geo.attributes.position);
       const r = Math.min(5.4, Math.max(2.6, Math.max(bb.max.x - bb.min.x, bb.max.z - bb.min.z) * 0.5));
@@ -1375,8 +1378,8 @@ function build(id, variant, base) {
     const pos = c.geo.attributes.position;
     let top = 0;
     for (let i = 0; i < pos.count; i++) if (Math.abs(pos.getX(i)) < 1.5 && Math.abs(pos.getZ(i)) < 1.5) top = Math.max(top, pos.getY(i));
-    c.propAt = [bb.max.x + 1.3, 0, bb.max.z * 0.4 + 0.6];
-    c.topAt = [0, (top || bb.max.y) - 0.05, 0];
+    c.propAt ||= [bb.max.x + 1.3, 0, bb.max.z * 0.4 + 0.6];
+    c.topAt ||= [0, (top || bb.max.y) - 0.05, 0];
     return c;
   }
 }

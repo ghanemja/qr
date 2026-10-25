@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 const q=new URLSearchParams(location.search);const v=q.get('v')||'';
 const M=await import('../qr/assets/models.js?'+v);
-const {ARCHETYPES,centerpiece,modelMaterial,setBrands,variantCount,motion,mountMovers,poseMovers}=M;
+const {ARCHETYPES,centerpiece,modelMaterial,setBrands,variantCount,motion,mountMovers,poseMovers,propGeo,topperGeo}=M;const pt=q.get('pt');
 const {RoomEnvironment}=await import('../qr/assets/RoomEnvironment.js');const r=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});const pm=new THREE.PMREMGenerator(r);const env=pm.fromScene(new RoomEnvironment(),0.04).texture;const detail=q.get('d')||'high';const PX=+(q.get('px')||200);r.setSize(PX*2,PX*2);document.body.insertAdjacentHTML('afterbegin','<style>#g{grid-template-columns:repeat(var(--cols,8),'+PX+'px)}img{width:'+PX+'px;height:'+PX+'px}</style>');r.outputColorSpace=THREE.SRGBColorSpace;r.shadowMap.enabled=true;r.setClearColor('#f6f1e7');
 const ids=(q.get('ids')||Object.keys(ARCHETYPES).join(',')).split(',');const ts=(q.get('ts')||'0').split(',').map(Number);const only=q.get('v2');
 const brands=[['#e5533d','#2b5aa8'],['#2a5aa8','#c9a227'],['#0e7c4a','#f2b705']];
@@ -14,7 +14,7 @@ for(const idv of ids){const [id,vv]=idv.split(':');const n=variantCount(id);for(
  const s=new THREE.Scene();s.environment=env;s.environmentIntensity=0.45;s.add(new THREE.HemisphereLight('#fffaf0','#d8cbb5',0.95));const sun=new THREE.DirectionalLight('#fff4e0',2.1);sun.position.set(-10,22,7);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=sun.shadow.camera.bottom=-10;sun.shadow.camera.right=sun.shadow.camera.top=10;s.add(sun);
  const cp=centerpiece(id,vi,0,detail);const mat=modelMaterial();mat.userData.tick(t);const g=new THREE.Group();
  const mk=(geo)=>{const m=new THREE.InstancedMesh(geo,mat,1);m.setMatrixAt(0,new THREE.Matrix4());setBrands(m,[brands[k%3]]);m.castShadow=m.receiveShadow=true;m.frustumCulled=false;return m;};
- g.add(mk(cp.geo));const nodes=mountMovers(cp,g,mk);poseMovers(nodes,t);const H=new THREE.Box3().setFromObject(g).max.y;const b=motion(id,cp,t);g.position.set(b.x*H,b.y*H,b.z*H);g.rotation.set(b.rx,b.ry,b.rz);g.scale.set(b.sx,b.sy,b.sz);
+ g.add(mk(cp.geo));if(pt&&!cp.bare){const [pi,ti]=pt.split('.').map(Number);const pm=mk(propGeo(pi,detail));pm.setMatrixAt(0,new THREE.Matrix4().makeTranslation(...cp.propAt));g.add(pm);const tg=topperGeo(ti,detail);if(tg){const tm=mk(tg);tm.setMatrixAt(0,new THREE.Matrix4().makeTranslation(...cp.topAt));g.add(tm);}}const nodes=mountMovers(cp,g,mk);poseMovers(nodes,t);const H=new THREE.Box3().setFromObject(g).max.y;const b=motion(id,cp,t);g.position.set(b.x*H,b.y*H,b.z*H);g.rotation.set(b.rx,b.ry,b.rz);g.scale.set(b.sx,b.sy,b.sz);
  const fl=new THREE.Mesh(new THREE.BoxGeometry(14,0.2,14),new THREE.MeshStandardMaterial({color:'#ddd3c2'}));fl.position.y=-0.1;fl.receiveShadow=true;s.add(fl);
  s.add(g);const c=new THREE.OrthographicCamera(-8,8,8,-8,0.1,200);c.position.set(30,26,30);c.lookAt(0,4.5,0);
  r.render(s,c);const f=document.createElement('figure');f.innerHTML=`<img src="${r.domElement.toDataURL()}"><figcaption>${id} ${vi} t${t}</figcaption>`;document.getElementById('g').append(f);k++;}}}

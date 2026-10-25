@@ -65,6 +65,9 @@ const walker = (base, path, { shirt = '#3d7be0', pants = '#2b3a55', skin = '#e9b
   ];
 };
 
+// The set dressing is shared with the upgraded industry scenes (src/scenes.js).
+export { rbox, curve, tubeOn, along, parcel, flameGeo, puff, miniTree, lampPost, profile, sedan, cartGeo, walker };
+
 export const HEROES = {
   // Amazon: the logistics machine. A fulfilment centre with a trailer at its dock sends parcels
   // down a smile-shaped conveyor; a delivery drone collects one at the arrow and flies it off,
