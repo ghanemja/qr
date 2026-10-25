@@ -3119,4 +3119,46 @@ export const SCENES = {
     for (let k = 0; k < 7; k++) { const p = barAt(k); moving.push({ geo: coin(0.18, 0.06), pivot: [p.x + 0.15, 0, p.z], anim: (t) => { const f = cyc(t, 4, k / 7), yT = top(k, F(t)) + 0.05; return { y: yT + (1 - easeIn(win(f, 0, 0.4))) * 2.2, ry: f * 9, s: f < 0.5 ? 1 : 0.001 }; } }); }
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.8, y0, 2.0], topAt: [D.x, y0 + 1.04, D.z] };
   },
+
+  // Solar farm (renewable generators, utilities, data-centre power): sun by day, stored for the
+  // night. The sun arcs over and every row of trackers tilts to follow it; power flows to the
+  // batteries, which fill through the day and keep the data centre humming after sunset.
+  'power:3': () => {
+    const R = rand(4601), out = [], moving = [];
+    out.push(slab('#c8d89a'));
+    // ---- tracker rows along z (front left), their posts
+    const rows = [-4.3, -3.2, -2.1, -1.0, 0.1], Z0 = -0.4, Z1 = 4.6, PY = y0 + 0.75;
+    rows.forEach((x) => { for (let z = Z0 + 0.3; z < Z1; z += 1.1) out.push(part(cyl(0.05, 0.05, PY - y0, 8), K.steelDk, { p: [x, y0 + (PY - y0) / 2, z] })); out.push(part(cyl(0.05, 0.05, Z1 - Z0, 8), K.steelDk, { p: [x, PY, (Z0 + Z1) / 2], r: [Math.PI / 2, 0, 0] })); });
+    // ---- the inverter, the battery yard (back left), the data centre (back right)
+    const IV = new V(0.9, 0, -1.4);
+    out.push(part(rbox(0.9, 0.8, 0.7, 0.05), '#d8dde3', { p: [IV.x, y0 + 0.4, IV.z] }), part(box(0.92, 0.12, 0.72), 'A', { p: [IV.x, y0 + 0.74, IV.z] }));
+    const bats = [[-3.9, -3.6], [-2.6, -3.6], [-1.3, -3.6]];
+    bats.forEach(([x, z]) => out.push(part(rbox(1.1, 1.0, 1.0, 0.04), K.white, { p: [x, y0 + 0.5, z] }), part(box(1.12, 0.1, 1.02), 'A', { p: [x, y0 + 0.88, z] }), part(box(0.5, 0.65, 0.02), '#2b2f36', { p: [x, y0 + 0.45, z + 0.51] })));
+    const DX = 2.9, DZ = -2.9;
+    out.push(part(rbox(3.4, 1.8, 2.4, 0.06), '#e3e6ea', { p: [DX, y0 + 0.9, DZ] }), part(box(3.42, 0.2, 2.42), 'B', { p: [DX, y0 + 1.6, DZ] }));
+    for (let i = 0; i < 6; i++) out.push(part(rbox(0.4, 0.5, 0.05, 0.02), '#2b2f36', { p: [DX - 1.25 + i * 0.5, y0 + 0.8, DZ + 1.21] }));
+    // A substation and the cables between it all.
+    const cables = [curve([[0.6, y0 + 0.05, 0.4], [IV.x, y0 + 0.05, -0.4], [IV.x, y0 + 0.05, IV.z + 0.4]]), curve([[IV.x - 0.45, y0 + 0.05, IV.z], [-0.4, y0 + 0.05, -2.4], [-1.3, y0 + 0.05, -3.1]]), curve([[IV.x + 0.45, y0 + 0.05, IV.z], [1.6, y0 + 0.05, -1.6], [DX - 1.2, y0 + 0.05, DZ + 1.3]])];
+    cables.forEach((c) => out.push(part(tubeOn(c, 0.05), '#5b616b')));
+    [[4.6, 1.0], [3.6, 3.8], [1.8, 2.2]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.55 + R() * 0.15)));
+    out.push(part(rbox(1.6, 0.03, 4.0, 0.03), '#b9b4aa', { p: [2.6, y0 + 0.015, 1.8] }));
+    // ---- moving parts (one 14 s cycle: day, then night)
+    const P = 14, F = (t) => cyc(t, P), day = (f) => f < 0.7;
+    const sunAt = (f) => { const u = win(f, 0, 0.7); return new V(-5.4 + u * 10.8, 3.4 + Math.sin(u * Math.PI) * 1.3, 0.6); };
+    moving.push({ geo: merge(part(new THREE.SphereGeometry(0.55, 24, 16), '#ffd23f'), ring(10, (a) => part(box(0.32, 0.08, 0.08), '#ffb43a', { p: [Math.cos(a) * 0.85, Math.sin(a) * 0.85, 0], r: [0, 0, a] }))).rotateY(Math.PI / 4), pivot: [0, 0, 0], anim: (t) => { const f = F(t), p = sunAt(f); return { x: p.x, y: p.y, z: p.z, s: day(f) ? Math.min(1, win(f, 0, 0.04) + 0.001, (0.7 - f) / 0.04) : 0.001 }; } });
+    moving.push({ geo: merge(part(new THREE.SphereGeometry(0.4, 20, 14), '#eef0f6'), part(new THREE.SphereGeometry(0.34, 16, 12), '#c8d89a', { p: [0.2, 0.12, 0.18] })), pivot: [0, 0, 0], anim: (t) => { const f = F(t), u = win(f, 0.7, 1); return { x: 4 - u * 8, y: 3.8 + Math.sin(u * Math.PI) * 0.6, z: 0.6, s: !day(f) ? Math.min(1, u / 0.1, (1 - u) / 0.1) * 0.999 + 0.001 : 0.001 }; } });
+    // Each tracker row tilts to face the sun, flattening for the night.
+    const panelRow = merge(Array.from({ length: 5 }, (_, i) => merge(part(rbox(0.95, 0.05, 0.95, 0.02), '#2a4a7a', { p: [0, 0, Z0 + 0.5 + i * 1.0 - (Z0 + Z1) / 2] }), hi() ? [0.32, 0, -0.32].map((d) => part(box(0.01, 0.055, 0.93), '#9fb5d6', { p: [d, 0, Z0 + 0.5 + i * 1.0 - (Z0 + Z1) / 2] })) : [])), part(box(0.97, 0.03, Z1 - Z0 - 0.1), '#c9ced6', { p: [0, -0.04, 0] }));
+    rows.forEach((x) => moving.push({ geo: panelRow, pivot: [x, PY + 0.06, (Z0 + Z1) / 2], anim: (t) => { const f = F(t); if (!day(f)) return { rz: 0 }; const s = sunAt(f); return { rz: -Math.atan2(s.x - x, s.y - PY) * 0.85 * Math.min(1, win(f, 0, 0.08) * 1, (0.7 - f) / 0.06) }; } }));
+    // Power: panels to the inverter by day; batteries to the data centre by night.
+    cables.forEach((c, i) => { for (let k = 0; k < 3; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.08, 8, 6), '#ffd23f'), pivot: [0, 0, 0], anim: (t) => { const f = F(t), u0 = cyc(t, 1.6, k / 3 + i * 0.2), u = i === 1 && !day(f) ? 1 - u0 : u0, onC = i === 2 || (i === 0 ? day(f) : true), p = c.getPointAt(u); return { x: p.x, y: p.y + 0.05, z: p.z, s: onC ? 1 : 0.001 }; } }); });
+    // The battery bars fill by day and drain by night.
+    bats.forEach(([x, z], i) => { for (let k = 0; k < 4; k++) moving.push({ geo: part(box(0.4, 0.11, 0.03), '#62d35f'), pivot: [x, y0 + 0.22 + k * 0.15, z + 0.52], anim: (t) => { const f = F(t), lvl = 4 * win(f, 0.08 + i * 0.03, 0.6) * (1 - win(f, 0.72, 1)) ; return { s: lvl > k ? 1 : 0.001 }; } }); });
+    // The data centre: rack lights and spinning cooling fans on the roof, day and night.
+    for (let i = 0; i < 6; i++) moving.push({ geo: part(box(0.3, 0.06, 0.02), i % 2 ? '#62d35f' : '#3d7be0'), pivot: [DX - 1.25 + i * 0.5, y0 + 0.85, DZ + 1.24], anim: (t) => ({ s: Math.sin(t * 7 + i * 1.7) > -0.3 ? 1 : 0.001 }) });
+    [-0.9, 0.3, 1.1].forEach((dx) => { out.push(part(cyl(0.4, 0.4, 0.2, 20), '#9aa1a9', { p: [DX + dx, y0 + 1.9, DZ - 0.3] })); moving.push({ geo: merge(ring(5, (a) => part(box(0.34, 0.02, 0.1), K.dark, { p: [Math.cos(a) * 0.17, 0, Math.sin(a) * 0.17], r: [0, -a, 0.4] }))), pivot: [DX + dx, y0 + 2.02, DZ - 0.3], anim: (t) => ({ ry: t * 8 }) }); });
+    // A maintenance cart patrols the rows.
+    moving.push({ geo: merge(part(rbox(0.8, 0.4, 0.5, 0.06), K.white, { p: [0, 0.4, 0] }), part(box(0.82, 0.08, 0.52), 'A', { p: [0, 0.6, 0] }), [[-0.25, 0.25], [0.25, 0.25], [-0.25, -0.25], [0.25, -0.25]].map(([x, z]) => part(new THREE.CylinderGeometry(0.12, 0.12, 0.08, 12), '#1d1f24', { p: [x, 0.12, z], r: [Math.PI / 2, 0, 0] }))), pivot: [-0.45, y0, 0], anim: (t) => { const k = Math.sin(t * 0.4); return { z: 2.1 + k * 2.2, ry: Math.cos(t * 0.4) > 0 ? -Math.PI / 2 : Math.PI / 2 }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [2.6, y0, 1.6], topAt: [IV.x, y0 + 0.8, IV.z] };
+  },
 };
