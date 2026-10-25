@@ -501,4 +501,43 @@ export const HEROES2 = {
     moving.push({ geo: part(rbox(2.5, 0.08, 1.4, 0.04), '#c9ced6', { p: [0, 0, 0.7] }), pivot: [PX, y0 + 2.06, PZ - 0.7], anim: (t) => ({ rx: -0.5 * bump(cyc(t, P), 0.86, 0.05) }) });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Super Micro: first to ship the newest AI servers. Building blocks fly off the shelf and slot
+  // into the open rack until it fills and lights up, while coolant runs through the liquid-cooled
+  // racks beside it to the cooling unit outside.
+  supermicro: { finder: '#2361a8', build: () => {
+    const R = rand(115), out = [], BLUE = '#2361a8', GLOW = '#76e05f', COOL = '#4fc3f7';
+    out.push(ground('#8fc66f'), part(rbox(7.2, 0.1, 6.0, 0.03), '#c9ced6', { p: [-1.2, y0 + 0.05, -1.4] }));
+    for (let i = 0; i < 12; i++) for (let j = 0; j < 10; j++) if ((i + j) % 2) out.push(part(box(0.58, 0.012, 0.58), '#bfc5cc', { p: [-4.5 + i * 0.6, y0 + 0.11, -4.1 + j * 0.6] }));
+    out.push(part(rbox(7.2, 2.8, 0.2, 0.04), '#e6e9ed', { p: [-1.2, y0 + 1.4, -4.5] }), part(box(7.22, 0.22, 0.22), BLUE, { p: [-1.2, y0 + 2.7, -4.5] }), place(pixText('SUPERMICRO', 0.06, K.white, 0.03), { p: [-1.6, y0 + 2.7, -4.38] }));
+    // ---- the rows of liquid-cooled racks
+    const rack = (h = 2.4) => merge(part(rbox(0.9, h, 0.9, 0.04), '#1d2026', { p: [0, h / 2, 0] }), part(box(0.92, 0.1, 0.92), BLUE, { p: [0, h - 0.05, 0] }), Array.from({ length: 8 }, (_, k) => part(box(0.8, 0.2, 0.02), '#30343c', { p: [0, 0.25 + k * 0.27, 0.46] })), Array.from({ length: 8 }, (_, k) => part(box(0.05, 0.05, 0.02), GLOW, { p: [0.3, 0.25 + k * 0.27, 0.475] })), part(cyl(0.04, 0.04, h - 0.2, 8), COOL, { p: [0.47, h / 2, 0.3] }), part(cyl(0.04, 0.04, h - 0.2, 8), '#e5533d', { p: [0.47, h / 2, -0.3] }));
+    const racks = [[-4.2, -3.6], [-3.2, -3.6], [-2.2, -3.6], [-1.2, -3.6], [-4.2, -1.6], [-3.2, -1.6], [-2.2, -1.6]];
+    racks.forEach(([x, z]) => out.push(place(rack(), { p: [x, y0 + 0.1, z] })));
+    // The open rack being filled, its frame only.
+    const OX = -1.2, OZ = -1.6, OH = 2.4;
+    out.push(part(box(0.92, 0.08, 0.92), '#1d2026', { p: [OX, y0 + 0.14, OZ] }), part(box(0.92, 0.1, 0.92), BLUE, { p: [OX, y0 + 0.1 + OH - 0.05, OZ] }), [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([a, b]) => part(box(0.06, OH, 0.06), '#1d2026', { p: [OX + a * 0.43, y0 + 0.1 + OH / 2, OZ + b * 0.43] })));
+    // ---- the shelf of building blocks, front left: boards, GPUs, drives, power
+    const SX = -2.6, SZ = 1.6;
+    out.push(place(racking(R, 2, 3, BLUE, K.orange, ['#2f9e6e', '#3a3f47', '#76b900']), { p: [SX, y0 + 0.1, SZ], r: [0, Math.PI / 4, 0], s: 0.8 }));
+    // ---- the cooling unit outside, right, and the pipe run to it
+    const CX = 3.6, CZ = -1.0;
+    out.push(part(rbox(1.8, 1.4, 1.6, 0.06), '#d8dde3', { p: [CX, y0 + 0.7, CZ] }), [0, 1].map((i) => part(cyl(0.5, 0.5, 0.12, 24), '#3a3f47', { p: [CX - 0.4 + i * 0.8, y0 + 1.45, CZ] })));
+    const pipeOut = curve([[-1.75, y0 + 2.6, -3.6], [1.5, y0 + 2.7, -3.4], [2.8, y0 + 2.2, -2.0], [CX - 0.6, y0 + 1.2, CZ - 0.4]]), pipeBack = curve([[CX - 0.6, y0 + 0.9, CZ + 0.4], [2.6, y0 + 1.8, -0.6], [0.6, y0 + 2.6, -1.4], [-1.75, y0 + 2.5, -1.6]]);
+    out.push(part(tubeOn(pipeOut, 0.07, hi() ? 60 : 14), '#e5533d'), part(tubeOn(pipeBack, 0.07, hi() ? 60 : 14), COOL));
+    out.push(trees(R, [[4.6, 4.6], [1.6, 4.4], [4.6, 2.0], [-4.6, 4.4]]));
+    // ---- moving parts
+    const moving = [], P = 9, N = 8;
+    // Sleds flying from the shelf into the open rack, bottom up; it lights up when full.
+    for (let k = 0; k < N; k++) {
+      const y = y0 + 0.1 + 0.25 + k * 0.27, path = curve([[SX + 0.2, y0 + 1.3, SZ], [(SX + OX) / 2 + 0.6, y0 + 2.9, (SZ + OZ) / 2 + 0.6], [OX + 0.2, y + 0.3, OZ + 1.2], [OX, y, OZ + 0.1]]);
+      moving.push({ geo: merge(part(box(0.8, 0.2, 0.8), '#30343c'), part(box(0.05, 0.05, 0.02), GLOW, { p: [0.3, 0, 0.41] }), part(box(0.6, 0.04, 0.02), k % 2 ? '#76b900' : '#3a3f47', { p: [-0.05, 0.05, 0.41] })), pivot: [0, 0, 0], anim: (t) => {
+        const f = cyc(t, P), a = 0.05 + k * 0.09, u = easeIO(win(f, a, a + 0.12)); if (f < a || f > 0.97) return { s: 0.001 }; const p = path.getPointAt(u); return { x: p.x, y: p.y, z: p.z, s: Math.min(1, (1 - f) / 0.03) }; } });
+    }
+    moving.push({ geo: part(box(0.95, 0.06, 0.95), GLOW), pivot: [OX, y0 + 0.1 + OH + 0.03, OZ], anim: (t) => { const f = cyc(t, P); return f > 0.82 && f < 0.97 ? { s: 1 + Math.sin(t * 12) * 0.03 } : { s: 0.001 }; } });
+    // Coolant flowing out hot and back cold.
+    for (let k = 0; k < 6; k++) { moving.push(rider(part(new THREE.SphereGeometry(0.1, 10, 7), '#ff8a65'), pipeOut, 3, k / 6)); moving.push(rider(part(new THREE.SphereGeometry(0.1, 10, 7), '#b3e5fc'), pipeBack, 3, k / 6)); }
+    // The cooling unit's fans.
+    [0, 1].forEach((i) => moving.push({ geo: merge([0, 1, 2, 3].map((k) => part(box(0.85, 0.02, 0.14), '#9aa1a9', { r: [0, k * Math.PI / 4, 0] }))), pivot: [CX - 0.4 + i * 0.8, y0 + 1.53, CZ], anim: (t) => ({ ry: t * 8 }) }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
