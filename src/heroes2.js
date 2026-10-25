@@ -1971,34 +1971,42 @@ export const HEROES2 = {
     for (let k = 0; k < 4; k++) moving.push({ geo: merge(part(box(1.2 - (k % 2) * 0.3, 0.07, 0.02), '#5b6b7d', { p: [0, 0, 0] }), part(rbox(0.16, 0.16, 0.025, 0.04), TEAL, { p: [0.75 - (k % 2) * 0.15, 0, 0] })), pivot: at(-0.15, 2.2 - k * 0.3, 0.1), anim: (t) => { const f = cyc(t, P), a = 0.55 + k * 0.08; return f > a && f < 0.97 ? { q: Q, s: 1, sx: Math.min(1, win(f, a, a + 0.06)) + 0.001 } : { s: 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // Neuralink: thought into action. The R1 robot places the tiny implant with a surgeon's
-  // precision; across the room a participant moves the cursor on the screen just by thinking.
+  // Neuralink: thought into action. In the surgical bay the R1 robot threads the implant with a
+  // precision no hand can match; the N1 itself floats in the middle, its threads stirring; and
+  // the participant in the wheelchair moves the cursor across the big screen just by thinking.
   neuralink: { finder: '#1d1f24', build: () => {
-    const R = rand(160), out = [], INK = '#1d1f24';
-    out.push(ground('#8fc66f'), part(rbox(8.4, 0.08, 6.0, 0.03), '#f2f4f6', { p: [-0.4, y0 + 0.04, -1.0] }), part(rbox(8.4, 2.6, 0.2, 0.03), '#e9ecef', { p: [-0.4, y0 + 1.3, -4.0] }), part(rbox(0.2, 2.6, 6.0, 0.03), '#e2e6ea', { p: [-4.6, y0 + 1.3, -1.0] }));
-    out.push(place(pixText('NEURALINK', 0.07, INK, 0.03), { p: [-0.4, y0 + 2.2, -3.88] }));
-    // ---- the surgical bay, back left: the R1 robot's gantry over the head rest
-    const BX = -2.6, BZ = -2.2;
-    out.push(part(rbox(1.0, 0.8, 2.0, 0.08), K.white, { p: [BX, y0 + 0.4, BZ] }), part(rbox(0.9, 0.12, 1.9, 0.05), '#cfd8de', { p: [BX, y0 + 0.86, BZ] }), part(ball(0.32), '#e9b98f', { p: [BX, y0 + 1.15, BZ - 0.75] }), part(torus(0.36, 0.05, TAU, 24), '#c9ced6', { p: [BX, y0 + 1.1, BZ - 0.75], r: [Math.PI / 2, 0, 0] }), part(rbox(0.8, 0.2, 1.2, 0.05), '#9fb7c9', { p: [BX, y0 + 1.0, BZ + 0.3] }));
-    [[-0.9, -1.6], [0.9, -1.6]].forEach(([x, z]) => out.push(part(rbox(0.16, 2.4, 0.16, 0.04), K.white, { p: [BX + x, y0 + 1.2, BZ + z * 0.5 - 0.5] })));
-    out.push(part(rbox(2.0, 0.2, 0.3, 0.05), K.white, { p: [BX, y0 + 2.4, BZ - 1.3] }));
-    // ---- the participant's desk, front right: chair, screen
-    const DX = 2.2, DZ = 1.6;
-    out.push(place(desk(K.white, INK), { p: [DX, y0, DZ], r: [0, -Math.PI / 4, 0] }), part(rbox(1.6, 1.0, 0.06, 0.04), INK, { p: [DX - 0.25, y0 + 1.35, DZ - 0.25], r: [0, Math.PI / 4, 0] }), part(box(1.44, 0.86, 0.01), '#0f2a3a', { p: [DX - 0.22, y0 + 1.35, DZ - 0.22], r: [0, Math.PI / 4, 0] }));
-    out.push(place(fan('#3d7be0'), { p: [DX + 0.45, y0, DZ + 0.45], s: 1.4 }));
-    out.push(trees(R, [[4.6, 4.6], [-4.6, 4.6], [-1.6, 4.4], [4.6, -1.0]], 0.55));
+    const R = rand(217), out = [], INK = '#1d1f24', GLOW = '#4fc3f7';
+    out.push(ground('#8fc66f'), part(rbox(9.6, 0.08, 9.6, 0.05), '#f2f4f6', { p: [0, y0 + 0.04, 0] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(9.4, 0.005, 0.02), '#e2e6ea', { p: [0, y0 + 0.085, -4.2 + i * 1.2] }), part(box(0.02, 0.005, 9.4), '#e2e6ea', { p: [-4.2 + i * 1.2, y0 + 0.085, 0] }));
+    out.push(part(rbox(9.6, 2.2, 0.2, 0.03), '#e9ecef', { p: [0, y0 + 1.1, -4.7] }), part(rbox(0.2, 2.2, 9.4, 0.03), '#e2e6ea', { p: [-4.7, y0 + 1.1, 0] }), place(pixText('NEURALINK', 0.09, INK, 0.03), { p: [1.4, y0 + 1.5, -4.58] }));
+    // ---- the surgical bay, back left: the bed, the head rest, the R1 gantry
+    const BX = -2.8, BZ = -2.6;
+    out.push(part(rbox(1.2, 0.8, 2.6, 0.1), K.white, { p: [BX, y0 + 0.48, BZ] }), part(rbox(1.1, 0.14, 2.5, 0.05), '#cfd8de', { p: [BX, y0 + 0.94, BZ] }), part(rbox(0.9, 0.24, 1.5, 0.08), '#9fb7c9', { p: [BX, y0 + 1.12, BZ + 0.4] }), part(ball(0.34), '#e9b98f', { p: [BX, y0 + 1.25, BZ - 0.95] }), part(torus(0.38, 0.06, TAU, 24), '#c9ced6', { p: [BX, y0 + 1.15, BZ - 0.95], r: [Math.PI / 2, 0, 0] }));
+    [-1, 1].forEach((s) => out.push(part(rbox(0.22, 3.0, 0.22, 0.05), K.white, { p: [BX + s * 1.0, y0 + 1.55, BZ - 1.7] })));
+    out.push(part(rbox(2.4, 0.3, 0.4, 0.06), K.white, { p: [BX, y0 + 3.0, BZ - 1.7] }), part(rbox(0.5, 0.5, 0.5, 0.08), INK, { p: [BX - 0.8, y0 + 2.6, BZ - 1.9] }), part(box(0.3, 0.1, 0.02), GLOW, { p: [BX - 0.8, y0 + 2.65, BZ - 1.64] }));
+    // ---- the implant's plinth, middle
+    out.push(part(cyl(0.7, 0.8, 0.9, 32), K.white, { p: [0.6, y0 + 0.45, -0.4] }), part(torus(0.72, 0.04, TAU, 32), GLOW, { p: [0.6, y0 + 0.85, -0.4], r: [Math.PI / 2, 0, 0] }));
+    // ---- the participant's corner, front right: the big screen and the wheelchair
+    const DX = 2.6, DZ = 2.4, DQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 4, 0)), sc = (dx, dy, dz = 0.06) => { const v = new V(dx, dy, dz).applyQuaternion(DQ); return [DX + v.x, y0 + dy, DZ + v.z]; };
+    out.push(part(rbox(2.8, 1.7, 0.1, 0.05), INK, { p: sc(0, 1.7, 0), q: DQ }), part(box(2.6, 1.5, 0.01), '#0f2a3a', { p: sc(0, 1.7, 0.06), q: DQ }), beam(sc(0, 0, -0.1), sc(0, 0.85, -0.1), 0.1, '#3a3f47'), part(rbox(1.0, 0.06, 0.6, 0.03), '#3a3f47', { p: sc(0, 0.03, -0.1) }));
+    const WX = 3.9, WZ = 3.7;
+    out.push(part(torus(0.35, 0.05, TAU, 24), '#3a3f47', { p: [WX - 0.3, y0 + 0.4, WZ + 0.3], r: [0, Math.PI / 4, 0] }), part(torus(0.35, 0.05, TAU, 24), '#3a3f47', { p: [WX + 0.3, y0 + 0.4, WZ - 0.3], r: [0, Math.PI / 4, 0] }), part(rbox(0.6, 0.1, 0.6, 0.03), '#3a3f47', { p: [WX, y0 + 0.55, WZ] }), part(rbox(0.1, 0.6, 0.6, 0.03), '#3a3f47', { p: [WX + 0.25, y0 + 0.85, WZ + 0.25], r: [0, Math.PI / 4, 0] }));
+    out.push(part(capsule(0.2, 0.35), '#3d7be0', { p: [WX + 0.05, y0 + 0.95, WZ + 0.05] }), part(capsule(0.08, 0.4), '#2b3a55', { p: [WX - 0.2, y0 + 0.55, WZ - 0.2], r: [0, Math.PI / 4, Math.PI / 2] }), part(ball(0.17), '#e9b98f', { p: [WX, y0 + 1.42, WZ] }), part(ball(0.18), '#3a2a20', { p: [WX + 0.02, y0 + 1.48, WZ + 0.02], s: [1, 0.7, 1] }));
+    out.push(trees(R, [[4.6, -4.6], [-4.6, 4.6], [1.2, 4.6]], 0.45));
     // ---- moving parts
-    const moving = [], P = 9;
-    // The R1 head on its carriage: down to the head, places the implant, back up.
-    const head = merge(part(rbox(0.4, 0.5, 0.4, 0.08), K.white), part(cyl(0.05, 0.02, 0.3, 10), '#9aa1a9', { p: [0, -0.4, 0] }), part(cyl(0.06, 0.06, 0.06, 12), '#4fc3f7', { p: [0.21, 0.1, 0], r: [0, 0, Math.PI / 2] }));
-    moving.push({ geo: head, pivot: [BX, y0 + 2.1, BZ - 1.3], anim: (t) => { const f = cyc(t, P), d = easeIO(win(f, 0.05, 0.25)) - easeIO(win(f, 0.4, 0.55)); return { z: d * 0.55, y: -d * 0.25 }; } });
-    moving.push({ geo: merge(part(cyl(0.1, 0.1, 0.04, 20), '#c9ced6'), part(cyl(0.06, 0.06, 0.045, 16), INK)), pivot: [BX, y0 + 1.48, BZ - 0.75], anim: (t) => { const f = cyc(t, P); return f > 0.28 ? { s: 1 } : { s: 0.001 }; } });
-    // Thought to the screen: rings from the participant's head, the cursor gliding to targets.
-    for (let k = 0; k < 2; k++) moving.push({ geo: part(torus(0.25, 0.025, TAU, 24), '#4fc3f7', { r: [Math.PI / 2, 0, 0] }), pivot: [DX + 0.45, y0 + 1.25, DZ + 0.45], anim: (t) => { const u = cyc(t, 1.6, k / 2); return { s: 0.6 + u * 1.8, y: u * 0.2 }; } });
-    const SQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 4, 0)), sc = (dx, dy) => { const v = new V(dx, dy, 0.05).applyQuaternion(SQ); return [DX - 0.22 + v.x, y0 + 1.35 + dy * 0, DZ - 0.22 + v.z]; };
-    const tgt = [[-0.5, 0.25], [0.45, 0.2], [0.3, -0.25], [-0.4, -0.2]];
-    tgt.forEach(([x, y], k) => moving.push({ geo: part(new THREE.CircleGeometry(0.08, 16), '#62d35f'), pivot: [...sc(x, y).slice(0, 1), y0 + 1.35 + y, sc(x, y)[2]], anim: (t) => { const f = cyc(t, 6), i = Math.floor(f * 4); return i === k ? { q: SQ, s: 1 + Math.sin(t * 8) * 0.1 } : { s: 0.001 }; } }));
-    moving.push({ geo: part(cone(0.06, 0.14, 3), K.white, { r: [0, 0, 0.6] }), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 6) * 4, i = Math.floor(f), u = easeIO(Math.min(1, (f - i) / 0.6)), a = tgt[(i + 3) % 4], b = tgt[i], x = a[0] + (b[0] - a[0]) * u, y = a[1] + (b[1] - a[1]) * u, p = sc(x, y); return { x: p[0], y: y0 + 1.35 + y, z: p[2], q: SQ }; } });
+    const moving = [], P = 10;
+    // The R1 head: along the gantry, down to the head rest, threading, back up.
+    moving.push({ geo: merge(part(rbox(0.5, 0.6, 0.5, 0.08), K.white), part(cyl(0.06, 0.02, 0.4, 10), '#9aa1a9', { p: [0, -0.5, 0] }), part(cyl(0.07, 0.07, 0.06, 12), GLOW, { p: [0.26, 0.1, 0], r: [0, 0, Math.PI / 2] })), pivot: [BX, y0 + 2.5, BZ - 1.4], anim: (t) => { const f = cyc(t, P), d = easeIO(win(f, 0.05, 0.25)) - easeIO(win(f, 0.45, 0.6)); return { z: d * 0.45, y: -d * 0.55 + Math.sin(t * 30) * 0.01 * (f > 0.25 && f < 0.45 ? 1 : 0) }; } });
+    moving.push({ geo: merge(part(cyl(0.12, 0.12, 0.05, 20), '#c9ced6'), part(cyl(0.07, 0.07, 0.055, 16), INK)), pivot: [BX, y0 + 1.6, BZ - 0.95], anim: (t) => (cyc(t, P) > 0.35 ? { s: 1 } : { s: 0.001 }) });
+    // The N1, big, floating over its plinth with its threads stirring.
+    const n1 = moving.length;
+    moving.push({ geo: merge(part(cyl(0.75, 0.75, 0.25, 48), '#c9ced6'), part(cyl(0.6, 0.6, 0.26, 48), '#e9ecef'), part(cyl(0.3, 0.3, 0.27, 32), INK), part(torus(0.75, 0.04, TAU, 48), GLOW, { r: [Math.PI / 2, 0, 0] })), pivot: [0.6, y0 + 2.2, -0.4], anim: (t) => ({ ry: t * 0.4, y: Math.sin(t * 1.2) * 0.1 }) });
+    for (let k = 0; k < 16; k++) { const a = k * TAU / 16, r = 0.25 + (k % 3) * 0.12; moving.push({ geo: part(tube([[0, 0, 0], [0.04, -0.4, 0], [-0.03, -0.8, 0.02], [0.02, -1.1, 0]], 0.012), '#5b616b'), pivot: [Math.cos(a) * r, -0.12, Math.sin(a) * r], parent: n1, anim: (t) => ({ rz: Math.sin(t * 2 + k) * 0.15, rx: Math.cos(t * 1.7 + k) * 0.12 }) }); }
+    // Thought to the screen: rings from the participant's head, the cursor gliding to each target.
+    for (let k = 0; k < 3; k++) moving.push({ geo: part(torus(0.3, 0.03, TAU, 24), GLOW, { r: [Math.PI / 2, 0, 0] }), pivot: [WX, y0 + 1.7, WZ], anim: (t) => { const u = cyc(t, 1.8, k / 3); return { s: 0.5 + u * 2, y: u * 0.3 }; } });
+    const tgt = [[-0.9, 0.45], [0.8, 0.35], [0.6, -0.45], [-0.7, -0.4]];
+    tgt.forEach(([x, y], k) => moving.push({ geo: merge(part(new THREE.CircleGeometry(0.16, 20), '#62d35f'), part(new THREE.RingGeometry(0.2, 0.24, 20), '#62d35f')), pivot: sc(x, 1.7 + y, 0.08), anim: (t) => { const i = Math.floor(cyc(t, 6) * 4); return i === k ? { q: DQ, s: 1 + Math.sin(t * 8) * 0.1 } : { s: 0.001 }; } }));
+    moving.push({ geo: part(extrude([[0, 0], [0, -0.3], [0.08, -0.22], [0.15, -0.34], [0.2, -0.32], [0.13, -0.2], [0.22, -0.2]], 0.02), K.white), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 6) * 4, i = Math.floor(f), u = easeIO(Math.min(1, (f - i) / 0.6)), a = tgt[(i + 3) % 4], b = tgt[i], x = a[0] + (b[0] - a[0]) * u, y = a[1] + (b[1] - a[1]) * u, p = sc(x, 1.7 + y, 0.09); return { x: p[0], y: p[1], z: p[2], q: DQ }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // Scale AI: the data behind the models. Pictures roll down the belt past the labellers, who
