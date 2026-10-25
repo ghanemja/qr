@@ -1638,5 +1638,52 @@ export const HEROES = {
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, 9), A = [CX + 4.2, 2.6], B = [CX + 2.35, CZ + D / 2 + 0.45]; if (f < 0.35) { const k = easeIO(f / 0.35); return { x: A[0] + (B[0] - A[0]) * k, z: A[1] + (B[1] - A[1]) * k, ry: Math.atan2(-(B[1] - A[1]), B[0] - A[0]), s: Math.min(1, f / 0.05) }; } if (f < 0.6) return { x: B[0], z: B[1], ry: Math.PI / 2, still: true }; const k = easeIO(win(f, 0.6, 1)); return { x: B[0] + (A[0] - 0.8 - B[0]) * k, z: B[1] + (A[1] + 1.6 - B[1]) * k, ry: Math.atan2(-(A[1] + 1.6 - B[1]), A[0] - 0.8 - B[0]), s: Math.min(1, (1 - f) / 0.05) }; }, { shirt: '#d6336c', pants: '#2b3a55', y: y0 }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Visa: the network in the middle of the world's card payments. On a map of the world a card taps
+  // at a shop; the payment races to VisaNet and back and a green check pops up, while every other
+  // city pings in at the same time.
+  visa: { finder: '#1a1f71', build: () => {
+    const out = [], y0 = 0.24, NAVY = '#1a1f71', GOLD = '#f7b600';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#2b4a7a', { p: [0, 0.12, 0] }), part(box(10.2, 0.06, 10.2), 'W', { p: [0, y0 + 0.02, 0] }));
+    // Continents: rounded slabs, sandy edges and green tops (north is the back of the board).
+    const land = (pts) => { const sh = new THREE.Shape(new THREE.SplineCurve(pts.map(([x, z]) => new THREE.Vector2(x, -z))).getPoints(hi() ? 60 : 16)); return part(new THREE.ExtrudeGeometry(sh, { depth: 0.22, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.08, bevelSegments: hi() ? 3 : 1, curveSegments: 4 }).rotateX(-Math.PI / 2), (px, py) => (py > 0.24 ? '#8fc46a' : '#d8c89a'), { p: [0, y0 + 0.02, 0] }); };
+    const lands = {
+      na: [[-4.6, -4.2], [-2.6, -4.6], [-0.6, -4.0], [-0.4, -2.6], [-1.2, -1.2], [-1.8, 0.2], [-2.6, 0.4], [-3.4, -0.6], [-4.4, -1.8], [-4.8, -3.2], [-4.6, -4.2]],
+      sa: [[-2.0, 1.0], [-0.9, 1.4], [-0.5, 2.4], [-1.1, 3.6], [-1.7, 4.6], [-2.2, 4.2], [-2.4, 2.8], [-2.6, 1.6], [-2.0, 1.0]],
+      eu: [[0.2, -4.4], [1.4, -4.6], [2.2, -3.8], [1.8, -2.8], [0.8, -2.2], [0.1, -2.7], [-0.1, -3.6], [0.2, -4.4]],
+      af: [[0.2, -1.6], [1.6, -1.8], [2.6, -1.0], [2.4, 0.6], [1.8, 2.2], [1.1, 2.6], [0.6, 1.4], [0.0, 0.2], [0.2, -1.6]],
+      as: [[2.4, -4.6], [4.2, -4.8], [4.9, -3.4], [4.6, -1.6], [3.6, -0.6], [2.8, -1.4], [2.5, -2.6], [2.4, -4.6]],
+      au: [[3.2, 1.8], [4.4, 1.6], [4.9, 2.6], [4.4, 3.6], [3.4, 3.5], [3.0, 2.6], [3.2, 1.8]],
+    };
+    for (const k in lands) out.push(land(lands[k]));
+    const ty = y0 + 0.32;
+    // VisaNet: a white data tower in North America with its blue band and gold crown.
+    const HX = -2.6, HZ = -2.4;
+    out.push(part(rbox(1.6, 0.3, 1.2, 0.05), '#e9ecef', { p: [HX, ty + 0.15, HZ] }), part(lathe([[0, 0], [0.55, 0], [0.45, 2.6], [0.0, 2.6]], 40), '#f4f5f6', { p: [HX, ty + 0.3, HZ] }));
+    out.push(part(cyl(0.53, 0.53, 0.4, 40), NAVY, { p: [HX, ty + 1.2, HZ] }), part(cyl(0.5, 0.47, 0.12, 40), GOLD, { p: [HX, ty + 1.5, HZ] }), part(cyl(0.47, 0.46, 0.08, 40), GOLD, { p: [HX, ty + 2.9, HZ] }));
+    // Shops in cities round the world, each with a card terminal.
+    const cities = [[1.0, -3.4, '#e5533d'], [3.5, -2.6, '#2f9e6e'], [-1.5, 2.6, '#f29a3a'], [1.4, 0.4, '#8a6cf0'], [3.9, 2.6, '#3fb8a8'], [-3.6, -1.0, '#d6336c']];
+    const shop = (x, z, c) => [part(rbox(0.7, 0.5, 0.55, 0.04), '#f4f1ea', { p: [x, ty + 0.25, z] }), part(prism(0.78, 0.25, 0.62), c, { p: [x, ty + 0.5, z], r: [0, Math.PI / 2, 0] }), part(box(0.3, 0.26, 0.02), '#2a3c50', { p: [x + 0.12, ty + 0.2, z + 0.28] }),
+      part(rbox(0.12, 0.2, 0.06, 0.02), '#2b2f36', { p: [x - 0.48, ty + 0.1, z + 0.22] }), part(box(0.08, 0.06, 0.01), '#7cf0ff', { p: [x - 0.48, ty + 0.16, z + 0.255] })];
+    cities.forEach(([x, z, c]) => out.push(shop(x, z, c)));
+    // The routes, arcing over the oceans to VisaNet.
+    const hub = [HX, ty + 2.4, HZ];
+    const routes = cities.map(([x, z]) => { const A = [x - 0.48, ty + 0.3, z + 0.22], d = Math.hypot(x - HX, z - HZ); return curve([A, [(x + HX) / 2, ty + 1.6 + d * 0.35, (z + HZ) / 2], hub]); });
+    routes.forEach((c) => out.push(part(tubeOn(c, 0.018, hi() ? 48 : 12), '#9fb7ff')));
+    // ---- moving parts
+    const moving = [];
+    // The ring of light turning on the tower.
+    moving.push({ geo: merge(part(torus(0.8, 0.04, TAU, 48), GOLD), ring(8, (a) => part(ball(0.07), '#ffffff', { p: [Math.cos(a) * 0.8, 0, Math.sin(a) * 0.8] }))), pivot: [HX, ty + 2.2, HZ], anim: (t) => ({ ry: t * 1.2, rx: Math.sin(t) * 0.15 }) });
+    // The featured tap: the card dips to the terminal in Europe, the payment goes and comes back.
+    const [FX, FZ] = cities[0], P = 4;
+    const card = merge(part(rbox(0.9, 0.56, 0.04, 0.06), (px, py) => (py > 0.12 ? NAVY : py > -0.14 ? '#ffffff' : GOLD)), part(rbox(0.16, 0.12, 0.01, 0.02), '#d4af37', { p: [-0.25, 0.04, 0.025] }), hi() ? [0, 1, 2, 3].map((i) => part(box(0.07, 0.1, 0.01), NAVY, { p: [0.05 + i * 0.09, -0.01, 0.025], r: [0, 0, i === 1 ? 0.3 : 0] })) : []);
+    moving.push({ geo: card, pivot: [FX - 0.48, ty + 0.35, FZ + 0.3], anim: (t) => { const f = cyc(t, P); return { y: 0.7 - bump(f, 0.12, 0.06) * 0.6, rx: -1.1 + bump(f, 0.12, 0.06) * 0.6, ry: 0.3 }; } });
+    for (const home of [0, 1]) moving.push({ geo: part(ball(0.13), home ? '#2fbf5b' : GOLD), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P), u = home ? 1 - win(f, 0.45, 0.7) : win(f, 0.18, 0.43); const vis = home ? f > 0.45 && f < 0.7 : f > 0.18 && f < 0.43; const p = routes[0].getPointAt(u); return vis ? { x: p.x, y: p.y, z: p.z } : { s: 0.001 }; } });
+    moving.push({ geo: merge(part(rbox(0.12, 0.34, 0.08, 0.04), '#2fbf5b', { p: [-0.12, 0.08, 0], r: [0, 0, 0.7] }), part(rbox(0.12, 0.6, 0.08, 0.04), '#2fbf5b', { p: [0.12, 0.2, 0], r: [0, 0, -0.6] })), pivot: [FX, ty + 1.3, FZ], anim: (t) => { const f = cyc(t, P); return f > 0.7 && f < 0.97 ? { s: back(win(f, 0.7, 0.78)) + 0.001, y: win(f, 0.7, 0.97) * 0.3, ry: Math.PI / 4 } : { s: 0.001 }; } });
+    // The other cities: payments heading in and approvals heading out, all the time.
+    routes.slice(1).forEach((c, i) => { for (let k = 0; k < 2; k++) moving.push({ geo: part(ball(0.07), k ? '#2fbf5b' : GOLD), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 2.2 + i * 0.3, i * 0.21 + k * 0.5), u = k ? 1 - f : f, p = c.getPointAt(u); return { x: p.x, y: p.y, z: p.z, s: Math.min(1, u / 0.05, (1 - u) / 0.05) + 0.001 }; } }); });
+    // A cargo ship and a jet crossing, for the world's trade.
+    moving.push({ geo: merge(part(rbox(1.2, 0.22, 0.38, 0.08), '#c0392b', { p: [0, 0.11, 0] }), part(box(0.7, 0.18, 0.3), '#3d6ea8', { p: [-0.1, 0.3, 0] }), part(rbox(0.22, 0.32, 0.3, 0.04), '#f4f5f6', { p: [-0.48, 0.38, 0] })), pivot: [0, y0 + 0.05, 0], anim: (t) => { const f = cyc(t, 20), x = -4.6 + f * 9.2; return { x, z: 0.9 + Math.sin(f * 6) * 0.15, ry: 0, s: Math.min(1, f / 0.05, (1 - f) / 0.05) + 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

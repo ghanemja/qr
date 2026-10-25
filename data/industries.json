@@ -55,7 +55,8 @@
   "boeing": "Built to fly",
   "homedepot": "Built by the pros",
   "netflix": "Made for streaming",
-  "starbucks": "The third place"
+  "starbucks": "The third place",
+  "visa": "The network"
  },
  "bank": [
   "Bank of America",
@@ -102,7 +103,6 @@
  ],
  "payments": [
   "American Express",
-  "Visa",
   "Mastercard",
   "PayPal Holdings",
   "First Data",
@@ -1558,5 +1558,8 @@
  ],
  "starbucks": [
   "Starbucks"
+ ],
+ "visa": [
+  "Visa"
  ]
 }
