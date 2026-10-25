@@ -250,6 +250,12 @@ const rocketGeo = (h = 4, body = '#f4f5f6', band = 'A', nose = 'Ad') => { const 
 const radarDish = (r = 0.8, c = K.white) => merge(part(new THREE.SphereGeometry(r, hi() ? 28 : 10, hi() ? 10 : 4, 0, TAU, 0, Math.PI * 0.32), c, { r: [0, 0, Math.PI / 2 + 0.6], p: [-r * 0.5, 0, 0] }),
   beam([0, 0, 0], [r * 0.45, r * 0.32, 0], 0.04, K.steelDk), part(new THREE.SphereGeometry(0.08, 10, 8), 'A', { p: [r * 0.47, r * 0.34, 0] }), part(cyl(0.12, 0.16, 0.3, 12), K.steelDk, { p: [-0.2, -0.15, 0] }));
 
+// A helicopter facing +x (body only; its rotor is a separate part at (0, 0.62, 0)), skids on y = 0.
+const heliGeo = (c = 'A', trim = K.white) => merge(part(capsule(0.36, 0.7), c, { p: [0.1, 0.55, 0], r: [0, 0, Math.PI / 2], s: [1, 1, 0.9] }), part(new THREE.SphereGeometry(0.3, 16, 10, 0, TAU, 0, Math.PI / 2), '#9fcdea', { p: [0.55, 0.6, 0], r: [0, 0, -Math.PI / 2 + 0.3] }),
+  beam([-0.4, 0.62, 0], [-1.5, 0.75, 0], 0.12, c), part(box(0.06, 0.4, 0.22), trim, { p: [-1.5, 0.85, 0] }), part(box(0.5, 0.05, 0.06), trim, { p: [-0.2, 0.55, 0.32] }),
+  [-0.3, 0.3].flatMap((z) => [part(cyl(0.025, 0.025, 1.2, 6), K.dark, { p: [0.1, 0.04, z], r: [0, 0, Math.PI / 2] }), beam([-0.2, 0.04, z], [-0.15, 0.3, z * 0.7], 0.03, K.dark), beam([0.4, 0.04, z], [0.35, 0.3, z * 0.7], 0.03, K.dark)]));
+const rotorGeo = (r = 1.1) => merge(part(cyl(0.06, 0.06, 0.12, 8), K.dark), [0, 1].map((i) => part(box(r * 2, 0.02, 0.1), '#3a3f47', { p: [0, 0.06, 0], r: [0, i * Math.PI / 2, 0] })));
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -1953,5 +1959,68 @@ export const SCENES = {
     // A crew member walking from mission control toward the pad.
     moving.push(...walker(moving.length, (t) => { const k = Math.sin(t * 0.35); return { x: -1.0 + k * 0.1, z: 0.2 + k * 1.4, ry: Math.cos(t * 0.35) > 0 ? -Math.PI / 2 : Math.PI / 2 }; }, { shirt: K.orange, pants: '#3a4a3a', y: y0 }));
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-0.6, y0, 3.7], topAt: [MX - 0.2, y0 + 1.2, MZ + 0.2] };
+  },
+
+  // Hospital (hospital chains, dialysis and care networks): the network that's there when it
+  // matters. An ambulance pulls into the emergency bay and the crew wheel the patient in; the
+  // medevac helicopter lands on the tower's pad; and out of the front door a patient goes home,
+  // a heart over their head, to the car waiting in the lot.
+  'health:3': () => {
+    const R = rand(2701), out = [], moving = [];
+    out.push(slab('#a8d08a'));
+    // The road along the front, the lot, the drive round to the emergency bay.
+    out.push(part(box(10.4, 0.03, 1.2), '#5b616b', { p: [0, y0 + 0.015, 4.5] }), part(rbox(4.6, 0.03, 2.6, 0.03), '#6b7078', { p: [-1.6, y0 + 0.015, 1.3] }));
+    for (let i = 0; i < 6; i++) out.push(part(box(0.06, 0.012, 1.0), K.white, { p: [-3.6 + i * 0.8, y0 + 0.035, 1.0] }));
+    const drive = curve([[4.6, 0, 4.5], [3.6, 0, 3.8], [3.2, 0, 1.6], [3.2, 0, -0.2], [3.2, 0, -1.0]]);
+    for (let i = 0, n = hi() ? 40 : 12; i < n; i++) { const { p, ry } = along(drive, i / n); out.push(part(box(0.5, 0.025, 1.3), '#5b616b', { p: [p.x, y0 + 0.014, p.z], r: [0, ry, 0] })); }
+    // ---- the hospital: a long block at the back, a taller tower with its helipad at the left
+    const HX = -1.0, HZ = -3.3, W = 6.2, D = 2.6, H = 3.2;
+    out.push(part(rbox(W, H, D, 0.06), '#f4f5f6', { p: [HX, y0 + H / 2, HZ] }), part(box(W + 0.02, 0.24, D + 0.02), 'A', { p: [HX, y0 + H - 0.2, HZ] }));
+    for (let f = 0; f < 3; f++) for (let i = 0; i < 8; i++) { if (f === 0 && i > 2 && i < 5) continue; out.push(part(rbox(0.5, 0.5, 0.05, 0.02), '#9fcdea', { p: [HX - W / 2 + 0.55 + i * 0.73, y0 + 0.55 + f * 0.85, HZ + D / 2 + 0.01] })); }
+    for (let f = 0; f < 3; f++) for (let i = 0; i < 3; i++) out.push(part(rbox(0.05, 0.5, 0.5, 0.02), '#9fcdea', { p: [HX + W / 2 + 0.01, y0 + 0.55 + f * 0.85, HZ - 0.8 + i * 0.8] }));
+    const TX = -3.6, TZ = -3.6, TW = 2.4, TH = 4.3;
+    out.push(part(rbox(TW, TH, 2.2, 0.06), '#e9edf0', { p: [TX, y0 + TH / 2, TZ] }), part(box(TW + 0.02, 0.2, 2.22), 'A', { p: [TX, y0 + TH - 0.18, TZ] }));
+    for (let f = 0; f < 5; f++) [-0.6, 0, 0.6].forEach((x) => out.push(part(rbox(0.4, 0.45, 0.05, 0.02), '#9fcdea', { p: [TX + x, y0 + 0.6 + f * 0.75, TZ + 1.11] })));
+    out.push(part(cyl(1.05, 1.05, 0.1, 32), '#5b616b', { p: [TX, y0 + TH + 0.05, TZ] }), part(torus(0.8, 0.03, TAU, 32), K.white, { p: [TX, y0 + TH + 0.11, TZ], r: [Math.PI / 2, 0, 0] }));
+    out.push(place(merge(part(box(0.1, 0.02, 0.6), K.white, { p: [-0.18, 0, 0] }), part(box(0.1, 0.02, 0.6), K.white, { p: [0.18, 0, 0] }), part(box(0.36, 0.02, 0.1), K.white)), { p: [TX, y0 + TH + 0.11, TZ], r: [0, Math.PI / 4, 0] }));
+    // The red cross on the main block, the main entrance with its canopy.
+    const cross = merge(part(rbox(0.8, 0.26, 0.1, 0.03), '#e5533d'), part(rbox(0.26, 0.8, 0.1, 0.03), '#e5533d'));
+    out.push(place(cross, { p: [HX + 1.6, y0 + H + 0.55, HZ + 0.6] }), part(box(0.08, 0.3, 0.08), K.dark, { p: [HX + 1.6, y0 + H + 0.08, HZ + 0.6] }));
+    const DOOR = new V(HX + 0.55, 0, HZ + D / 2);
+    out.push(part(rbox(1.2, 1.0, 0.06, 0.03), '#2a3c50', { p: [DOOR.x, y0 + 0.5, DOOR.z + 0.02] }), part(rbox(2.0, 0.1, 1.2, 0.03), 'A', { p: [DOOR.x, y0 + 1.25, DOOR.z + 0.6] }), [-0.85, 0.85].map((x) => part(cyl(0.04, 0.04, 1.2, 8), K.white, { p: [DOOR.x + x, y0 + 0.6, DOOR.z + 1.1] })));
+    // The emergency bay on the right end.
+    const EX = 3.2, EZ = -1.4;
+    out.push(part(rbox(1.6, 1.6, 1.4, 0.05), '#f4f5f6', { p: [EX - 0.3, y0 + 0.8, HZ - 0.1] }), part(rbox(2.0, 0.12, 1.8, 0.03), '#e5533d', { p: [EX, y0 + 1.6, EZ - 0.3] }), [-0.85, 0.85].map((x) => part(cyl(0.05, 0.05, 1.6, 8), K.white, { p: [EX + x, y0 + 0.8, EZ + 0.5] })));
+    out.push(part(rbox(1.4, 0.22, 0.08, 0.03), K.white, { p: [EX, y0 + 1.8, EZ + 0.6] }), part(box(1.1, 0.1, 0.09), '#e5533d', { p: [EX, y0 + 1.8, EZ + 0.6] }), part(rbox(0.9, 1.0, 0.06, 0.03), '#2a3c50', { p: [EX - 0.3, y0 + 0.5, HZ + 0.62] }));
+    // ---- the outpatient clinic (front left) and parked cars
+    const CX = -3.6, CZ = 3.2;
+    out.push(part(rbox(2.0, 1.1, 1.4, 0.05), K.cream, { p: [CX, y0 + 0.55, CZ] }), part(box(2.02, 0.2, 1.42), 'B', { p: [CX, y0 + 0.95, CZ] }), part(rbox(1.4, 0.45, 0.05, 0.02), '#9fcdea', { p: [CX + 0.1, y0 + 0.55, CZ - 0.71] }), place(cross, { p: [CX - 0.7, y0 + 0.65, CZ - 0.74], s: [0.4, 0.4, 0.4] }));
+    [[-3.2, 'Bd'], [-2.4, '#9aa1a9'], [0.0, '#e9ecef']].forEach(([x, c]) => out.push(place(sedan(c), { p: [x, y0, 1.2], r: [0, Math.PI / 2, 0], s: [0.75, 0.75, 0.75] })));
+    [[4.6, 2.2], [-4.6, 0.2], [0.4, 3.5], [4.7, -4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.5 + R() * 0.2)));
+    out.push(lampPost(1.0, y0, 0.0, Math.PI));
+    // ---- moving parts (one 14 s cycle)
+    const P = 14, F = (t) => cyc(t, P);
+    // The ambulance: in off the road, round the drive, backs into the bay, then leaves.
+    const amb = merge(van(K.white, '#e5533d'), part(box(0.5, 0.08, 0.3), '#e5533d', { p: [0.4, 1.18, 0] }), place(cross, { p: [-0.6, 0.75, 0.44], s: [0.3, 0.3, 0.3] }), place(cross, { p: [-0.6, 0.75, -0.44], s: [0.3, 0.3, 0.3] }));
+    const au = (f) => (f < 0.25 ? easeOut(f / 0.25) : f < 0.6 ? 1 : 1 - easeIn(win(f, 0.6, 0.85)));
+    const ai = moving.length;
+    moving.push({ geo: amb, pivot: [0, y0, 0], anim: (t) => { const f = F(t), u = au(f), { p, ry } = along(drive, Math.min(0.999, u)); return { x: p.x, z: p.z, ry, s: f > 0.84 ? Math.max(0.001, 1 - win(f, 0.84, 0.88)) : f < 0.02 ? f / 0.02 : 1 }; } });
+    moving.push({ geo: merge(part(box(0.12, 0.08, 0.12), '#ff3b30', { p: [0, 0, -0.16] }), part(box(0.12, 0.08, 0.12), '#3d7be0', { p: [0, 0, 0.16] })), pivot: [0.4, 1.26, 0], parent: ai, anim: (t) => ({ ry: t * 8, s: F(t) < 0.3 ? 1 : 0.001 }) });
+    // The crew wheel the patient in on a gurney.
+    const gur = merge(part(rbox(0.9, 0.08, 0.4, 0.03), K.white, { p: [0, 0.5, 0] }), part(rbox(0.6, 0.12, 0.38, 0.05), '#9fcdea', { p: [0.1, 0.6, 0] }), part(new THREE.SphereGeometry(0.1, 10, 8), '#e9b98f', { p: [-0.32, 0.6, 0] }), [-0.35, 0.35].map((x) => part(cyl(0.02, 0.02, 0.46, 6), K.steelDk, { p: [x, 0.24, 0] })));
+    const gp = (f) => { const k = easeIO(win(f, 0.28, 0.5)); return new V(EX, 0, EZ + 0.9 - k * 1.9); };
+    moving.push({ geo: gur, pivot: [0, y0, 0], anim: (t) => { const f = F(t), p = gp(f); return { x: p.x, z: p.z, ry: Math.PI / 2, s: f > 0.27 && f < 0.52 ? 1 : 0.001 }; } });
+    moving.push(...walker(moving.length, (t) => { const f = F(t), p = gp(f); return { x: p.x, z: p.z + 0.75, ry: Math.PI / 2, s: f > 0.27 && f < 0.52 ? 1 : 0.001, push: true, still: f < 0.28 || f > 0.5 }; }, { shirt: '#3d7be0', pants: '#2b3a55', y: y0 }));
+    // The medevac helicopter lands on the tower's pad and lifts off again.
+    const hp = (f) => { const inn = 1 - easeOut(win(f, 0.05, 0.3)), out2 = easeIn(win(f, 0.62, 0.9)); return new V(TX - 3.5 * (inn + out2 * 0.4), y0 + TH + 0.12 + inn * 2.5 + out2 * 3.5, TZ + 2.5 * inn - 3.0 * out2); };
+    const hi0 = moving.length;
+    moving.push({ geo: heliGeo('#e5533d', K.white), pivot: [0, 0, 0], anim: (t) => { const f = F(t), p = hp(f); return { x: p.x, y: p.y, z: p.z, ry: -0.6, rz: (f < 0.3 ? 0.1 : 0) * (1 - win(f, 0.25, 0.3)) - (f > 0.62 ? 0.12 : 0), s: f > 0.9 ? Math.max(0.001, 1 - win(f, 0.9, 0.95)) : f < 0.05 ? Math.max(0.001, win(f, 0, 0.05)) : 1 }; } });
+    moving.push({ geo: rotorGeo(1.0), pivot: [0.1, 0.95, 0], parent: hi0, anim: (t) => ({ ry: t * 18 }) });
+    // Going home: a patient walks out of the front door, a heart over them, to the car in the lot.
+    const home2 = curve([[DOOR.x, 0, DOOR.z + 0.3], [DOOR.x, 0, -0.6], [-0.4, 0, 0.3], [-1.2, 0, 0.9]]);
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P, 0.45), k = win(f, 0, 0.45), { p, ry } = along(home2, k * 0.999); return { x: p.x, z: p.z, ry, s: f > 0.5 ? 0.001 : Math.min(1, f / 0.03), still: f > 0.45 }; }, { shirt: '#f29a3a', pants: '#2b3a55', y: y0 }));
+    moving.push({ geo: part(heartGeo(0.22, 0.12), '#e5533d', { r: [0, Math.PI / 4, 0] }), pivot: [0, y0 + 2.2, 0], anim: (t) => { const f = cyc(t, P, 0.45), k = win(f, 0, 0.45), { p } = along(home2, k * 0.999); return { x: p.x, z: p.z, y: Math.sin(t * 3) * 0.06, s: f > 0.48 ? 0.001 : life(f, 0.02, 0.07, 0.42, 0.48) }; } });
+    moving.push({ geo: sedan('A'), pivot: [0, y0, 1.6], anim: (t) => { const f = cyc(t, P, 0.45), x = f < 0.5 ? -1.2 : -1.2 - easeIn(win(f, 0.5, 0.75)) * 0.2, z = f < 0.5 ? 0 : easeIn(win(f, 0.5, 0.75)) * 2.9, gone = f > 0.75 ? clamp01((f - 0.75) / 0.05) : 0, back = f > 0.92 ? win(f, 0.92, 1) : 0; return { x: x + (f > 0.75 ? -easeIn(win(f, 0.75, 0.9)) * 4 : 0), z, ry: f > 0.62 ? Math.PI * 0.5 * win(f, 0.62, 0.75) + Math.PI / 2 : Math.PI / 2, s: (f < 0.8 ? 0.75 : Math.max(0.001, 0.75 * (1 - gone))) * (f > 0.9 ? back : 1) + 0.001 }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [1.8, y0, 2.4], topAt: [CX, y0 + 1.1, CZ] };
   },
 };
