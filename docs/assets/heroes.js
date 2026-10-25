@@ -2332,5 +2332,52 @@ export const HEROES = {
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, 9), z = 3.0 - f * 4.4; return { x: -2.6, z, ry: Math.PI / 2, s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: '#5a6b4a', pants: '#3a4433', y: y0 }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Deere: the machines farms run on, now steering themselves. A driverless tractor plants rows
+  // that sprout behind it; a combine works the wheat, its reel turning and grain pouring into the
+  // cart; a satellite overhead guides them both; the farmstead stands in the corner.
+  deere: { finder: '#367c2b', build: () => {
+    const R = rand(5), out = [], y0 = 0.24, GRN = '#367c2b', YEL = '#ffde00', INK = '#1d1f24';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#86c766', { p: [0, 0.12, 0] }));
+    // ---- the planting field (left) and the wheat field (right)
+    out.push(part(box(4.6, 0.06, 6.4), '#7a5a3a', { p: [-2.5, y0 + 0.03, 1.2] }));
+    for (let i = 0; i < 12; i++) out.push(part(box(4.4, 0.02, 0.08), '#6a4c30', { p: [-2.5, y0 + 0.07, -1.8 + i * 0.52] }));
+    out.push(part(box(4.6, 0.06, 6.4), '#c9a24a', { p: [2.5, y0 + 0.03, 1.2] }));
+    // ---- the farmstead: barn, silos, house
+    const FX = 2.6, FZ = -3.7;
+    out.push(part(rbox(2.0, 1.2, 1.4, 0.04), '#b8452f', { p: [FX - 0.6, y0 + 0.6, FZ] }), part(prism(2.2, 0.8, 1.5), '#4a3a30', { p: [FX - 0.6, y0 + 1.2, FZ], r: [0, Math.PI / 2, 0] }), part(rbox(0.9, 0.9, 0.06, 0.03), '#f4f1ea', { p: [FX - 0.6, y0 + 0.5, FZ + 0.71] }), beam([FX - 1.03, y0 + 0.08, FZ + 0.75], [FX - 0.17, y0 + 0.92, FZ + 0.75], 0.03, '#b8452f'), beam([FX - 0.17, y0 + 0.08, FZ + 0.75], [FX - 1.03, y0 + 0.92, FZ + 0.75], 0.03, '#b8452f'));
+    for (const [x, r, h] of [[FX + 1.0, 0.45, 2.6], [FX + 1.9, 0.38, 2.2]]) out.push(part(cyl(r, r, h, 32), '#d6d9dd', { p: [x, y0 + h / 2, FZ] }), part(lathe([[r, 0], [r * 0.5, 0.3], [0, 0.38]], 32), '#b9bec6', { p: [x, y0 + h, FZ] }));
+    out.push(part(rbox(1.2, 0.8, 1.0, 0.04), '#f4f1ea', { p: [-3.8, y0 + 0.4, -3.8] }), part(prism(1.3, 0.5, 1.1), '#5a3a2a', { p: [-3.8, y0 + 0.8, -3.8], r: [0, Math.PI / 2, 0] }));
+    [[-4.7, -2.4], [-2.6, -4.6], [0.2, -4.6], [4.7, -2.2]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.75 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    const wheel = (r, w) => merge(part(new THREE.CylinderGeometry(r, r, w, hi() ? 24 : 10), INK, { r: [Math.PI / 2, 0, 0] }), part(new THREE.CylinderGeometry(r * 0.6, r * 0.6, w + 0.01, 16), YEL, { r: [Math.PI / 2, 0, 0] }));
+    // Seedlings that sprout as the tractor passes each row.
+    const P = 16, rowsN = 6, tractorX = (t) => { const f = cyc(t, P) * rowsN, row = Math.floor(f), k = f - row, dir = row % 2 ? -1 : 1; return { row, x: -2.5 + dir * (-2.0 + 4.0 * k), dir }; };
+    for (let r = 0; r < rowsN; r++) for (let i = 0; i < (hi() ? 9 : 4); i++) {
+      const n = hi() ? 9 : 4, x = -4.4 + (i + 0.5) * (3.8 / n), z = -1.55 + r * 1.04, dir = r % 2 ? -1 : 1, at = (r + (dir > 0 ? (x + 4.5) / 4.0 : (-0.5 - x) / 4.0)) / rowsN;
+      moving.push({ geo: merge(part(cone(0.05, 0.22, 6), '#5fae45', { p: [0, 0.11, 0] }), part(cone(0.04, 0.16, 6), '#86cc5f', { p: [0.05, 0.08, 0.03], r: [0, 0, -0.5] })), pivot: [x, y0 + 0.06, z], anim: (t) => { const f = cyc(t, P); return f < at ? { s: 0.001 } : { s: Math.min(1, (f - at) * 30) * (f > 0.97 ? 0.001 : 1) + 0.001 }; } });
+    }
+    // The autonomous tractor and its planter, running the rows back and forth.
+    const trac = moving.length;
+    moving.push({ geo: merge(part(rbox(1.1, 0.5, 0.7, 0.08), GRN, { p: [0.15, 0.75, 0] }), part(rbox(0.6, 0.6, 0.66, 0.08), GRN, { p: [-0.35, 1.25, 0] }), part(box(0.5, 0.4, 0.62), '#26323f', { p: [-0.35, 1.28, 0] }), part(rbox(0.66, 0.06, 0.72, 0.03), YEL, { p: [-0.35, 1.58, 0] }), part(box(0.05, 0.25, 0.6), YEL, { p: [0.7, 0.75, 0] }),
+      place(wheel(0.45, 0.28), { p: [-0.4, 0.45, 0.45] }), place(wheel(0.45, 0.28), { p: [-0.4, 0.45, -0.45] }), place(wheel(0.28, 0.2), { p: [0.5, 0.28, 0.42] }), place(wheel(0.28, 0.2), { p: [0.5, 0.28, -0.42] }), part(cyl(0.12, 0.12, 0.06, 16), '#f4f5f6', { p: [-0.35, 1.64, 0] }),
+      part(box(0.1, 0.1, 1.6), YEL, { p: [-1.05, 0.35, 0] }), [-0.6, -0.2, 0.2, 0.6].map((z) => part(rbox(0.25, 0.3, 0.18, 0.04), GRN, { p: [-1.05, 0.3, z] }))),
+      pivot: [0, y0 + 0.02, 0], anim: (t) => { const { row, x, dir } = tractorX(t); return { x, z: -1.55 + row * 1.04, ry: dir > 0 ? 0 : Math.PI }; } });
+    // The combine in the wheat, its reel turning, with the grain cart alongside.
+    const comb = moving.length, cz = (t) => -1.6 + Math.abs(cyc(t, 18) * 2 - 1) * 5.8;
+    moving.push({ geo: merge(part(rbox(1.4, 1.0, 1.0, 0.08), GRN, { p: [-0.2, 0.9, 0] }), part(rbox(0.55, 0.55, 0.6, 0.06), GRN, { p: [0.35, 1.65, 0] }), part(box(0.45, 0.4, 0.62), '#26323f', { p: [0.38, 1.68, 0] }), part(box(0.5, 0.1, 1.9), YEL, { p: [0.95, 0.45, 0] }), part(box(0.3, 0.3, 1.9), GRN, { p: [0.75, 0.55, 0] }),
+      part(cyl(0.08, 0.08, 1.2, 10), YEL, { p: [-0.6, 1.6, 0.5], r: [0.9, 0, 0] }), place(wheel(0.5, 0.32), { p: [0.3, 0.5, 0.5] }), place(wheel(0.5, 0.32), { p: [0.3, 0.5, -0.5] }), place(wheel(0.3, 0.2), { p: [-0.7, 0.3, 0.45] }), place(wheel(0.3, 0.2), { p: [-0.7, 0.3, -0.45] })),
+      pivot: [2.4, y0 + 0.02, 0], anim: (t) => { const f = cyc(t, 18); return { z: cz(t), ry: f < 0.5 ? -Math.PI / 2 : Math.PI / 2 }; } });
+    moving.push({ geo: merge(ring(5, (a) => part(box(0.04, 0.04, 1.8), YEL, { p: [Math.cos(a) * 0.28, Math.sin(a) * 0.28, 0] })), part(cyl(0.05, 0.05, 1.9, 8), INK, { r: [Math.PI / 2, 0, 0] })), pivot: [1.2, 0.85, 0], parent: comb, anim: (t) => ({ rz: -t * 4 }) });
+    for (let k = 0; k < 6; k++) moving.push({ geo: part(ball(0.06), '#e0b84a'), pivot: [-0.6, 2.05, 1.0], parent: comb, anim: (t) => { const u = cyc(t, 0.8, k / 6); return { z: u * 0.4, y: -u * u * 0.9 }; } });
+    moving.push({ geo: merge(part(rbox(1.2, 0.6, 0.8, 0.06), GRN, { p: [0, 0.75, 0] }), part(lathe([[0.4, 0], [0.3, 0.2], [0, 0.25]], 12), '#e0b84a', { p: [0, 1.05, 0], s: [1.4, 1, 0.9] }), place(wheel(0.32, 0.2), { p: [0, 0.32, 0.45] }), place(wheel(0.32, 0.2), { p: [0, 0.32, -0.45] })),
+      pivot: [3.9, y0 + 0.02, 0], anim: (t) => { const f = cyc(t, 18); return { z: cz(t) - 0.4 * (f < 0.5 ? -1 : 1), ry: f < 0.5 ? -Math.PI / 2 : Math.PI / 2 }; } });
+    // Wheat: tufts that fall as the combine passes, standing again as it turns back.
+    for (let i = 0; i < (hi() ? 70 : 18); i++) { const x = 0.6 + R() * 3.8, z = -1.7 + R() * 6.0; moving.push({ geo: hi() ? merge(tuft(R, 0, 0, 0.22, 7, ['#e0b84a', '#c9a24a', '#ecc861'], 0.5)) : part(cone(0.18, 0.4, 5), '#e0b84a', { p: [0, 0.2, 0] }), pivot: [x, y0 + 0.06, z], anim: (t) => { const f = cyc(t, 18), c = cz(t), cut = f < 0.5 ? z < c : z > c; return { s: cut && Math.abs(x - 2.4) < 1.0 ? 0.001 : 1, sy: cut && Math.abs(x - 2.4) < 1.0 ? 0.001 : 1 }; } }); }
+    // The guiding satellite and its pings.
+    moving.push({ geo: merge(part(rbox(0.4, 0.3, 0.3, 0.04), '#d4a640'), part(box(0.9, 0.02, 0.35), '#1f3550', { p: [0.7, 0, 0] }), part(box(0.9, 0.02, 0.35), '#1f3550', { p: [-0.7, 0, 0] })), pivot: [0, y0 + 5.2, 0.6], anim: (t) => ({ x: Math.sin(t * 0.3) * 1.2, ry: t * 0.2 }) });
+    for (let k = 0; k < 2; k++) moving.push({ geo: part(new THREE.TorusGeometry(1, 0.012, 4, 40), '#7cf0ff'), pivot: [0, y0 + 5.0, 0.6], anim: (t) => { const f = cyc(t, 2, k / 2); return { rx: Math.PI / 2, y: -f * 4.4, x: Math.sin(t * 0.3) * 1.2 * (1 - f) + (k ? 2.4 : -2.5) * f, s: 0.1 + f * 0.9 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

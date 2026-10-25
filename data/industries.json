@@ -69,7 +69,8 @@
   "lilly": "Medicine at scale",
   "caterpillar": "Moving the earth",
   "pepsico": "Snacks and sips",
-  "lockheed": "Only a few can build it"
+  "lockheed": "Only a few can build it",
+  "deere": "Farms that steer themselves"
  },
  "bank": [
   "Wells Fargo",
@@ -560,7 +561,6 @@
  ],
  "farm": [
   "Archer Daniels Midland",
-  "Deere",
   "CHS",
   "AGCO",
   "Mosaic",
@@ -1593,5 +1593,8 @@
  ],
  "lockheed": [
   "Lockheed Martin"
+ ],
+ "deere": [
+  "Deere"
  ]
 }
