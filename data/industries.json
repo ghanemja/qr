@@ -52,7 +52,8 @@
   "jpmorgan": "The fortress",
   "unitedhealth": "Coverage and care",
   "cvs": "The pharmacy next door",
-  "boeing": "Built to fly"
+  "boeing": "Built to fly",
+  "homedepot": "Built by the pros"
  },
  "bank": [
   "Bank of America",
@@ -280,7 +281,6 @@
  ],
  "retail": [
   "Kroger",
-  "Home Depot",
   "Target",
   "Lowe's",
   "Albertsons",
@@ -1189,7 +1189,6 @@
   "Tapestry": 15,
   "Costco Wholesale": 5,
   "BJ's Wholesale Club": 5,
-  "Home Depot": 6,
   "Lowe's": 6,
   "Tractor Supply": 6,
   "Best Buy": 7,
@@ -1550,5 +1549,8 @@
  ],
  "boeing": [
   "Boeing"
+ ],
+ "homedepot": [
+  "Home Depot"
  ]
 }

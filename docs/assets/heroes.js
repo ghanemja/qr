@@ -1452,5 +1452,74 @@ export const HEROES = {
       pivot: [0, y0, 0.9], anim: (t) => { const f = cyc(t, 9), x = -3.6 + 7.2 * Math.abs(f * 2 - 1); return { x, ry: f < 0.5 ? 0 : Math.PI }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Home Depot: the store the pros build from. A forklift loads lumber from the yard onto a flatbed,
+  // the flatbed delivers it to the job site next door, and the house frame rises stud by stud;
+  // the garden centre blooms by the big orange store.
+  homedepot: { finder: '#f96302', build: () => {
+    const R = rand(19), out = [], y0 = 0.24, OR = '#f96302';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#50555d', { p: [0, 0.12, 0] }));
+    // ---- the store: big box, orange band and logo, entrance canopy
+    const SX = -1.2, SZ = -2.9, W = 6.2, D = 2.6, H = 1.9;
+    out.push(part(rbox(W, H, D, 0.05), '#6b6f76', { p: [SX, y0 + H / 2, SZ] }), part(rbox(W + 0.06, 0.4, 0.12, 0.04), OR, { p: [SX, y0 + H - 0.1, SZ + D / 2] }), part(rbox(0.12, 0.4, D + 0.06, 0.04), OR, { p: [SX + W / 2, y0 + H - 0.1, SZ] }), part(box(W - 0.1, 0.04, D - 0.1), '#8a8f96', { p: [SX, y0 + H + 0.01, SZ] }));
+    out.push(part(rbox(1.1, 1.1, 0.12, 0.05), OR, { p: [SX + 0.2, y0 + H - 0.1, SZ + D / 2 + 0.06], r: [0, 0, Math.PI / 4] }), part(box(0.66, 0.66, 0.02), '#ffffff', { p: [SX + 0.2, y0 + H - 0.1, SZ + D / 2 + 0.12], r: [0, 0, Math.PI / 4] }), part(rbox(0.6, 0.6, 0.04, 0.03), OR, { p: [SX + 0.2, y0 + H - 0.1, SZ + D / 2 + 0.13], r: [0, 0, Math.PI / 4] }));
+    if (hi()) [[-0.18, 0.08], [0, 0.0], [0.18, -0.08]].forEach(([dx, dy]) => out.push(part(box(0.32, 0.05, 0.02), '#ffffff', { p: [SX + 0.2 + dx * 0.4, y0 + H - 0.1 + dy + 0.0, SZ + D / 2 + 0.16], r: [0, 0, 0.35] })));
+    out.push(part(rbox(1.4, 1.0, 0.06, 0.03), '#2a3c50', { p: [SX + 0.2, y0 + 0.5, SZ + D / 2 + 0.01] }), part(rbox(2.0, 0.1, 0.7, 0.03), OR, { p: [SX + 0.2, y0 + 1.15, SZ + D / 2 + 0.33] }));
+    for (const x of [-0.75, 1.15]) out.push(part(cyl(0.05, 0.05, 1.1, 10), '#c9ced6', { p: [SX + x, y0 + 0.55, SZ + D / 2 + 0.6] }));
+    // Garden centre: a fenced yard of plant tables and flowers.
+    const GX = SX - W / 2 + 0.9, GZ = SZ + D / 2 + 1.0;
+    for (let i = 0; i <= 8; i++) { out.push(part(box(0.04, 0.7, 0.04), '#3a3f47', { p: [GX - 0.9 + i * 0.225, y0 + 0.35, GZ + 0.9] }), part(box(0.04, 0.7, 0.04), '#3a3f47', { p: [GX - 0.9, y0 + 0.35, GZ - 0.9 + i * 0.225] })); }
+    out.push(part(box(1.8, 0.04, 0.04), '#3a3f47', { p: [GX, y0 + 0.7, GZ + 0.9] }), part(box(0.04, 0.04, 1.8), '#3a3f47', { p: [GX - 0.9, y0 + 0.7, GZ] }));
+    for (let r = 0; r < 3; r++) { out.push(part(box(1.4, 0.06, 0.32), '#7b5a3a', { p: [GX + 0.1, y0 + 0.4, GZ - 0.6 + r * 0.55] })); if (hi()) for (let i = 0; i < 7; i++) { const c = ['#e5533d', '#ffd23f', '#d6336c', '#8a6cf0', '#ffffff'][Math.floor(R() * 5)]; out.push(part(cyl(0.06, 0.05, 0.08, 10), '#5a3a2a', { p: [GX - 0.5 + i * 0.2, y0 + 0.47, GZ - 0.6 + r * 0.55] }), part(ball(0.08), '#4f8f3a', { p: [GX - 0.5 + i * 0.2, y0 + 0.56, GZ - 0.6 + r * 0.55] }), part(ball(0.05), c, { p: [GX - 0.5 + i * 0.2, y0 + 0.62, GZ - 0.6 + r * 0.55] })); } }
+    // ---- the lumber yard
+    const plank = (len) => merge(part(box(len, 0.08, 0.16), '#d9b27c'), hi() ? part(box(len + 0.002, 0.012, 0.162), '#c49a62', { p: [0, 0.03, 0] }) : []);
+    const lumber = (len, cols, rows) => merge([...Array(cols * rows)].map((_, i) => place(plank(len), { p: [0, 0.04 + Math.floor(i / cols) * 0.09, (i % cols - (cols - 1) / 2) * 0.17] })));
+    const LX = 1.8, LZ = -2.6;
+    for (const [dx, h] of [[0, 4], [1.0, 6], [2.0, 3]]) out.push(place(lumber(1.8, 4, h), { p: [LX + dx, y0, LZ], r: [0, Math.PI / 2, 0] }), part(box(0.8, 0.06, 0.12), '#7b5a3a', { p: [LX + dx, y0 + 0.03, LZ - 0.6] }), part(box(0.8, 0.06, 0.12), '#7b5a3a', { p: [LX + dx, y0 + 0.03, LZ + 0.6] }));
+    out.push(part(box(0.06, 1.2, 2.2), OR, { p: [LX - 0.6, y0 + 0.6, LZ] }), part(box(3.2, 0.08, 2.2), '#3a3f47', { p: [LX + 1.0, y0 + 1.3, LZ], r: [0.05, 0, 0] }));
+    for (const x of [-0.6, 2.6]) for (const z of [-1, 1]) out.push(part(box(0.08, 1.3, 0.08), '#3a3f47', { p: [LX + x, y0 + 0.65, LZ + z] }));
+    // ---- the job site: a slab, a sign, a portable toilet, a stack of plywood
+    const JX = 2.6, JZ = 2.5;
+    out.push(part(rbox(3.2, 0.16, 2.6, 0.03), '#bdb8ad', { p: [JX, y0 + 0.08, JZ] }), part(box(4.4, 0.02, 3.8), '#8a6a4a', { p: [JX, y0 + 0.008, JZ] }));
+    out.push(part(rbox(0.6, 1.0, 0.6, 0.06), '#2f7fd8', { p: [JX - 1.9, y0 + 0.5, JZ + 1.6] }), part(rbox(0.66, 0.08, 0.66, 0.04), '#f4f5f6', { p: [JX - 1.9, y0 + 1.03, JZ + 1.6] }));
+    out.push(place(lumber(1.2, 3, 3), { p: [JX + 1.9, y0, JZ - 0.2], r: [0, Math.PI / 2, 0] }));
+    // Parking: a few pickups.
+    const pickup = (c) => (!hi() ? merge(part(new THREE.BoxGeometry(2.3, 0.6, 1.05), c, { p: [0, 0.45, 0] })) : merge(part(rbox(2.3, 0.5, 1.05, 0.15), c, { p: [0, 0.48, 0] }), part(rbox(0.95, 0.5, 0.98, 0.15), c, { p: [0.3, 0.95, 0] }), part(box(0.9, 0.36, 1.0), '#26323f', { p: [0.3, 0.98, 0] }), part(box(1.05, 0.08, 0.9), '#3a3f47', { p: [-0.55, 0.74, 0] }),
+      [[-0.72, 0.5], [0.72, 0.5], [-0.72, -0.5], [0.72, -0.5]].map(([x, z]) => part(new THREE.CylinderGeometry(0.24, 0.24, 0.18, 18), '#1d1f24', { p: [x, 0.24, z], r: [Math.PI / 2, 0, 0] }))));
+    out.push(place(pickup('#c0392b'), { p: [-3.6, y0, 1.4], r: [0, Math.PI / 2, 0] }), place(pickup('#e9ecef'), { p: [-2.3, y0, 1.4], r: [0, Math.PI / 2, 0] }), place(sedan('#3d6ea8'), { p: [-1.0, y0, 1.4], r: [0, Math.PI / 2, 0] }));
+    for (let i = 0; i < 5; i++) out.push(part(box(0.05, 0.012, 2.0), '#eceae4', { p: [-4.25 + i * 1.3, y0 + 0.006, 1.4] }));
+    [[-4.6, 4.6], [-2.4, 4.6], [-0.2, 4.6], [4.6, -4.6], [-4.6, -4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.75 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [], P = 12;
+    // The forklift: picks a bundle at the yard, sets it on the flatbed.
+    const fork = moving.length;
+    moving.push({ geo: merge(part(rbox(0.9, 0.45, 0.7, 0.08), OR, { p: [0, 0.38, 0] }), part(box(0.5, 0.06, 0.6), '#3a3f47', { p: [0.05, 1.15, 0] }), [-0.2, 0.25].flatMap((x) => [-0.28, 0.28].map((z) => part(box(0.04, 0.85, 0.04), '#3a3f47', { p: [x, 0.75, z] }))), part(box(0.08, 1.3, 0.5), '#3a3f47', { p: [0.5, 0.75, 0] }),
+      [[-0.3, 0.33], [0.3, 0.33], [-0.3, -0.33], [0.3, -0.33]].map(([x, z]) => part(new THREE.CylinderGeometry(0.15, 0.15, 0.1, 14), '#1d1f24', { p: [x, 0.15, z], r: [Math.PI / 2, 0, 0] }))),
+      pivot: [LX + 1.0, y0, LZ + 1.7], anim: (t) => { const f = cyc(t, P), go = easeIO(win(f, 0.05, 0.18)) - easeIO(win(f, 0.24, 0.36)); return { z: go * 1.6, ry: -Math.PI / 2 }; } });
+    moving.push({ geo: merge(part(box(0.6, 0.04, 0.08), '#3a3f47', { p: [0.3, 0, -0.18] }), part(box(0.6, 0.04, 0.08), '#3a3f47', { p: [0.3, 0, 0.18] }), place(lumber(0.9, 3, 2), { p: [0.35, 0.02, 0], r: [0, Math.PI / 2, 0] })), pivot: [0.55, 0.12, 0], parent: fork,
+      anim: (t) => { const f = cyc(t, P); return { y: easeIO(win(f, 0.02, 0.06)) * 0.4 - easeIO(win(f, 0.19, 0.22)) * 0.1, s: f > 0.22 && f < 0.98 ? 0.001 : 1 }; } });
+    // The flatbed: loaded at the yard, drives to the site, unloads, returns.
+    const truckX = (f) => -0.2 + (easeIO(win(f, 0.26, 0.48)) - easeIO(win(f, 0.62, 0.84))) * 2.3;
+    const truck = moving.length;
+    moving.push({ geo: merge(part(rbox(0.9, 0.95, 1.0, 0.12), OR, { p: [1.15, 0.7, 0] }), part(box(0.05, 0.4, 0.85), '#26323f', { p: [1.6, 0.92, 0] }), part(box(2.2, 0.12, 1.05), '#3a3f47', { p: [-0.45, 0.48, 0] }), part(box(0.08, 0.6, 1.0), '#3a3f47', { p: [0.62, 0.8, 0] }),
+      [[-1.1, 0.5], [-0.4, 0.5], [1.1, 0.5], [-1.1, -0.5], [-0.4, -0.5], [1.1, -0.5]].map(([x, z]) => part(new THREE.CylinderGeometry(0.22, 0.22, 0.16, 16), '#1d1f24', { p: [x, 0.22, z], r: [Math.PI / 2, 0, 0] }))),
+      pivot: [LX + 1.0, y0, 0.2], anim: (t) => ({ x: truckX(cyc(t, P)), ry: 0 }) });
+    moving.push({ geo: place(lumber(1.8, 4, 2), { r: [0, 0, 0] }), pivot: [-0.45, 0.55, 0], parent: truck, anim: (t) => { const f = cyc(t, P); return { s: f > 0.2 && f < 0.56 ? 1 : 0.001 }; } });
+    // The house frame: studs rise round the slab, then the top plates, then the roof trusses.
+    const studs = [], fy = y0 + 0.16, fw = 2.8, fd = 2.2;
+    for (let i = 0; i <= 9; i++) studs.push([JX - fw / 2 + i * fw / 9, JZ - fd / 2], [JX - fw / 2 + i * fw / 9, JZ + fd / 2]);
+    for (let i = 1; i < 7; i++) studs.push([JX - fw / 2, JZ - fd / 2 + i * fd / 7], [JX + fw / 2, JZ - fd / 2 + i * fd / 7]);
+    studs.sort((a, b) => (a[0] - b[0]) || (a[1] - b[1]));
+    const N = studs.length, stud = part(box(0.06, 1.2, 0.1), '#e2c08d', { p: [0, 0.6, 0] }), built = (t) => cyc(t, P * 2);
+    studs.forEach(([x, z], i) => moving.push({ geo: stud, pivot: [x, fy, z], anim: (t) => { const f = built(t), k = win(f, (i / N) * 0.55, (i / N) * 0.55 + 0.05); return f > 0.96 ? { s: 0.001 } : { sy: back(k) || 0.001 }; } }));
+    moving.push({ geo: merge(part(box(fw + 0.1, 0.08, 0.12), '#d9b27c', { p: [0, 0, -fd / 2] }), part(box(fw + 0.1, 0.08, 0.12), '#d9b27c', { p: [0, 0, fd / 2] }), part(box(0.12, 0.08, fd), '#d9b27c', { p: [-fw / 2, 0, 0] }), part(box(0.12, 0.08, fd), '#d9b27c', { p: [fw / 2, 0, 0] })),
+      pivot: [JX, fy + 1.24, JZ], anim: (t) => { const f = built(t); return f > 0.62 && f < 0.96 ? { y: (1 - easeOut(win(f, 0.62, 0.68))) * 1.5 } : { s: 0.001 }; } });
+    for (let i = 0; i < 6; i++) {
+      const x = JX - fw / 2 + i * fw / 5, tr = merge(beam([0, 0, -fd / 2 - 0.1], [0, 0.85, 0], 0.045, '#d9b27c'), beam([0, 0, fd / 2 + 0.1], [0, 0.85, 0], 0.045, '#d9b27c'), beam([0, 0, -fd / 2 - 0.1], [0, 0, fd / 2 + 0.1], 0.04, '#d9b27c'));
+      moving.push({ geo: tr, pivot: [x, fy + 1.3, JZ], anim: (t) => { const f = built(t), a = 0.7 + i * 0.04; return f > a && f < 0.96 ? { y: (1 - easeOut(win(f, a, a + 0.04))) * 1.2 } : { s: 0.001 }; } });
+    }
+    // A builder carrying a board between the plywood stack and the frame.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 6), k = 1 - Math.abs(f * 2 - 1); return { x: JX + 1.75, z: JZ - 1.3 + k * 2.4, ry: f < 0.5 ? Math.PI / 2 : -Math.PI / 2 }; }, { shirt: OR, pants: '#2b3a55', y: y0, carry: part(box(0.08, 0.1, 1.2), '#d9b27c', { p: [0.3, 1.25, 0], r: [0, Math.PI / 2, 0] }) }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
