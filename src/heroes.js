@@ -3098,5 +3098,36 @@ export const HEROES = {
     for (let k = 0; k < 4; k++) moving.push({ geo: part(ball(0.1), '#ffffff'), pivot: [0, y0 + 0.08, 3.6], anim: (t) => { const f = cyc(t, 14), x = -5.6 + f * 11.2, u = cyc(t, 0.8, k / 4); return { x: x - 1.0 - u * 0.8, z: Math.sin(f * TAU) * 0.6 + (k % 2 ? 0.2 : -0.2) * u, s: (1 - u) * clamp01((5.0 - Math.abs(x)) / 0.6) + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Cisco: named for San Francisco, and the gear the internet runs through. Packets race across
+  // the Golden Gate between two network racks, switching lanes at the routers; the bridge's
+  // cables shimmer as the traffic flows.
+  cisco: { finder: '#049fd9', build: () => {
+    const R = rand(25), out = [], y0 = 0.24, BLUE = '#049fd9', GATE = '#c0362c';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#86c766', { p: [0, 0.12, 0] }), part(box(4.0, 0.05, 10.4), 'W', { p: [0, y0 + 0.02, 0] }));
+    // Headlands either side.
+    out.push(part(lathe([[0, 0], [1.3, 0], [1.0, 0.5], [0.5, 0.9], [0, 1.0]], 24), '#6aa84f', { p: [-3.8, y0, -3.8] }), part(lathe([[0, 0], [1.3, 0], [1.0, 0.4], [0.5, 0.75], [0, 0.8]], 24), '#7db85a', { p: [3.8, y0, 3.8] }));
+    // ---- the bridge: two towers, deck, main cables and hangers
+    const BZ = 0.2, L = 4.2, TH = 3.6, DY = y0 + 1.2;
+    for (const x of [-L / 2 - 0.2, L / 2 + 0.2]) { for (const s of [-1, 1]) out.push(part(rbox(0.22, TH, 0.22, 0.04), GATE, { p: [x, y0 + TH / 2, BZ + s * 0.42] })); for (const y of [1.6, 2.6, 3.4]) out.push(part(box(0.18, 0.18, 1.0), GATE, { p: [x, y0 + y, BZ] })); out.push(part(rbox(0.6, 0.4, 1.4, 0.05), '#9aa1a9', { p: [x, y0 + 0.2, BZ] })); }
+    out.push(part(rbox(10.4, 0.16, 1.0, 0.04), GATE, { p: [0, DY, BZ] }), part(box(10.4, 0.02, 0.84), '#3a3f47', { p: [0, DY + 0.09, BZ] }));
+    for (const s of [-1, 1]) {
+      const pts = []; for (let i = 0; i <= 24; i++) { const x = -5.2 + i * (10.4 / 24), tx = L / 2 + 0.2; let y; if (Math.abs(x) <= tx) { const k = x / tx; y = DY + 0.4 + (TH - 1.2 - 0.4) * k * k + 0.0; } else y = y0 + TH - (Math.abs(x) - tx) / (5.2 - tx) * (TH - 1.4); pts.push([x, Math.min(y, y0 + TH), BZ + s * 0.42]); }
+      out.push(part(tube(pts, 0.035), GATE));
+      for (let i = 1; i < 24; i++) { const [x, y] = pts[i]; if (y - DY > 0.15) out.push(part(box(0.015, y - DY, 0.015), GATE, { p: [x, (y + DY) / 2, BZ + s * 0.42] })); }
+    }
+    // ---- the network racks on each shore, with the Cisco bridge-bars on top
+    const rack = (x, z) => { out.push(part(rbox(0.9, 1.8, 0.7, 0.05), '#2b2f36', { p: [x, y0 + 0.9, z] })); for (let j = 0; j < 6; j++) out.push(part(box(0.75, 0.16, 0.02), '#3a3f47', { p: [x, y0 + 0.35 + j * 0.25, z + 0.36] })); [0.25, 0.45, 0.65, 0.45, 0.25].forEach((h, i) => out.push(part(box(0.1, h, 0.1), BLUE, { p: [x - 0.32 + i * 0.16, y0 + 1.8 + h / 2, z] }))); };
+    rack(-3.4, -1.8); rack(3.6, 2.0);
+    [[-4.4, 4.4], [-2.8, 4.6], [4.4, -4.4], [2.8, -4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.6 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // Packets in four lanes over the bridge, changing lane mid-span like routed traffic.
+    for (let k = 0; k < 12; k++) { const lane = k % 4, c = ['#7cf0ff', BLUE, '#2fbf5b', '#f2c94c'][lane]; moving.push({ geo: part(rbox(0.28, 0.12, 0.14, 0.04), c), pivot: [0, DY + 0.18, BZ], anim: (t) => { const dir = lane < 2 ? 1 : -1, u = cyc(t, 4, k / 12), x = dir * (-5.2 + u * 10.4), z0 = (lane % 2 ? 0.12 : -0.12) + (dir > 0 ? -0.18 : 0.18), sw = Math.abs(x) < 0.8 ? (lane % 2 ? -0.24 : 0.24) * (1 - Math.abs(x) / 0.8) : 0; return { x, z: z0 + sw, s: clamp01((5.1 - Math.abs(x)) / 0.3) + 0.001 }; } }); }
+    // Status lights on the racks.
+    for (const [x, z] of [[-3.4, -1.8], [3.6, 2.0]]) for (let j = 0; j < 6; j++) moving.push({ geo: part(box(0.06, 0.05, 0.02), j % 2 ? '#2fbf5b' : BLUE), pivot: [x + 0.28, y0 + 0.35 + j * 0.25, z + 0.38], anim: (t) => ({ s: Math.sin(t * (7 + j) + x) > 0 ? 1 : 0.001 }) });
+    // A ferry crossing under the bridge.
+    moving.push({ geo: merge(part(rbox(1.2, 0.25, 0.5, 0.1), '#f4f5f6', { p: [0, 0.12, 0] }), part(rbox(0.7, 0.3, 0.4, 0.05), BLUE, { p: [0, 0.38, 0] })), pivot: [0, y0 + 0.04, 0], anim: (t) => { const f = cyc(t, 12), z = 2.2 - f * 4.4; return { x: -1.0, z, ry: Math.PI / 2, s: clamp01((2.1 - Math.abs(z)) / 0.4) + 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

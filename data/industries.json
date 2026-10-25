@@ -88,7 +88,8 @@
   "airbnb": "Belong anywhere",
   "salesforce": "Pipeline to closed-won",
   "fedex": "Overnight, anywhere",
-  "oracle": "Where the records live"
+  "oracle": "Where the records live",
+  "cisco": "The internet runs through it"
  },
  "bank": [
   "Citigroup",
@@ -458,7 +459,6 @@
   "Dell Technologies",
   "HP",
   "Hewlett Packard Enterprise",
-  "Cisco Systems",
   "Xerox",
   "NCR",
   "Tech Data",
@@ -1646,5 +1646,8 @@
  ],
  "oracle": [
   "Oracle"
+ ],
+ "cisco": [
+  "Cisco Systems"
  ]
 }
