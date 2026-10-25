@@ -117,6 +117,13 @@ const shieldGeo = (face = 'A', rim = K.white, check = K.white) => {
     part(extrude([[-0.38, 0.85], [-0.22, 1.0], [-0.08, 0.82], [0.32, 1.25], [0.46, 1.1], [-0.08, 0.55]], 0.3), check));
 };
 
+// A delivery van facing +x on y = 0, about 2 long, brand panels on its sides.
+const van = (body = K.white, panel = 'A') => merge(part(rbox(1.5, 0.95, 0.85, 0.1), body, { p: [-0.1, 0.65, 0] }), part(rbox(0.5, 0.65, 0.82, 0.12), body, { p: [0.8, 0.48, 0] }), part(box(0.04, 0.28, 0.7), '#26323f', { p: [1.04, 0.66, 0] }),
+  part(box(1.2, 0.3, 0.02), panel, { p: [-0.1, 0.72, 0.43] }), part(box(1.2, 0.3, 0.02), panel, { p: [-0.1, 0.72, -0.43] }),
+  [[-0.55, 0.4], [0.65, 0.4], [-0.55, -0.4], [0.65, -0.4]].map(([x, z]) => part(new THREE.CylinderGeometry(0.17, 0.17, 0.1, 14), '#1d1f24', { p: [x, 0.17, z], r: [Math.PI / 2, 0, 0] })));
+// A crowd member (cheap: body and head), standing on y = 0.
+const fan = (shirt, skin = '#e9b98f') => merge(part(new THREE.CapsuleGeometry(0.13, 0.32, 3, 8), shirt, { p: [0, 0.38, 0] }), part(new THREE.SphereGeometry(0.12, 10, 7), skin, { p: [0, 0.75, 0] }));
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -839,5 +846,73 @@ export const SCENES = {
     // Cross traffic while the light is red for the waiting cars.
     for (let k = 0; k < 2; k++) moving.push({ geo: sedan(k ? '#3d7be0' : '#f29a3a'), pivot: [ZX + (k ? -0.42 : 0.42), y0, 0], anim: (t) => { const f = F(t), u = win(f, 0.08 + k * 0.22, 0.32 + k * 0.22), z = (k ? 1 : -1) * (5.8 - 11.6 * u); return { z, ry: k ? Math.PI / 2 : -Math.PI / 2, s: u > 0 && u < 1 ? fade(z) : 0.001 }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.4, y0 + 0.08, 1.9], topAt: [BX + 0.9, y0 + 2.15, BZ] };
+  },
+
+  // Showtime (studios, broadcasters, live events, radio): made once, watched everywhere. On stage
+  // the band plays under sweeping spotlights, the crowd jumps and the big screen pulses; a camera
+  // crane films it, and the broadcast truck beams the show up to a satellite and down to the
+  // homes, whose screens light up.
+  'media:0': () => {
+    const R = rand(1001), out = [], moving = [];
+    out.push(slab('#5d6470'));
+    // ---- the stage: deck, truss arch, speaker stacks, the big screen
+    const SX = -1.6, SZ = -3.1, SW = 5.0, SD = 2.2, SH = 0.9;
+    out.push(part(rbox(SW, SH, SD, 0.05), '#2b2f36', { p: [SX, y0 + SH / 2, SZ] }), part(box(SW + 0.02, 0.12, SD + 0.02), 'A', { p: [SX, y0 + SH - 0.1, SZ] }));
+    for (let i = 0; i < 4; i++) out.push(part(rbox(1.0, 0.18, 0.4, 0.03), '#3a3f47', { p: [SX + 0.5, y0 + 0.09 + i * 0.0, SZ + SD / 2 + 0.2 + 0 * i] }));
+    const TH = 3.9, truss = (a, b) => { out.push(beam(a, b, 0.09, K.steel)); if (hi()) { const A = new V(...a), B = new V(...b), n = Math.round(A.distanceTo(B) / 0.45); for (let i = 0; i < n; i++) { const p = A.clone().lerp(B, (i + 0.5) / n); out.push(beam([p.x - 0.1, p.y - 0.1, p.z], [p.x + 0.1, p.y + 0.1, p.z], 0.03, K.steelDk)); } } };
+    [-1, 1].forEach((sx) => truss([SX + sx * (SW / 2 - 0.1), y0 + SH, SZ + SD / 2 - 0.2], [SX + sx * (SW / 2 - 0.1), y0 + SH + TH, SZ + SD / 2 - 0.2]));
+    truss([SX - SW / 2 + 0.1, y0 + SH + TH, SZ + SD / 2 - 0.2], [SX + SW / 2 - 0.1, y0 + SH + TH, SZ + SD / 2 - 0.2]);
+    out.push(part(box(SW - 0.4, 0.3, 0.12), 'A', { p: [SX, y0 + SH + TH - 0.3, SZ + SD / 2 - 0.2] }));
+    out.push(part(rbox(3.4, 2.1, 0.15, 0.04), '#1d1f24', { p: [SX, y0 + SH + 1.55, SZ - SD / 2 + 0.15] }), part(box(3.2, 1.9, 0.02), '#272b3a', { p: [SX, y0 + SH + 1.55, SZ - SD / 2 + 0.24] }));
+    [-1, 1].forEach((sx) => { for (let i = 0; i < 3; i++) out.push(part(rbox(0.6, 0.55, 0.5, 0.04), '#1d1f24', { p: [SX + sx * (SW / 2 + 0.4), y0 + 0.28 + i * 0.56, SZ + 0.3] }), part(cyl(0.18, 0.18, 0.03, 16), '#3a3f47', { p: [SX + sx * (SW / 2 + 0.4), y0 + 0.28 + i * 0.56, SZ + 0.56], r: [Math.PI / 2, 0, 0] })); });
+    // Drum kit and mic stand.
+    out.push(part(cyl(0.3, 0.3, 0.3, 18), K.white, { p: [SX - 0.9, y0 + SH + 0.2, SZ - 0.4], r: [Math.PI / 2, 0, 0] }), part(cyl(0.2, 0.2, 0.2, 16), 'B', { p: [SX - 1.3, y0 + SH + 0.4, SZ - 0.2] }), part(cyl(0.25, 0.25, 0.02, 16), K.gold, { p: [SX - 0.4, y0 + SH + 0.8, SZ - 0.3] }), part(cyl(0.02, 0.02, 0.8, 6), K.dark, { p: [SX - 0.4, y0 + SH + 0.4, SZ - 0.3] }));
+    out.push(part(cyl(0.02, 0.02, 1.1, 6), K.dark, { p: [SX + 0.5, y0 + SH + 0.55, SZ + 0.5] }));
+    // ---- the camera crane's dolly, the broadcast truck with its dish, homes at the front right
+    const JX = 1.6, JZ = 0.0;
+    out.push(part(rbox(1.0, 0.3, 0.8, 0.05), '#3a3f47', { p: [JX, y0 + 0.2, JZ] }), part(cyl(0.12, 0.15, 1.2, 12), '#3a3f47', { p: [JX, y0 + 0.9, JZ] }));
+    const TX = 3.2, TZ = -2.6;
+    out.push(place(van('#eef0f2', 'A'), { p: [TX, y0, TZ], r: [0, -Math.PI / 2, 0], s: 1.3 }), part(cyl(0.08, 0.1, 0.8, 10), K.steelDk, { p: [TX, y0 + 1.6, TZ + 0.2] }));
+    out.push(part(lathe([[0, 0], [0.4, 0.06], [0.7, 0.22]], 28), '#f4f5f6', { p: [TX, y0 + 2.0, TZ + 0.2], r: [-0.5, 0.6, 0] }), beam([TX, y0 + 2.05, TZ + 0.2], [TX + 0.2, y0 + 2.5, TZ + 0.5], 0.03, K.steelDk));
+    const homes = [[2.4, 3.7], [3.9, 2.3], [3.9, 3.9]];
+    homes.forEach(([x, z], i) => out.push(place(home(['#f3ead8', '#e4ecf0', '#efe2cc'][i], ['#7d6a5a', '#5a6b7d', '#a35a3c'][i], 1.4, 1.2, 0.9), { p: [x, y0, z], r: [0, Math.PI * 0.75, 0] })));
+    out.push(part(rbox(4.0, 0.06, 3.4, 0.04), '#8cc66a', { p: [3.2, y0 + 0.03, 3.3] }));
+    [[0.9, 4.5], [4.6, 0.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.5 + R() * 0.2)));
+    // ---- moving parts
+    // The big screen: equalizer bars dancing in the brand colours.
+    for (let i = 0; i < 10; i++) moving.push({ geo: part(box(0.24, 1, 0.03), i % 3 ? 'A' : 'B', { p: [0, 0.5, 0] }), pivot: [SX - 1.35 + i * 0.3, y0 + SH + 0.7, SZ - SD / 2 + 0.27], anim: (t) => ({ sy: 0.15 + Math.abs(Math.sin(t * (3 + (i % 4)) + i * 1.7)) * 1.4 * (0.6 + 0.4 * Math.sin(t * 1.3 + i)) }) });
+    // Spotlights on the truss sweep the crowd.
+    for (let i = 0; i < 4; i++) {
+      const L = new V(SX - 1.8 + i * 1.2, y0 + SH + TH - 0.12, SZ + SD / 2 - 0.2), ang = (t) => ({ rx: -0.75 + Math.sin(t * 0.9 + i) * 0.25, rz: Math.sin(t * 0.7 + i * 1.9) * 0.28 });
+      moving.push({ geo: merge(part(cyl(0.14, 0.18, 0.32, 12), '#1d1f24'), part(cyl(0.12, 0.12, 0.02, 12), '#fff4c2', { p: [0, -0.17, 0] })), pivot: L.toArray(), anim: (t) => ang(t) });
+      // Where its beam lands: a pool of light on the crowd.
+      moving.push({ geo: part(cyl(0.55, 0.55, 0.02, 24), '#fff1b0'), pivot: [0, y0 + 0.02, 0], anim: (t) => { const { rx, rz } = ang(t), d = new V(Math.sin(rz), -Math.cos(rz) * Math.cos(rx), -Math.cos(rz) * Math.sin(rx)), k = (L.y - y0) / -d.y; return { x: L.x + d.x * k, z: L.z + d.z * k, sx: 1, sz: 1 + Math.abs(d.z / d.y) * 0.4 }; } });
+    }
+    // The band: a singer at the mic, a guitarist rocking.
+    moving.push(...walker(moving.length, (t) => ({ x: SX + 0.5, z: SZ + 0.3, ry: -Math.PI / 2 + Math.sin(t * 1.5) * 0.3, still: true }), { shirt: 'B', pants: '#1d1f24', y: y0 + SH }));
+    moving.push(...walker(moving.length, (t) => ({ x: SX + 1.5 + Math.sin(t * 0.8) * 0.4, z: SZ, ry: -Math.PI / 2 + Math.sin(t * 2) * 0.2 }), { shirt: K.white, pants: '#1d1f24', y: y0 + SH, carry: part(rbox(0.6, 0.18, 0.05, 0.03), K.red, { p: [0.25, 0.95, 0], r: [0, 0, 0.5] }) }));
+    // The crowd jumps in three waves.
+    const shirts = ['#e5533d', '#3d7be0', '#f2c94c', '#5fae5b', '#8a6cf0', '#f39ab8', K.white, '#f29a3a'], skins = ['#e9b98f', '#c98d63', '#8a5a3a', '#f1cfae'];
+    for (let g = 0; g < 3; g++) {
+      const crowd = [];
+      for (let i = 0; i < (hi() ? 14 : 5); i++) { const x = SX - 2.2 + R() * 4.6, z = SZ + SD / 2 + 0.8 + R() * 2.6; if (Math.hypot(x - JX, z - JZ) < 0.9) continue; crowd.push(place(fan(shirts[Math.floor(R() * shirts.length)], skins[Math.floor(R() * skins.length)]), { p: [x, 0, z], r: [0, -Math.PI / 2 + (R() - 0.5), 0] })); }
+      moving.push({ geo: merge(crowd), pivot: [0, y0, 0], anim: (t) => ({ y: Math.abs(Math.sin(t * 4.2 + g * 2.1)) * 0.18 }) });
+    }
+    // The camera crane swings its arm over the crowd.
+    const jib = moving.length;
+    moving.push({ geo: merge(beam([-1.0, 0, 0], [2.4, 0, 0], 0.09, '#f2c94c'), part(rbox(0.4, 0.4, 0.4, 0.06), '#3a3f47', { p: [-1.1, -0.1, 0] })), pivot: [JX, y0 + 1.55, JZ], anim: (t) => ({ ry: Math.PI * 0.75 + Math.sin(t * 0.5) * 0.6, rz: 0.25 + Math.sin(t * 0.7) * 0.15 }) });
+    moving.push({ geo: merge(part(rbox(0.4, 0.3, 0.3, 0.05), '#1d1f24'), part(cyl(0.1, 0.12, 0.25, 12), '#3a3f47', { p: [0.3, 0, 0], r: [0, 0, Math.PI / 2] }), part(cyl(0.03, 0.03, 0.04, 8), '#e5533d', { p: [0, 0.17, 0] })), pivot: [2.4, -0.1, 0], parent: jib, anim: (t) => ({ rz: -0.25 - Math.sin(t * 0.7) * 0.15 }) });
+    // The broadcast: rings up from the dish to the satellite, down to each home.
+    const SAT = new V(3.6, y0 + 5.4, 0.2), DISH = new V(TX + 0.2, y0 + 2.4, TZ + 0.4);
+    moving.push({ geo: merge(part(rbox(0.4, 0.4, 0.4, 0.05), K.gold), [-1, 1].map((sx) => part(box(0.9, 0.02, 0.4), '#2a5bb0', { p: [sx * 0.68, 0, 0] })), part(cyl(0.18, 0.05, 0.15, 14), K.white, { p: [0, -0.25, 0], r: [Math.PI, 0, 0] })), pivot: SAT.toArray(), anim: (t) => ({ y: Math.sin(t * 0.8) * 0.1, ry: Math.sin(t * 0.3) * 0.3 }) });
+    const ringG = part(torus(0.22, 0.03, TAU, 20), '#ffe27a');
+    for (let k = 0; k < 3; k++) moving.push({ geo: ringG, pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 2, k / 3), p = DISH.clone().lerp(SAT, u); return { x: p.x, y: p.y, z: p.z, rx: -0.6, s: 0.6 + u * 0.8 }; } });
+    homes.forEach(([x, z], i) => {
+      const H = new V(x, y0 + 1.6, z);
+      moving.push({ geo: ringG, pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 2, i / 3 + 0.5), p = SAT.clone().lerp(H, u); return { x: p.x, y: p.y, z: p.z, rx: 0.5, s: 1.2 - u * 0.6 }; } });
+      // The TV in each window flickers on as the show arrives.
+      moving.push({ geo: part(box(0.36, 0.26, 0.04), '#7cc7ff'), pivot: [x + 0.48, y0 + 0.55, z - 0.48], anim: (t) => ({ ry: Math.PI * 0.75, s: Math.floor(t * 6 + i) % 4 ? 1 : 0.85 }) });
+    });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.7, y0, 3.4], topAt: [SX + SW / 2 + 0.4, y0 + 1.66, SZ + 0.3] };
   },
 };
