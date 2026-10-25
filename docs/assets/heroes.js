@@ -2136,5 +2136,56 @@ export const HEROES = {
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, 12, 0.3), x = -4.6 + f * 9.2; return { x, z: 1.4, ry: 0, s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: BLUE, pants: '#2b2f36', skin: '#c58c66', hair: '#1d1f24', y: y0 }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Eli Lilly: medicines made at enormous scale. The bioreactors stir behind their portholes; the
+  // auto-injector pens roll down the line and a robot arm packs them; trucks carry them out; in the
+  // park a jogger runs the loop.
+  lilly: { finder: '#d52b1e', build: () => {
+    const R = rand(59), out = [], y0 = 0.24, RED = '#d52b1e', STEEL = '#c9ced6';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#a9cf8a', { p: [0, 0.12, 0] }));
+    // ---- the plant floor
+    out.push(part(box(6.6, 0.04, 4.4), '#dfe3e8', { p: [-1.6, y0 + 0.02, -2.5] }));
+    // Bioreactors: tall stainless vessels with domed tops, legs, portholes and piping.
+    const tanks = [[-4.0, -3.6], [-2.7, -3.6], [-1.4, -3.6]];
+    tanks.forEach(([x, z]) => {
+      out.push(part(lathe([[0, 0.3], [0.45, 0.3], [0.5, 0.45], [0.5, 2.4], [0.42, 2.65], [0.15, 2.75], [0, 2.76]], 40), STEEL, { p: [x, y0, z] }));
+      for (let i = 0; i < 3; i++) { const a = (i / 3) * TAU + 0.5; out.push(part(cyl(0.04, 0.04, 0.4, 8), '#9aa1a9', { p: [x + Math.cos(a) * 0.38, y0 + 0.2, z + Math.sin(a) * 0.38] })); }
+      out.push(part(cyl(0.2, 0.2, 0.06, 24), '#2a3c50', { p: [x + 0.36, y0 + 1.4, z + 0.36], r: [Math.PI / 2, -Math.PI / 4, 0] }), part(torus(0.2, 0.03, TAU, 24), '#9aa1a9', { p: [x + 0.37, y0 + 1.4, z + 0.37], r: [0, Math.PI / 4, 0] }));
+      out.push(part(cyl(0.06, 0.06, 0.5, 10), '#9aa1a9', { p: [x, y0 + 3.0, z] }));
+    });
+    out.push(part(tube([[-4.0, y0 + 3.25, -3.6], [-2.7, y0 + 3.25, -3.6], [-1.4, y0 + 3.25, -3.6], [0.2, y0 + 3.25, -3.6], [0.4, y0 + 1.2, -2.6]], 0.06), '#9aa1a9'));
+    // The clean room: a glass-walled lab with benches.
+    out.push(part(rbox(2.4, 0.06, 1.8, 0.02), '#f4f5f6', { p: [2.6, y0 + 0.03, -3.4] }), ...[[1.4, -3.4, 0.04, 1.8], [3.8, -3.4, 0.04, 1.8], [2.6, -4.3, 2.4, 0.04]].map(([x, z, w, d]) => part(box(w, 1.3, d), '#b9d6e8', { p: [x, y0 + 0.68, z] })));
+    out.push(part(rbox(1.6, 0.6, 0.5, 0.04), '#f4f5f6', { p: [2.6, y0 + 0.36, -3.7] }), part(rbox(1.6, 0.04, 0.55, 0.02), '#e9ecef', { p: [2.6, y0 + 0.68, -3.7] }));
+    if (hi()) for (let i = 0; i < 5; i++) out.push(part(lathe([[0, 0], [0.05, 0], [0.05, 0.18], [0.02, 0.2], [0, 0.2]], 12), ['#7cc4ff', '#ffd23f', '#2fbf5b'][i % 3], { p: [2.0 + i * 0.3, y0 + 0.7, -3.7] }));
+    // The pen line: a long conveyor with its frame, ending at the packing robot.
+    const LZ = -0.6;
+    out.push(part(rbox(5.4, 0.12, 0.5, 0.03), '#3a3f47', { p: [-1.2, y0 + 0.8, LZ] }), part(box(5.4, 0.02, 0.42), '#5b616b', { p: [-1.2, y0 + 0.87, LZ] }));
+    for (let i = 0; i < 7; i++) out.push(part(box(0.06, 0.8, 0.4), '#9aa1a9', { p: [-3.8 + i * 0.86, y0 + 0.4, LZ] }));
+    out.push(part(rbox(0.6, 0.5, 0.6, 0.05), '#f2c94c', { p: [2.1, y0 + 0.25, LZ - 0.6] }), part(rbox(1.2, 0.4, 0.8, 0.04), '#e8d3ad', { p: [2.1, y0 + 0.2, LZ + 0.6] }));
+    // ---- the headquarters: red brick with a white portico
+    const HX = 2.8, HZ = 2.6;
+    out.push(part(rbox(3.0, 1.6, 1.6, 0.05), '#a8452f', { p: [HX, y0 + 0.8, HZ] }), part(rbox(3.1, 0.14, 1.7, 0.03), '#e9e4da', { p: [HX, y0 + 1.62, HZ] }));
+    for (let i = 0; i < 6; i++) out.push(part(rbox(0.28, 0.5, 0.05, 0.03), '#2a3c50', { p: [HX - 1.2 + i * 0.48, y0 + 1.1, HZ + 0.81] }));
+    for (let i = 0; i < 4; i++) out.push(part(cyl(0.07, 0.07, 0.8, 12), '#f4f1ea', { p: [HX - 0.45 + i * 0.3, y0 + 0.4, HZ + 1.0] }));
+    out.push(part(prism(1.3, 0.3, 0.4), '#f4f1ea', { p: [HX, y0 + 0.8, HZ + 1.0] }), part(rbox(1.0, 0.3, 0.06, 0.04), RED, { p: [HX, y0 + 1.35, HZ + 0.83] }));
+    // ---- the park and its running loop
+    const run = curve([[-4.2, y0 + 0.02, 1.4], [-1.0, y0 + 0.02, 1.2], [0.6, y0 + 0.02, 2.6], [-0.4, y0 + 0.02, 4.4], [-3.6, y0 + 0.02, 4.4], [-4.5, y0 + 0.02, 3.0]], true);
+    run.curveType = 'centripetal';
+    out.push(part(tubeOn(run, 0.32, hi() ? 120 : 30), '#d9c7a4', { s: [1, 0.04, 1], p: [0, y0 * 0.96, 0] }));
+    [[-2.2, 2.9], [-3.0, 3.6], [-1.4, 3.4], [4.6, -0.6], [4.6, 4.6], [-4.7, -0.4]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.7 + R() * 0.25)));
+    // ---- moving parts
+    const moving = [];
+    // Agitators turning inside each porthole.
+    tanks.forEach(([x, z], i) => moving.push({ geo: merge(part(box(0.3, 0.04, 0.02), '#e9ecef'), part(box(0.04, 0.3, 0.02), '#e9ecef')), pivot: [x + 0.39, y0 + 1.4, z + 0.39], anim: (t) => ({ ry: Math.PI / 4, rz: t * (2 + i) }) }));
+    // Pens on the belt: they ride down, the arm lifts each into the box.
+    const pen = merge(part(capsule(0.06, 0.42), '#e9e4f2', { r: [0, 0, Math.PI / 2] }), part(cyl(0.065, 0.065, 0.12, 16), '#8a6cf0', { p: [0.2, 0, 0], r: [0, 0, Math.PI / 2] }), part(cyl(0.066, 0.066, 0.06, 16), '#f2c94c', { p: [-0.22, 0, 0], r: [0, 0, Math.PI / 2] }));
+    for (let k = 0; k < 8; k++) moving.push({ geo: pen, pivot: [0, y0 + 0.95, LZ], anim: (t) => { const u = cyc(t, 8, k / 8), x = -3.8 + u * 5.6; return { x, s: Math.min(1, u / 0.04, (1 - u) / 0.04) + 0.001 }; } });
+    const arm = moving.length;
+    moving.push({ geo: merge(part(cyl(0.12, 0.12, 0.5, 16), '#f2c94c', { p: [0, 0.25, 0] }), part(box(0.14, 0.9, 0.14), '#f2c94c', { p: [0, 0.85, 0] })), pivot: [2.1, y0 + 0.5, LZ - 0.6], anim: (t) => ({ ry: Math.sin(t * 1.6) * 0.9 }) });
+    moving.push({ geo: merge(part(box(0.7, 0.12, 0.12), '#f2c94c', { p: [0.35, 0, 0] }), part(box(0.08, 0.2, 0.08), '#3a3f47', { p: [0.68, -0.12, 0] })), pivot: [0, 1.25, 0], parent: arm, anim: (t) => ({ rz: -0.3 + Math.sin(t * 3.2) * 0.25, ry: Math.PI / 2 }) });
+    // The jogger.
+    moving.push(...walker(moving.length, (t) => { const a = along(run, cyc(t, 12)); return { x: a.p.x, z: a.p.z, ry: a.ry }; }, { shirt: RED, pants: '#2b2f36', y: y0 }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

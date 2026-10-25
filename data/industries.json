@@ -65,7 +65,8 @@
   "bofa": "The deposit reservoir",
   "target": "Expect more, pay less",
   "ups": "Hub to doorstep",
-  "ibm": "Mainframes to qubits"
+  "ibm": "Mainframes to qubits",
+  "lilly": "Medicine at scale"
  },
  "bank": [
   "Wells Fargo",
@@ -190,7 +191,6 @@
   "Merck",
   "AbbVie",
   "Abbott Laboratories",
-  "Eli Lilly",
   "Bristol-Myers Squibb",
   "Amgen",
   "Gilead Sciences",
@@ -1223,7 +1223,6 @@
   "Magellan Health": 4,
   "Pfizer": 5,
   "Merck": 5,
-  "Eli Lilly": 5,
   "Bristol-Myers Squibb": 5,
   "AbbVie": 5,
   "Zoetis": 5,
@@ -1583,5 +1582,8 @@
  ],
  "ibm": [
   "IBM"
+ ],
+ "lilly": [
+  "Eli Lilly"
  ]
 }
