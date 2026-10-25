@@ -2518,4 +2518,56 @@ export const SCENES = {
     for (let k = 0; k < 2; k++) moving.push(...walker(moving.length, (t) => { const f = F(t), u = win(f, 0.8 + k * 0.03, 0.95 + k * 0.03), A = new V(-0.4 + k * 0.3, 0, -1.2), B = new V(0.2 + k * 0.4, 0, TZ + 1.0), p = A.lerp(B, u); return { x: p.x, z: p.z, ry: Math.atan2(-(TZ + 1.0 - (-1.2)), 0.6), s: u > 0 && u < 1 ? 0.8 : 0.001 }; }, { shirt: ['#e5533d', '#8a6cf0'][k], pants: '#2b3a55', y: y0, carry: place(merge(part(rbox(0.3, 0.4, 0.18, 0.04), k ? 'B' : 'A'), part(cyl(0.02, 0.02, 0.3, 6), K.dark, { p: [0, 0.32, 0] })), { p: [0, 0.25, 0.32] }) }));
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-4.0, y0, 1.3], topAt: [TX + 2.0, y0 + 2.2, TZ] };
   },
+
+  // Airliner (airlines, travel booking, hotels, aero engines): the whole trip, booked, flown and
+  // stayed. On the home island a traveller books (a tick pops over the terminal) and the jet rolls,
+  // lifts off and climbs out over the sea; engines spinning and a contrail behind, it follows the
+  // dotted route round to the resort island, lands, and the guest checks in at the hotel.
+  'plane:1': () => {
+    const R = rand(3501), out = [], moving = [], SEA = 0.16;
+    out.push(part(rbox(10.4, 0.12, 10.4, 0.06), '#2b5a86', { p: [0, 0.06, 0] }), part(new THREE.PlaneGeometry(10.4, 10.4).rotateX(-Math.PI / 2), 'W', { p: [0, SEA, 0] }));
+    const island = (x, z, rx, rz) => [part(new THREE.CylinderGeometry(1, 1.08, y0 + 0.02, hi() ? 48 : 16), '#e8d3a0', { p: [x, (y0 + 0.02) / 2, z], s: [rx, 1, rz] }), part(new THREE.CylinderGeometry(1, 1, 0.06, hi() ? 48 : 16), '#9ccc7a', { p: [x, y0 + 0.02, z], s: [rx - 0.35, 1, rz - 0.35] })];
+    // ---- the home island (front left): runway, terminal, a few blocks of town
+    out.push(island(-2.55, 2.55, 2.35, 2.35));
+    const RZ = 2.9, RX0 = -4.4, RX1 = -0.8;
+    out.push(part(box(RX1 - RX0, 0.03, 0.8), '#5b616b', { p: [(RX0 + RX1) / 2, y0 + 0.07, RZ] }));
+    for (let i = 0; i < 5; i++) out.push(part(box(0.4, 0.012, 0.06), K.white, { p: [RX0 + 0.4 + i * 0.75, y0 + 0.09, RZ] }));
+    const HX = -2.9, HZ = 1.3;
+    out.push(part(rbox(1.8, 0.8, 0.9, 0.05), '#eef0f2', { p: [HX, y0 + 0.45, HZ] }), part(box(1.6, 0.4, 0.04), '#9fcdea', { p: [HX, y0 + 0.45, HZ + 0.46] }), part(rbox(1.9, 0.12, 1.0, 0.03), 'A', { p: [HX, y0 + 0.9, HZ] }));
+    [[-4.4, 1.5, 1.4], [-4.0, 0.7, 1.0], [-1.6, 0.9, 0.8]].forEach(([x, z, h], i) => out.push(part(rbox(0.6, h, 0.6, 0.04), ['#e3e6ea', '#d8dde3', '#efe2cc'][i], { p: [x, y0 + h / 2, z] }), part(box(0.62, 0.08, 0.62), 'Bd', { p: [x, y0 + h - 0.04, z] })));
+    // ---- the resort island (back right): runway along z, the hotel tower, pool and palms
+    out.push(island(2.5, -2.5, 2.4, 2.4));
+    const DX = 3.0, DZ0 = 0.0, DZ1 = -3.8;
+    out.push(part(box(0.8, 0.03, DZ0 - DZ1), '#5b616b', { p: [DX, y0 + 0.07, (DZ0 + DZ1) / 2] }));
+    for (let i = 0; i < 5; i++) out.push(part(box(0.06, 0.012, 0.4), K.white, { p: [DX, y0 + 0.09, DZ0 - 0.4 - i * 0.75] }));
+    const TX = 1.1, TZ = -3.4, TH = 3.4;
+    out.push(part(rbox(1.6, TH, 1.2, 0.06), '#f6efe2', { p: [TX, y0 + TH / 2, TZ] }), part(box(1.62, 0.25, 1.22), 'A', { p: [TX, y0 + TH - 0.2, TZ] }), part(rbox(1.8, 0.1, 1.4, 0.03), 'Ad', { p: [TX, y0 + TH + 0.05, TZ] }));
+    for (let f = 0; f < 5; f++) for (let i = 0; i < 3; i++) out.push(part(rbox(0.36, 0.34, 0.05, 0.02), '#9fcdea', { p: [TX - 0.48 + i * 0.48, y0 + 0.55 + f * 0.6, TZ + 0.61] }), part(box(0.42, 0.04, 0.16), K.white, { p: [TX - 0.48 + i * 0.48, y0 + 0.36 + f * 0.6, TZ + 0.68] }));
+    out.push(part(rbox(1.2, 0.5, 0.06, 0.03), '#2a3c50', { p: [TX, y0 + 0.25, TZ + 0.62] }), part(rbox(1.6, 0.08, 0.6, 0.03), 'A', { p: [TX, y0 + 0.7, TZ + 0.9] }));
+    out.push(part(rbox(1.4, 0.06, 0.9, 0.2), '#4fb3c9', { p: [1.0, y0 + 0.08, -1.5] }), part(rbox(1.6, 0.04, 1.1, 0.22), K.white, { p: [1.0, y0 + 0.05, -1.5] }), parasol('A', K.white, 0.5).translate(0.1, y0, -1.0), parasol('B', K.white, 0.5).translate(1.9, y0, -0.9));
+    [[3.9, -1.0], [3.9, -3.6], [0.0, -2.3]].forEach(([x, z]) => out.push(part(taper([[x, y0, z], [x + 0.15, y0 + 0.9, z], [x + 0.35, y0 + 1.7, z + 0.05]], 0.08, 0.05, 8), '#8a6a45'), hi() ? ring(6, (a) => part(leafShape(0), shade('#5fae45', 0.9 + (a % 1) * 0.1), { p: [x + 0.35, y0 + 1.7, z + 0.05], q: new THREE.Quaternion().setFromEuler(new THREE.Euler(0.9, a, 0, 'YXZ')), s: [0.35, 0.9, 0.35] })) : []));
+    // ---- moving parts (one 16 s cycle)
+    const P = 16, F = (t) => cyc(t, P);
+    // The booking: a tick pops over the home terminal.
+    moving.push({ geo: tickGeo(0.3), pivot: [HX, y0 + 1.5, HZ], anim: (t) => { const f = F(t); return { y: easeOut(win(f, 0.0, 0.05)) * 0.3, ry: Math.PI / 4, s: life(f, 0.01, 0.04, 0.1, 0.13) }; } });
+    // The flight: take-off roll, climb out, the turn, approach and landing, taxi.
+    const route = curve([[RX0 + 0.3, y0 + 0.07, RZ], [RX1 - 0.6, y0 + 0.07, RZ], [0.6, y0 + 1.6, RZ - 0.1], [2.6, y0 + 3.4, 2.2], [DX + 0.2, y0 + 2.2, 1.6], [DX, y0 + 0.8, 0.6], [DX, y0 + 0.07, -0.6], [DX, y0 + 0.07, DZ1 + 0.6]]);
+    const L = (f) => (f < 0.1 ? 0 : f < 0.25 ? easeIn(win(f, 0.1, 0.25)) * 0.16 : f < 0.7 ? 0.16 + win(f, 0.25, 0.7) * 0.68 : 0.84 + easeOut(win(f, 0.7, 0.85)) * 0.15);
+    const X = new V(1, 0, 0), qq = new THREE.Quaternion();
+    const ji = moving.length;
+    moving.push({ geo: jet('A').scale(0.8, 0.8, 0.8), pivot: [0, 0, 0], anim: (t) => { const f = F(t), u = Math.min(0.999, L(f)), p = route.getPointAt(u), d = route.getTangentAt(u); if (u > 0.85) d.y = 0; return { x: p.x, y: p.y, z: p.z, q: qq.setFromUnitVectors(X, d.normalize()), s: f > 0.9 ? Math.max(0.001, 1 - win(f, 0.9, 0.95)) : f < 0.04 ? Math.max(0.001, f / 0.04) : 1 }; } });
+    // Its engine fans spin.
+    [-0.6, 0.6].forEach((z) => moving.push({ geo: merge(part(cyl(0.06, 0.06, 0.02, 10), K.white, { r: [0, 0, Math.PI / 2] }), [0, 1, 2].map((i) => part(box(0.015, 0.16, 0.03), '#c9ced6', { r: [i * Math.PI / 3, 0, 0] }))), pivot: [0.33, 0.27, z], parent: ji, anim: (t) => ({ rx: t * 20 }) }));
+    // The contrail: puffs left behind in the cruise.
+    for (let k = 0; k < 8; k++) moving.push({ geo: puff(0.18), pivot: [0, 0, 0], anim: (t) => { const f = F(t), lag = 0.012 * (k + 1), u = Math.min(0.999, Math.max(0, L(f - lag))), p = route.getPointAt(u), on = L(f) > 0.3 && L(f) < 0.78; return { x: p.x, y: p.y + 0.4, z: p.z, s: on ? 1 - k / 9 : 0.001 }; } });
+    // Drifting clouds.
+    [[-1.0, 4.4, -1.4, 0], [1.4, 3.6, 3.8, 0.5]].forEach(([x, y, z, o]) => moving.push({ geo: stormCloud(0.45), pivot: [x, y, z], anim: (t) => ({ x: Math.sin((t / 20 + o) * TAU) * 0.8 }) }));
+    // The dotted route over the sea.
+    if (hi()) for (let i = 4; i < 40; i++) { const p = route.getPointAt(0.16 + (i / 40) * 0.68); out.push(part(new THREE.SphereGeometry(0.05, 6, 4), K.white, { p: [p.x, Math.max(SEA + 0.05, p.y - 0.9), p.z] })); }
+    // The guest walks from the plane to the hotel; the key card pops, a window lights.
+    moving.push(...walker(moving.length, (t) => { const f = F(t), u = win(f, 0.86, 0.98), A = new V(DX - 0.6, 0, DZ1 + 0.8), B = new V(TX + 0.2, 0, TZ + 1.0), p = A.lerp(B, u); return { x: p.x, z: p.z, ry: Math.atan2(-(TZ + 1.0 - DZ1 - 0.8), TX + 0.2 - DX + 0.6), s: u > 0 && u < 1 ? 1 : 0.001 }; }, { shirt: '#f29a3a', pants: '#2b3a55', y: y0, carry: place(part(rbox(0.3, 0.4, 0.18, 0.04), 'B'), { p: [0, 0.25, 0.32] }) }));
+    moving.push({ geo: merge(cardGeo('A').scale(0.6, 0.6, 0.6)), pivot: [TX, y0 + 1.4, TZ + 1.2], anim: (t) => { const f = F(t); return { y: easeOut(win(f, 0.97, 1)) * 0.3, ry: Math.PI / 4, s: life(f, 0.96, 0.98, 0.995, 1) + life(f, 0, 0.0001, 0.02, 0.04) }; } });
+    moving.push({ geo: part(rbox(0.36, 0.34, 0.06, 0.02), '#ffe066'), pivot: [TX + 0.48, y0 + 0.55 + 3 * 0.6, TZ + 0.62], anim: (t) => { const f = F(t); return { s: f > 0.98 || f < 0.3 ? 1 : 0.001 }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.3, y0, 4.0], topAt: [HX, y0 + 0.96, HZ] };
+  },
 };
