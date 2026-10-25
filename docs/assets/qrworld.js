@@ -1,6 +1,7 @@
 // Shared 3D pieces for the QR worlds: stage, isometric camera rig, palettes, helpers.
 import * as THREE from 'three';
 import { OrbitControls } from './OrbitControls.js';
+import { RoomEnvironment } from './RoomEnvironment.js';
 
 export { THREE };
 
@@ -48,10 +49,15 @@ export function createStage(container, { viewSize = 30, background = '#f6f1e7' }
   container.prepend(renderer.domElement);
 
   const scene = new THREE.Scene();
+  // A soft studio environment, so curved surfaces pick up gentle reflections and highlights.
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environmentIntensity = 0.28;
+  pmrem.dispose();
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 4000);
   camera.position.set(200, 200, 200);
 
-  const hemi = new THREE.HemisphereLight('#fffaf0', '#d8cbb5', 1.35);
+  const hemi = new THREE.HemisphereLight('#fffaf0', '#d8cbb5', 0.95);
   scene.add(hemi);
   const sun = new THREE.DirectionalLight('#fff4e0', 2.1);
   sun.castShadow = true;
@@ -121,6 +127,7 @@ export function createStage(container, { viewSize = 30, background = '#f6f1e7' }
     window.removeEventListener('resize', resize);
     ro.disconnect();
     controls.dispose();
+    scene.environment.dispose();
     renderer.dispose();
     renderer.forceContextLoss();
     renderer.domElement.remove();

@@ -3,102 +3,9 @@
 // Geometry carries vertex colours; parts painted 'A'/'B' (and darker 'Ad'/'Bd') take the
 // company's own two brand colours in the shader, so one geometry serves many companies.
 import * as THREE from 'three';
-import { mergeGeometries } from './BufferGeometryUtils.js';
+import { V, part, merge, place, box, cyl, lathe, tube, ball, cone, torus, extrude, prism, star, beam, ring, faceted, TAU, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, legacy, K, withDetail } from './kit.js';
+import { HEROES } from './heroes.js';
 
-const V = THREE.Vector3;
-const m4 = new THREE.Matrix4(), qt = new THREE.Quaternion(), eu = new THREE.Euler(), col = new THREE.Color();
-
-// ---------- geometry kit ----------
-// Brand slots: the 'mask' attribute says which brand colour a vertex takes (0 = its own colour).
-const BRAND = { A: 1, Ad: 2, B: 3, Bd: 4 };
-// Colour a geometry (a hex, a brand slot, or fn(x, y, z, vertexIndex) returning either) and place it.
-function part(geo, color, { p = [0, 0, 0], r = [0, 0, 0], s = 1, q = null } = {}) {
-  let g = geo.index ? geo.toNonIndexed() : geo.clone();
-  for (const k of Object.keys(g.attributes)) if (k !== 'position' && k !== 'normal') g.deleteAttribute(k);
-  if (!g.attributes.normal) g.computeVertexNormals();
-  g.clearGroups();
-  m4.compose(new V(...p), q || qt.setFromEuler(eu.set(...r)), new V(...(Array.isArray(s) ? s : [s, s, s])));
-  g.applyMatrix4(m4);
-  const pos = g.attributes.position, n = pos.count, arr = new Float32Array(n * 3), mask = new Float32Array(n);
-  const fn = typeof color === 'function' ? color : null;
-  for (let i = 0; i < n; i++) {
-    const c = fn ? fn(pos.getX(i), pos.getY(i), pos.getZ(i), i) : color;
-    mask[i] = BRAND[c] || 0;
-    col.set(BRAND[c] ? '#ffffff' : c);
-    arr[i * 3] = col.r; arr[i * 3 + 1] = col.g; arr[i * 3 + 2] = col.b;
-  }
-  g.setAttribute('color', new THREE.BufferAttribute(arr, 3));
-  g.setAttribute('mask', new THREE.BufferAttribute(mask, 1));
-  return g;
-}
-const merge = (...parts) => mergeGeometries(parts.flat(Infinity));
-// Move an already-coloured geometry without repainting it.
-function place(geo, { p = [0, 0, 0], r = [0, 0, 0], s = 1 } = {}) {
-  return geo.clone().applyMatrix4(m4.compose(new V(...p), qt.setFromEuler(eu.set(...r)), new V(...(Array.isArray(s) ? s : [s, s, s]))));
-}
-const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
-// The material shades smoothly, so round things read as round; shapes meant to look cut
-// (low-poly balls, few-sided prisms) get flat normals to keep their facets.
-const faceted = (g) => { g = g.index ? g.toNonIndexed() : g; g.deleteAttribute('normal'); g.computeVertexNormals(); return g; };
-const cyl = (rt, rb, h, seg = 14) => (seg <= 8 ? faceted : (g) => g)(new THREE.CylinderGeometry(rt, rb, h, seg));
-const ball = (r, d = 1) => (d < 2 ? faceted : (g) => g)(new THREE.IcosahedronGeometry(r, d));
-const cone = (r, h, seg = 12) => (seg <= 8 ? faceted : (g) => g)(new THREE.ConeGeometry(r, h, seg));
-const torus = (r, t, arc = Math.PI * 2, seg = 24) => new THREE.TorusGeometry(r, t, 8, seg, arc);
-function extrude(points, depth) {
-  const sh = new THREE.Shape(points.map(([x, y]) => new THREE.Vector2(x, y)));
-  const g = new THREE.ExtrudeGeometry(sh, { depth, bevelEnabled: false });
-  g.translate(0, 0, -depth / 2);
-  return g;
-}
-const prism = (w, h, d) => extrude([[-w / 2, 0], [w / 2, 0], [0, h]], d); // roof: ridge along z
-function star(r, depth) {
-  const pts = [];
-  for (let i = 0; i < 10; i++) {
-    const a = (i / 10) * Math.PI * 2 + Math.PI / 2, rr = i % 2 ? r * 0.45 : r;
-    pts.push([Math.cos(a) * rr, Math.sin(a) * rr]);
-  }
-  return extrude(pts, depth);
-}
-// A strut from a to b.
-function beam(a, b, t, color) {
-  const A = new V(...a), B = new V(...b);
-  const dir = B.clone().sub(A);
-  const g = box(t, dir.length(), t);
-  return part(g, color, { p: A.clone().add(B).multiplyScalar(0.5).toArray(), q: new THREE.Quaternion().setFromUnitVectors(new V(0, 1, 0), dir.normalize()) });
-}
-const ring = (n, fn) => Array.from({ length: n }, (_, i) => fn((i / n) * Math.PI * 2, i));
-
-// ---------- motion kit ----------
-// A moving part is { geo, pivot, anim, parent }: anim(t) returns its pose about the pivot (x, y, z
-// offsets; rx, ry, rz angles or a quaternion q; s or sx/sy/sz scale). A part with a parent (its
-// index in the list) rides on it, with its pivot in the parent's frame; geo may be null for a
-// bare joint. A model's move(t) replaces its kind's whole-model motion (behave).
-const TAU = Math.PI * 2;
-const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
-const cyc = (t, period, off = 0) => (((t / period + off) % 1) + 1) % 1;
-const win = (f, a, b) => clamp01((f - a) / (b - a)); // progress of f through [a, b]
-const easeIn = (k) => k * k * k;
-const easeOut = (k) => 1 - (1 - k) ** 3;
-const easeIO = (k) => (k < 0.5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2);
-const back = (k) => 1 + 2.70158 * (k - 1) ** 3 + 1.70158 * (k - 1) ** 2; // overshoots, then settles
-const bump = (f, at, w) => Math.exp(-(((f - at) / w) ** 2));
-const hop = (k) => 4 * k * (1 - k); // 0 → 1 → 0
-// Grows in with a little overshoot over [a, b] and shrinks away over [c, d] of a cycle.
-const life = (f, a, b, c, d) => (f < a || f > d ? 0 : f < b ? back(win(f, a, b)) : f < c ? 1 : 1 - easeIn(win(f, c, d)));
-const legacy = (mv) => {
-  const axis = new V(...mv.axis).normalize(), q = new THREE.Quaternion();
-  if (mv.mode === 'spin') return (t) => ({ q: q.setFromAxisAngle(axis, t * mv.speed) });
-  if (mv.mode === 'flap') return (t) => ({ q: q.setFromAxisAngle(axis, Math.sin(t * mv.speed) * mv.amp) });
-  return (t) => { const f = cyc(t * mv.speed + (mv.phase || 0), 1); return { y: -f * mv.drop, s: Math.min(1, f * 8, (1 - f) * 8), q: q.setFromAxisAngle(axis, f * 6) }; };
-};
-
-// ---------- palette ----------
-const K = {
-  stone: '#efe6d6', stoneDk: '#d8ccb6', white: '#f8f6f1', ink: '#2b2f36', dark: '#3a3f47', steel: '#a9b1bb', steelDk: '#7d8792',
-  gold: '#f0c24a', goldDk: '#c99a2e', red: '#e5533d', redDk: '#b83a2a', blue: '#3d7be0', blueDk: '#2a5bb0', sky: '#8cc8f0',
-  green: '#5fae5b', greenDk: '#3f7f43', money: '#7cbf7d', moneyDk: '#4f9258', wood: '#9a6a41', woodDk: '#6f4a2c',
-  cream: '#fbf3e3', orange: '#f29a3a', purple: '#8a6cf0', purpleLt: '#c3b4ff', pink: '#f39ab8', teal: '#3fb8a8', yellow: '#ffd23f', tan: '#e2b37a', brown: '#8a5a36',
-};
 
 // ---------- centerpieces (≈10 units tall) ----------
 const columns = (n, x0, x1, z, h, y, color) => Array.from({ length: n }, (_, i) => part(cyl(0.34, 0.38, h, 12), color, { p: [x0 + ((x1 - x0) * i) / (n - 1), y + h / 2, z] }));
@@ -660,11 +567,10 @@ const EXTRA = {
           anim: (t) => { const f = cyc(t, 4); return { s: f < 0.5 ? 1 : f < 0.55 ? 1 - win(f, 0.5, 0.55) : f < 0.84 ? 0 : back(win(f, 0.84, 0.96)) }; } },
       ] }),
     // A lifebuoy on the waves.
-    () => ({ geo: part(cyl(4.6, 4.8, 0.8, 32), '#5aa9e6', { p: [0, 0.4, 0] }),
+    () => ({ geo: part(cyl(4.6, 4.8, 0.8, 32), 'W', { p: [0, 0.4, 0] }),
       moving: [
         { geo: merge(part(torus(3, 1, TAU, 40), (x, y) => (Math.floor(((Math.atan2(y, x) + Math.PI) / TAU) * 8) % 2 ? 'A' : K.white)), part(torus(3.05, 0.12, TAU, 40), '#d9c39a', { p: [0, 0, 1] })),
           pivot: [0, 4.6, 0], anim: (t) => ({ y: Math.sin(t * 1.7) * 0.35, rx: Math.sin(t * 1.3) * 0.12, rz: Math.sin(t * 1.1) * 0.1 }) },
-        ...ring(6, (a, i) => ({ geo: part(cone(1, 1.4, 4), '#8cc8f0'), pivot: [Math.cos(a) * 3.4, 1.2, Math.sin(a) * 3.4], anim: (t) => ({ y: Math.sin(t * 2.2 + i * 2.1) * 0.3 - 0.1, sy: 1 + Math.sin(t * 2.2 + i * 2.1) * 0.2 }) })),
       ] }),
   ],
   health: [
@@ -919,7 +825,7 @@ const EXTRA = {
       [-2.4, 2.4].map((x) => part(cyl(0.5, 0.5, 1.6, 12), 'B', { p: [x, 4.5, 0.6], r: [Math.PI / 2 - 0.35, 0, 0] })), ring(6, (a, i) => part(box(0.05, 0.25, 0.3), K.ink, { p: [1.02, 5.9 - i * 0.22, 2.4 - i * 0.62] }))) }),
     // A hotel with a sign.
     () => ({ geo: merge(part(box(6, 9, 4), K.cream, { p: [0, 4.5, 0] }), ring(6, (a, i) => [part(box(5.4, 0.2, 0.8), K.white, { p: [0, 1.6 + i * 1.3, 2.3] }), ring(3, (b, j) => part(box(1.2, 0.8, 0.06), '#9dd0f2', { p: [-1.8 + j * 1.8, 2.1 + i * 1.3, 2.02] }))]),
-      part(box(6.4, 1.4, 0.4), 'A', { p: [0, 9.6, 0.8] }), part(box(2, 1.6, 0.1), 'B', { p: [0, 0.8, 2.03] }), part(cyl(3, 3, 0.3, 24), '#7cc0ff', { p: [5, 0.15, 3] })) }),
+      part(box(6.4, 1.4, 0.4), 'A', { p: [0, 9.6, 0.8] }), part(box(2, 1.6, 0.1), 'B', { p: [0, 0.8, 2.03] }), part(cyl(3, 3, 0.3, 24), 'W', { p: [5, 0.15, 3] })) }),
   ],
 };
 // ---------- heroes by what a company actually does ----------
@@ -1091,7 +997,7 @@ EXTRA.insurance.push(
       return { y: up * 1.3 - bump(f, 0.85, 0.02) * 0.1, ry: -1.7 * easeIO(win(f, 0.32, 0.46)) * (1 - easeIO(win(f, 0.58, 0.72))) };
     } }] }),
   // 5 anchor
-  () => ({ geo: part(cyl(4, 4.2, 0.6, 28), '#5aa9e6', { p: [0, 0.3, 0] }),
+  () => ({ geo: part(cyl(4, 4.2, 0.6, 28), 'W', { p: [0, 0.3, 0] }),
     moving: [{ geo: merge(part(box(0.7, 7, 0.7), 'A', { p: [0, -4, 0] }), part(box(3.6, 0.6, 0.6), 'A', { p: [0, -1.6, 0] }), part(torus(0.8, 0.25, TAU, 14), 'A'), part(torus(2.8, 0.35, Math.PI, 20), 'A', { p: [0, -5, 0], r: [0, 0, Math.PI] }), part(cone(0.7, 1.2, 4), 'A', { p: [-2.8, -4.8, 0] }), part(cone(0.7, 1.2, 4), 'A', { p: [2.8, -4.8, 0] }), part(torus(1.2, 0.12, Math.PI * 1.6, 14), '#d9c39a', { p: [0, -1.2, 0.5] })),
       pivot: [0, 8.6, 0], anim: (t) => ({ rz: Math.sin(t * 1.4) * 0.2, rx: Math.sin(t * 0.9) * 0.05 }) }] }),
 );
@@ -1108,7 +1014,7 @@ EXTRA.oil.push(
       } }))),
     ] }),
   // 5 tanker ship
-  () => ({ geo: part(cyl(4.8, 5, 0.6, 28), '#5aa9e6', { p: [0, 0.3, 0] }), move: () => ({}),
+  () => ({ geo: part(cyl(4.8, 5, 0.6, 28), 'W', { p: [0, 0.3, 0] }), move: () => ({}),
     moving: [
       { geo: merge(part(box(8.4, 1.8, 2.8), 'A', { p: [0, 0.9, 0] }), part(box(8.4, 0.4, 2.8), 'Ad', { p: [0, 2, 0] }), part(box(2, 2.6, 2.4), K.white, { p: [-3, 3.4, 0] }), part(cyl(0.4, 0.5, 1.6, 10), 'B', { p: [-3.4, 5.4, 0] }), ring(3, (a, i) => part(cyl(0.8, 0.8, 0.6, 14), K.white, { p: [-0.2 + i * 1.8, 2.5, 0] }))),
         pivot: [0, 0.6, 0], anim: (t) => ({ y: Math.sin(t * 1.5) * 0.14, rz: Math.sin(t * 1.1) * 0.05, rx: Math.sin(t * 0.8) * 0.04 }) },
@@ -1352,7 +1258,7 @@ EXTRA.comms = [
 export const PROPS = [
   () => merge(part(cyl(0.06, 0.06, 3.2, 6), K.steel, { p: [0, 1.6, 0] }), part(box(1.4, 0.9, 0.05), 'A', { p: [0.7, 2.7, 0] })),
   () => merge(part(cyl(0.03, 0.03, 2.6, 4), K.ink, { p: [0, 1.3, 0] }), part(ball(0.5, 1), 'A', { p: [0, 2.9, 0] }), part(ball(0.45, 1), 'B', { p: [0.5, 2.6, 0.2] }), part(ball(0.45, 1), '#ffd23f', { p: [-0.4, 2.7, -0.2] })),
-  () => merge(part(cyl(1.2, 1.3, 0.5, 18), K.stone, { p: [0, 0.25, 0] }), part(cyl(1, 1, 0.1, 18), '#7cc0ff', { p: [0, 0.5, 0] }), part(cyl(0.2, 0.25, 1.2, 8), K.stone, { p: [0, 1, 0] }), part(ball(0.35, 1), '#bfe3ff', { p: [0, 1.7, 0] })),
+  () => merge(part(cyl(1.2, 1.3, 0.5, 18), K.stone, { p: [0, 0.25, 0] }), part(cyl(1, 1, 0.1, 18), 'W', { p: [0, 0.5, 0] }), part(cyl(0.2, 0.25, 1.2, 8), K.stone, { p: [0, 1, 0] }), part(ball(0.35, 1), '#bfe3ff', { p: [0, 1.7, 0] })),
   () => merge(part(cyl(0.2, 0.3, 2, 6), K.wood, { p: [0, 1, 0] }), part(ball(1.1, 0), '#5fae5b', { p: [0, 2.6, 0] })),
   () => merge(part(cyl(0.18, 0.25, 2.6, 6), '#a07a4e', { p: [0, 1.3, 0], r: [0, 0, 0.15] }), ring(5, (a) => part(box(1.6, 0.08, 0.5), '#5fae5b', { p: [0.2 + Math.cos(a) * 0.7, 2.7, Math.sin(a) * 0.7], r: [0, -a, -0.4] }))),
   () => merge(part(box(0.9, 0.5, 0.9), K.stone, { p: [0, 0.25, 0] }), part(cyl(0.12, 0.12, 0.8, 8), K.gold, { p: [0, 0.9, 0] }), part(cyl(0.5, 0.25, 0.7, 12), K.gold, { p: [0, 1.6, 0] }), part(torus(0.25, 0.06, Math.PI, 8), K.gold, { p: [0.5, 1.6, 0], r: [0, 0, -Math.PI / 2] })),
@@ -1391,20 +1297,26 @@ const FINDER = {
   social: '#f39ab8', media: '#e5533d', food: '#f3c443', drink: '#e5533d', care: '#7fd1c4', farm: '#7cbf5a', industrial: '#f29a3a', chem: '#5fd08f',
   metal: '#b0643c', house: '#7cbf5a', ai: '#f2b08f', robot: '#7cc0ff', tree: '#6fb84e', search: '#9fc3f2', vr: '#9aa6b8', bricks: '#e06a45',
 };
+// The biggest names have signature models of their own (src/heroes.js), each its own kind.
+for (const [id, h] of Object.entries(HEROES)) { CENTER[id] = h.build; FINDER[id] = h.finder; }
 export const ARCHETYPES = Object.fromEntries(Object.entries(FINDER).map(([id, finder]) => [id, { id, finder }]));
 
 const propCache = new Map(), topCache = new Map();
-export const propGeo = (i) => (propCache.has(i) ? propCache.get(i) : propCache.set(i, PROPS[i % PROPS.length]()).get(i));
-export const topperGeo = (i) => (!TOPPERS[i % TOPPERS.length] ? null : topCache.has(i) ? topCache.get(i) : topCache.set(i, TOPPERS[i % TOPPERS.length]()).get(i));
+export const propGeo = (i, detail = 'high') => { const k = `${i}:${detail}`; if (!propCache.has(k)) propCache.set(k, withDetail(detail, PROPS[i % PROPS.length])); return propCache.get(k); };
+export const topperGeo = (i, detail = 'high') => { const make = TOPPERS[i % TOPPERS.length], k = `${i}:${detail}`; if (!make) return null; if (!topCache.has(k)) topCache.set(k, withDetail(detail, make)); return topCache.get(k); };
 export const PROP_COUNT = 16, TOPPER_COUNT = 6;
 // How many shapes each kind of company has.
 export const variantCount = (id) => 1 + ((EXTRA[id] || []).length);
 const cache = new Map();
 // { geo, moving: [{ geo, pivot, axis, mode: spin|flap|drop, speed, amp, drop, phase }], hover }
 // A moving part's geometry is built around its own pivot point.
-export function centerpiece(id, variant = 0, base = 0) {
-  const key = `${id}:${variant}:${base}`;
-  if (!cache.has(key)) {
+export function centerpiece(id, variant = 0, base = 0, detail = 'high') {
+  const key = `${id}:${variant}:${base}:${detail}`;
+  if (!cache.has(key)) cache.set(key, withDetail(detail, () => build(id, variant, base)));
+  return cache.get(key);
+}
+function build(id, variant, base) {
+  {
     const builders = [CENTER[id] || CENTER.tree, ...(EXTRA[id] || [])];
     const c = { ...builders[variant % builders.length]() };
     if (c.spin) c.moving = [{ ...c.spin, mode: 'spin' }];
@@ -1425,9 +1337,8 @@ export function centerpiece(id, variant = 0, base = 0) {
     for (let i = 0; i < pos.count; i++) if (Math.abs(pos.getX(i)) < 1.5 && Math.abs(pos.getZ(i)) < 1.5) top = Math.max(top, pos.getY(i));
     c.propAt = [bb.max.x + 1.3, 0, bb.max.z * 0.4 + 0.6];
     c.topAt = [0, (top || bb.max.y) - 0.05, 0];
-    cache.set(key, c);
+    return c;
   }
-  return cache.get(key);
 }
 
 // Builds a model's moving parts under `root`, each holding mesh(geo); returns them for poseMovers.
@@ -1563,16 +1474,39 @@ export function behave(id, t, phase = 0) {
 }
 
 // Shared material: vertex colours, with brand slots filled from per-instance brandA / brandB.
+// Water ('W' parts) is drawn live, like the sea on the map: rippling light, caustics and glints.
+// Call material.userData.tick(seconds) each frame to move it.
 export function modelMaterial() {
-  const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.62, metalness: 0.02 });
+  const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.55, metalness: 0.04 });
+  const uTime = { value: 0 };
+  m.userData.tick = (t) => (uTime.value = t);
   m.onBeforeCompile = (sh) => {
+    sh.uniforms.uTime = uTime;
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', '#include <common>\nattribute float mask;\nattribute vec3 brandA;\nattribute vec3 brandB;')
+      .replace('#include <common>', '#include <common>\nattribute float mask;\nattribute vec3 brandA;\nattribute vec3 brandB;\nvarying float vWater;\nvarying vec2 vFlat;')
       .replace('#include <color_vertex>', `#include <color_vertex>
-  if (mask > 0.5) {
+  vWater = mask > 4.5 ? 1.0 : 0.0;
+  vFlat = position.xz;
+  if (mask > 0.5 && mask < 4.5) {
     vec3 bc = mask < 2.5 ? brandA : brandB;
     vColor.rgb = bc * ((mask > 1.5 && mask < 2.5) || mask > 3.5 ? 0.72 : 1.0);
   }`);
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', `#include <common>
+uniform float uTime;
+varying float vWater;
+varying vec2 vFlat;
+float wHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float wNoise(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(wHash(i), wHash(i + vec2(1, 0)), f.x), mix(wHash(i + vec2(0, 1)), wHash(i + vec2(1, 1)), f.x), f.y); }
+float wWaves(vec2 p, float t) { return 0.5 * sin(dot(p, vec2(0.9, 0.5)) + t * 1.3) + 0.35 * sin(dot(p, vec2(-0.6, 1.0)) + t * 1.7) + 0.3 * wNoise(p * 1.6 + vec2(t * 0.4, t * 0.25)); }
+float wCaustic(vec2 p, float t) { float c = 0.0; for (int i = 0; i < 2; i++) { vec2 q = p * (1.6 + float(i)) + vec2(t * 0.3, -t * 0.22) * (1.0 + float(i)); float n = wNoise(q) + 0.5 * wNoise(q * 2.3 + 4.0); c += pow(1.0 - abs(n - 0.75) * 2.2, 6.0); } return clamp(c, 0.0, 1.0); }`)
+      .replace('#include <color_fragment>', `#include <color_fragment>
+  if (vWater > 0.5) diffuseColor.rgb = mix(vec3(0.16, 0.52, 0.66), vec3(0.42, 0.80, 0.86), 0.5 + 0.5 * wWaves(vFlat * 0.9, uTime)) + vec3(wCaustic(vFlat * 0.8, uTime) * 0.35);`)
+      .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
+  if (vWater > 0.5) roughnessFactor = 0.12;`)
+      .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+  if (vWater > 0.5) { float e = 0.12, h = wWaves(vFlat * 0.9, uTime); normal = normalize(normal + vec3(-(wWaves((vFlat + vec2(e, 0.0)) * 0.9, uTime) - h) / e * 0.18, 0.0, -(wWaves((vFlat + vec2(0.0, e)) * 0.9, uTime) - h) / e * 0.18)); }`);
   };
   return m;
 }
@@ -1587,7 +1521,7 @@ export function setBrands(mesh, pairs) {
 // The colour a vertex shows for a given brand pair (used when a model turns into pixels).
 export function vertexColor(geo, i, [a, b], out = new THREE.Color()) {
   const k = geo.attributes.mask ? geo.attributes.mask.getX(i) : 0;
-  if (!k) return out.fromBufferAttribute(geo.attributes.color, i);
+  if (!k || k > 4.5) return out.fromBufferAttribute(geo.attributes.color, i);
   out.set(k < 2.5 ? a : b);
   return k === 2 || k === 4 ? out.multiplyScalar(0.72) : out;
 }

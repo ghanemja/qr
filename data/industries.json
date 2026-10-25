@@ -32,7 +32,23 @@
   "tree": "Timber",
   "search": "Search",
   "vr": "Virtual reality",
-  "bricks": "Data bricks"
+  "bricks": "Data bricks",
+  "amazon": "Smile to the door",
+  "walmart": "Everyday low prices",
+  "apple": "The ecosystem",
+  "alphabet": "Search everything",
+  "berkshire": "The snowball",
+  "exxon": "Well to tanker",
+  "microsoft": "Window to the cloud",
+  "costco": "The membership warehouse",
+  "nvidia": "The AI engine",
+  "meta": "Billions connected",
+  "ford": "The moving assembly line",
+  "tesla": "Charge and go",
+  "disney": "The magic kingdom",
+  "cocacola": "The contour bottle",
+  "mcdonalds": "Billions served",
+  "spacex": "Land and fly again"
  },
  "bank": [
   "JPMorgan Chase",
@@ -69,7 +85,6 @@
   "Fannie Mae",
   "Freddie Mac",
   "Navient",
-  "Berkshire Hathaway",
   "Icahn Enterprises",
   "Loews",
   "Alleghany",
@@ -196,7 +211,6 @@
   "Whoop"
  ],
  "oil": [
-  "Exxon Mobil",
   "Chevron",
   "Phillips 66",
   "Valero Energy",
@@ -264,8 +278,6 @@
   "Quanta Services"
  ],
  "retail": [
-  "Walmart",
-  "Costco Wholesale",
   "Kroger",
   "Home Depot",
   "Target",
@@ -314,7 +326,6 @@
   "Simon Property Group"
  ],
  "parcel": [
-  "Amazon.com",
   "United Parcel Service",
   "FedEx",
   "XPO Logistics",
@@ -341,8 +352,6 @@
  ],
  "car": [
   "General Motors",
-  "Ford Motor",
-  "Tesla",
   "AutoNation",
   "Penske Automotive Group",
   "Lear",
@@ -404,7 +413,6 @@
   "Huntington Ingalls Industries",
   "Textron",
   "United Technologies",
-  "SpaceX",
   "Relativity Space",
   "Varda Space",
   "Anduril",
@@ -414,7 +422,6 @@
  ],
  "chip": [
   "Intel",
-  "Nvidia",
   "Micron Technology",
   "Texas Instruments",
   "Applied Materials",
@@ -432,7 +439,6 @@
   "Cerebras"
  ],
  "computer": [
-  "Apple",
   "Dell Technologies",
   "HP",
   "IBM",
@@ -449,7 +455,6 @@
   "NetApp"
  ],
  "software": [
-  "Microsoft",
   "Oracle",
   "salesforce.com",
   "Adobe",
@@ -497,7 +502,6 @@
   "ByteDance"
  ],
  "media": [
-  "Walt Disney",
   "Twenty-First Century Fox",
   "CBS",
   "Viacom",
@@ -511,7 +515,6 @@
   "R.R. Donnelley & Sons"
  ],
  "food": [
-  "McDonald's",
   "Yum Brands",
   "Yum China Holdings",
   "Darden Restaurants",
@@ -534,7 +537,6 @@
   "Aramark"
  ],
  "drink": [
-  "Coca-Cola",
   "PepsiCo",
   "Keurig Dr Pepper",
   "Molson Coors Brewing",
@@ -670,12 +672,8 @@
   "Weyerhaeuser",
   "International Paper"
  ],
- "search": [
-  "Alphabet"
- ],
- "vr": [
-  "Facebook"
- ],
+ "search": [],
+ "vr": [],
  "bricks": [
   "Databricks"
  ],
@@ -1494,5 +1492,53 @@
   "Discord": 0,
   "Uber Technologies": 0,
   "Carvana": 1
- }
+ },
+ "amazon": [
+  "Amazon.com"
+ ],
+ "walmart": [
+  "Walmart"
+ ],
+ "apple": [
+  "Apple"
+ ],
+ "alphabet": [
+  "Alphabet"
+ ],
+ "berkshire": [
+  "Berkshire Hathaway"
+ ],
+ "exxon": [
+  "Exxon Mobil"
+ ],
+ "microsoft": [
+  "Microsoft"
+ ],
+ "costco": [
+  "Costco Wholesale"
+ ],
+ "nvidia": [
+  "Nvidia"
+ ],
+ "meta": [
+  "Facebook"
+ ],
+ "ford": [
+  "Ford Motor"
+ ],
+ "tesla": [
+  "Tesla"
+ ],
+ "disney": [
+  "Walt Disney"
+ ],
+ "cocacola": [
+  "Coca-Cola"
+ ],
+ "mcdonalds": [
+  "McDonald's"
+ ],
+ "spacex": [
+  "SpaceX"
+ ]
 }

@@ -101,7 +101,7 @@ export function createQRWorld(container, { slug, model, look = { v: 0, a: '#e553
     return m;
   };
   // Companion prop beside the model and a topper on its crown, when the company has them.
-  const accs = [[look.prop != null ? propGeo(look.prop) : null, cp.propAt], [look.topper ? topperGeo(look.topper) : null, cp.topAt]]
+  const accs = (cp.bare ? [] : [[look.prop != null ? propGeo(look.prop) : null, cp.propAt], [look.topper ? topperGeo(look.topper) : null, cp.topAt]])
     .filter(([geo]) => geo).map(([geo, at]) => ({ geo, matrix: new THREE.Matrix4().makeTranslation(...at) }));
   const bb = new THREE.Box3().setFromBufferAttribute(cp.geo.attributes.position);
   for (const a of accs) bb.union(new THREE.Box3().setFromBufferAttribute(a.geo.attributes.position).applyMatrix4(a.matrix));
@@ -233,6 +233,7 @@ export function createQRWorld(container, { slug, model, look = { v: 0, a: '#e553
   let morph = 0, morphing = false, clock = 0;
   stage.frame.add((dt) => {
     clock += dt;
+    mat.userData.tick(clock);
     if (morph === 0) animate(clock);
   });
 

@@ -114,6 +114,7 @@ function start() {
   const waterView = new THREE.Vector3();
   const waters = [waterMat];
   stage.frame.add(() => {
+    mat.userData.tick(clock);
     for (const w of waters) {
       w.uniforms.uTime.value = clock;
       w.uniforms.uSun.value.copy(stage.sun.position).sub(stage.sun.target.position);
@@ -158,7 +159,7 @@ function start() {
   const I4 = new THREE.Matrix4();
   function buildModel(d, maxH, maxW) {
     const arch = ARCHETYPES[d.m] ? d.m : 'tree';
-    const cp = centerpiece(arch, d.L[0], d.L[3]);
+    const cp = centerpiece(arch, d.L[0], d.L[3], 'low');
     const brand = [[d.L[1], d.L[2]]];
     const branded = (geo, m4 = I4) => {
       const mesh = new THREE.InstancedMesh(geo, mat, 1);
@@ -173,13 +174,13 @@ function start() {
     g.add(inner);
     inner.add(branded(cp.geo));
     const bb = new THREE.Box3().setFromBufferAttribute(cp.geo.attributes.position);
-    const prop = propGeo(d.L[4]);
+    const prop = cp.bare ? null : propGeo(d.L[4], 'low');
     if (prop) {
       const m4 = new THREE.Matrix4().makeTranslation(...cp.propAt);
       inner.add(branded(prop, m4));
       bb.union(new THREE.Box3().setFromBufferAttribute(prop.attributes.position).applyMatrix4(m4));
     }
-    const top = d.L[5] ? topperGeo(d.L[5]) : null;
+    const top = d.L[5] && !cp.bare ? topperGeo(d.L[5], 'low') : null;
     if (top) inner.add(branded(top, new THREE.Matrix4().makeTranslation(...cp.topAt)));
     const movers = mountMovers(cp, inner, (geo) => branded(geo));
     const rest = restMatrices(cp);
