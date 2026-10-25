@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import { V, part, windy, rand, taper, leafShape, shade, tuft, merge, place, box, cyl, lathe, tube, ball, cone, torus, extrude, prism, star, beam, ring, faceted, hi, TAU, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, legacy, K, withDetail } from './kit.js';
 import { HEROES } from './heroes.js';
+import { HEROES2 } from './heroes2.js';
 import { SCENES } from './scenes.js';
 
 
@@ -1339,7 +1340,7 @@ const FINDER = {
   metal: '#b0643c', house: '#7cbf5a', ai: '#f2b08f', robot: '#7cc0ff', tree: '#6fb84e', search: '#9fc3f2', vr: '#9aa6b8', bricks: '#e06a45',
 };
 // The biggest names have signature models of their own (src/heroes.js), each its own kind.
-for (const [id, h] of Object.entries(HEROES)) { CENTER[id] = h.build; FINDER[id] = h.finder; }
+for (const [id, h] of Object.entries({ ...HEROES, ...HEROES2 })) { CENTER[id] = h.build; FINDER[id] = h.finder; }
 export const ARCHETYPES = Object.fromEntries(Object.entries(FINDER).map(([id, finder]) => [id, { id, finder }]));
 
 const propCache = new Map(), topCache = new Map();

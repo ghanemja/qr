@@ -328,6 +328,9 @@ const semi = (cab = 'A', trailer = K.white, stripe = 'B') => merge(part(rbox(0.8
   part(rbox(3.0, 1.2, 1.0, 0.06), trailer, { p: [-0.6, 1.0, 0] }), part(box(2.9, 0.22, 1.02), stripe, { p: [-0.6, 0.85, 0] }), part(box(3.2, 0.1, 0.8), K.dark, { p: [-0.3, 0.35, 0] }),
   [[-1.7, 0.42], [-1.3, 0.42], [1.0, 0.42], [1.7, 0.42], [-1.7, -0.42], [-1.3, -0.42], [1.0, -0.42], [1.7, -0.42]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.14, 14), '#1d1f24', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] })));
 
+// Shared with the second batch of signature models (src/heroes2.js).
+export { y0, slab, coin, home, house2, truss, frame, wheat, tyre, bin, gear, reach2, stormCloud, bolt, shieldGeo, van, fan, humanoid, bottle, bubbleGeo, lifebuoy, parasol, anchorGeo, trawler, labWalls, tubeGeo, tickGeo, heartGeo, bed, pylon, jigsaw, drone, stethoscope, cardGeo, racking, medBox, column, tankTruck, rocketGeo, radarDish, heliGeo, rotorGeo, vial, molecule, crossGeo, padBody, padShackle, wafer, chipGeo, desk, serverRack, helixGeo, whiteboard, jet, appBlock, bugGeo, fighter, semi };
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
