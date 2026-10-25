@@ -85,7 +85,8 @@
   "pg": "In every cupboard",
   "jnj": "Medicine and the surgeon's hand",
   "waymo": "The car drives itself",
-  "airbnb": "Belong anywhere"
+  "airbnb": "Belong anywhere",
+  "salesforce": "Pipeline to closed-won"
  },
  "bank": [
   "Citigroup",
@@ -469,7 +470,6 @@
  ],
  "software": [
   "Oracle",
-  "salesforce.com",
   "Adobe",
   "Intuit",
   "ADP",
@@ -1391,7 +1391,6 @@
   "Vercel": 3,
   "Replit": 3,
   "Anysphere (Cursor)": 3,
-  "salesforce.com": 4,
   "Celonis": 4,
   "Clay": 4,
   "Outreach": 4,
@@ -1638,5 +1637,8 @@
  ],
  "airbnb": [
   "Airbnb"
+ ],
+ "salesforce": [
+  "salesforce.com"
  ]
 }
