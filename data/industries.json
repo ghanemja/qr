@@ -139,7 +139,8 @@
   "mgm": "The Strip's biggest landlord, and BetMGM in every pocket",
   "caesars": "One rewards card across a whole Strip of casinos",
   "carvana": "Buy it on your phone, pick it up from the vending machine",
-  "carmax": "The no-haggle used car, reconditioned and priced at scale"
+  "carmax": "The no-haggle used car, reconditioned and priced at scale",
+  "hertz": "The airport counter with a car for everyone off the plane"
  },
  "bank": [
   "PNC Financial Services",
@@ -421,7 +422,6 @@
   "Navistar International",
   "Paccar",
   "Cummins",
-  "Hertz Global Holdings",
   "Avis Budget Group",
   "Harley-Davidson",
   "Thor Industries",
@@ -1783,5 +1783,8 @@
  ],
  "carmax": [
   "CarMax"
+ ],
+ "hertz": [
+  "Hertz Global Holdings"
  ]
 }

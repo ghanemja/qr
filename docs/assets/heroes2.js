@@ -1738,4 +1738,30 @@ export const HEROES2 = {
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.6, 0.8)); return { x: -1.6 + u * 2.8, z: -2.0 + u * 2.2, ry: -Math.PI / 4, s: f > 0.8 || f < 0.58 ? 0.001 : 1 }; }, { shirt: '#d6336c', pants: '#2b3a55', y: y0 }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Hertz: the airport counter with a car for everyone. A plane lands, travellers come off
+  // with their bags, pick up keys at the yellow counter and drive away, while returned cars are
+  // washed, charged and lined up for the next flight.
+  hertz: { finder: '#ffd100', build: () => {
+    const R = rand(152), out = [], YEL = '#ffd100', INK = '#1d1f24';
+    out.push(ground('#8fc66f'), part(box(10.2, 0.02, 2.0), '#4a4f57', { p: [0, y0 + 0.01, -3.6] }), part(box(10.2, 0.02, 6.0), '#6a7079', { p: [0, y0 + 0.01, 1.6] }));
+    // ---- the counter building, middle left
+    out.push(part(rbox(3.0, 1.6, 1.6, 0.05), '#eef0f2', { p: [-2.8, y0 + 0.8, -1.6] }), part(box(3.02, 0.45, 1.62), YEL, { p: [-2.8, y0 + 1.4, -1.6] }), place(pixText('HERTZ', 0.09, INK, 0.03), { p: [-2.8, y0 + 1.4, -0.78] }), part(rbox(1.8, 0.9, 0.5, 0.04), YEL, { p: [-2.8, y0 + 0.45, -0.4] }));
+    // ---- the rows of rental cars, the charging posts
+    const spots = [];
+    for (let k = 0; k < 6; k++) spots.push([-4.0 + k * 1.5, 3.4]);
+    spots.forEach(([x, z], i) => out.push(part(box(0.05, 0.012, 2.0), K.white, { p: [x - 0.75, y0 + 0.02, z] }), part(rbox(0.2, 0.9, 0.2, 0.04), '#2f9e6e', { p: [x, y0 + 0.45, z - 1.3] })));
+    spots.forEach(([x, z], i) => { if (i !== 2) out.push(place(sedan(['#f4f5f6', '#1d1f24', '#3d7be0', '#9aa1a9', '#e5533d', '#f4f5f6'][i]), { p: [x, y0, z], r: [0, Math.PI / 2, 0], s: 0.85 })); });
+    out.push(trees(R, [[4.6, -1.6], [1.6, -1.8], [4.6, 0.4]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 12;
+    // The plane landing on the runway at the back.
+    moving.push({ geo: place(jet('#3d7be0'), { s: 0.8 }), pivot: [0, y0, -3.6], anim: (t) => { const f = cyc(t, P), x = -6 + easeOut(win(f, 0, 0.3)) * 12, y = (1 - easeOut(win(f, 0, 0.18))) * 2.5; return { x, y, rz: -y * 0.05, s: clamp01((5.6 - Math.abs(x)) / 0.6) * Math.min(1, f / 0.03) + 0.001 }; } });
+    // A traveller: from the runway side to the counter, then to the car.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.25, 0.45)), v = easeIO(win(f, 0.55, 0.7)); return f < 0.5 ? { x: 0.4 - u * 2.8, z: -2.6 + u * 2.6, ry: Math.PI * 0.8, still: f > 0.45, s: f < 0.22 ? 0.001 : 1 } : { x: -2.4 + v * 1.4, z: 0.0 + v * 2.2, ry: -1.2, s: f > 0.7 ? 0.001 : 1 }; }, { shirt: '#d6336c', pants: '#2b3a55', y: y0, carry: part(rbox(0.3, 0.4, 0.18, 0.04), INK, { p: [0, 0.3, 0.35] }) }));
+    // The rented car pulls out of spot 2 and away.
+    moving.push({ geo: place(sedan(YEL), { r: [0, Math.PI / 2, 0], s: 0.85 }), pivot: [spots[2][0], y0, spots[2][1]], anim: (t) => { const f = cyc(t, P), u = easeIn(win(f, 0.72, 0.95)); return f < 0.12 ? { s: f / 0.12 + 0.001 } : { z: -u * 2.2, s: f > 0.88 ? 1 - win(f, 0.88, 0.95) + 0.001 : 1 }; } });
+    // Charging pulses on the posts.
+    spots.forEach(([x, z], i) => moving.push({ geo: part(box(0.12, 0.12, 0.02), '#62d35f'), pivot: [x, y0 + 0.75, z - 1.19], anim: (t) => ({ s: Math.sin(t * 3 + i) > 0 ? 1 : 0.4 }) }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
