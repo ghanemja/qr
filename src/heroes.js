@@ -2187,5 +2187,54 @@ export const HEROES = {
     moving.push(...walker(moving.length, (t) => { const a = along(run, cyc(t, 12)); return { x: a.p.x, z: a.p.z, ry: a.ry }; }, { shirt: RED, pants: '#2b2f36', y: y0 }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Caterpillar: the machines that move the earth, and the dealers who keep them running. At the
+  // bottom of the open pit the excavator loads the giant haul truck; the truck climbs the spiral
+  // road and tips its load into the crusher at the rim; a dozer works a bench.
+  caterpillar: { finder: '#ffcd11', build: () => {
+    const R = rand(17), out = [], y0 = 0.24, CAT = '#ffcd11', INK = '#1d1f24';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#b89a72', { p: [0, 0.12, 0] }));
+    // ---- the pit: stepped benches rising from the floor to the rim
+    const steps = 5, rim = 1.6, r0 = 1.3, dr = 0.56;
+    const prof = [[0, 0]];
+    for (let i = 0; i < steps; i++) { const r = r0 + i * dr, h = (i + 1) * rim / steps; prof.push([r, (i * rim) / steps], [r + 0.08, h]); }
+    prof.push([5.18, rim], [5.18, 0]);
+    const pit = lathe(prof.slice().reverse(), hi() ? 72 : 24); pit.deleteAttribute('normal');
+    out.push(part(pit, (px, py) => shade(Math.floor((py - y0 + 0.01) / (rim / steps)) % 2 ? '#c49a68' : '#a8835a', 0.88 + ((py - y0) / rim) * 0.2), { p: [0, y0, 0] }));
+    // Corners of the plateau, and scrub on top.
+    if (hi()) for (let i = 0; i < 18; i++) { const a = R() * TAU, r = 4.6 + R() * 0.6; const x = Math.max(-5, Math.min(5, Math.cos(a) * r)), z = Math.max(-5, Math.min(5, Math.sin(a) * r)); out.push(part(ball(0.15 + R() * 0.1), '#8f9a5a', { p: [x, y0 + rim + 0.06, z], s: [1, 0.6, 1] })); }
+    // The haul road spiralling down the benches.
+    const spiral = curve([...Array(13)].map((_, i) => { const u = i / 12, a = -0.8 + u * TAU * 1.05, r = 4.3 - u * 3.3, h = Math.min(rim, Math.max(0, (r - r0 + 0.3) / dr) * rim / steps); return [Math.cos(a) * r, y0 + h + 0.05, Math.sin(a) * r]; }));
+    { const n = hi() ? 160 : 48, tri = []; for (let i = 0; i < n; i++) { const A = spiral.getPointAt(i / n), B = spiral.getPointAt((i + 1) / n), da = spiral.getTangentAt(i / n), db = spiral.getTangentAt((i + 1) / n), w = 0.34, la = Math.hypot(da.x, da.z), lb = Math.hypot(db.x, db.z); const a0 = [A.x - da.z / la * w, A.y, A.z + da.x / la * w], a1 = [A.x + da.z / la * w, A.y, A.z - da.x / la * w], b0 = [B.x - db.z / lb * w, B.y, B.z + db.x / lb * w], b1 = [B.x + db.z / lb * w, B.y, B.z - db.x / lb * w]; tri.push(...a0, ...b0, ...a1, ...a1, ...b0, ...b1); } const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(tri, 3)); g.computeVertexNormals(); out.push(part(g, '#6e5236')); }
+    // The crusher at the rim, and the stockpile beside it.
+    const CX = 3.1, CZ = -3.1;
+    out.push(part(rbox(1.0, 1.0, 1.0, 0.05), '#6b6f76', { p: [CX, y0 + rim + 0.5, CZ] }), part(lathe([[0.0, 0], [0.6, 0.45], [0.0, 0.45]], 4), '#5b616b', { p: [CX, y0 + rim + 1.0, CZ], r: [0, Math.PI / 4, 0] }));
+    out.push(part(cone(0.8, 0.8, 24), '#8a6a4a', { p: [0.8, y0 + rim + 0.4, -4.35] }), beam([CX, y0 + rim + 0.4, CZ], [0.8, y0 + rim + 0.8, -4.35], 0.1, '#3a3f47'));
+    // The dealer's service yard: a shed with the yellow sign.
+    out.push(part(rbox(1.4, 0.8, 1.0, 0.05), '#e9e4da', { p: [-3.1, y0 + rim + 0.4, 3.1], r: [0, Math.PI / 4, 0] }), part(rbox(1.0, 0.24, 0.08, 0.03), CAT, { p: [-2.75, y0 + rim + 0.65, 3.45], r: [0, Math.PI / 4, 0] }), part(box(0.5, 0.1, 0.02), INK, { p: [-2.72, y0 + rim + 0.65, 3.48], r: [0, Math.PI / 4, 0] }));
+    // ---- moving parts
+    const moving = [];
+    const wheel = (r, w) => merge(part(new THREE.CylinderGeometry(r, r, w, hi() ? 24 : 10), INK, { r: [Math.PI / 2, 0, 0] }), part(new THREE.CylinderGeometry(r * 0.55, r * 0.55, w + 0.01, 16), CAT, { r: [Math.PI / 2, 0, 0] }));
+    // The excavator at the bottom: tracks, turning house, boom, stick and bucket.
+    const ex = moving.length;
+    moving.push({ geo: merge(part(rbox(1.3, 0.3, 0.3, 0.12), INK, { p: [0, 0.15, 0.4] }), part(rbox(1.3, 0.3, 0.3, 0.12), INK, { p: [0, 0.15, -0.4] }), part(cyl(0.3, 0.3, 0.12, 20), '#3a3f47', { p: [0, 0.36, 0] })), pivot: [-0.4, y0, 0.2], anim: () => ({}) });
+    const house = moving.length;
+    moving.push({ geo: merge(part(rbox(1.0, 0.5, 0.8, 0.08), CAT, { p: [-0.1, 0.3, 0] }), part(rbox(0.4, 0.45, 0.4, 0.06), CAT, { p: [0.25, 0.75, 0.2] }), part(box(0.3, 0.3, 0.02), '#26323f', { p: [0.3, 0.78, 0.41] }), part(rbox(0.4, 0.3, 0.76, 0.06), '#3a3f47', { p: [-0.55, 0.45, 0] })), pivot: [0, 0.42, 0], parent: ex, anim: (t) => { const f = cyc(t, 6); return { ry: (easeIO(win(f, 0.3, 0.45)) - easeIO(win(f, 0.75, 0.9))) * 1.6 }; } });
+    const boom = moving.length;
+    moving.push({ geo: part(box(1.4, 0.18, 0.2), CAT, { p: [0.7, 0, 0] }), pivot: [0.35, 0.5, -0.15], parent: house, anim: (t) => { const f = cyc(t, 6); return { rz: 0.5 - bump(f, 0.15, 0.08) * 0.6 + win(f, 0.3, 0.45) * 0.3 - win(f, 0.75, 0.9) * 0.3 }; } });
+    const stick = moving.length;
+    moving.push({ geo: part(box(0.9, 0.14, 0.16), CAT, { p: [0.45, 0, 0] }), pivot: [1.4, 0, 0], parent: boom, anim: (t) => { const f = cyc(t, 6); return { rz: -1.5 + bump(f, 0.18, 0.08) * 0.5 }; } });
+    moving.push({ geo: merge(part(extrude([[0, 0.12], [0.3, 0.12], [0.36, -0.2], [0.05, -0.28]], 0.36), '#3a3f47'), part(box(0.3, 0.12, 0.32), '#8a6a4a', { p: [0.18, 0.12, 0] })), pivot: [0.9, 0, 0], parent: stick, anim: (t) => { const f = cyc(t, 6); return { rz: -0.4 + bump(f, 0.22, 0.06) * 1.0 - bump(f, 0.6, 0.06) * 1.2 }; } });
+    // The haul truck: climbs out with a load, tips it at the crusher, comes back down.
+    const P = 18, truckU = (t) => { const f = cyc(t, P); return f < 0.15 ? 1 : f < 0.45 ? 1 - easeIO(win(f, 0.15, 0.45)) : f < 0.65 ? 0 : easeIO(win(f, 0.65, 0.95)); };
+    const truck = moving.length;
+    moving.push({ geo: merge(part(rbox(2.2, 0.3, 1.2, 0.06), CAT, { p: [0, 0.65, 0] }), part(rbox(0.6, 0.6, 1.2, 0.08), CAT, { p: [0.85, 1.05, 0] }), part(box(0.3, 0.25, 0.4), '#26323f', { p: [0.95, 1.15, 0.35] }), part(box(0.05, 0.05, 1.2), '#e9ecef', { p: [1.16, 0.85, 0] }),
+      [[-0.7, 0.62], [0.75, 0.62], [-0.7, -0.62], [0.75, -0.62]].map(([x, z]) => place(wheel(0.42, 0.34), { p: [x, 0.42, z] }))),
+      pivot: [0, 0, 0], anim: (t) => { const u = truckU(t), a = along(spiral, Math.min(0.999, Math.max(0.001, u))), back = cyc(t, P) > 0.6; return { x: a.p.x, y: a.p.y - 0.03, z: a.p.z, ry: a.ry + (back ? 0 : Math.PI), s: 0.62 }; } });
+    moving.push({ geo: merge(part(extrude([[-1.2, 0], [0.55, 0], [0.75, 0.75], [-1.2, 0.75]], 1.3), CAT), part(lathe([[0, 0], [0.6, 0], [0, 0.45]], 10), '#8a6a4a', { p: [-0.3, 0.75, 0], s: [1.4, 1, 1] })), pivot: [-0.3, 0.8, 0], parent: truck, anim: (t) => { const f = cyc(t, P); return { rz: (f > 0.47 && f < 0.63 ? -0.8 * Math.sin(win(f, 0.47, 0.63) * Math.PI) : 0) }; } });
+    // A dozer pushing along the upper bench.
+    moving.push({ geo: merge(part(rbox(0.9, 0.3, 0.7, 0.08), INK, { p: [0, 0.15, 0] }), part(rbox(0.7, 0.4, 0.6, 0.06), CAT, { p: [-0.05, 0.5, 0] }), part(rbox(0.3, 0.35, 0.4, 0.05), CAT, { p: [-0.2, 0.85, 0] }), part(box(0.08, 0.4, 0.9), '#3a3f47', { p: [0.55, 0.25, 0] })),
+      pivot: [0, y0 + rim * 0.8 + 0.02, 0], anim: (t) => { const f = cyc(t, 10), a = Math.PI * 0.6 + (f < 0.5 ? f : 1 - f) * 1.4, r = r0 + 3 * dr + 0.3; return { x: Math.cos(a) * r, z: Math.sin(a) * r, ry: -a + (f < 0.5 ? -Math.PI / 2 : Math.PI / 2) }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

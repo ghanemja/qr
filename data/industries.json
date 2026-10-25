@@ -66,7 +66,8 @@
   "target": "Expect more, pay less",
   "ups": "Hub to doorstep",
   "ibm": "Mainframes to qubits",
-  "lilly": "Medicine at scale"
+  "lilly": "Medicine at scale",
+  "caterpillar": "Moving the earth"
  },
  "bank": [
   "Wells Fargo",
@@ -573,7 +574,6 @@
   "General Electric",
   "3M",
   "Honeywell International",
-  "Caterpillar",
   "Emerson Electric",
   "Illinois Tool Works",
   "Parker-Hannifin",
@@ -1305,7 +1305,6 @@
   "Xcel Energy": 1,
   "Helion Energy": 2,
   "Commonwealth Fusion Systems": 2,
-  "Caterpillar": 3,
   "Fluor": 3,
   "Jacobs Engineering Group": 3,
   "AECOM": 3,
@@ -1585,5 +1584,8 @@
  ],
  "lilly": [
   "Eli Lilly"
+ ],
+ "caterpillar": [
+  "Caterpillar"
  ]
 }
