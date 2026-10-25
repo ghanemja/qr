@@ -89,7 +89,8 @@
   "salesforce": "Pipeline to closed-won",
   "fedex": "Overnight, anywhere",
   "oracle": "Where the records live",
-  "cisco": "The internet runs through it"
+  "cisco": "The internet runs through it",
+  "stripe": "Payments in a few lines"
  },
  "bank": [
   "Citigroup",
@@ -140,7 +141,6 @@
   "Alliance Data Systems",
   "A-Mark Precious Metals",
   "Newmont Goldcorp",
-  "Stripe",
   "Brex",
   "Ramp",
   "Plaid",
@@ -1649,5 +1649,8 @@
  ],
  "cisco": [
   "Cisco Systems"
+ ],
+ "stripe": [
+  "Stripe"
  ]
 }

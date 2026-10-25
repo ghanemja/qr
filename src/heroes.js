@@ -3129,5 +3129,38 @@ export const HEROES = {
     moving.push({ geo: merge(part(rbox(1.2, 0.25, 0.5, 0.1), '#f4f5f6', { p: [0, 0.12, 0] }), part(rbox(0.7, 0.3, 0.4, 0.05), BLUE, { p: [0, 0.38, 0] })), pivot: [0, y0 + 0.04, 0], anim: (t) => { const f = cyc(t, 12), z = 2.2 - f * 4.4; return { x: -1.0, z, ry: Math.PI / 2, s: clamp01((2.1 - Math.abs(z)) / 0.4) + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Stripe: payments in a few lines of code. On the giant laptop the code types itself; each call
+  // shoots out to one of the online shops around the plaza, whose screen flashes paid; the
+  // business grows a little each time.
+  stripe: { finder: '#635bff', build: () => {
+    const R = rand(9), out = [], y0 = 0.24, PURP = '#635bff', INK = '#0a2540';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#f6f9fc', { p: [0, 0.12, 0] }));
+    // A gradient band of stripes across the plaza.
+    for (let i = 0; i < 7; i++) out.push(part(box(10.2, 0.012, 0.5), new THREE.Color().setHSL(0.68 - i * 0.05, 0.75, 0.62).getStyle(), { p: [0, y0 + 0.006, -3.0 + i * 0.52], r: [0, 0.25, 0] }));
+    // ---- the laptop: base, keyboard, open screen with a code editor
+    const LX = -0.6, LZ = 0.4;
+    out.push(part(rbox(3.0, 0.12, 2.0, 0.08), '#c9ced6', { p: [LX, y0 + 0.06, LZ] }), part(box(2.5, 0.02, 1.0), '#3a3f47', { p: [LX, y0 + 0.13, LZ + 0.15] }), part(box(0.9, 0.02, 0.5), '#9aa1a9', { p: [LX, y0 + 0.13, LZ + 0.75] }));
+    out.push(part(rbox(3.0, 1.9, 0.08, 0.08), '#c9ced6', { p: [LX, y0 + 1.0, LZ - 1.05], r: [-0.18, 0, 0] }), part(box(2.7, 1.6, 0.02), INK, { p: [LX, y0 + 1.02, LZ - 1.0], r: [-0.18, 0, 0] }));
+    // ---- the shops: little storefront screens around the plaza
+    const shops = [[-3.8, -3.4], [3.2, -3.4], [3.8, 0.6], [3.2, 3.6], [-3.8, 3.4], [-4.2, -0.2]];
+    const cols = ['#e5533d', '#2f9e6e', '#f29a3a', '#3d7be0', '#d6336c', '#00d4ff'];
+    shops.forEach(([x, z], i) => { const a = Math.atan2(LX - x, LZ - z); out.push(part(rbox(1.0, 0.9, 0.7, 0.06), '#ffffff', { p: [x, y0 + 0.45, z], r: [0, a, 0] }), part(rbox(1.2, 0.22, 0.9, 0.05), cols[i], { p: [x, y0 + 0.98, z], r: [0, a, 0] }), part(cyl(0.04, 0.04, 0.9, 8), '#c9ced6', { p: [x, y0 + 1.5, z] }), part(rbox(0.5, 0.3, 0.05, 0.04), cols[i], { p: [x, y0 + 1.95, z], r: [0, a, 0] }), part(box(0.6, 0.4, 0.02), '#e9ecef', { p: [x + Math.sin(a) * 0.36, y0 + 0.5, z + Math.cos(a) * 0.36], r: [0, a, 0] })); });
+    [[-4.7, -4.7], [4.7, -4.7], [4.7, 4.7], [-4.7, 4.7]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.55 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // Code lines typing themselves on the screen, then scrolling clear.
+    const lines = [[0.9, '#c1a7ff'], [1.4, '#7cf0ff'], [0.7, '#ffd479'], [1.6, '#a8e6a1'], [1.1, '#c1a7ff'], [0.5, '#ff9e9e'], [1.3, '#7cf0ff']];
+    lines.forEach(([w, c], i) => moving.push({ geo: part(box(1, 0.09, 0.01), c, { p: [0.5, 0, 0] }), pivot: [LX - 1.15 + (i % 3 === 1 ? 0.2 : 0), y0 + 1.62 - i * 0.18, LZ - 0.99 + i * 0.032], anim: (t) => { const f = cyc(t, 6), k = clamp01((f - i * 0.1) / 0.08); return f > 0.92 ? { s: 0.001 } : { rx: -0.18, sx: Math.max(0.001, k * w) }; } }));
+    // API calls: purple orbs out of the screen to each shop; the shop flashes paid.
+    shops.forEach(([x, z], i) => {
+      const c = curve([[LX, y0 + 1.6, LZ - 0.9], [(LX + x) / 2, y0 + 3.0, (LZ + z) / 2], [x, y0 + 1.1, z]]), at = i / shops.length;
+      moving.push({ geo: part(ball(0.2), PURP), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 6, -at), u = win(f, 0.5, 0.75); if (f < 0.5 || f > 0.76) return { s: 0.001 }; const p = c.getPointAt(u); return { x: p.x, y: p.y, z: p.z, s: 0.7 }; } });
+      const a = Math.atan2(LX - x, LZ - z);
+      moving.push({ geo: merge(part(box(0.6, 0.4, 0.02), '#2fbf5b'), part(rbox(0.08, 0.18, 0.02, 0.02), '#ffffff', { p: [-0.07, -0.02, 0.015], r: [0, 0, 0.7] }), part(rbox(0.08, 0.3, 0.02, 0.02), '#ffffff', { p: [0.06, 0.03, 0.015], r: [0, 0, -0.6] })), pivot: [x + Math.sin(a) * 0.375, y0 + 0.5, z + Math.cos(a) * 0.375], anim: (t) => { const f = cyc(t, 6, -at); return f > 0.75 && f < 0.95 ? { ry: a, s: back(win(f, 0.75, 0.8)) + 0.001 } : { s: 0.001 }; } });
+    });
+    // The developer at the keyboard.
+    moving.push(...walker(moving.length, () => ({ x: LX, z: LZ + 1.5, ry: Math.PI / 2, still: true, push: true }), { shirt: PURP, pants: INK, skin: '#c58c66', hair: '#1d1f24', y: y0 }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
