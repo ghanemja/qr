@@ -126,7 +126,8 @@
   "tyson": "From the egg to the supermarket, all in one company",
   "kraftheinz": "The brands already in every pantry",
   "generalmills": "From the mill by the river to the breakfast bowl",
-  "mondelez": "The snacks the world reaches for: twist, lick, dunk"
+  "mondelez": "The snacks the world reaches for: twist, lick, dunk",
+  "hershey": "America's chocolate town: every Kiss wrapped in silver"
  },
  "bank": [
   "PNC Financial Services",
@@ -541,7 +542,6 @@
   "US Foods Holding",
   "Performance Food Group",
   "Kellogg",
-  "Hershey",
   "Campbell Soup",
   "Conagra Brands",
   "Hormel Foods",
@@ -1439,7 +1439,6 @@
   "Kellogg": 3,
   "Post Holdings": 3,
   "TreeHouse Foods": 3,
-  "Hershey": 4,
   "Dean Foods": 5,
   "Campbell Soup": 6,
   "Conagra Brands": 6,
@@ -1742,5 +1741,8 @@
  ],
  "mondelez": [
   "Mondelez International"
+ ],
+ "hershey": [
+  "Hershey"
  ]
 }

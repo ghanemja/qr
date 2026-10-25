@@ -1318,4 +1318,41 @@ export const HEROES2 = {
     for (let k = 0; k < 3; k++) moving.push(rider(part(rbox(0.6, 0.08, 0.3, 0.03), PURP), curve([[3.4, y0 + 1.8, -1.0], [4.0, y0 + 3.0, 1.0], [4.6, y0 + 2.0, 3.6]]), 4, k / 3, 0, 1, (t, u) => ({ rx: u * 4 })));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Hershey: America's chocolate town. In the factory each Kiss is dropped onto the belt and
+  // wrapped in silver foil with its paper plume; the street lamps of Hershey, Pennsylvania are
+  // Kisses too.
+  hershey: { finder: '#4e2a1e', build: () => {
+    const R = rand(139), out = [], BROWN = '#4e2a1e', CHOC = '#5a3221';
+    out.push(ground('#8fc66f'), part(box(10.2, 0.03, 1.4), '#5b616b', { p: [0, y0 + 0.015, 3.4] }));
+    // ---- the factory, back: brick, smokestacks with HERSHEY down them
+    const FX = -0.8, FZ = -3.2;
+    out.push(part(rbox(7.0, 2.4, 2.0, 0.04), '#9b5a3c', { p: [FX, y0 + 1.2, FZ] }));
+    for (let c = 0; c < 10; c++) out.push(part(box(0.4, 0.6, 0.04), '#f3e7c9', { p: [FX - 3.0 + c * 0.66, y0 + 1.5, FZ + 1.01] }));
+    [-3.6, -2.8].forEach((x) => out.push(part(cyl(0.3, 0.36, 5.0, 16), '#9b5a3c', { p: [x, y0 + 2.5, -4.2] }), part(cyl(0.34, 0.34, 0.2, 16), '#5b3a2a', { p: [x, y0 + 5.0, -4.2] })));
+    out.push(place(pixText('HERSHEY', 0.06, K.white, 0.03), { p: [FX + 1.4, y0 + 2.1, FZ + 1.03] }));
+    // ---- the line in front of the factory: depositor, belt, wrapper
+    const LZ = -0.6;
+    out.push(part(rbox(7.0, 0.5, 1.0, 0.05), '#5b616b', { p: [FX, y0 + 0.25, LZ] }), part(box(6.9, 0.03, 0.9), '#e9e6df', { p: [FX, y0 + 0.52, LZ] }));
+    out.push(part(rbox(1.2, 1.4, 1.2, 0.05), '#c9ced6', { p: [-3.4, y0 + 1.4, LZ] }), part(cone(0.4, 0.5, 20), '#c9ced6', { p: [-3.4, y0 + 0.9, LZ], r: [Math.PI, 0, 0] }), part(rbox(1.3, 1.1, 1.3, 0.05), '#b9bec6', { p: [0.6, y0 + 1.2, LZ] }));
+    [[-3.4, 0], [0.6, 0]].forEach(([x]) => [-0.55, 0.55].forEach((dz) => out.push(part(box(0.1, 0.9, 0.1), '#7b828c', { p: [x - 0.5, y0 + 0.45, LZ + dz] }), part(box(0.1, 0.9, 0.1), '#7b828c', { p: [x + 0.5, y0 + 0.45, LZ + dz] }))));
+    // ---- the Kiss street lamps along the road
+    const kiss = (c, s) => place(merge(part(lathe([[0, 0], [0.5, 0], [0.48, 0.15], [0.34, 0.4], [0.16, 0.7], [0.05, 0.95], [0, 1.0]], 32), c), part(box(0.03, 0.5, 0.15), K.white, { p: [0, 1.15, 0.05], r: [0, 0, 0.2] })), { s });
+    [-3.6, -1.2, 1.2, 3.6].forEach((x, i) => out.push(part(cyl(0.05, 0.06, 2.0, 10), '#2b2f36', { p: [x, y0 + 1.0, 2.5] }), place(kiss(i % 2 ? '#c9ced6' : '#d9dde3', 0.45), { p: [x, y0 + 2.0, 2.5] })));
+    // ---- a giant Kiss on the plaza, front left
+    out.push(part(cyl(0.9, 1.0, 0.2, 32), '#c9ced6', { p: [-3.2, y0 + 0.1, 1.2] }), place(kiss('#cdd3da', 1.6), { p: [-3.2, y0 + 0.2, 1.2] }));
+    out.push(trees(R, [[4.6, 4.6], [-0.4, 4.6], [4.6, 1.2], [3.6, -4.6]], 0.55));
+    // ---- moving parts
+    const moving = [], T = 1.2;
+    // Kisses along the belt: brown under the depositor, silver after the wrapper.
+    for (let k = 0; k < 8; k++) {
+      const pos = (t) => cyc(t, T * 8, k / 8);
+      moving.push({ geo: kiss(CHOC, 0.28), pivot: [0, y0 + 0.55, LZ], anim: (t) => { const u = pos(t), x = -3.4 + u * 6.8; return x > 0.6 ? { s: 0.001 } : { x, s: Math.min(1, u / 0.03) + 0.001 }; } });
+      moving.push({ geo: kiss('#d4d9df', 0.3), pivot: [0, y0 + 0.55, LZ], anim: (t) => { const u = pos(t), x = -3.4 + u * 6.8; return x <= 0.6 ? { s: 0.001 } : { x, s: Math.min(1, (1 - u) / 0.04) + 0.001 }; } });
+    }
+    // The depositor's nozzle pumping.
+    moving.push({ geo: part(cyl(0.06, 0.06, 0.4, 10), '#7b828c'), pivot: [-3.4, y0 + 0.75, LZ], anim: (t) => ({ y: -Math.max(0, Math.sin(t / T * TAU)) * 0.1 }) });
+    // A tour tram rolling along the road.
+    moving.push({ geo: merge(part(rbox(1.6, 0.6, 0.8, 0.08), '#a33a2a', { p: [0, 0.6, 0] }), part(box(1.4, 0.06, 0.82), K.white, { p: [0, 0.95, 0] }), part(rbox(1.6, 0.06, 0.9, 0.03), '#5b3a2a', { p: [0, 1.25, 0] }), [[-0.55, 0.42], [0.55, 0.42], [-0.55, -0.42], [0.55, -0.42]].map(([x, z]) => part(new THREE.CylinderGeometry(0.18, 0.18, 0.1, 12), '#1d1f24', { p: [x, 0.18, z], r: [Math.PI / 2, 0, 0] }))), pivot: [0, y0, 3.4], anim: (t) => { const x = -5.6 + cyc(t, 12) * 11.2; return { x, s: clamp01((5.2 - Math.abs(x)) / 0.5) + 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
