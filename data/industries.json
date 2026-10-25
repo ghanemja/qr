@@ -53,7 +53,8 @@
   "unitedhealth": "Coverage and care",
   "cvs": "The pharmacy next door",
   "boeing": "Built to fly",
-  "homedepot": "Built by the pros"
+  "homedepot": "Built by the pros",
+  "netflix": "Made for streaming"
  },
  "bank": [
   "Bank of America",
@@ -506,7 +507,6 @@
   "CBS",
   "Viacom",
   "Discovery",
-  "Netflix",
   "Live Nation Entertainment",
   "iHeartMedia",
   "News Corp.",
@@ -1552,5 +1552,8 @@
  ],
  "homedepot": [
   "Home Depot"
+ ],
+ "netflix": [
+  "Netflix"
  ]
 }

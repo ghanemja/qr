@@ -1521,5 +1521,67 @@ export const HEROES = {
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, 6), k = 1 - Math.abs(f * 2 - 1); return { x: JX + 1.75, z: JZ - 1.3 + k * 2.4, ry: f < 0.5 ? Math.PI / 2 : -Math.PI / 2 }; }, { shirt: OR, pants: '#2b3a55', y: y0, carry: part(box(0.08, 0.1, 1.2), '#d9b27c', { p: [0.3, 1.25, 0], r: [0, Math.PI / 2, 0] }) }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Netflix: it makes the shows and streams them straight to the couch. A camera crane films on the
+  // studio lot; the giant N sends the stream along a red ribbon into a living room where a family
+  // watches, popcorn popping; above it all, a row of recommendations scrolls by.
+  netflix: { finder: '#e50914', build: () => {
+    const R = rand(53), out = [], y0 = 0.24, RED = '#e50914', DK = '#221f1f';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#4a4a50', { p: [0, 0.12, 0] }));
+    out.push(part(box(10.2, 0.012, 0.9), '#5c5c63', { p: [0, y0 + 0.006, 0.0] }), part(box(0.9, 0.012, 10.2), '#5c5c63', { p: [0.0, y0 + 0.006, 0] }));
+    // ---- the soundstage, door rolled up on a set inside
+    const SX = -2.6, SZ = -2.6;
+    out.push(part(rbox(3.6, 2.0, 3.0, 0.05), '#e8e1d2', { p: [SX, y0 + 1.0, SZ - 0.2] }), part(prism(3.7, 0.6, 3.1), '#cfc6b4', { p: [SX, y0 + 2.0, SZ - 0.2], r: [0, Math.PI / 2, 0] }));
+    out.push(part(rbox(1.8, 1.5, 0.06, 0.02), '#1d1f24', { p: [SX + 0.3, y0 + 0.75, SZ + 1.31] }), part(rbox(1.9, 0.18, 0.2, 0.05), '#9aa1a9', { p: [SX + 0.3, y0 + 1.55, SZ + 1.36] }));
+    out.push(part(rbox(1.0, 0.3, 0.06, 0.03), DK, { p: [SX - 1.1, y0 + 1.6, SZ + 1.32] }), part(box(0.5, 0.08, 0.02), '#f2c94c', { p: [SX - 1.1, y0 + 1.6, SZ + 1.36] }));
+    // The set glimpsed through the door: a little lit room.
+    out.push(part(box(1.6, 1.3, 0.04), '#5a7a9a', { p: [SX + 0.3, y0 + 0.66, SZ + 0.6] }), part(rbox(0.6, 0.35, 0.3, 0.06), '#b8452f', { p: [SX + 0.1, y0 + 0.18, SZ + 0.85] }));
+    // Lights on stands and the director's chair outside.
+    for (const [x, z, a] of [[SX + 1.9, SZ + 2.2, -2.4], [SX - 1.2, SZ + 2.4, -0.7]]) out.push(part(cyl(0.03, 0.03, 1.5, 8), '#2b2f36', { p: [x, y0 + 0.75, z] }), [0, 2.1, 4.2].map((b) => beam([x, y0 + 0.1, z], [x + Math.cos(b) * 0.35, y0, z + Math.sin(b) * 0.35], 0.02, '#2b2f36')), part(lathe([[0.12, 0], [0.22, 0.3], [0.2, 0.32], [0, 0.32]], 20), '#2b2f36', { p: [x, y0 + 1.55, z], r: [Math.PI / 2, a, 0] }), part(cyl(0.19, 0.19, 0.02, 20), '#fff6d8', { p: [x + Math.cos(-a) * -0.0, y0 + 1.55, z], r: [Math.PI / 2, a, 0] }));
+    out.push(part(box(0.4, 0.04, 0.35), DK, { p: [SX + 0.9, y0 + 0.45, SZ + 2.9] }), part(box(0.4, 0.3, 0.04), DK, { p: [SX + 0.9, y0 + 0.65, SZ + 2.73] }), beam([SX + 0.72, y0, SZ + 2.75], [SX + 1.08, y0 + 0.45, SZ + 3.05], 0.02, '#7b5a3a'), beam([SX + 1.08, y0, SZ + 2.75], [SX + 0.72, y0 + 0.45, SZ + 3.05], 0.02, '#7b5a3a'));
+    // ---- the giant N
+    const NX = 2.6, NZ = -2.9, NH = 3.2;
+    out.push(part(rbox(2.6, 0.2, 1.0, 0.06), DK, { p: [NX, y0 + 0.1, NZ] }));
+    out.push(part(rbox(0.55, NH, 0.4, 0.06), '#b20710', { p: [NX - 0.75, y0 + 0.2 + NH / 2, NZ] }), part(rbox(0.55, NH, 0.4, 0.06), '#b20710', { p: [NX + 0.75, y0 + 0.2 + NH / 2, NZ] }));
+    out.push(part(rbox(0.6, NH * 1.08, 0.42, 0.06), RED, { p: [NX, y0 + 0.2 + NH / 2, NZ + 0.02], r: [0, 0, 0.42] }));
+    // ---- the living room, cut away
+    const LX = 2.3, LZ = 2.4;
+    out.push(part(rbox(3.6, 0.14, 3.0, 0.03), '#a8774a', { p: [LX, y0 + 0.07, LZ] }));
+    if (hi()) for (let i = 0; i < 12; i++) out.push(part(box(0.01, 0.002, 2.98), '#946640', { p: [LX - 1.65 + i * 0.3, y0 + 0.141, LZ] }));
+    out.push(part(rbox(3.6, 1.9, 0.12, 0.03), '#d9cdb8', { p: [LX, y0 + 1.0, LZ - 1.44] }), part(rbox(0.12, 1.9, 3.0, 0.03), '#e3d8c4', { p: [LX - 1.74, y0 + 1.0, LZ] }));
+    out.push(part(rbox(2.0, 0.6, 0.6, 0.12), '#c4b59d', { p: [LX, y0 + 0.4, LZ + 0.35] }), part(rbox(1.7, 0.18, 0.7, 0.08), '#c4b59d', { p: [LX, y0 + 0.73, LZ + 0.65] }), part(rbox(0.6, 0.18, 0.7, 0.08), '#2e3a5c', { p: [LX + 0.65, y0 + 0.8, LZ + 0.6], r: [0, 0, 0.2] }));
+    out.push(part(rbox(0.9, 0.08, 0.5, 0.04), '#5a3a2a', { p: [LX + 0.1, y0 + 0.42, LZ - 0.45] }), part(box(0.05, 0.3, 0.05), '#5a3a2a', { p: [LX - 0.3, y0 + 0.24, LZ - 0.45] }), part(box(0.05, 0.3, 0.05), '#5a3a2a', { p: [LX + 0.5, y0 + 0.24, LZ - 0.45] }));
+    out.push(part(rbox(2.0, 1.1, 0.08, 0.04), '#111214', { p: [LX, y0 + 1.15, LZ - 1.33] }), part(rbox(1.5, 0.12, 0.3, 0.04), '#3a3f47', { p: [LX, y0 + 0.4, LZ - 1.2] }));
+    out.push(part(lathe([[0, 0], [0.16, 0.0], [0.22, 0.14], [0.2, 0.15], [0, 0.04]], 24), (px, py, pz) => (Math.floor(Math.atan2(pz - (LZ - 0.45), px - (LX + 0.3)) * 3) % 2 ? RED : '#ffffff'), { p: [LX + 0.3, y0 + 0.46, LZ - 0.45] }));
+    out.push(part(lathe([[0.14, 0], [0.18, 0.6], [0.0, 0.6]], 16), '#f2e6c9', { p: [LX - 1.35, y0 + 0.14, LZ - 1.1] }), part(cyl(0.02, 0.02, 0.6, 6), '#2b2f36', { p: [LX - 1.35, y0 + 0.44, LZ - 1.1] }), part(cyl(0.2, 0.15, 0.3, 16), '#7b5a3a', { p: [LX - 1.35, y0 + 0.29, LZ - 1.1] }));
+    out.push(miniTree(R, LX - 1.35, y0 + 0.14, LZ + 1.1, 0.45));
+    // The family on the couch.
+    const sitter = (x, shirt, skin, hair, s = 1) => [part(capsule(0.17 * s, 0.32 * s), shirt, { p: [x, y0 + 0.9 * s + 0.0, LZ + 0.45] }), part(ball(0.15 * s), skin, { p: [x, y0 + 1.33 * s - 0.0, LZ + 0.42] }), part(ball(0.16 * s), hair, { p: [x, y0 + 1.38 * s, LZ + 0.47], s: [1, 0.75, 1] }), part(capsule(0.07 * s, 0.35 * s), '#2b3a55', { p: [x - 0.08 * s, y0 + 0.75, LZ + 0.15], r: [Math.PI / 2, 0, 0] }), part(capsule(0.07 * s, 0.35 * s), '#2b3a55', { p: [x + 0.08 * s, y0 + 0.75, LZ + 0.15], r: [Math.PI / 2, 0, 0] })];
+    out.push(sitter(LX - 0.55, '#3d7be0', '#e9b98f', '#3a2a20'), sitter(LX + 0.05, '#e5533d', '#c58c66', '#1d1f24'), sitter(LX + 0.5, '#f2c94c', '#e9b98f', '#a0522d', 0.75));
+    // The ribbon that carries the stream from the N to the screen.
+    const ribbon = curve([[NX, y0 + NH + 0.3, NZ], [NX + 0.8, y0 + NH + 0.9, NZ + 1.6], [LX + 1.4, y0 + 2.6, LZ - 1.8], [LX + 0.6, y0 + 1.9, LZ - 1.5], [LX + 0.3, y0 + 1.6, LZ - 1.34]]);
+    out.push(part(tubeOn(ribbon, 0.035, hi() ? 64 : 16), '#8a0a10'));
+    [[-4.6, 4.6], [-4.6, 2.2], [-1.2, 4.6], [4.6, -0.9], [-4.6, -0.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.75 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // The crane: column turns, boom tilts, camera at the tip.
+    const crane = moving.length;
+    moving.push({ geo: merge(part(rbox(0.7, 0.2, 0.7, 0.05), '#2b2f36', { p: [0, 0.1, 0] }), part(cyl(0.08, 0.1, 0.9, 12), '#3a3f47', { p: [0, 0.6, 0] })), pivot: [SX + 1.0, y0, SZ + 2.0], anim: (t) => ({ ry: Math.sin(t * 0.5) * 0.7 - 0.5 }) });
+    const boom = moving.length;
+    moving.push({ geo: merge(part(box(2.6, 0.08, 0.08), '#3a3f47', { p: [0.6, 0, 0] }), part(box(0.3, 0.25, 0.25), '#5b616b', { p: [-0.8, 0, 0] })), pivot: [0, 1.05, 0], parent: crane, anim: (t) => ({ rz: 0.25 + Math.sin(t * 0.8) * 0.25 }) });
+    moving.push({ geo: merge(part(rbox(0.36, 0.26, 0.2, 0.04), DK), part(cyl(0.08, 0.1, 0.22, 16), '#111214', { p: [0.27, 0, 0], r: [0, 0, Math.PI / 2] }), part(cyl(0.1, 0.1, 0.05, 16), '#3a3f47', { p: [-0.05, 0.2, 0], r: [Math.PI / 2, 0, 0] }), part(cyl(0.1, 0.1, 0.05, 16), '#3a3f47', { p: [0.12, 0.2, 0], r: [Math.PI / 2, 0, 0] })), pivot: [1.9, -0.2, 0], parent: boom, anim: (t) => ({ rz: -(0.25 + Math.sin(t * 0.8) * 0.25) - 0.2 }) });
+    // The TV picture: a sequence of scenes, one at a time.
+    ['#2f6db5', '#e5533d', '#2f9e6e', '#f29a3a', '#8a6cf0'].forEach((c, i) => moving.push({ geo: merge(part(box(1.86, 0.98, 0.02), c), part(ball(0.18), shade(c, 1.35), { p: [-0.4 + i * 0.15, -0.1, 0.02], s: [1, 1, 0.1] }), part(box(0.7, 0.25, 0.01), shade(c, 0.7), { p: [0.4, -0.3, 0.015] })), pivot: [LX, y0 + 1.15, LZ - 1.285], anim: (t) => ({ s: Math.floor(t / 2.4) % 5 === i ? 1 : 0.001 }) }));
+    // Popcorn hopping out of the bowl.
+    for (let i = 0; i < 6; i++) moving.push({ geo: part(ball(0.035), '#fff4cf'), pivot: [LX + 0.3, y0 + 0.58, LZ - 0.45], anim: (t) => { const f = cyc(t, 1.6, i / 6), a = i * 1.1; return { x: Math.cos(a) * f * 0.15, z: Math.sin(a) * f * 0.15, y: hop(f) * 0.28, rx: f * 6 }; } });
+    // The stream: red packets running along the ribbon.
+    for (let k = 0; k < 5; k++) moving.push({ geo: part(rbox(0.16, 0.1, 0.1, 0.04), '#ff3b45'), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 3, k / 5), a = along(ribbon, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry, s: Math.min(1, (1 - u) / 0.05) + 0.001 }; } });
+    // A row of recommendations scrolling by: posters, one marked Top 10.
+    const tiles = ['#2f6db5', '#e5533d', '#2f9e6e', '#f29a3a', '#8a6cf0', '#d6336c', '#3fb8a8', '#c0392b'];
+    tiles.forEach((c, i) => moving.push({ geo: merge(part(rbox(0.55, 0.8, 0.05, 0.04), c), part(box(0.4, 0.1, 0.01), '#ffffff', { p: [0, -0.25, 0.03] }), i === 2 ? part(rbox(0.18, 0.22, 0.02, 0.02), RED, { p: [0.17, 0.27, 0.035] }) : part(box(0.12, 0.2, 0.01), shade(c, 1.4), { p: [-0.12, 0.15, 0.03] })),
+      pivot: [-1.6, y0 + 3.1, 0.4], anim: (t) => { const u = cyc(t + i * 0.6 * 1.2, 0.6 * 1.2 * tiles.length), x = -2.6 + u * 0.7 * tiles.length; return { x, z: -x * 0.0, ry: Math.PI / 4, s: Math.min(1, u / 0.08, (1 - u) / 0.08) + 0.001 }; } }));
+    // A crew member walking the lot.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 10), x = -4.4 + f * 8.8; return { x, z: 0.0, ry: 0, s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: DK, pants: '#2b3a55', y: y0, carry: part(rbox(0.25, 0.32, 0.03, 0.02), '#f4f5f6', { p: [0.25, 1.1, 0.25] }) }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
