@@ -62,7 +62,8 @@
   "openai": "Ask anything",
   "gm": "One platform, every vehicle",
   "verizon": "Can you hear me now?",
-  "bofa": "The deposit reservoir"
+  "bofa": "The deposit reservoir",
+  "target": "Expect more, pay less"
  },
  "bank": [
   "Wells Fargo",
@@ -287,7 +288,6 @@
  ],
  "retail": [
   "Kroger",
-  "Target",
   "Lowe's",
   "Albertsons",
   "Best Buy",
@@ -1207,7 +1207,6 @@
   "Office Depot": 2,
   "Simon Property Group": 2,
   "Casey's General Stores": 2,
-  "Target": 1,
   "Qurate Retail": 1,
   "Whatnot": 1,
   "HCA Healthcare": 3,
@@ -1575,5 +1574,8 @@
  ],
  "bofa": [
   "Bank of America"
+ ],
+ "target": [
+  "Target"
  ]
 }

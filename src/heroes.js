@@ -1999,5 +1999,54 @@ export const HEROES = {
     moving.push({ geo: merge(part(rbox(0.7, 0.36, 0.05, 0.12), '#6b48ff'), part(cone(0.07, 0.14, 3), '#6b48ff', { p: [-0.2, -0.22, 0], r: [0, 0, Math.PI] }), [-0.16, 0, 0.16].map((x) => part(ball(0.04), '#ffffff', { p: [x, 0, 0.03] }))), pivot: [0.2, 2.2, 0], parent: cust, anim: (t) => { const f = cyc(t, 3); return { s: back(win(f, 0, 0.1)) * (f > 0.85 ? 1 - win(f, 0.85, 1) : 1) + 0.001, y: f * 0.2 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Target: a store people like to linger in, and a quick pickup when they don't. The bullseye
+  // glows over the red-ball entrance, the Bullseye dog trots the walkway, and at the Drive Up bays
+  // a team member wheels a red cart of bags to a waiting car's open trunk.
+  target: { finder: '#cc0000', build: () => {
+    const R = rand(43), out = [], y0 = 0.24, RED = '#cc0000';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#55595f', { p: [0, 0.12, 0] }));
+    const bull = (r, d = 0.08) => merge(part(cyl(r, r, d, 48), RED, { r: [Math.PI / 2, 0, 0] }), part(cyl(r * 0.68, r * 0.68, d + 0.01, 48), '#ffffff', { r: [Math.PI / 2, 0, 0] }), part(cyl(r * 0.36, r * 0.36, d + 0.02, 48), RED, { r: [Math.PI / 2, 0, 0] }));
+    // ---- the store
+    const SX = -0.8, SZ = -2.6, W = 6.6, D = 2.8, H = 2.0;
+    out.push(part(rbox(W + 0.3, 0.1, D + 1.2, 0.03), '#d6d0c4', { p: [SX, y0 + 0.05, SZ + 0.4] }));
+    out.push(part(rbox(W, H, D, 0.05), '#e9e4da', { p: [SX, y0 + H / 2, SZ] }), part(rbox(W + 0.08, 0.14, D + 0.08, 0.03), '#c9c2b4', { p: [SX, y0 + H, SZ] }));
+    out.push(part(rbox(2.4, H + 0.5, 0.3, 0.05), RED, { p: [SX + 0.4, y0 + (H + 0.5) / 2, SZ + D / 2 + 0.1] }), place(bull(0.7), { p: [SX + 0.4, y0 + H - 0.1, SZ + D / 2 + 0.28] }));
+    out.push(part(rbox(1.5, 1.0, 0.06, 0.03), '#2a3c50', { p: [SX + 0.4, y0 + 0.55, SZ + D / 2 + 0.26] }), part(box(0.04, 1.0, 0.08), '#c9ced6', { p: [SX + 0.4, y0 + 0.55, SZ + D / 2 + 0.28] }));
+    for (const x of [-2.6, -1.6, 2.0, 2.8]) out.push(part(rbox(0.7, 0.8, 0.05, 0.03), '#2a3c50', { p: [SX + x, y0 + 0.65, SZ + D / 2 + 0.01] }));
+    // The big red balls by the door.
+    for (let i = 0; i < 6; i++) out.push(part(ball(0.2), RED, { p: [SX - 0.9 + i * (i < 3 ? 0.42 : 0.42) + (i < 3 ? 0 : 1.4), y0 + 0.24, SZ + D / 2 + 0.85] }));
+    // ---- Drive Up: marked bays with a sign, under a red canopy
+    const DX = 2.4;
+    for (let i = 0; i < 3; i++) out.push(part(cyl(0.04, 0.04, 1.2, 8), '#5b616b', { p: [DX - 0.55 + i * 1.3, y0 + 0.6, 0.7] }), part(rbox(0.5, 0.36, 0.05, 0.03), RED, { p: [DX - 0.55 + i * 1.3, y0 + 1.3, 0.7] }), part(box(0.3, 0.06, 0.01), '#ffffff', { p: [DX - 0.55 + i * 1.3, y0 + 1.3, 0.73] }));
+    for (let i = 0; i < 4; i++) out.push(part(box(0.06, 0.012, 2.0), '#ffffff', { p: [DX - 1.2 + i * 1.3, y0 + 0.006, 1.9] }), part(box(0.6, 0.012, 0.25), RED, { p: [DX - 0.55 + i * 1.3, y0 + 0.008, 0.95] }));
+    out.push(part(rbox(0.6, 0.4, 0.06, 0.03), RED, { p: [DX - 1.8, y0 + 1.3, 0.9] }), part(cyl(0.03, 0.03, 1.1, 8), '#5b616b', { p: [DX - 1.8, y0 + 0.55, 0.9] }));
+    // Parking for shoppers, a few cars.
+    for (let i = 0; i < 5; i++) out.push(part(box(0.06, 0.012, 2.0), '#ffffff', { p: [-4.6 + i * 1.3, y0 + 0.006, 2.4] }));
+    out.push(place(sedan('#f4f5f6'), { p: [-3.95, y0, 2.4], r: [0, Math.PI / 2, 0] }), place(sedan('#2b2f36'), { p: [-1.35, y0, 2.4], r: [0, -Math.PI / 2, 0] }));
+    // A cart corral.
+    out.push(part(box(1.2, 0.04, 0.04), '#c9ced6', { p: [-2.6, y0 + 0.5, 4.2] }), part(box(1.2, 0.04, 0.04), '#c9ced6', { p: [-2.6, y0 + 0.5, 4.8] }));
+    [[-4.6, -4.6], [4.6, -4.6], [-4.7, 0.4], [4.7, 4.6], [0.6, 4.7], [-0.9, 4.7]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.75 + R() * 0.2)));
+    out.push(lampPost(-0.4, y0, 3.6, Math.PI / 2), lampPost(-4.6, y0, 3.0, 0));
+    // ---- moving parts
+    const moving = [];
+    // The big bullseye turns a little now and then.
+    moving.push({ geo: bull(0.45, 0.1), pivot: [SX + 0.4, y0 + H + 1.0, SZ + D / 2 + 0.1], anim: (t) => { const f = cyc(t, 5); return { ry: TAU * easeIO(win(f, 0, 0.3)) }; } });
+    // Cars pull into Drive Up, the trunk opens, the bags go in, they leave.
+    const P = 10;
+    const car = moving.length;
+    moving.push({ geo: sedan('#3d6ea8'), pivot: [DX + 0.75, y0, 2.0], anim: (t) => { const f = cyc(t, P), z = f < 0.2 ? (1 - easeOut(f / 0.2)) * 3.2 : f < 0.75 ? 0 : easeIn(win(f, 0.75, 0.95)) * 3.2; return { z, ry: -Math.PI / 2, s: clamp01((3.3 - z) / 0.4) + 0.001 }; } });
+    moving.push({ geo: part(rbox(0.5, 0.06, 0.95, 0.03), '#3d6ea8', { p: [0.25, 0, 0] }), pivot: [-1.15, 0.68, 0], parent: car, anim: (t) => { const f = cyc(t, P); return { rz: -(easeOut(win(f, 0.22, 0.3)) - easeIn(win(f, 0.62, 0.7))) * 1.4 }; } });
+    // The team member with the red cart.
+    const cart = merge(place(cartGeo(RED), { p: [0.95, 0, 0] }), part(rbox(0.3, 0.32, 0.2, 0.03), '#f4f1ea', { p: [0.9, 1.05, -0.12] }), part(rbox(0.3, 0.28, 0.2, 0.03), '#f4f1ea', { p: [1.1, 1.03, 0.12] }), part(box(0.1, 0.1, 0.01), RED, { p: [0.9, 1.08, -0.01] }));
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P), A = [SX + 2.6, SZ + D / 2 + 0.7], B = [DX + 0.75, 0.2]; const k = easeIO(win(f, 0.2, 0.45)) - easeIO(win(f, 0.62, 0.85)); const ry = Math.atan2(-(B[1] - A[1]), B[0] - A[0]) + (f < 0.55 ? 0 : Math.PI); return { x: A[0] + (B[0] - A[0]) * k, z: A[1] + (B[1] - A[1]) * k, ry, still: (f > 0.45 && f < 0.62) || f < 0.2 || f > 0.85, push: true }; }, { shirt: RED, pants: '#c4b59d', y: y0, carry: cart }));
+    // The bags hop from the cart into the trunk.
+    for (let k = 0; k < 2; k++) moving.push({ geo: merge(part(rbox(0.3, 0.32, 0.2, 0.03), '#f4f1ea'), part(box(0.1, 0.1, 0.01), RED, { p: [0, 0.03, 0.11] })), pivot: [DX + 0.75, y0 + 1.0, 0.3], anim: (t) => { const f = cyc(t, P), a = 0.47 + k * 0.06, u = win(f, a, a + 0.05); return f > a && f < 0.72 ? { z: u * 0.75, y: hop(u) * 0.4 - u * 0.25 + 0.0, x: (k - 0.5) * 0.3 } : { s: 0.001 }; } });
+    // The Bullseye dog trotting along the walkway.
+    const dog = merge(part(capsule(0.17, 0.4), '#ffffff', { r: [0, 0, Math.PI / 2] }), part(ball(0.17), '#ffffff', { p: [0.42, 0.18, 0] }), part(capsule(0.07, 0.12), '#ffffff', { p: [0.58, 0.14, 0], r: [0, 0, Math.PI / 2] }), part(ball(0.03), '#1d1f24', { p: [0.67, 0.15, 0] }),
+      part(torus(0.06, 0.025, TAU, 16), RED, { p: [0.47, 0.24, 0.13] }), part(ball(0.025), '#1d1f24', { p: [0.47, 0.24, 0.14] }), part(ball(0.025), '#1d1f24', { p: [0.47, 0.24, -0.14] }),
+      [[-0.2, 0.1], [0.2, 0.1], [-0.2, -0.1], [0.2, -0.1]].map(([x, z]) => part(capsule(0.045, 0.2), '#ffffff', { p: [x, -0.22, z] })), part(capsule(0.03, 0.18), '#ffffff', { p: [-0.36, 0.14, 0], r: [0, 0, 0.9] }), part(cone(0.06, 0.12, 3), '#ffffff', { p: [0.4, 0.37, 0.08] }), part(cone(0.06, 0.12, 3), '#ffffff', { p: [0.4, 0.37, -0.08] }));
+    moving.push({ geo: dog, pivot: [0, y0 + 0.37, SZ + D / 2 + 1.35], anim: (t) => { const f = cyc(t, 12), x = -3.6 + (f < 0.5 ? f * 2 : 2 - f * 2) * 6.6; return { x: SX + x, y: Math.abs(Math.sin(t * 9)) * 0.05, ry: f < 0.5 ? 0 : Math.PI, rz: Math.sin(t * 9) * 0.04 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
