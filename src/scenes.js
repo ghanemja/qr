@@ -158,6 +158,13 @@ const trawler = (hull = 'A') => merge(
   part(extrude([[-1.1, -0.2], [0.9, -0.2], [1.35, 0.35], [-1.1, 0.35]], 0.9), hull, { r: [0, 0, 0] }), part(extrude([[-1.1, 0.25], [1.32, 0.25], [1.36, 0.36], [-1.1, 0.36]], 0.92), K.white),
   part(rbox(0.7, 0.55, 0.65, 0.05), K.white, { p: [-0.35, 0.65, 0] }), part(box(0.72, 0.15, 0.67), '#2a3c50', { p: [-0.35, 0.78, 0] }), part(cyl(0.04, 0.04, 1.1, 8), K.white, { p: [0.4, 0.9, 0] }), beam([0.4, 1.4, 0], [-1.0, 0.45, 0], 0.025, K.steelDk));
 
+// Two back walls (along -z and -x) of a room, with a brand stripe along the top; returns parts.
+const labWalls = (h = 2.4, wall = '#eef0f2') => [part(rbox(10.4, h, 0.2, 0.04), wall, { p: [0, y0 + h / 2, -5.1] }), part(rbox(0.2, h, 10.0, 0.04), wall, { p: [-5.1, y0 + h / 2, 0.1] }), part(box(10.4, 0.2, 0.22), 'A', { p: [0, y0 + h - 0.1, -5.1] }), part(box(0.22, 0.2, 10.0), 'A', { p: [-5.1, y0 + h - 0.1, 0.1] })];
+// A sample tube with a coloured cap, standing on y = 0.
+const tubeGeo = (cap = '#e5533d') => merge(part(cyl(0.07, 0.07, 0.38, 12), '#eef6fa', { p: [0, 0.19, 0] }), part(cyl(0.065, 0.065, 0.2, 12), '#c0392b', { p: [0, 0.12, 0] }), part(cyl(0.085, 0.085, 0.08, 12), cap, { p: [0, 0.42, 0] }));
+// A green tick in a disc, facing +z, centred on the origin.
+const tickGeo = (r = 0.3) => merge(part(cyl(r, r, 0.06, 24), '#5fae5b', { r: [Math.PI / 2, 0, 0] }), part(extrude([[-0.5, 0.05], [-0.25, -0.2], [0.45, 0.45], [0.35, 0.55], [-0.25, 0.0], [-0.42, 0.15]].map(([x, y]) => [x * r, y * r]), 0.08), K.white, { p: [0, 0, 0.03] }));
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -1248,5 +1255,56 @@ export const SCENES = {
     for (let k = 0; k < 8; k++) moving.push({ geo: link, pivot: [0, 0, 0], anim: (t) => { const p = boatAt(t), d = AN.clone().sub(p).normalize(), bow = p.clone().addScaledVector(d, 1.25).add(new V(0, 0.3 + Math.sin(t * 2) * 0.12, 0)), u = (k + 0.5) / 8, q = bow.clone().lerp(AN, u); q.y = bow.y * (1 - u) + (y0 - 0.05) * u - Math.sin(u * Math.PI) * 0.15 * (0.5 + 0.5 * Math.sin(t * 2)); return { x: q.x, y: q.y, z: q.z, ry: Math.atan2(-d.z, d.x) + (k % 2) * Math.PI / 2 }; } });
     moving.push({ geo: merge(part(new THREE.SphereGeometry(0.22, 14, 10), 'B'), part(cyl(0.03, 0.03, 0.4, 6), K.dark, { p: [0, 0.3, 0] })), pivot: AN.toArray(), anim: (t) => ({ y: Math.sin(t * 2.2) * 0.08, rz: Math.sin(t * 1.7) * 0.2 }) });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.4, y0, 3.2], topAt: [RX + 0.9, y0 + 1.6, RZ - 0.6] };
+  },
+
+  // Microscope (life-science tools, diagnostics labs, clinical research): every test, fast and
+  // right. A courier brings samples in; capped tubes ride the automation track through the
+  // analysers and a green tick pops as each result comes out; a pipetting robot works a well
+  // plate; the big microscope's view of moving cells glows on the wall.
+  'health:7': () => {
+    const R = rand(1601), out = [], moving = [];
+    out.push(slab('#e3e8ec'), labWalls());
+    // ---- the big microscope at the back left and its wall view
+    const MX = -3.3, MZ = -3.4;
+    out.push(part(rbox(1.8, 0.3, 1.4, 0.1), K.white, { p: [MX, y0 + 0.15, MZ] }), part(extrude([[-0.3, 0], [0.3, 0], [0.3, 1.2], [0.0, 2.2], [-0.45, 2.2], [-0.3, 1.2]], 0.5), 'A', { p: [MX - 0.5, y0 + 0.3, MZ] }));
+    out.push(part(rbox(1.2, 0.12, 1.0, 0.04), '#3a3f47', { p: [MX + 0.15, y0 + 1.0, MZ] }), part(cyl(0.08, 0.08, 0.04, 12), '#fff2c6', { p: [MX + 0.15, y0 + 1.07, MZ] }));
+    out.push(part(cyl(0.18, 0.2, 1.1, 18), K.white, { p: [MX + 0.15, y0 + 1.95, MZ], r: [0, 0, 0.0] }), part(cyl(0.3, 0.3, 0.25, 18), K.dark, { p: [MX + 0.15, y0 + 1.45, MZ] }), ring(3, (a) => part(cyl(0.06, 0.05, 0.3, 10), K.steel, { p: [MX + 0.15 + Math.cos(a) * 0.15, y0 + 1.25, MZ + Math.sin(a) * 0.15] })));
+    out.push(part(cyl(0.12, 0.1, 0.6, 14), K.white, { p: [MX - 0.15, y0 + 2.65, MZ], r: [0, 0, 0.6] }), part(cyl(0.12, 0.12, 0.1, 14), K.dark, { p: [MX - 0.38, y0 + 2.92, MZ], r: [0, 0, 0.6] }), part(cyl(0.22, 0.22, 0.28, 16), 'Ad', { p: [MX - 0.45, y0 + 1.4, MZ + 0.3], r: [Math.PI / 2, 0, 0] }));
+    const VX = -0.8, VY = y0 + 1.45, VR = 0.85;
+    out.push(part(cyl(VR + 0.08, VR + 0.08, 0.08, 40), K.dark, { p: [VX, VY, -4.95], r: [Math.PI / 2, 0, 0] }), part(cyl(VR, VR, 0.1, 40), '#f6e9f2', { p: [VX, VY, -4.94], r: [Math.PI / 2, 0, 0] }));
+    // ---- the automation track: a loop through two analysers
+    const track = curve([[-1.6, 0, -0.4], [2.8, 0, -0.4], [3.4, 0, 0.4], [2.8, 0, 1.2], [-1.6, 0, 1.2], [-2.2, 0, 0.4]], true), TY = y0 + 0.8;
+    out.push(part(tubeOn(track, 0.16, hi() ? 160 : 40), '#c9ced6', { p: [0, TY - 0.08, 0] }), part(tubeOn(curve(track.points.map((p) => [p.x, p.y, p.z]), true), 0.1, hi() ? 160 : 40), '#3a3f47', { p: [0, TY - 0.02, 0] }));
+    for (let i = 0; i < 10; i++) { const p = track.getPointAt(i / 10); out.push(part(box(0.1, TY - 0.1 - y0, 0.1), '#9aa1a9', { p: [p.x, y0 + (TY - 0.1 - y0) / 2, p.z] })); }
+    const analyser = (x, c) => out.push(part(rbox(1.3, 1.3, 1.4, 0.08), K.white, { p: [x, y0 + 0.95, -0.4] }), part(box(1.32, 0.18, 1.42), c, { p: [x, y0 + 1.5, -0.4] }), part(rbox(0.7, 0.4, 0.04, 0.02), '#1d2a33', { p: [x, y0 + 1.1, 0.31] }), part(box(0.5, 0.06, 0.05), '#62d35f', { p: [x, y0 + 1.1, 0.33] }));
+    analyser(0.0, 'A'); analyser(1.8, 'B');
+    // ---- the pipetting robot's deck at the front left
+    const GX = -3.0, GZ = 2.8;
+    out.push(part(rbox(2.0, 0.8, 1.4, 0.06), '#d8dde3', { p: [GX, y0 + 0.4, GZ] }), [-0.95, 0.95].map((dx) => part(box(0.1, 1.0, 1.3), '#9aa1a9', { p: [GX + dx, y0 + 1.3, GZ] })), part(box(2.0, 0.12, 0.12), '#9aa1a9', { p: [GX, y0 + 1.82, GZ - 0.6] }), part(box(2.0, 0.12, 0.12), '#9aa1a9', { p: [GX, y0 + 1.82, GZ + 0.6] }));
+    out.push(part(rbox(0.9, 0.08, 0.6, 0.02), K.white, { p: [GX - 0.3, y0 + 0.84, GZ] }));
+    if (hi()) for (let i = 0; i < 8; i++) for (let j = 0; j < 5; j++) out.push(part(cyl(0.035, 0.035, 0.02, 8), ['#f39ab8', '#8fc4e8', '#f2c94c'][(i + j) % 3], { p: [GX - 0.68 + i * 0.11, y0 + 0.89, GZ - 0.22 + j * 0.11] }));
+    out.push(part(rbox(0.4, 0.15, 0.5, 0.03), '#3d7be0', { p: [GX + 0.55, y0 + 0.88, GZ] }));
+    // A results screen beside the track.
+    out.push(part(rbox(1.2, 0.8, 0.06, 0.03), '#1d2a33', { p: [3.6, y0 + 1.6, -1.6], r: [0, -0.3, 0] }), part(cyl(0.04, 0.04, 1.2, 8), K.dark, { p: [3.6, y0 + 0.6, -1.6] }));
+    [[4.5, 4.4], [-4.5, 0.4]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.55), part(cyl(0.3, 0.25, 0.4, 16), '#c9ced6', { p: [x, y0 + 0.2, z] })));
+    // ---- moving parts
+    // Cells drifting in the wall view.
+    for (let k = 0; k < 7; k++) { const a0 = R() * TAU, r0 = R() * 0.55; moving.push({ geo: merge(part(new THREE.SphereGeometry(0.16, 14, 10), k % 3 ? '#d98bc0' : '#9b7fd8', { s: [1, 1, 0.3] }), part(new THREE.SphereGeometry(0.07, 10, 8), '#6a3d8f', { p: [0.03, 0.02, 0.03], s: [1, 1, 0.4] })), pivot: [VX, VY, -4.86], anim: (t) => { const a = a0 + t * 0.15 * (k % 2 ? 1 : -1), r = r0 + Math.sin(t * 0.5 + k) * 0.1; return { x: Math.cos(a) * r, y: Math.sin(a) * r, rz: t * 0.3 + k, s: 1 + Math.sin(t * 2 + k) * 0.08 }; } }); }
+    // Tubes ride the track; a green tick pops over the analysers as each result comes out.
+    const caps = ['#e5533d', '#7d3fbf', '#3d7be0', '#f2c94c', '#5fae5b', '#e5533d', '#3d7be0', '#f39ab8'];
+    for (let k = 0; k < 8; k++) moving.push({ geo: tubeGeo(caps[k]), pivot: [0, TY, 0], anim: (t) => { const { p } = along(track, cyc(t, 16, k / 8)); return { x: p.x, z: p.z }; } });
+    [0.0, 1.8].forEach((x, i) => moving.push({ geo: tickGeo(0.3), pivot: [x, y0 + 2.0, -0.4], anim: (t) => { const f = cyc(t, 2, i * 0.5); return { y: easeOut(f) * 0.5, s: life(f, 0, 0.12, 0.6, 0.8) }; } }));
+    // The results screen ticks through a list.
+    for (let k = 0; k < 3; k++) moving.push({ geo: merge(part(box(0.7, 0.08, 0.02), '#8fa6b8', { p: [0.1, 0, 0] }), part(cyl(0.06, 0.06, 0.02, 12), '#62d35f', { p: [-0.35, 0, 0], r: [Math.PI / 2, 0, 0] })), pivot: [3.6 + Math.sin(-0.6) * -0.04, y0 + 1.85 - k * 0.2, -1.6 + 0.04], anim: (t) => ({ ry: -0.3, s: (Math.floor(t * 1.2) % 4) > k ? 1 : 0.001 }) });
+    // The pipette head: across the plate, down into a well, up, over to the reservoir.
+    const gan = moving.length;
+    moving.push({ geo: part(box(0.14, 0.14, 1.3), '#5b616b'), pivot: [GX, y0 + 1.82, GZ], anim: (t) => ({ x: -0.6 + cyc(t, 4) * 0.7 + (Math.floor(t / 4) % 2) * 0.0 }) });
+    moving.push({ geo: merge(part(rbox(0.26, 0.4, 0.26, 0.05), 'A'), ring(4, (a, i) => part(cyl(0.015, 0.008, 0.3, 6), K.white, { p: [0, -0.35, -0.15 + i * 0.1] }))), pivot: [0, -0.2, 0], parent: gan, anim: (t) => { const f = cyc(t, 1); return { y: -bump(f, 0.5, 0.12) * 0.32, z: Math.floor(t) % 4 * 0.11 - 0.17 }; } });
+    // The courier: from the van at the front right to the track, with a cooler.
+    out.push(place(van(K.white, 'A'), { p: [3.4, y0, 3.6], r: [0, Math.PI, 0] }));
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 10), k = f < 0.45 ? easeIO(f / 0.45) : f < 0.55 ? 1 : 1 - easeIO(win(f, 0.55, 1)), x = 2.6 - k * 0.9, z = 3.1 - k * 1.5; return { x, z, ry: f < 0.5 ? Math.atan2(1.5, -0.9) : Math.atan2(-1.5, 0.9), still: f > 0.45 && f < 0.55 }; }, { shirt: 'B', pants: '#2b3a55', y: y0, carry: part(rbox(0.4, 0.3, 0.3, 0.05), K.white, { p: [0.3, 0.9, 0] }) }));
+    // A scientist at the microscope.
+    moving.push(...walker(moving.length, (t) => ({ x: MX + 1.1, z: MZ + 0.4, ry: Math.PI - 0.4 + Math.sin(t * 0.5) * 0.15, still: true }), { shirt: K.white, pants: '#3b4a5c', y: y0 }));
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.4, y0, 0.0], topAt: [0.0, y0 + 1.6, -0.4] };
   },
 };
