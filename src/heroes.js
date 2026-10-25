@@ -619,27 +619,68 @@ export const HEROES = {
     };
   } },
 
-  // Microsoft: the platform everyone works on. Its four tiles break apart into the cloud as
-  // data and snap back together as the window.
+  // Microsoft: the world works on its software, and that work runs in its cloud. On the campus,
+  // people at desks work in Word, Excel, PowerPoint and Teams; their work arcs up into the cloud
+  // and down into the Azure data centre, its racks blinking and its fans turning.
   microsoft: { finder: '#00a4ef', build: () => {
-    const tiles = [['#f25022', -1, 1], ['#7fba00', 1, 1], ['#00a4ef', -1, -1], ['#ffb900', 1, -1]];
-    const cloudGeo = merge([[0, 0, 0, 1.5], [1.5, -0.3, 0.2, 1.15], [-1.5, -0.35, -0.1, 1.2], [0.6, 0.65, -0.3, 1.05], [-0.7, 0.5, 0.4, 1]].map(([x, y, z, r]) => part(ball(r), (X, Y) => (Y < y - 0.5 ? '#dbe9f6' : '#f4f8fc'), { p: [x, y, z] })));
-    const apart = (t) => { const f = cyc(t, 5); return easeIO(win(f, 0.15, 0.35)) * (1 - easeIO(win(f, 0.65, 0.85))); };
-    return {
-      bare: true, move: () => ({}),
-      geo: merge(part(cyl(3.4, 3.6, 0.5, 48), '#f3f2f1', { p: [0, 0.25, 0] }), part(cyl(0.2, 0.3, 2.6, 16), '#737373', { p: [0, 1.7, 0] })),
-      moving: [
-        { geo: cloudGeo, pivot: [0, 9.4, -0.6], anim: (t) => ({ y: Math.sin(t * 0.9) * 0.25, s: 1 + apart(t) * 0.1 }) },
-        ...tiles.map(([c, sx, sy], i) => ({ geo: part(rbox(2.2, 2.2, 0.5, 0.18), c), pivot: [sx * 1.2, 4.6 + sy * 1.2, 0], anim: (t) => {
-          const k = apart(t);
-          return { x: sx * k * 1.6, y: sy * k * 1.2 + k * 0.6, z: k * (i % 2 ? 1 : -1) * 0.8, rx: k * sy * 0.6, ry: k * sx * 0.8 + Math.sin(t * 0.8) * 0.15, rz: k * (i - 1.5) * 0.3 };
-        } })),
-        ...Array.from({ length: 8 }, (_, i) => ({ geo: part(rbox(0.36, 0.36, 0.12, 0.08), tiles[i % 4][0]), pivot: [tiles[i % 4][1] * 1.2, 5.6, 0], anim: (t) => {
-          const k = apart(t), f = cyc(t, 1.2, i / 8);
-          return k > 0.6 ? { y: f * 3, x: -tiles[i % 4][1] * f * 1.1, s: life(f, 0, 0.1, 0.8, 1) } : { s: 0 };
-        } })),
-      ],
-    };
+    const R = rand(51), out = [], y0 = 0.3, MS = ['#f25022', '#7fba00', '#00a4ef', '#ffb900'], APPS = ['#2b579a', '#217346', '#d24726', '#5b5fc7'];
+    // ---- the campus lawn and paths
+    out.push(part(rbox(10.4, 0.3, 10.4, 0.08), '#7cbf5a', { p: [0, 0.15, 0] }), part(box(10.2, 0.02, 0.9), '#e9e4d8', { p: [0, y0 + 0.01, 1.6] }), part(box(0.9, 0.02, 3.4), '#e9e4d8', { p: [-0.1, y0 + 0.01, 3.6] }));
+    [[-4.2, 3.0], [-3.0, 4.4], [4.3, 3.2], [3.2, 4.5], [1.6, 4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.8)));
+    // ---- the office pavilion, cut away to show the floor
+    const O = { x0: -4.9, x1: -0.7, z0: -4.6, z1: 0.6 };
+    out.push(part(box(O.x1 - O.x0, 0.2, O.z1 - O.z0), '#d6d1c6', { p: [(O.x0 + O.x1) / 2, y0 + 0.1, (O.z0 + O.z1) / 2] }), part(box(O.x1 - O.x0 - 0.1, 0.02, O.z1 - O.z0 - 0.1), '#b9a58a', { p: [(O.x0 + O.x1) / 2, y0 + 0.21, (O.z0 + O.z1) / 2] }));
+    out.push(part(box(O.x1 - O.x0, 2.4, 0.12), '#9fc3d8', { p: [(O.x0 + O.x1) / 2, y0 + 1.4, O.z0] }), part(box(0.12, 2.4, O.z1 - O.z0), '#9fc3d8', { p: [O.x0, y0 + 1.4, (O.z0 + O.z1) / 2] }));
+    for (let x = O.x0 + 0.5; x < O.x1; x += 0.6) out.push(part(box(0.04, 2.4, 0.14), '#e9ecef', { p: [x, y0 + 1.4, O.z0] }));
+    for (let z = O.z0 + 0.5; z < O.z1; z += 0.6) out.push(part(box(0.14, 2.4, 0.04), '#e9ecef', { p: [O.x0, y0 + 1.4, z] }));
+    out.push(part(box(O.x1 - O.x0 + 0.1, 0.12, 0.3), '#e9ecef', { p: [(O.x0 + O.x1) / 2, y0 + 2.66, O.z0] }), part(box(0.3, 0.12, O.z1 - O.z0 + 0.1), '#e9ecef', { p: [O.x0, y0 + 2.66, (O.z0 + O.z1) / 2] }));
+    // Desks in two rows, each with a monitor showing an app and a person at work.
+    const fy = y0 + 0.22;
+    [[-3.9, -3.4], [-2.3, -3.4], [-3.9, -1.5], [-2.3, -1.5]].forEach(([x, z], k) => {
+      out.push(part(rbox(1.3, 0.06, 0.7, 0.03), '#f4f5f6', { p: [x, fy + 0.72, z] }), [[-0.6, -0.3], [0.6, -0.3], [-0.6, 0.3], [0.6, 0.3]].map(([dx, dz]) => part(box(0.04, 0.72, 0.04), '#5b616b', { p: [x + dx, fy + 0.36, z + dz] })));
+      const app = APPS[k % 4];
+      out.push(part(rbox(0.75, 0.48, 0.04, 0.03), '#1d1f24', { p: [x, fy + 1.12, z - 0.2] }), part(box(0.68, 0.4, 0.01), '#f4f5f6', { p: [x, fy + 1.12, z - 0.175] }), part(box(0.68, 0.08, 0.012), app, { p: [x, fy + 1.28, z - 0.17] }),
+        [0, 1, 2].map((r) => part(box(0.4 - r * 0.08, 0.025, 0.012), '#9aa1a9', { p: [x - 0.1, fy + 1.15 - r * 0.07, z - 0.17] })), part(box(0.05, 0.25, 0.05), '#1d1f24', { p: [x, fy + 0.86, z - 0.2] }), part(box(0.4, 0.02, 0.14), '#2b2f36', { p: [x, fy + 0.76, z + 0.05] }));
+      // A seated person.
+      const shirt = ['#3d7be0', '#e5533d', '#2f9e6e', '#8a6cf0'][k], skin = ['#e9b98f', '#c58c66', '#8d5a3b', '#f2c9a0'][k];
+      out.push(part(rbox(0.5, 0.08, 0.5, 0.03), '#3a3f47', { p: [x, fy + 0.48, z + 0.55] }), part(box(0.5, 0.5, 0.06), '#3a3f47', { p: [x, fy + 0.75, z + 0.82] }), part(cyl(0.04, 0.04, 0.45, 8), '#5b616b', { p: [x, fy + 0.24, z + 0.55] }),
+        part(new THREE.CapsuleGeometry(0.17, 0.32, 6, 12), shirt, { p: [x, fy + 0.85, z + 0.55] }), part(ball(0.15), skin, { p: [x, fy + 1.25, z + 0.52] }), part(ball(0.16), '#2b2f36', { p: [x, fy + 1.3, z + 0.55], s: [1, 0.7, 1] }),
+        part(new THREE.CapsuleGeometry(0.05, 0.3, 4, 8), shirt, { p: [x - 0.18, fy + 0.85, z + 0.25], r: [1.2, 0, 0] }), part(new THREE.CapsuleGeometry(0.05, 0.3, 4, 8), shirt, { p: [x + 0.18, fy + 0.85, z + 0.25], r: [1.2, 0, 0] }));
+    });
+    out.push(part(cyl(0.22, 0.18, 0.4, 16), '#e9e6df', { p: [-1.2, fy + 0.2, -4.1] }), miniTree(R, -1.2, fy + 0.3, -4.1, 0.45), part(rbox(0.9, 0.5, 2.0, 0.1), '#5b5fc7', { p: [-1.2, fy + 0.25, -0.6] }));
+    // ---- the Azure data centre, cut away to show its racks
+    const Dc = { x0: 0.4, x1: 4.9, z0: -4.7, z1: 0.4 };
+    out.push(part(box(Dc.x1 - Dc.x0, 0.2, Dc.z1 - Dc.z0), '#5b616b', { p: [(Dc.x0 + Dc.x1) / 2, y0 + 0.1, (Dc.z0 + Dc.z1) / 2] }));
+    out.push(part(box(Dc.x1 - Dc.x0, 2.8, 0.2), '#2f343c', { p: [(Dc.x0 + Dc.x1) / 2, y0 + 1.4, Dc.z0] }), part(box(0.2, 2.8, Dc.z1 - Dc.z0), '#2f343c', { p: [Dc.x0, y0 + 1.4, (Dc.z0 + Dc.z1) / 2] }));
+    out.push(part(box(Dc.x1 - Dc.x0 + 0.2, 0.25, Dc.z1 - Dc.z0 + 0.2), '#3a3f47', { p: [(Dc.x0 + Dc.x1) / 2, y0 + 2.92, (Dc.z0 + Dc.z1) / 2] }));
+    // The four-square logo standing on the data centre's roof, turned to face the street.
+    out.push(place(merge(part(rbox(1.35, 1.35, 0.1, 0.05), '#f4f5f6'), MS.map((c, i) => part(rbox(0.56, 0.56, 0.06, 0.04), c, { p: [-0.3 + (i % 2) * 0.6, 0.3 - Math.floor(i / 2) * 0.6, 0.07] })), [-0.45, 0.45].map((dx) => part(box(0.08, 0.6, 0.08), '#5b616b', { p: [dx, -0.95, -0.05] }))), { p: [4.2, y0 + 4.2, -0.3], r: [0, Math.PI / 4, 0] }));
+    const racks = [];
+    for (let row = 0; row < 3; row++) for (let k = 0; k < 4; k++) {
+      const x = 1.1 + k * 0.92, z = -3.9 + row * 1.4;
+      out.push(part(rbox(0.8, 2.0, 0.6, 0.04), '#1d1f24', { p: [x, y0 + 1.2, z] }));
+      for (let u = 0; u < 9; u++) out.push(part(box(0.7, 0.03, 0.01), '#3a3f47', { p: [x, y0 + 0.35 + u * 0.2, z + 0.305] }));
+      racks.push([x, z]);
+    }
+    // ---- the logo sculpture on the lawn
+    out.push(part(rbox(0.5, 0.6, 0.5, 0.06), '#e9e6df', { p: [2.4, y0 + 0.3, 3.0] }));
+    // ---- the cloud
+    const cloudGeo = merge([[0, 0, 0, 1.2], [1.2, -0.25, 0.2, 0.95], [-1.25, -0.3, -0.1, 1.0], [0.5, 0.55, -0.3, 0.85], [-0.6, 0.45, 0.35, 0.8], [2.0, -0.45, -0.2, 0.6], [-2.0, -0.5, 0.2, 0.6]].map(([x, y, z, r]) => part(ball(r), (X, Y) => shade('#f4f8fc', Y < y - 0.4 ? 0.88 : 1), { p: [x, y, z] })));
+    const officeOut = [-2.9, y0 + 1.6, -2.4], cloudAt = [0.2, 7.2, -1.6], dcIn = [2.6, y0 + 3.1, -2.2];
+    const arc = (a, b, k, lift) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k + Math.sin(Math.PI * k) * lift, a[2] + (b[2] - a[2]) * k];
+    const moving = [
+      { geo: cloudGeo, pivot: cloudAt, anim: (t) => ({ y: Math.sin(t * 0.8) * 0.2, x: Math.sin(t * 0.3) * 0.2 }) },
+      ...MS.map((c, i) => ({ geo: part(rbox(0.5, 0.5, 0.14, 0.05), c), pivot: [2.15 + (i % 2) * 0.56, y0 + 1.15 - Math.floor(i / 2) * 0.56, 3.0], anim: (t) => ({ z: Math.sin(t * 2 + i * 0.9) * 0.04, y: 0.55 + Math.max(0, Math.sin(t * 2 + i * 0.9)) * 0.06 }) })),
+      // Work flows up from the office into the cloud, and down into the data centre.
+      ...Array.from({ length: hi() ? 8 : 4 }, (_, i) => ({ geo: part(rbox(0.28, 0.28, 0.08, 0.05), APPS[i % 4]), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 3.2, i / (hi() ? 8 : 4)), p = f < 0.5 ? arc(officeOut, cloudAt, easeIO(f * 2), 0.8) : arc(cloudAt, dcIn, easeIO(f * 2 - 1), 0.6); return { x: p[0], y: p[1], z: p[2], ry: t * 2 + i, s: Math.min(1, f / 0.06, (1 - f) / 0.06) }; } })),
+      // Rack lights blinking, a strip per rack.
+      ...racks.map(([x, z], i) => ({ geo: merge(Array.from({ length: 8 }, (_, u) => part(box(0.05, 0.04, 0.012), u % 3 ? '#5fd08f' : '#00a4ef', { p: [0.25, 0.35 + u * 0.2, 0] }))), pivot: [x, y0, z + 0.31], anim: (t) => ({ sy: Math.sin(t * (3 + (i % 5)) + i * 1.7) > -0.3 ? 1 : 0.001 }) })),
+      // Cooling fans turning on the roof.
+      ...[[1.4, -3.6], [2.8, -3.6], [4.2, -3.6], [1.4, -1.4], [2.8, -1.4], [4.2, -1.4]].map(([x, z]) => ({ geo: merge(part(cyl(0.45, 0.45, 0.2, 24), '#7d8792', { p: [0, -0.1, 0] }), ring(5, (a) => part(box(0.38, 0.02, 0.12), '#c9ced6', { p: [Math.cos(a) * 0.2, 0.02, Math.sin(a) * 0.2], r: [0.3, -a, 0] }))), pivot: [x, y0 + 3.15, z], anim: (t) => ({ ry: t * 6 }) })),
+    ];
+    const walkerAt = moving.length;
+    moving.push(...walker(walkerAt, (t) => { const f = cyc(t, 9), x = -4.6 + f * 9.2; return { x, z: 1.6, ry: 0, s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: '#00a4ef', pants: '#2b3a55', y: y0 }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 
   // Nvidia: the engine of the AI boom. A GPU spins its fans while streams of light run up out of
