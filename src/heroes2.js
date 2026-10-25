@@ -373,4 +373,42 @@ export const HEROES2 = {
     moving.push(pulse(3.6, y0 + 0.05, 1.9, SKY, P, 0.1, 0.5));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Block: Square on the counter and Cash App in the pocket. At the market every stall takes a
+  // tap on its white Square reader; the money lands in the seller's Cash App, and the seller
+  // spends it at the next stall, so the dollars go round inside Block's own loop.
+  block: { finder: '#00d64f', build: () => {
+    const R = rand(112), out = [], GREEN = '#00d64f', INK = '#121212';
+    out.push(ground('#8fc66f'), part(box(7.6, 0.03, 7.6), '#d9cdb8', { p: [0.2, y0 + 0.015, 0.2] }));
+    // ---- the market: a ring of stalls with striped awnings and Square readers
+    const stalls = [[-2.8, -2.4], [0.2, -3.2], [3.0, -2.2], [3.2, 1.0], [-3.2, 1.0]], wares = ['#e5533d', '#f2c94c', '#8fc46a', '#d6336c', '#f29a3a'];
+    const reader = merge(part(rbox(0.3, 0.05, 0.3, 0.04), K.white), part(rbox(0.26, 0.2, 0.03, 0.03), K.white, { p: [0, 0.12, -0.1], r: [-0.3, 0, 0] }), part(box(0.2, 0.15, 0.01), '#1d1f24', { p: [0, 0.12, -0.08], r: [-0.3, 0, 0] }), part(rbox(0.08, 0.08, 0.012, 0.015), INK, { p: [0, 0.12, -0.07], r: [-0.3, 0, 0] }));
+    stalls.forEach(([x, z], i) => {
+      const ry = Math.atan2(-(0.2 - x), 0.2 - z) * 0, face = Math.atan2(0.2 - x, 0.2 - z), g = [];
+      g.push(part(rbox(1.6, 0.8, 0.7, 0.04), K.wood, { p: [0, 0.4, 0] }), [-0.75, 0.75].flatMap((dx) => [part(cyl(0.04, 0.04, 1.8, 8), K.white, { p: [dx, 0.9, -0.3] }), part(cyl(0.04, 0.04, 1.5, 8), K.white, { p: [dx, 0.75, 0.3] })]));
+      for (let k = 0; k < 6; k++) g.push(part(box(0.28, 0.04, 0.9), k % 2 ? K.white : wares[i], { p: [-0.7 + k * 0.28, 1.65, 0], r: [0.35, 0, 0] }));
+      for (let k = 0; k < 6; k++) g.push(part(new THREE.SphereGeometry(0.1, 10, 7), wares[(i + k) % 5], { p: [-0.6 + k * 0.17, 0.88, -0.1 + (k % 2) * 0.12] }));
+      g.push(place(reader, { p: [0.55, 0.8, 0.15], r: [0, Math.PI, 0] }));
+      out.push(place(merge(g), { p: [x, y0, z], r: [0, face, 0] }));
+      out.push(place(fan(wares[(i + 2) % 5]), { p: [x - Math.sin(face) * 0.7, y0, z - Math.cos(face) * 0.7], s: 1.4 }));
+    });
+    // ---- the giant phone with Cash App, front right
+    const PX = 2.6, PZ = 3.4, PQ = Math.PI / 4;
+    out.push(part(rbox(1.3, 2.4, 0.14, 0.18), INK, { p: [PX, y0 + 1.4, PZ], r: [0, PQ, 0] }), part(rbox(1.16, 2.16, 0.02, 0.12), GREEN, { p: [PX + 0.05, y0 + 1.4, PZ + 0.05], r: [0, PQ, 0] }));
+    out.push(place(merge(part(rbox(0.6, 0.6, 0.04, 0.14), K.white), pixText('$', 0.09, GREEN, 0.03).translate(0, 0, 0.03)), { p: [PX + 0.08, y0 + 1.75, PZ + 0.08], r: [0, PQ, 0] }), part(rbox(0.6, 0.1, 0.12, 0.03), '#c9ced6', { p: [PX, y0 + 0.05, PZ] }));
+    out.push(trees(R, [[-4.6, 4.6], [4.6, -4.6], [-4.6, -4.6], [0.2, 4.6]]));
+    // ---- moving parts
+    const moving = [], P = 10, MID = [0.2, 0, 0.2];
+    // The bitcoin turning over the square.
+    moving.push({ geo: merge(part(cyl(0.5, 0.5, 0.1, 32), '#f7931a', { r: [Math.PI / 2, 0, 0] }), pixText('B', 0.1, K.white, 0.13)), pivot: [MID[0], y0 + 2.3, MID[2]], anim: (t) => ({ ry: t * 1.2, y: Math.sin(t) * 0.1 }) });
+    out.push(part(cyl(0.05, 0.05, 1.7, 8), '#c9ced6', { p: [MID[0], y0 + 0.85, MID[2]] }), part(cyl(0.5, 0.6, 0.12, 24), '#c9ced6', { p: [MID[0], y0 + 0.06, MID[2]] }));
+    // Each sale: a tap at the stall's reader, the green dollar to the phone, then spent at the next stall.
+    const cash = merge(part(rbox(0.4, 0.4, 0.06, 0.1), GREEN), pixText('$', 0.06, K.white, 0.08));
+    stalls.forEach(([x, z], i) => {
+      const face = Math.atan2(0.2 - x, 0.2 - z), rx = x + Math.sin(face) * 0.15 + Math.cos(face) * 0.55, rz = z + Math.cos(face) * 0.15 - Math.sin(face) * 0.55, [nx, nz] = stalls[(i + 1) % 5];
+      moving.push(pulse(rx, y0 + 0.9, rz, GREEN, P, i / 5, 0.22));
+      moving.push(rider(cash, curve([[rx, y0 + 1.1, rz], [(rx + PX) / 2, y0 + 3.0, (rz + PZ) / 2], [PX, y0 + 2.4, PZ]]), P, i / 5, 0.02, 0.35));
+      moving.push(rider(cash, curve([[PX, y0 + 2.4, PZ], [(nx + PX) / 2, y0 + 3.4, (nz + PZ) / 2], [nx, y0 + 1.3, nz]]), P, i / 5, 0.45, 0.8));
+    });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

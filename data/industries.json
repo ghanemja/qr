@@ -99,7 +99,8 @@
   "moodys": "No bond sells without a grade: every issue passes under Moody's stamp",
   "nasdaq": "Where the next big company lists, beside the giants already there",
   "ice": "The exchange behind the exchanges: stocks, oil and mortgages in one data cube",
-  "paypal": "Both sides of the checkout: friends pay friends, and the same accounts pay every shop"
+  "paypal": "Both sides of the checkout: friends pay friends, and the same accounts pay every shop",
+  "block": "Square on the counter, Cash App in the pocket: the money goes round inside Block"
  },
  "bank": [
   "PNC Financial Services",
@@ -1678,5 +1679,8 @@
  ],
  "paypal": [
   "PayPal Holdings"
+ ],
+ "block": [
+  "Block"
  ]
 }
