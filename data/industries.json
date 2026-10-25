@@ -115,7 +115,8 @@
   "macys": "The store on Herald Square that New York parades past",
   "gap": "One maker, four brands for every budget, and the denim to fill them",
   "lululemon": "A brand built on a community: the free yoga class and the run club",
-  "ulta": "Every price point under one roof, and the points that bring members back"
+  "ulta": "Every price point under one roof, and the points that bring members back",
+  "dollargeneral": "The store close to everyone in rural America"
  },
  "bank": [
   "PNC Financial Services",
@@ -327,7 +328,6 @@
  "retail": [
   "Albertsons",
   "Publix Super Markets",
-  "Dollar General",
   "Dollar Tree",
   "Kohl's",
   "Nordstrom",
@@ -1199,7 +1199,6 @@
   "AutoZone": 10,
   "O'Reilly Automotive": 10,
   "Advance Auto Parts": 10,
-  "Dollar General": 11,
   "Dollar Tree": 11,
   "GameStop": 12,
   "Williams-Sonoma": 2,
@@ -1720,5 +1719,8 @@
  ],
  "ulta": [
   "Ulta Beauty"
+ ],
+ "dollargeneral": [
+  "Dollar General"
  ]
 }

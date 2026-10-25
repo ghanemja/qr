@@ -978,4 +978,33 @@ export const HEROES2 = {
     moving.push({ geo: merge(part(cyl(0.08, 0.08, 0.5, 16), '#1d1f24', { p: [0, 0.25, 0] }), part(cyl(0.07, 0.07, 0.3, 16), '#c2185b', { p: [0, 0.65, 0] })), pivot: [1.6, y0 + 0.9, -1.6], anim: (t) => ({ ry: t, y: Math.sin(t * 2) * 0.05 }) });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Dollar General: the store that is close to everyone in rural America. Across the farmland
+  // the yellow stores keep opening, each a short drive from the farms around it, and the truck
+  // runs its route between them.
+  dollargeneral: { finder: '#ffc220', build: () => {
+    const R = rand(128), out = [], YEL = '#ffc220';
+    out.push(ground('#9cc86a'));
+    // ---- farmland patches and roads
+    [[-3.4, -3.4, '#c9b45a'], [3.4, -3.4, '#7fb35a'], [-3.4, 3.4, '#a3c46a'], [3.4, 3.4, '#d6c27a'], [-0.0, -3.6, '#8fbf5a'], [0.0, 3.6, '#b9c96a'], [-3.6, 0, '#8ab55a'], [3.6, 0, '#c4b860']].forEach(([x, z, c]) => {
+      out.push(part(box(2.4, 0.05, 2.4), c, { p: [x, y0 + 0.025, z] }));
+      if (hi()) for (let k = 0; k < 6; k++) out.push(part(box(2.3, 0.02, 0.06), shade(c, 0.85), { p: [x, y0 + 0.055, z - 1.0 + k * 0.4] }));
+    });
+    out.push(part(box(10.2, 0.03, 0.7), '#5b616b', { p: [0, y0 + 0.02, -1.8] }), part(box(10.2, 0.03, 0.7), '#5b616b', { p: [0, y0 + 0.02, 1.8] }), part(box(0.7, 0.03, 10.2), '#5b616b', { p: [-1.8, y0 + 0.02, 0] }), part(box(0.7, 0.03, 10.2), '#5b616b', { p: [1.8, y0 + 0.02, 0] }));
+    // Farmhouses, barns and silos.
+    [[-3.8, -4.0], [3.0, -4.2], [-4.2, 3.0], [3.8, 3.2], [0.0, 4.3], [4.3, 0.2]].forEach(([x, z], i) => out.push(place(i % 2 ? home('#fbf3e3', '#8a5a36', 1.0, 0.9, 0.7) : merge(part(rbox(1.0, 0.7, 0.8, 0.04), '#b03a2e', { p: [0, 0.35, 0] }), part(prism(1.1, 0.5, 0.9), '#5b3a2a', { p: [0, 0.7, 0] })), { p: [x, y0, z], r: [0, i * 0.7, 0] })));
+    [[-2.6, -3.2], [2.6, 3.0]].forEach(([x, z]) => out.push(place(bin(0.32, 1.1, '#9aa1a9'), { p: [x, y0, z] })));
+    // ---- the depot, back left
+    out.push(part(rbox(1.6, 0.9, 1.2, 0.04), '#e6e9ed', { p: [-3.8, y0 + 0.45, -0.2] }), part(box(1.62, 0.25, 1.22), YEL, { p: [-3.8, y0 + 0.8, -0.2] }));
+    out.push(trees(R, [[-0.4, -0.4], [0.6, 0.6], [-2.6, 2.6], [2.6, -2.6], [4.5, -1.2], [-1.0, 4.5]], 0.45));
+    // ---- moving parts
+    const moving = [], P = 14;
+    // The stores: opening one by one at the crossroads and along the roads.
+    const store = merge(part(rbox(1.1, 0.6, 0.8, 0.04), '#f4f1ea', { p: [0, 0.3, 0] }), part(box(1.12, 0.22, 0.82), YEL, { p: [0, 0.55, 0] }), pixText('DG', 0.04, '#1d1f24', 0.02).translate(0, 0.55, 0.42), part(box(0.5, 0.3, 0.02), '#2a3c50', { p: [0, 0.2, 0.41] }));
+    const spots = [[-1.0, -1.0], [1.0, 1.0], [-1.0, 2.6], [2.6, -1.0], [1.0, -2.6], [-2.6, 1.0], [2.6, 2.6], [-2.6, -2.6]];
+    spots.forEach(([x, z], i) => { moving.push({ geo: store, pivot: [x, y0, z], anim: (t) => { const f = cyc(t, P), a = i * 0.1; return f < a || f > 0.97 ? { s: 0.001 } : { ry: Math.PI / 4, s: back(win(f, a, a + 0.06)) * 0.9 }; } }); moving.push({ geo: part(cone(0.18, 0.4, 16), YEL, { r: [Math.PI, 0, 0] }), pivot: [x, y0 + 1.3, z], anim: (t) => { const f = cyc(t, P), a = i * 0.1; return f < a || f > 0.97 ? { s: 0.001 } : { y: Math.abs(Math.sin(t * 3 + i)) * 0.2, s: back(win(f, a, a + 0.06)) }; } }); });
+    // The truck running the route round the crossroads.
+    const loop = curve([[-1.8, y0, -1.8], [1.8, y0, -1.8], [1.8, y0, 1.8], [-1.8, y0, 1.8]], true);
+    moving.push({ geo: place(semi(YEL, K.white, '#1d1f24'), { s: 0.45 }), pivot: [0, 0, 0], anim: (t) => { const a = along(loop, cyc(t, 10)); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
