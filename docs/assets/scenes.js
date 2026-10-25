@@ -3023,4 +3023,59 @@ export const SCENES = {
     moving.push({ geo: merge(part(rbox(0.5, 0.5, 0.5, 0.06), K.orange, { p: [0, -0.1, 0] }), part(capsule(0.12, 0.2), '#f2c94c', { p: [0, 0.35, 0] }), part(new THREE.SphereGeometry(0.12, 12, 8), '#e9b98f', { p: [0, 0.62, 0] }), part(new THREE.SphereGeometry(0.13, 12, 8, 0, TAU, 0, Math.PI / 2), K.white, { p: [0, 0.66, 0] })), pivot: [2.0, 0, 0], parent: boom, anim: (t) => ({ rz: -(0.15 + lift(F(t)) * 0.7) }) });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [2.4, y0, -1.6], topAt: [BT.x + 1.0, y0 + 1.0, BT.z] };
   },
+
+  // Power lines (transmission utilities and grid builders): the long wires that carry it all. Power
+  // leaves the plant and rides the lattice towers to the substation; a helicopter strings a new
+  // conductor tower to tower, and once it's in, the town and the data centre beyond light up.
+  'power:1': () => {
+    const R = rand(4401), out = [], moving = [];
+    out.push(slab('#a3cf7c'));
+    out.push(part(box(10.4, 0.03, 1.0), '#6b7078', { p: [0, y0 + 0.015, 2.0] }));
+    for (let i = 0; i < 9; i++) out.push(part(box(0.5, 0.012, 0.06), K.white, { p: [-4.4 + i * 1.1, y0 + 0.035, 2.0] }));
+    // ---- the plant (back left): turbine hall, stack, a wisp of steam
+    out.push(part(rbox(2.2, 1.4, 1.6, 0.06), '#e3e0da', { p: [-3.9, y0 + 0.7, -3.4] }), part(box(2.22, 0.2, 1.62), 'A', { p: [-3.9, y0 + 1.25, -3.4] }), part(cyl(0.22, 0.3, 3.4, 16), '#c9ced6', { p: [-4.5, y0 + 1.7, -4.4] }), part(cyl(0.24, 0.24, 0.2, 16), 'A', { p: [-4.5, y0 + 3.0, -4.4] }));
+    // ---- the towers along the back, the substation (right)
+    const PZ = -2.9, PH = 3.4, towers = [-2.0, 0.6, 3.2];
+    towers.forEach((x) => out.push(place(pylon(PH, '#9aa1a9'), { p: [x, y0, PZ] })));
+    const arms = [[PH * 0.72, -0.9], [PH * 0.72, 0.9], [PH * 0.92, -0.65], [PH * 0.92, 0.65]];
+    const span = (x0, x1, y, z) => curve([[x0, y0 + y - 0.12, PZ + z], [(x0 + x1) / 2, y0 + y - 0.5, PZ + z], [x1, y0 + y - 0.12, PZ + z]]);
+    const wires = [];
+    arms.slice(0, 3).forEach(([y, z]) => { const c1 = curve([[-3.0, y0 + 1.4, -3.0 + z * 0.3], [-2.5, y0 + y - 0.3, PZ + z], [towers[0], y0 + y - 0.12, PZ + z]]); wires.push(c1); for (let i = 0; i < 2; i++) wires.push(span(towers[i], towers[i + 1], y, z)); });
+    wires.forEach((c) => out.push(part(tubeOn(c, 0.025, hi() ? 24 : 8), K.dark)));
+    const SX = 4.2, SZ = -0.6;
+    out.push(part(rbox(1.6, 0.08, 2.2, 0.03), '#b9b4aa', { p: [SX, y0 + 0.04, SZ] }));
+    [[-0.4, -0.6], [0.4, -0.6], [-0.4, 0.4], [0.4, 0.4]].forEach(([dx, dz]) => out.push(part(rbox(0.5, 0.6, 0.45, 0.04), '#9aa1a9', { p: [SX + dx, y0 + 0.38, SZ + dz] }), part(cyl(0.05, 0.05, 0.4, 8), '#d8dde3', { p: [SX + dx, y0 + 0.88, SZ + dz] })));
+    out.push(beam([towers[2], y0 + PH * 0.72 - 0.12, PZ + 0.9], [SX, y0 + 1.1, SZ - 0.6], 0.025, K.dark), beam([towers[2], y0 + PH * 0.72 - 0.12, PZ - 0.9], [SX, y0 + 1.1, SZ - 0.6], 0.025, K.dark));
+    // ---- the town (front left) and the data centre (front right)
+    const homes = [[-3.8, 3.6], [-2.2, 3.9], [-0.6, 3.6]];
+    homes.forEach(([x, z], i) => out.push(place(home(['#f3ead8', '#e4ecf0', '#efe2cc'][i], ['#7d6a5a', '#5a6b7d', 'Bd'][i], 1.3, 1.1, 0.9), { p: [x, y0, z] })));
+    const DX = 2.4, DZ = 3.7;
+    out.push(part(rbox(3.0, 1.2, 1.6, 0.05), '#d8dde3', { p: [DX, y0 + 0.6, DZ] }), part(box(3.02, 0.14, 1.62), 'A', { p: [DX, y0 + 1.1, DZ] }));
+    for (let i = 0; i < 3; i++) out.push(part(rbox(0.8, 0.2, 0.6, 0.03), '#9aa1a9', { p: [DX - 1.0 + i * 1.0, y0 + 1.3, DZ - 0.3] }));
+    const feeds = [curve([[SX - 0.6, y0 + 0.9, SZ + 0.8], [SX - 0.8, y0 + 1.6, 1.0], [DX + 0.6, y0 + 1.2, DZ - 0.8]]), curve([[SX - 0.6, y0 + 0.9, SZ + 0.8], [1.2, y0 + 1.6, 1.0], [-1.0, y0 + 1.6, 2.6], [-2.2, y0 + 1.2, 3.4]])];
+    [[SX - 0.8, 1.0], [1.2, 1.0], [-1.0, 2.6]].forEach(([x, z]) => out.push(part(cyl(0.06, 0.08, 1.6, 10), K.wood, { p: [x, y0 + 0.8, z] })));
+    feeds.forEach((c) => out.push(part(tubeOn(c, 0.02, hi() ? 30 : 10), K.dark)));
+    [[-4.6, 0.6], [-1.0, -0.6], [1.8, -0.4], [4.6, 2.2]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.5 + R() * 0.15)));
+    // ---- moving parts (one 12 s cycle)
+    const P = 12, F = (t) => cyc(t, P), live = (f) => f > 0.55 && f < 0.97;
+    // Steam from the stack.
+    for (let k = 0; k < 3; k++) moving.push({ geo: puff(0.3), pivot: [-4.5, y0 + 3.4, -4.4], anim: (t) => { const u = cyc(t, 3, k / 3); return { y: u * 1.2, x: u * 0.4, s: (0.5 + u) * (1 - u) * 1.6 }; } });
+    // Power along the existing wires, all the time.
+    wires.forEach((c, i) => moving.push({ geo: part(new THREE.SphereGeometry(0.07, 8, 6), '#ffd23f'), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 1.4, i * 0.13), p = c.getPointAt(u); return { x: p.x, y: p.y, z: p.z }; } }));
+    // The helicopter strings the new top conductor from tower to tower.
+    const top = arms[3], hx0 = towers[0], hx1 = towers[2], prog = (f) => easeIO(win(f, 0.08, 0.5));
+    const hy = y0 + top[0] + 0.7, hz = PZ + top[1];
+    const heli = moving.length;
+    moving.push({ geo: heliGeo('#e5533d', K.white), pivot: [0, 0, 0], anim: (t) => { const f = F(t), k = prog(f), away = easeIn(win(f, 0.5, 0.65)); return { x: hx0 - 0.6 + (hx1 - hx0 + 0.6) * k + away * 2, y: hy + Math.sin(t * 2) * 0.05 + away * 1.5, z: hz + away * 1.0, ry: 0, rz: -0.1, s: f < 0.04 ? Math.max(0.001, f / 0.04) : f > 0.62 ? Math.max(0.001, 1 - win(f, 0.62, 0.66)) : 1 }; } });
+    moving.push({ geo: rotorGeo(1.0), pivot: [0.1, 0.95, 0], parent: heli, anim: (t) => ({ ry: t * 16 }) });
+    moving.push({ geo: part(box(1, 0.04, 0.04), '#c9612a', { p: [0.5, 0, 0] }), pivot: [hx0, y0 + top[0] - 0.12, hz], anim: (t) => { const f = F(t); return { sx: Math.max(0.001, prog(f) * (hx1 - hx0)) * (f > 0.97 ? 0.001 : 1) }; } });
+    // Once it's in: pulses down the feeders, windows and racks light.
+    feeds.forEach((c, i) => { for (let k = 0; k < 3; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.07, 8, 6), '#ffd23f'), pivot: [0, 0, 0], anim: (t) => { const f = F(t), u = cyc(t, 1.4, k / 3 + i * 0.2), p = c.getPointAt(u); return { x: p.x, y: p.y, z: p.z, s: live(f) ? 1 : 0.001 }; } }); });
+    homes.forEach(([x, z], i) => moving.push({ geo: part(rbox(0.34, 0.28, 0.06, 0.02), '#ffe066'), pivot: [x + 0.26, y0 + 0.6, z + 0.47], anim: (t) => ({ s: live(F(t)) && F(t) > 0.58 + i * 0.03 ? 1 : 0.001 }) }));
+    for (let i = 0; i < 6; i++) moving.push({ geo: part(box(0.3, 0.08, 0.02), i % 2 ? '#62d35f' : '#3d7be0'), pivot: [DX - 1.1 + i * 0.44, y0 + 0.6, DZ + 0.81], anim: (t) => ({ s: live(F(t)) && Math.sin(t * 6 + i * 2) > -0.4 ? 1 : 0.001 }) });
+    moving.push({ geo: part(star(0.4, 0.06), K.yellow), pivot: [hx1, y0 + top[0] + 0.2, hz], anim: (t) => { const f = F(t); return { rz: t * 3, s: life(f, 0.5, 0.52, 0.56, 0.6) + 0.001 }; } });
+    // A crew truck on the road.
+    moving.push({ geo: van(K.white, K.orange), pivot: [0, y0, 2.2], anim: (t) => { const u = cyc(t, 9), x = -5.4 + u * 10.8; return { x, s: clamp01((5.0 - Math.abs(x)) / 0.6) * 0.85 + 0.001 }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.4, y0, 0.2], topAt: [-3.6, y0 + 1.4, -3.4] };
+  },
 };
