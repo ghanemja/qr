@@ -3693,4 +3693,52 @@ export const SCENES = {
     moving.push({ geo: merge(part(rbox(0.7, 0.5, 0.55, 0.05), '#f2c94c', { p: [0, 0.4, 0] }), part(box(0.06, 1.1, 0.4), K.dark, { p: [0.4, 0.7, 0] }), part(rbox(0.4, 0.4, 0.5, 0.05), '#9fcdea', { p: [-0.1, 0.85, 0] }), [[-0.25, 0.27], [0.25, 0.27], [-0.25, -0.27], [0.25, -0.27]].map(([x, z]) => part(new THREE.CylinderGeometry(0.12, 0.12, 0.08, 10), '#1d1f24', { p: [x, 0.12, z], r: [Math.PI / 2, 0, 0] }))), pivot: [0, y0, 2.4], anim: (t) => { const k = Math.sin(t * 0.5); return { x: -1.6 + k * 0.9, ry: Math.PI }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.9, y0, 2.6], topAt: [CPX, y0 + 1.55, LZ] };
   },
+
+  // Email (scheduling, payroll, customer-experience and services firms): messages that turn into
+  // meetings. The giant envelope's flap lifts and invites fly out to three desks; each person
+  // accepts with a tick, and a block drops into its slot on the big calendar; then the call lights
+  // up both screens.
+  'software:5': () => {
+    const R = rand(5701), out = [], moving = [];
+    out.push(slab('#d7d3e6'));
+    out.push(part(rbox(10.0, 0.03, 10.0, 0.04), '#ebe9f3', { p: [0, y0 + 0.015, 0] }));
+    const A4 = Math.PI / 4, q = new THREE.Quaternion().setFromAxisAngle(new V(0, 1, 0), A4);
+    // ---- the giant envelope (back left), facing the camera
+    const EX = -2.6, EZ = -2.6, EW = 3.4, EH = 2.2, EY = y0 + 0.5;
+    const eAt = (lx, ly, lz = 0) => new V(lx, ly, lz).applyQuaternion(q).add(new V(EX, 0, EZ));
+    out.push(place(merge(part(rbox(EW, EH, 0.3, 0.08), K.white, { p: [0, EY + EH / 2, 0] }), part(extrude([[-EW / 2 + 0.05, 0], [EW / 2 - 0.05, 0], [0, EH * 0.55]], 0.04), '#e9e6f2', { p: [0, EY + 0.05, 0.16] }), part(extrude([[-EW / 2 + 0.05, EH - 0.05], [0, EH * 0.42], [EW / 2 - 0.05, EH - 0.05]].map(([x, y]) => [x, y]), 0.04), '#f1eef8', { p: [0, EY, 0.17] }),
+      part(rbox(2.6, 0.5, 0.6, 0.06), K.stoneDk, { p: [0, 0.25, 0] })), { p: [EX, 0, EZ], r: [0, A4, 0] }));
+    // ---- the calendar board (back right)
+    const CX = 2.4, CZ = -2.8, CW = 3.2, CH = 2.6, CY = y0 + 0.6;
+    const cAt = (lx, ly, lz = 0.12) => new V(lx, ly, lz).applyQuaternion(q).add(new V(CX, 0, CZ));
+    out.push(place(merge(part(rbox(CW + 0.2, CH + 0.2, 0.16, 0.06), K.dark, { p: [0, CY + CH / 2, 0] }), part(box(CW, CH, 0.02), K.white, { p: [0, CY + CH / 2, 0.08] }), part(box(CW, 0.42, 0.03), 'A', { p: [0, CY + CH - 0.21, 0.09] }), [-1, 1].map((s2) => part(rbox(0.16, CY - y0, 0.16, 0.04), K.steelDk, { p: [s2 * 1.2, (CY - y0) / 2, 0] })), [-0.9, 0.9].map((x) => part(cyl(0.06, 0.06, 0.3, 10), K.steelDk, { p: [x, CY + CH + 0.05, 0.05] }))), { p: [CX, 0, CZ], r: [0, A4, 0] }));
+    const cols = 5, rows = 4, cw = CW / cols, ch = (CH - 0.5) / rows;
+    for (let i = 1; i < cols; i++) out.push(merge(part(box(0.02, CH - 0.45, 0.02), '#d4d0e2')).applyQuaternion(q).translate(...cAt(-CW / 2 + i * cw, CY + (CH - 0.45) / 2, 0.1).toArray()));
+    for (let j = 1; j < rows; j++) out.push(merge(part(box(CW, 0.02, 0.02), '#d4d0e2')).applyQuaternion(q).translate(...cAt(0, CY + j * ch, 0.1).toArray()));
+    const preset = [[0, 0, '#9ad0f0'], [2, 1, '#c3b4ff'], [4, 3, '#f6d77a'], [1, 3, '#9ad0f0'], [3, 0, '#c3b4ff']];
+    preset.forEach(([c, r, col]) => out.push(merge(part(rbox(cw * 0.85, ch * 0.75, 0.03, 0.03), col)).applyQuaternion(q).translate(...cAt(-CW / 2 + (c + 0.5) * cw, CY + (r + 0.5) * ch, 0.11).toArray())));
+    // ---- three desks with their people (front)
+    const desks = [new V(-3.2, 0, 2.0), new V(0.0, 0, 3.2), new V(3.2, 0, 1.8)];
+    desks.forEach((d) => out.push(place(desk(K.wood, '#3a3f47'), { p: [d.x, y0, d.z], r: [0, Math.PI, 0] })));
+    [[-4.6, -0.4], [4.6, 4.4], [-1.4, 4.4]].forEach(([x, z]) => out.push(part(cyl(0.3, 0.22, 0.4, 14), '#c99a62', { p: [x, y0 + 0.2, z] }), miniTree(R, x, y0 + 0.4, z, 0.45)));
+    // ---- moving parts (one 12 s cycle)
+    const P = 12, F = (t) => cyc(t, P);
+    // The flap: hinged at the envelope's top edge, it lifts for each send.
+    const flapOpen = (f) => easeIO(win(f, 0.03, 0.1)) * (1 - easeIO(win(f, 0.42, 0.5)));
+    moving.push({ geo: merge(part(extrude([[-EW / 2, 0], [EW / 2, 0], [0, -EH * 0.55]], 0.06), 'A')).applyQuaternion(q), pivot: eAt(0, EY + EH, 0.17).toArray(), anim: (t) => ({ q: new THREE.Quaternion().setFromAxisAngle(new V(1, 0, 0).applyQuaternion(q), -flapOpen(F(t)) * 2.6) }) });
+    // The invites fly to the desks; each is accepted with a tick and fills a calendar slot.
+    const letter = merge(part(rbox(0.5, 0.34, 0.04, 0.02), K.white), part(prism(0.5, 0.17, 0.05), '#e3e0ef', { p: [0, 0.17, 0], r: [Math.PI, 0, 0] }), part(box(0.18, 0.18, 0.05), 'A', { p: [0.1, -0.02, 0.01] }));
+    const slots = [[1, 1], [3, 2], [0, 2]];
+    desks.forEach((d, i) => {
+      const a = 0.1 + i * 0.1, from = eAt(0, EY + EH + 0.3, 0.2), to = new V(d.x, y0 + 1.5, d.z - 0.2);
+      moving.push({ geo: letter, pivot: [0, 0, 0], anim: (t) => { const f = F(t), u = easeIO(win(f, a, a + 0.14)), p = from.clone().lerp(to, u); return { x: p.x, y: p.y + hop(u) * 1.8, z: p.z, ry: A4 + u * 6, s: f > a && f < a + 0.16 ? 1 : 0.001 }; } });
+      moving.push({ geo: tickGeo(0.24), pivot: [d.x, y0 + 1.9, d.z], anim: (t) => { const f = F(t), b = a + 0.16; return { y: easeOut(win(f, b, b + 0.04)) * 0.3, ry: A4, s: life(f, b, b + 0.03, b + 0.1, b + 0.13) }; } });
+      const [c, r] = slots[i], cp = cAt(-CW / 2 + (c + 0.5) * cw, CY + (r + 0.5) * ch, 0.12);
+      moving.push({ geo: merge(part(rbox(cw * 0.85, ch * 0.75, 0.04, 0.03), 'B')).applyQuaternion(q), pivot: cp.toArray(), anim: (t) => { const f = F(t), b = a + 0.22; return { y: (1 - easeOut(win(f, b, b + 0.06))) * 0.6, s: (f > b ? 1 : 0.001) * (1 - win(f, 0.95, 0.99)) + 0.001 }; } });
+      moving.push(...walker(moving.length, (t) => ({ x: d.x, z: d.z - 0.55, ry: -Math.PI / 2, still: true, push: Math.sin(t * 3 + i) > 0.2 }), { shirt: ['#e5533d', '#3fb8a8', '#8a6cf0'][i], pants: '#2b3a55', y: y0 - 0.22 }));
+      // The call: both laptop screens light with a face when it starts.
+      moving.push({ geo: merge(part(box(0.44, 0.28, 0.02), 'A'), part(new THREE.SphereGeometry(0.06, 10, 8), '#e9b98f', { p: [0, 0.02, 0.02] })), pivot: [d.x, y0 + 0.94, d.z + 0.1], anim: (t) => { const f = F(t); return { rx: 0.25, ry: Math.PI, s: f > 0.62 && f < 0.92 && i !== 2 ? 1 : 0.001 }; } });
+    });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.4, y0, 1.2], topAt: [CX, CY + CH + 0.12, CZ] };
+  },
 };
