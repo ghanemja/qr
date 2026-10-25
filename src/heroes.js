@@ -2922,5 +2922,43 @@ export const HEROES = {
     moving.push({ geo: merge(helix), pivot: [LX, y0 + 0.9, LZ + 0.3], anim: (t) => ({ ry: t * 0.9 }) });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Waymo: cars that drive themselves, millions of miles in. The robotaxi loops the block, its
+  // lidar spinning and its sensor sweep painting the street; it waits at the crosswalk while a
+  // pedestrian crosses, then glides on.
+  waymo: { finder: '#00b1a9', build: () => {
+    const R = rand(43), out = [], y0 = 0.24, TEAL = '#00b1a9';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#86c766', { p: [0, 0.12, 0] }));
+    // ---- the loop road round a central block
+    const loop = curve([[-3.6, 0, -3.6], [3.6, 0, -3.6], [3.6, 0, 3.6], [-3.6, 0, 3.6]].map(([x, , z]) => [x, y0 + 0.012, z]), true);
+    loop.curveType = 'centripetal';
+    const band = (w, c, y) => { const n = hi() ? 160 : 48, tri = []; for (let i = 0; i < n; i++) { const A = loop.getPointAt(i / n), B = loop.getPointAt((i + 1) / n), da = loop.getTangentAt(i / n), db = loop.getTangentAt((i + 1) / n); const a0 = [A.x - da.z * w, y, A.z + da.x * w], a1 = [A.x + da.z * w, y, A.z - da.x * w], b0 = [B.x - db.z * w, y, B.z + db.x * w], b1 = [B.x + db.z * w, y, B.z - db.x * w]; tri.push(...a0, ...b0, ...a1, ...a1, ...b0, ...b1); } const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(tri, 3)); g.computeVertexNormals(); return part(g, c); };
+    out.push(band(0.75, '#c9c4b8', y0 + 0.008), band(0.62, '#55595f', y0 + 0.014));
+    // The crosswalk on the front stretch.
+    for (let i = 0; i < 6; i++) out.push(part(box(0.14, 0.006, 1.1), '#f4f4f0', { p: [0.3 + i * 0.25, y0 + 0.02, 3.4] }));
+    // ---- the block: low shops, a café, trees
+    out.push(part(rbox(5.4, 0.12, 5.4, 0.04), '#c9c4b8', { p: [0, y0 + 0.06, 0] }));
+    const shop = (x, z, w, d, h, c, awn) => [part(rbox(w, h, d, 0.04), c, { p: [x, y0 + 0.12 + h / 2, z] }), part(box(w * 0.8, 0.4, 0.02), '#2a3c50', { p: [x, y0 + 0.5, z + d / 2 + 0.01] }), part(box(w * 0.85, 0.05, 0.4), awn, { p: [x, y0 + 0.9, z + d / 2 + 0.2], r: [0.3, 0, 0] })];
+    out.push(shop(-1.4, 1.4, 1.8, 1.4, 1.4, '#f2d0c9', TEAL), shop(1.2, 1.4, 1.6, 1.4, 1.1, '#f6e7c8', '#e5533d'), shop(-1.2, -1.2, 2.0, 1.6, 2.0, '#d9e7f2', '#4a5d74'), shop(1.4, -1.2, 1.6, 1.6, 1.6, '#e7f2d9', '#2f9e6e'));
+    [[-4.7, -4.7], [4.7, -4.7], [-4.7, 4.7], [4.7, 4.7], [-4.7, 0], [4.7, 0]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.65 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // The robotaxi: white crossover, teal accents, lidar dome and side sensors.
+    const prof = new THREE.Shape([[-1.15, 0.2], [1.15, 0.2], [1.2, 0.5], [0.85, 0.62], [0.45, 1.0], [-0.85, 1.02], [-1.18, 0.75]].map(([x, y]) => new THREE.Vector2(x, y)));
+    const taxi = merge(part(new THREE.ExtrudeGeometry(prof, { depth: 0.86, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.06, bevelSegments: hi() ? 3 : 1, curveSegments: 4 }).translate(0, 0, -0.43), '#f4f5f6'), part(box(1.3, 0.24, 1.0), '#26323f', { p: [-0.2, 0.8, 0] }),
+      part(cyl(0.16, 0.18, 0.12, 20), '#2b2f36', { p: [-0.2, 1.12, 0] }), [-1, 1].map((s) => part(rbox(0.12, 0.1, 0.06, 0.02), '#2b2f36', { p: [0.7, 0.78, s * 0.5] })), part(box(0.02, 0.08, 0.7), TEAL, { p: [1.24, 0.42, 0] }),
+      [[-0.75, 0.47], [0.75, 0.47], [-0.75, -0.47], [0.75, -0.47]].map(([x, z]) => part(new THREE.CylinderGeometry(0.22, 0.22, 0.16, 18), '#1d1f24', { p: [x, 0.22, z], r: [Math.PI / 2, 0, 0] })));
+    const P = 16, stopU = (() => { let best = 0, bd = 1e9; for (let i = 0; i <= 400; i++) { const p = loop.getPointAt(i / 400), d = (p.x - 2.4) ** 2 + (p.z - 3.6) ** 2; if (d < bd) { bd = d; best = i / 400; } } return best; })();
+    const carU = (t) => { const f = cyc(t, P), base = stopU - 0.35; if (f < 0.35) return base + 0.35 * easeOut(f / 0.35); if (f < 0.55) return stopU; return stopU + 0.65 * easeIn(win(f, 0.55, 0.62)) * 0.1 + 0.65 * win(f, 0.6, 1) * 0.9; };
+    const car = moving.length;
+    moving.push({ geo: taxi, pivot: [0, y0 + 0.02, 0], anim: (t) => { const u = ((carU(t) % 1) + 1) % 1, a = along(loop, u); return { x: a.p.x, z: a.p.z, ry: a.ry, s: 0.9 }; } });
+    moving.push({ geo: merge(part(cyl(0.11, 0.11, 0.1, 16), '#3a3f47'), part(box(0.06, 0.06, 0.08), TEAL, { p: [0.1, 0, 0] })), pivot: [-0.2, 1.24, 0], parent: car, anim: (t) => ({ ry: t * 12 }) });
+    // The sensor sweep: a ring of points spinning round the car.
+    moving.push({ geo: merge([...Array(hi() ? 36 : 12)].map((_, i) => { const a = (i / (hi() ? 36 : 12)) * TAU, r = 1.5 + (i % 3) * 0.35; return part(new THREE.SphereGeometry(0.04, 6, 4), i % 4 ? TEAL : '#7cf0ff', { p: [Math.cos(a) * r, 0, Math.sin(a) * r] }); })), pivot: [0, 0.1, 0], parent: car, anim: (t) => ({ ry: -t * 3, s: 1 + Math.sin(t * 4) * 0.05 }) });
+    // The pedestrian crossing while the car waits.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P); const k = win(f, 0.33, 0.55); return { x: 0.9, z: 2.6 + k * 1.9, ry: -Math.PI / 2, still: k <= 0 || k >= 1, s: f > 0.25 && f < 0.62 ? 1 : 0.001 }; }, { shirt: '#e5533d', pants: '#2b3a55', y: y0 }));
+    // Another Waymo further round the loop.
+    moving.push({ geo: taxi, pivot: [0, y0 + 0.02, 0], anim: (t) => { const u = cyc(t, 20, 0.2), a = along(loop, u); return { x: a.p.x, z: a.p.z, ry: a.ry, s: 0.9 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

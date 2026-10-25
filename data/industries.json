@@ -83,7 +83,8 @@
   "comcast": "The wire and the story",
   "amex": "Membership has its privileges",
   "pg": "In every cupboard",
-  "jnj": "Medicine and the surgeon's hand"
+  "jnj": "Medicine and the surgeon's hand",
+  "waymo": "The car drives itself"
  },
  "bank": [
   "Citigroup",
@@ -394,7 +395,6 @@
   "Thor Industries",
   "Polaris Industries",
   "Oshkosh",
-  "Waymo",
   "Nuro",
   "Applied Intuition",
   "Bolt"
@@ -1631,5 +1631,8 @@
  ],
  "jnj": [
   "Johnson & Johnson"
+ ],
+ "waymo": [
+  "Waymo"
  ]
 }
