@@ -128,7 +128,8 @@
   "generalmills": "From the mill by the river to the breakfast bowl",
   "mondelez": "The snacks the world reaches for: twist, lick, dunk",
   "hershey": "America's chocolate town: every Kiss wrapped in silver",
-  "keurigdrpepper": "The brewer in the kitchen and the pods that keep coming"
+  "keurigdrpepper": "The brewer in the kitchen and the pods that keep coming",
+  "monster": "A brand riders wear, carried by Coca-Cola's trucks"
  },
  "bank": [
   "PNC Financial Services",
@@ -1747,5 +1748,8 @@
  ],
  "keurigdrpepper": [
   "Keurig Dr Pepper"
+ ],
+ "monster": [
+  "Monster Beverage"
  ]
 }

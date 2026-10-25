@@ -1395,4 +1395,41 @@ export const HEROES2 = {
     out.push(place(fan(MAROON), { p: [2.2, y0, -1.2], s: 1.3 }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Monster Beverage: a brand riders wear, carried by Coca-Cola's trucks. The rider sails off
+  // the dirt ramp under the giant clawed can, and the red trucks of the bottler network fill the
+  // store's cooler.
+  monster: { finder: '#7ac143', build: () => {
+    const R = rand(141), out = [], GREEN = '#7ac143', INK = '#111111';
+    out.push(ground('#8fc66f'), part(box(10.2, 0.03, 1.3), '#5b616b', { p: [0, y0 + 0.015, 3.5] }));
+    // ---- the giant can, back left, with the three claw marks
+    const CX = -3.0, CZ = -3.0, CH = 4.6;
+    out.push(part(cyl(1.15, 1.15, CH, 48), INK, { p: [CX, y0 + CH / 2 + 0.1, CZ] }), part(cyl(1.0, 1.15, 0.2, 48), '#c9ced6', { p: [CX, y0 + CH + 0.2, CZ] }), part(cyl(1.15, 1.0, 0.15, 48), '#c9ced6', { p: [CX, y0 + 0.08, CZ] }), part(rbox(0.3, 0.06, 0.5, 0.03), '#9aa1a9', { p: [CX + 0.3, y0 + CH + 0.32, CZ] }));
+    for (let k = 0; k < 3; k++) {
+      const pts = [], a0 = Math.PI / 4 - 0.35 + k * 0.32;
+      for (let j = 0; j <= 6; j++) { const y = 0.9 + j * 0.55, a = a0 + (j % 2 ? 0.08 : -0.08); pts.push([CX + Math.cos(a) * 1.16, y0 + y, CZ + Math.sin(a) * 1.16]); }
+      out.push(part(tubeOn(curve(pts), 0.09, hi() ? 40 : 10), GREEN));
+    }
+    // ---- the dirt track and the ramps, middle
+    out.push(part(rbox(7.0, 0.1, 2.6, 0.05), '#a9784f', { p: [0.6, y0 + 0.05, 0.4] }));
+    out.push(part(extrude([[0, 0], [1.6, 0], [1.6, 1.0]], 1.6), '#8a5a36', { p: [-2.2, y0 + 0.1, 0.4] }), part(extrude([[0, 0], [1.6, 0], [0, 0.8]], 1.6), '#8a5a36', { p: [2.0, y0 + 0.1, 0.4] }));
+    // ---- the store with its cooler, right
+    out.push(part(rbox(2.4, 1.6, 1.8, 0.05), '#f4efe6', { p: [3.6, y0 + 0.8, -2.8] }), part(box(2.42, 0.3, 1.82), '#e21a2c', { p: [3.6, y0 + 1.5, -2.8] }), part(rbox(1.0, 1.3, 0.5, 0.04), INK, { p: [3.6, y0 + 0.65, -1.7] }), part(box(0.8, 1.1, 0.04), '#1f3a1f', { p: [3.6, y0 + 0.65, -1.44] }));
+    for (let r = 0; r < 3; r++) for (let k = 0; k < 4; k++) out.push(part(cyl(0.07, 0.07, 0.26, 10), r === 1 ? '#5fa8d3' : INK, { p: [3.3 + k * 0.2, y0 + 0.3 + r * 0.35, -1.5] }), part(cyl(0.072, 0.072, 0.05, 10), GREEN, { p: [3.3 + k * 0.2, y0 + 0.33 + r * 0.35, -1.5] }));
+    // Fans by the track.
+    for (let k = 0; k < 6; k++) out.push(place(fan(['#7ac143', INK, '#e5533d', '#3d7be0'][k % 4]), { p: [-1.6 + k * 0.7, y0, 2.2], s: 1.2 }));
+    out.push(trees(R, [[4.6, 4.6], [-4.6, 4.6], [4.6, 1.4], [-4.6, 0.4], [0.6, -4.4]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 5;
+    // The rider: up the ramp, a flip in the air, down the landing.
+    const bike = merge(part(rbox(0.8, 0.2, 0.15, 0.05), GREEN, { p: [0, 0.45, 0] }), part(new THREE.TorusGeometry(0.22, 0.06, 8, 16), INK, { p: [-0.42, 0.22, 0] }), part(new THREE.TorusGeometry(0.22, 0.06, 8, 16), INK, { p: [0.45, 0.22, 0] }), beam([0.45, 0.22, 0], [0.25, 0.65, 0], 0.05, '#9aa1a9'), part(capsule(0.13, 0.3), INK, { p: [-0.05, 0.8, 0], r: [0, 0, -0.4] }), part(ball(0.14), GREEN, { p: [0.12, 1.12, 0] }));
+    moving.push({ geo: bike, pivot: [0, y0 + 0.1, 0.4], anim: (t) => { const f = cyc(t, P); let x, y, rz = 0;
+      if (f < 0.25) { const u = win(f, 0, 0.25); x = -4.2 + u * 3.6; y = Math.max(0, (x + 2.2) / 1.6) * 1.0; rz = x > -2.2 ? 0.55 : 0; }
+      else if (f < 0.65) { const u = win(f, 0.25, 0.65); x = -0.6 + u * 2.6; y = 1.0 + hop(u) * 1.8 - u * 0.2; rz = 0.4 - u * (TAU + 0.8); }
+      else { const u = win(f, 0.65, 1); x = 2.0 + u * 2.4; y = Math.max(0, 0.8 - (x - 2.0) / 2.0); rz = x < 3.6 ? -0.45 : 0; }
+      return { x, y, rz, s: Math.min(1, f / 0.04, (1 - f) / 0.04) + 0.001 }; } });
+    // The red bottler truck at the store, crates going in.
+    moving.push({ geo: place(merge(part(rbox(0.8, 0.9, 0.9, 0.08), '#e21a2c', { p: [0.9, 0.6, 0] }), part(box(0.04, 0.3, 0.75), '#26323f', { p: [1.31, 0.75, 0] }), part(rbox(1.8, 1.1, 0.95, 0.05), '#e21a2c', { p: [-0.4, 0.75, 0] }), part(box(1.2, 0.2, 0.02), K.white, { p: [-0.4, 0.8, 0.48] }), [[-0.8, 0.45], [0.8, 0.45], [-0.8, -0.45], [0.8, -0.45]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.12, 14), '#1d1f24', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] }))), { s: 0.8 }), pivot: [0, y0, 3.5], anim: (t) => { const f = cyc(t, 12), x = f < 0.3 ? 5.8 - easeOut(win(f, 0, 0.3)) * 3.0 : f < 0.65 ? 2.8 : 2.8 - easeIn(win(f, 0.65, 1)) * 8.6; return { x, ry: Math.PI, s: clamp01((5.4 - Math.abs(x)) / 0.6) + 0.001 }; } });
+    for (let k = 0; k < 3; k++) moving.push(rider(merge(part(rbox(0.4, 0.3, 0.3, 0.03), '#e21a2c'), part(box(0.3, 0.05, 0.2), INK, { p: [0, 0.16, 0] })), curve([[2.8, y0 + 0.9, 3.0], [3.4, y0 + 1.8, 0.6], [3.6, y0 + 1.0, -1.4]]), 12, -k * 0.04, 0.32, 0.5));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
