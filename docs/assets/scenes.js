@@ -2,7 +2,8 @@
 // (src/heroes.js): each sits on its own slab and shows how that kind of business wins. Unlike a
 // signature model, one scene serves many companies, so it is painted partly in brand slots
 // ('A'/'B' and darker 'Ad'/'Bd') and still takes each company's companion prop (at propAt, a
-// free spot on the slab) and topper (at topAt). Keyed `kind:variant` (see models.js).
+// free spot on the slab, at most 3.7 from the middle since a prop can be 1.5 wide) and topper
+// (at topAt). Keyed `kind:variant` (see models.js).
 // Same conventions as the heroes: slab top y0 = 0.24, keep within ±5.2, rest height ≤ 6.8, the
 // camera looks from +x, +z.
 import { THREE, V, part, windy, rand, taper, shade, tuft, bladeShape, merge, place, box, cyl, lathe, tube, ball, capsule, cone, torus, extrude, prism, star, beam, ring, hi, TAU, clamp01, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, K } from './kit.js';
@@ -85,6 +86,24 @@ const bin = (r, h, band = 'A') => merge(
   part(new THREE.CylinderGeometry(r * 1.01, r * 1.01, 0.22, hi() ? 40 : 14), band, { p: [0, h * 0.8, 0] }), part(cyl(r + 0.08, r + 0.1, 0.12, 40), K.stoneDk, { p: [0, 0.06, 0] }),
 );
 
+// A spur gear lying in the xy plane (axle along z): radius r to the tooth tips, n teeth, depth d.
+const gear = (r, n, d, hole = 0.3) => {
+  const sh = new THREE.Shape(), m = hi() ? 4 : 2;
+  for (let i = 0; i < n; i++) for (let j = 0; j < m * 2; j++) {
+    const a = ((i + j / (m * 2)) / n) * TAU, tooth = j < m ? 1 : 0.84, rr = r * (j === 0 || j === m ? (1 + 0.84) / 2 : tooth);
+    i || j ? sh.lineTo(Math.cos(a) * rr, Math.sin(a) * rr) : sh.moveTo(Math.cos(a) * rr, Math.sin(a) * rr);
+  }
+  if (hole) { const hp = new THREE.Path(); hp.absarc(0, 0, r * hole, 0, TAU, true); sh.holes.push(hp); }
+  const bev = Math.min(0.06, d * 0.2);
+  return new THREE.ExtrudeGeometry(sh, { depth: d - bev * 2, bevelEnabled: true, bevelThickness: bev, bevelSize: bev * 0.7, bevelSegments: hi() ? 2 : 1, curveSegments: hi() ? 24 : 8 }).translate(0, 0, -d / 2 + bev);
+};
+// Two-link reach: the shoulder and elbow angles (in the arm's own vertical plane) that put the
+// wrist r out and h up from the shoulder, elbow up.
+const reach2 = (r, h, L1, L2) => {
+  const d = Math.min(L1 + L2 - 1e-3, Math.hypot(r, h)), e = -Math.acos(clamp01(((d * d - L1 * L1 - L2 * L2) / (2 * L1 * L2) + 1) / 2) * 2 - 1);
+  return { s: Math.atan2(h, r) - Math.atan2(L2 * Math.sin(e), L1 + L2 * Math.cos(e)), e };
+};
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -154,7 +173,7 @@ export const SCENES = {
       const f = F(t), k = win(f, 0, 0.34), { p, ry } = along(wp, k * 0.999);
       return { x: p.x, z: p.z, ry, s: f > 0.34 ? 0.001 : Math.min(1, k / 0.04, (1 - k) / 0.04), still: f > 0.34 };
     }, { shirt: 'B', pants: '#2b3a55', y: y0 }));
-    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-4.2, y0, 0.2], topAt: [BX, fl + H + 0.78, BZ - 0.45] };
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.7, y0, 0.3], topAt: [BX, fl + H + 0.78, BZ - 0.45] };
   },
 
   // Neighborhood (homebuilders, real estate): new homes go up lot by lot. Across the street a
@@ -231,7 +250,7 @@ export const SCENES = {
       return { x: p.x, z: p.z, ry, s: f > 0.95 ? 1 - win(f, 0.95, 1) + 0.001 : Math.min(1, k / 0.02) * 0.8 + 0.001 };
     } });
     moving.push({ geo: merge(part(rbox(0.9, 0.3, 0.06, 0.03), 'A', { p: [0, -0.15, 0] }), part(box(0.56, 0.08, 0.07), K.white, { p: [0, -0.15, 0] })), pivot: [SX, y0 + 1.44, SZ + 0.04], anim: (t) => { const f = F(t); return { s: life(f, 0.5, 0.58, 0.94, 0.99), rx: (1 - back(win(f, 0.5, 0.6))) * 1.2 }; } });
-    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-4.1, y0, 0.6], topAt: [0, y0 + 2.95, HZ] };
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.7, y0, 0.6], topAt: [0, y0 + 2.95, HZ] };
   },
 
   // Harvest (grain, seed, fertiliser, farm machinery, tobacco): a combine cuts a swath through
@@ -316,6 +335,108 @@ export const SCENES = {
     // And pours from the spout into the nearest bin.
     const [bx, bz, btop] = spouts[2];
     for (let k = 0; k < 5; k++) moving.push({ geo: part(grain, GOLD[k % 4]), pivot: [bx, btop + 0.15, bz], anim: (t) => { const u = cyc(t, 0.7, k / 5); return { y: -u * 0.6, s: (1 - u) + 0.001 }; } });
-    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-4.0, y0, -0.9], topAt: [BX, y0 + 3.12, BZ] };
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.7, y0, -0.9], topAt: [BX, y0 + 3.12, BZ] };
   },
+
+  // Machine shop (industrial automation, components, conglomerates): blanks ride the conveyor into
+  // a CNC cell and come out finished gears; a robot arm lifts each one into a crate; a mobile
+  // robot hauls full crates past the racking to the trailer at the dock, and the big gear on the
+  // hall roof turns.
+  'industrial:0': () => {
+    const R = rand(404), out = [], moving = [];
+    out.push(slab('#b4b7bb'));
+    // ---- the hall: sawtooth roof with north lights, roller door, brand stripe
+    const HX = -2.0, HZ = -3.7, HW = 5.6, HD = 2.4, HH = 2.4;
+    out.push(part(rbox(HW, HH, HD, 0.05), '#e3e0da', { p: [HX, y0 + HH / 2, HZ] }), part(box(HW + 0.02, 0.3, HD + 0.02), 'A', { p: [HX, y0 + HH - 0.35, HZ] }));
+    for (let i = 0; i < 4; i++) {
+      const x = HX - HW / 2 + 0.7 + i * 1.4;
+      out.push(part(extrude([[-0.7, 0], [0.7, 0], [0.7, 0.75], [0.5, 0.75]], HD), '#9aa1a9', { p: [x, y0 + HH, HZ] }), part(box(0.04, 0.6, HD - 0.1), '#9fcdea', { p: [x + 0.67, y0 + HH + 0.38, HZ] }));
+    }
+    out.push(part(rbox(1.5, 1.7, 0.06, 0.03), '#c9ced6', { p: [HX + 1.6, y0 + 0.85, HZ + HD / 2 + 0.02] }));
+    if (hi()) for (let i = 0; i < 8; i++) out.push(part(box(1.46, 0.02, 0.07), '#aab3bc', { p: [HX + 1.6, y0 + 0.1 + i * 0.21, HZ + HD / 2 + 0.04] }));
+    [-2.2, -1.2, -0.2].forEach((dx) => out.push(part(rbox(0.6, 0.5, 0.06, 0.03), '#9fcdea', { p: [HX + dx, y0 + 1.3, HZ + HD / 2 + 0.02] })));
+    // Painted lanes on the floor.
+    const lane = (pts) => { for (let i = 0; i < pts.length - 1; i++) { const [a, b] = [pts[i], pts[i + 1]], L = Math.hypot(b[0] - a[0], b[1] - a[1]); out.push(part(box(L, 0.012, 0.07), '#f2c94c', { p: [(a[0] + b[0]) / 2, y0 + 0.006, (a[1] + b[1]) / 2], r: [0, -Math.atan2(b[1] - a[1], b[0] - a[0]), 0] })); } };
+    lane([[-4.9, 1.6], [2.0, 1.6]]); lane([[-4.9, 4.9], [2.0, 4.9]]);
+    // ---- the line: stock rack, conveyor, the CNC cell and its stack light
+    const CZ = 0.3, TOPY = y0 + 0.9, X0 = -4.6, X1 = 1.5;
+    out.push(part(box(X1 - X0, 0.08, 0.95), '#3a3f47', { p: [(X0 + X1) / 2, TOPY - 0.04, CZ] }));
+    [CZ - 0.5, CZ + 0.5].forEach((z) => out.push(part(new THREE.BoxGeometry(X1 - X0, 0.16, 0.07), '#9aa1a9', { p: [(X0 + X1) / 2, TOPY - 0.06, z] })));
+    for (let x = X0 + 0.1; x <= X1; x += 0.85) [CZ - 0.45, CZ + 0.45].forEach((z) => out.push(part(new THREE.BoxGeometry(0.08, 0.82, 0.08), '#7d8792', { p: [x, y0 + 0.41, z] })));
+    out.push(part(rbox(1.0, 0.55, 1.0, 0.04), '#7d8792', { p: [-4.3, y0 + 0.28, CZ - 1.25] }));
+    for (let i = 0; i < 6; i++) out.push(part(cyl(0.28, 0.28, 0.16, 20), '#8e959e', { p: [-4.55 + (i % 3) * 0.26, y0 + 0.64 + Math.floor(i / 3) * 0.17, CZ - 1.25 + (i % 2) * 0.32] }));
+    const MX = -2.0;
+    out.push(part(rbox(1.8, 2.0, 1.6, 0.1), '#eef0f2', { p: [MX, y0 + 1.0, CZ] }), part(rbox(1.82, 0.26, 1.62, 0.07), 'A', { p: [MX, y0 + 1.85, CZ] }), part(rbox(1.1, 0.7, 0.05, 0.03), '#2a3c50', { p: [MX - 0.15, y0 + 1.15, CZ + 0.81] }), part(rbox(0.3, 0.5, 0.06, 0.03), K.dark, { p: [MX + 0.62, y0 + 1.2, CZ + 0.81] }));
+    if (hi()) [[0.55, 1.35, '#e5533d'], [0.68, 1.35, '#5fae5b'], [0.55, 1.05, '#f2c94c']].forEach(([x, y, c]) => out.push(part(cyl(0.035, 0.035, 0.03, 10), c, { p: [MX + x, y0 + y, CZ + 0.85], r: [Math.PI / 2, 0, 0] })));
+    out.push(part(cyl(0.05, 0.05, 0.4, 8), K.dark, { p: [MX + 0.65, y0 + 2.2, CZ - 0.55] }));
+    [['#e5533d', 0], ['#f2c94c', 1], ['#5fae5b', 2]].forEach(([c, i]) => out.push(part(cyl(0.09, 0.09, 0.14, 12), shade(c, 0.6), { p: [MX + 0.65, y0 + 2.45 + i * 0.15, CZ - 0.55] })));
+    // ---- the robot cell: pedestal, control cabinet, fence posts, the crate being filled
+    const RX = 1.3, RZ = -1.1, SY = y0 + 1.1, L1 = 1.45, L2 = 1.3, PICK = new V(1.1, TOPY + 0.14, CZ), PLACE = new V(3.1, y0 + 0.8, RZ);
+    out.push(part(cyl(0.45, 0.55, 0.6, 24), '#3a3f47', { p: [RX, y0 + 0.3, RZ] }), part(rbox(1.2, 0.04, 1.2, 0.02), '#f2c94c', { p: [RX, y0 + 0.02, RZ] }));
+    out.push(part(rbox(0.8, 1.5, 0.5, 0.05), '#d8dde3', { p: [RX + 0.3, y0 + 0.75, RZ - 1.6] }), part(rbox(0.55, 0.35, 0.05, 0.02), '#2a3c50', { p: [RX + 0.3, y0 + 1.1, RZ - 1.33] }));
+    const crate = (c = '#3d7be0') => merge(part(rbox(1.3, 0.14, 1.1, 0.02), '#a37b4f', { p: [0, 0.07, 0] }), part(rbox(1.2, 0.55, 1.0, 0.04), c, { p: [0, 0.42, 0] }), part(box(1.1, 0.04, 0.9), shade(c, 0.7), { p: [0, 0.68, 0] }));
+    const done = place(part(gear(0.3, 12, 0.14, 0.25), 'B'), { r: [Math.PI / 2, 0, 0] }), blank = part(cyl(0.3, 0.3, 0.16, 20), '#8e959e');
+    const full = (c) => merge(crate(c), [[-0.3, -0.2], [0.3, -0.2], [0, 0.22], [-0.35, 0.25], [0.35, 0.2]].map(([x, z]) => place(done, { p: [x, 0.74, z] })));
+    out.push(place(crate(), { p: [PLACE.x, y0, PLACE.z] }));
+    [[0, 0.22], [0.3, -0.2], [-0.3, -0.2]].forEach(([x, z]) => out.push(place(done, { p: [PLACE.x + x, y0 + 0.74, PLACE.z + z] })));
+    if (hi()) [[RX - 1.0, RZ + 0.85], [PLACE.x + 0.9, RZ + 0.85], [PLACE.x + 0.9, RZ - 1.0]].forEach(([x, z]) => out.push(part(new THREE.BoxGeometry(0.07, 1.1, 0.07), '#f2c94c', { p: [x, y0 + 0.55, z] })));
+    // ---- racking at the front left, full crates waiting at the dock, the trailer
+    const KX = -2.9, KZ = 3.4;
+    [-1.5, 0, 1.5].forEach((dx) => [-0.55, 0.55].forEach((dz) => out.push(part(new THREE.BoxGeometry(0.08, 2.0, 0.08), '#2a5bb0', { p: [KX + dx * 1.0, y0 + 1.0, KZ + dz] }))));
+    [0.75, 1.65].forEach((y) => [-0.55, 0.55].forEach((dz) => out.push(part(new THREE.BoxGeometry(3.1, 0.1, 0.08), K.orange, { p: [KX, y0 + y, KZ + dz] }))));
+    [[-0.75, 0], [0.75, 0], [-0.75, 1], [0.75, 1]].forEach(([dx, l], i) => out.push(place(i % 3 ? full('#3d7be0') : crate('#5fae5b'), { p: [KX + dx, y0 + (l ? 1.7 : 0.05), KZ], s: [0.95, 0.95, 0.85] })));
+    out.push(place(full('#3d7be0'), { p: [KX - 0.75, y0 + 0.8, KZ], s: [0.95, 0.95, 0.85] }));
+    const TX = 3.5, TZ = 2.45;
+    out.push(part(rbox(1.6, 0.18, 2.9, 0.04), '#5b616b', { p: [TX, y0 + 0.62, TZ] }), part(box(1.62, 0.12, 2.9), 'A', { p: [TX, y0 + 0.5, TZ] }));
+    out.push(part(rbox(1.6, 1.25, 1.1, 0.12), 'A', { p: [TX, y0 + 1.05, TZ + 2.05] }), part(rbox(1.3, 0.5, 0.05, 0.04), '#2a3c50', { p: [TX, y0 + 1.35, TZ + 2.61] }), part(rbox(1.62, 0.16, 1.12, 0.04), 'Ad', { p: [TX, y0 + 0.5, TZ + 2.05] }), part(box(1.2, 0.08, 0.05), '#fff2c6', { p: [TX, y0 + 0.62, TZ + 2.62] }));
+    [[-0.8, TZ - 1.0], [0.8, TZ - 1.0], [-0.8, TZ - 0.3], [0.8, TZ - 0.3], [-0.8, TZ + 2.1], [0.8, TZ + 2.1]].forEach(([x, z]) => out.push(part(new THREE.CylinderGeometry(0.3, 0.3, 0.22, 18), '#1d1f24', { p: [TX + x, y0 + 0.3, z], r: [0, 0, Math.PI / 2] }), part(new THREE.CylinderGeometry(0.16, 0.16, 0.23, 12), K.steel, { p: [TX + x, y0 + 0.3, z], r: [0, 0, Math.PI / 2] })));
+    out.push(place(full('#3d7be0'), { p: [TX, y0 + 0.7, TZ - 0.8], s: 0.95 }), place(full('#5fae5b'), { p: [TX, y0 + 0.7, TZ + 0.4], s: 0.95 }));
+    // ---- moving parts
+    const P = 6, F = (t) => cyc(t, P);
+    // The big gear sign on the roof and its partner, meshing.
+    const G1 = new V(HX - 0.8, y0 + HH + 0.75 + 1.3, HZ + 0.2), r1 = 1.25, r2 = 0.78;
+    out.push(part(box(0.22, 1.4, 0.22), '#7d8792', { p: [G1.x, y0 + HH + 0.75 + 0.5, G1.z - 0.25] }), part(box(0.22, 1.0, 0.22), '#7d8792', { p: [G1.x + r1 + r2 - 0.1, y0 + HH + 0.75 + 0.3, G1.z - 0.25] }));
+    moving.push({ geo: merge(part(gear(r1, 16, 0.3, 0.22), 'A'), part(cyl(0.3, 0.3, 0.36, 20), K.dark, { r: [Math.PI / 2, 0, 0] }), ring(4, (a) => part(box(0.12, r1 * 0.55, 0.32), 'Ad', { p: [Math.cos(a) * r1 * 0.45, Math.sin(a) * r1 * 0.45, 0], r: [0, 0, a - Math.PI / 2] }))), pivot: G1.toArray(), anim: (t) => ({ rz: t * 0.5 }) });
+    moving.push({ geo: merge(part(gear(r2, 10, 0.26, 0.25), K.steel), part(cyl(0.2, 0.2, 0.32, 16), K.dark, { r: [Math.PI / 2, 0, 0] })), pivot: [G1.x + r1 + r2 - 0.1, G1.y - 0.4, G1.z], anim: (t) => ({ rz: -t * 0.5 * (16 / 10) + 0.2 }) });
+    // Each part spends two cycles on the line: conveyor to the cell, machining, out to the pick
+    // point, then up in the gripper and over to the crate. Two are on the line at once.
+    const onBelt = (u) => (u < 0.25 ? X0 + 0.2 + (MX - X0 - 0.2) * easeIO(u / 0.25) : u < 0.4 ? MX : u < 0.675 ? MX + (PICK.x - MX) * easeIO(win(u, 0.4, 0.675)) : PICK.x);
+    // The arm's wrist through a cycle: hover, down, grip, up, over, down, release, back.
+    const hover = (p) => p.clone().add(new V(0, 0.6, 0));
+    const keys = [[0, hover(PICK)], [0.3, hover(PICK)], [0.36, PICK], [0.42, PICK], [0.48, hover(PICK)], [0.62, hover(PLACE)], [0.68, PLACE], [0.72, PLACE], [0.78, hover(PLACE)], [0.95, hover(PICK)], [1, hover(PICK)]];
+    const wrist = (f) => { for (let i = 1; i < keys.length; i++) if (f <= keys[i][0]) return keys[i - 1][1].clone().lerp(keys[i][1], easeIO(win(f, keys[i - 1][0], keys[i][0]))); return hover(PICK); };
+    // Turn a wrist target into the arm's joints; the hand stays pointing straight down.
+    const HAND = 0.5;
+    const pose = (f) => { const w = wrist(f), dx = w.x - RX, dz = w.z - RZ, j = reach2(Math.hypot(dx, dz), w.y + HAND - SY, L1, L2); return { yaw: Math.atan2(-dz, dx), s: j.s, e: j.e, wr: -Math.PI / 2 - j.s - j.e }; };
+    const base = moving.length;
+    moving.push({ geo: merge(part(cyl(0.42, 0.46, 0.3, 24), 'A', { p: [0, 0.15, 0] }), part(rbox(0.55, 0.4, 0.55, 0.08), 'Ad', { p: [0, 0.45, 0] })), pivot: [RX, y0 + 0.6, RZ], anim: (t) => ({ ry: pose(F(t)).yaw }) });
+    moving.push({ geo: merge(part(cyl(0.24, 0.24, 0.6, 18), K.dark, { r: [Math.PI / 2, 0, 0] }), part(rbox(L1, 0.34, 0.36, 0.12), 'A', { p: [L1 / 2, 0, 0] })), pivot: [0, SY - y0 - 0.6, 0], parent: base, anim: (t) => ({ rz: pose(F(t)).s }) });
+    moving.push({ geo: merge(part(cyl(0.19, 0.19, 0.5, 16), K.dark, { r: [Math.PI / 2, 0, 0] }), part(rbox(L2, 0.26, 0.28, 0.1), 'A', { p: [L2 / 2, 0, 0] })), pivot: [L1, 0, 0], parent: base + 1, anim: (t) => ({ rz: pose(F(t)).e }) });
+    moving.push({ geo: merge(part(cyl(0.13, 0.13, 0.34, 14), K.dark, { r: [Math.PI / 2, 0, 0] }), part(rbox(0.32, 0.18, 0.22, 0.05), K.steelDk, { p: [0.2, 0, 0] }), [-0.1, 0.1].map((z) => part(box(0.16, 0.05, 0.05), K.steel, { p: [0.42, 0, z] }))), pivot: [L2, 0, 0], parent: base + 2, anim: (t) => ({ rz: pose(F(t)).wr }) });
+    // The parts: a raw blank until the cell has cut it, then a finished gear.
+    for (let k = 0; k < 2; k++) {
+      const u = (t) => cyc(t, 2 * P, k * 0.5);
+      const at = (t) => { const uu = u(t), f = (uu - 0.5) * 2; return uu < 0.68 ? new V(onBelt(uu), TOPY + 0.08, CZ) : f < 0.72 ? wrist(Math.max(f, 0.36)).add(new V(0, -0.12, 0)) : PLACE.clone().add(new V(0, -0.12, 0)); };
+      moving.push({ geo: blank, pivot: [0, 0, 0], anim: (t) => { const p = at(t), uu = u(t); return { x: p.x, y: p.y, z: p.z, s: uu < 0.33 ? Math.min(1, uu / 0.02) : 0.001 }; } });
+      moving.push({ geo: done, pivot: [0, 0, 0], anim: (t) => { const p = at(t), uu = u(t); return { x: p.x, y: p.y, z: p.z, s: uu >= 0.33 ? 1 - win(uu, 0.93, 0.99) + 0.001 : 0.001 }; } });
+    }
+    // Inside the cell: the spindle spins and sparks fly while it cuts.
+    const cutting = (t) => [0, 0.5].some((o) => { const a = cyc(t, 2 * P, o); return a > 0.26 && a < 0.39; });
+    moving.push({ geo: merge(part(cyl(0.14, 0.14, 0.6, 14), K.steelDk), part(cone(0.06, 0.24, 10), K.gold, { p: [0, -0.42, 0], r: [Math.PI, 0, 0] })), pivot: [MX, TOPY + 0.75, CZ], anim: (t) => ({ ry: t * 30, y: cutting(t) ? -0.15 : 0 }) });
+    for (let k = 0; k < 8; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.04, 5, 3), '#ffcf5a'), pivot: [MX, TOPY + 0.2, CZ + 0.3], anim: (t) => { const u = cyc(t, 0.4, k / 8), a = k * 0.8; return { x: Math.cos(a) * u * 0.6, y: hop(u) * 0.3, z: Math.abs(Math.sin(a)) * u * 0.45, s: cutting(t) ? 1 - u : 0.001 }; } });
+    moving.push({ geo: part(cyl(0.095, 0.095, 0.15, 12), '#62d35f'), pivot: [MX + 0.65, y0 + 2.75, CZ - 0.55], anim: (t) => ({ s: Math.floor(t * 2) % 2 ? 1 : 0.001 }) });
+    // The mobile robot: from the cell to the racking, along the front to the trailer, and back.
+    const loop = curve([[2.3, 0, 0.9], [0.0, 0, 2.2], [-2.9, 0, 2.3], [-4.4, 0, 2.6], [-2.9, 0, 2.9], [0.2, 0, 3.0], [2.0, 0, 2.3]], true);
+    moving.push({ geo: merge(part(rbox(1.1, 0.24, 0.8, 0.08), '#f4f5f6', { p: [0, 0.17, 0] }), part(box(1.12, 0.05, 0.82), 'A', { p: [0, 0.22, 0] }), part(cyl(0.05, 0.05, 0.04, 10), '#62d35f', { p: [0.45, 0.31, 0.25] }), place(full('#3d7be0'), { p: [0, 0.3, 0], s: 0.75 })),
+      pivot: [0, y0, 0], anim: (t) => { const { p, ry } = along(loop, cyc(t, 14)); return { x: p.x, z: p.z, ry }; } });
+    // A forklift lifts a crate into the racking and lowers again.
+    const fk = moving.length;
+    moving.push({ geo: merge(part(rbox(1.0, 0.5, 0.75, 0.08), K.orange, { p: [-0.1, 0.45, 0] }), part(rbox(0.5, 0.06, 0.7, 0.03), K.dark, { p: [-0.2, 1.4, 0] }), [[-0.4, 0.3], [0.2, 0.3], [-0.4, -0.3], [0.2, -0.3]].map(([x, z]) => beam([x, 0.7, z], [x * 0.7, 1.4, z], 0.04, K.dark)), part(rbox(0.4, 0.4, 0.5, 0.06), K.dark, { p: [-0.55, 0.85, 0] }),
+      [[0.25, 0.3], [-0.4, 0.3], [0.25, -0.3], [-0.4, -0.3]].map(([x, z]) => part(new THREE.CylinderGeometry(0.17, 0.17, 0.14, 14), '#1d1f24', { p: [x, 0.17, z], r: [Math.PI / 2, 0, 0] })), part(box(0.08, 1.9, 0.6), K.steelDk, { p: [0.48, 0.95, 0] })),
+      pivot: [KX + 0.75, y0, KZ - 1.6], anim: (t) => { const f = cyc(t, 8); return { z: 0.5 * easeIO(win(f, 0.05, 0.2)) - 0.5 * easeIO(win(f, 0.75, 0.9)), ry: Math.PI / 2 }; } });
+    moving.push({ geo: merge(part(box(0.6, 0.04, 0.12), K.steelDk, { p: [0.3, 0, -0.18] }), part(box(0.6, 0.04, 0.12), K.steelDk, { p: [0.3, 0, 0.18] }), place(full('#5fae5b'), { p: [0.45, 0.02, 0], s: [0.65, 0.75, 0.65] })), pivot: [0.5, 0.15, 0], parent: fk, anim: (t) => { const f = cyc(t, 8); return { y: 1.45 * easeIO(win(f, 0.25, 0.45)) * (1 - easeIO(win(f, 0.55, 0.7))) }; } });
+    moving.push(...walker(moving.length, (t) => { const k = Math.sin(t * 0.45); return { x: -0.4 + k * 1.3, z: 1.25, ry: Math.cos(t * 0.45) > 0 ? 0 : Math.PI }; }, { shirt: '#f2994a', pants: '#2b3a55', y: y0 }));
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [3.7, y0, -3.7], topAt: [HX + 1.8, y0 + HH + 0.75, HZ] };
+  },
+
 };
