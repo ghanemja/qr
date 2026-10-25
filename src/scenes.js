@@ -3161,4 +3161,58 @@ export const SCENES = {
     moving.push({ geo: merge(part(rbox(0.8, 0.4, 0.5, 0.06), K.white, { p: [0, 0.4, 0] }), part(box(0.82, 0.08, 0.52), 'A', { p: [0, 0.6, 0] }), [[-0.25, 0.25], [0.25, 0.25], [-0.25, -0.25], [0.25, -0.25]].map(([x, z]) => part(new THREE.CylinderGeometry(0.12, 0.12, 0.08, 12), '#1d1f24', { p: [x, 0.12, z], r: [Math.PI / 2, 0, 0] }))), pivot: [-0.45, y0, 0], anim: (t) => { const k = Math.sin(t * 0.4); return { z: 2.1 + k * 2.2, ry: Math.cos(t * 0.4) > 0 ? -Math.PI / 2 : Math.PI / 2 }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [2.6, y0, 1.6], topAt: [IV.x, y0 + 0.8, IV.z] };
   },
+
+  // Tanker (refiners, gas producers and LNG exporters): the field to the far side of the sea. Gas
+  // pipes in from the wells, the liquefaction trains chill it (their fans spinning, frost on the
+  // coils), it waits in the great domed tanks, then flows down the jetty arms into the LNG carrier,
+  // which sits lower as it fills and sails, and the next one comes in.
+  'oil:5': () => {
+    const R = rand(4701), out = [], moving = [], QX = 1.6, SEA = 0.14;
+    out.push(part(rbox(QX + 5.2, 0.24, 10.4, 0.08), '#bdb59f', { p: [(QX - 5.2) / 2, 0.12, 0] }), part(rbox(5.2 - QX, 0.1, 10.4, 0.05), '#2b4a7a', { p: [(QX + 5.2) / 2, 0.05, 0] }));
+    out.push(part(new THREE.PlaneGeometry(5.2 - QX, 10.4).rotateX(-Math.PI / 2), 'W', { p: [(QX + 5.2) / 2, SEA, 0] }), part(box(0.2, 0.3, 10.4), '#9aa1a9', { p: [QX + 0.1, 0.15, 0] }));
+    // ---- wellheads and the inbound line (front left)
+    const PY = y0 + 0.4, inbound = curve([[-5.0, PY, 3.6], [-3.4, PY, 3.6], [-2.4, PY, 2.0], [-2.4, PY, -0.6], [-3.0, PY, -1.6]]);
+    out.push(part(tubeOn(inbound, 0.12), '#d8a33a'));
+    [[-4.4, 4.6], [-2.6, 4.6]].forEach(([x, z]) => out.push(part(rbox(0.5, 0.3, 0.5, 0.05), '#9aa1a9', { p: [x, y0 + 0.15, z] }), part(cyl(0.08, 0.08, 0.8, 10), K.red, { p: [x, y0 + 0.6, z] }), part(torus(0.16, 0.04, TAU, 14), K.red, { p: [x, y0 + 0.9, z] }), part(tube([[x, y0 + 0.3, z], [x + 0.2, PY, z - 0.6], [x + 0.6, PY, 3.65]], 0.06), '#d8a33a')));
+    // ---- the liquefaction trains (back left): exchangers, columns and fan banks
+    const LX = -2.9, LZ = -3.4;
+    for (let k = 0; k < 2; k++) {
+      const z = LZ + k * 1.6;
+      out.push(part(rbox(2.6, 0.9, 1.0, 0.05), '#e3e6ea', { p: [LX, y0 + 0.45, z] }), part(box(2.62, 0.1, 1.02), 'A', { p: [LX, y0 + 0.86, z] }));
+      out.push(place(column(0.3, 2.6, '#eef0f2', 'A'), { p: [LX - 1.6, y0, z] }));
+      if (hi()) for (let i = 0; i < 10; i++) out.push(part(box(0.06, 0.6, 0.9), i % 2 ? '#d8e8f4' : '#eef6fb', { p: [LX - 1.0 + i * 0.22, y0 + 0.4, z + 0.05] }));
+    }
+    // ---- the storage tanks (middle)
+    const tanks = [[-0.6, -2.8], [-0.6, -0.2]], TR = 1.0, TH = 1.5;
+    tanks.forEach(([x, z]) => out.push(part(cyl(TR, TR, TH, 40), '#f4f5f6', { p: [x, y0 + TH / 2, z] }), part(new THREE.SphereGeometry(TR, hi() ? 32 : 12, hi() ? 10 : 4, 0, TAU, 0, Math.PI / 2), '#eef0f2', { p: [x, y0 + TH, z], s: [1, 0.45, 1] }), part(new THREE.CylinderGeometry(TR * 1.01, TR * 1.01, 0.18, hi() ? 40 : 14, 1, true), 'A', { p: [x, y0 + TH * 0.75, z] })));
+    // Pipes: trains to tanks, tanks to the jetty.
+    const toTanks = curve([[LX + 1.3, y0 + 0.6, LZ + 0.8], [-1.8, y0 + 0.9, -1.6], [-0.6 - TR, y0 + 0.9, -1.5]]), toJetty = curve([[-0.6 + TR, y0 + 0.6, -1.5], [0.6, y0 + 0.9, -1.5], [QX + 0.3, y0 + 1.2, -0.6]]);
+    [toTanks, toJetty].forEach((c) => out.push(part(tubeOn(c, 0.1), '#c9ced6')));
+    // ---- the jetty and its loading arms
+    out.push(part(rbox(1.1, 0.18, 2.4, 0.04), '#b9b2a2', { p: [QX + 0.45, y0 + 0.3, -0.6] }), [[QX + 0.2, -1.6], [QX + 0.8, -1.6], [QX + 0.2, 0.4], [QX + 0.8, 0.4]].map(([x, z]) => part(cyl(0.06, 0.06, 0.5, 8), '#6d7681', { p: [x, 0.2, z] })));
+    [-1.2, 0.0].forEach((dz) => out.push(part(box(0.14, 1.3, 0.14), K.steelDk, { p: [QX + 0.6, y0 + 0.95, -0.6 + dz] }), beam([QX + 0.6, y0 + 1.6, -0.6 + dz], [QX + 1.25, y0 + 1.7, -0.6 + dz], 0.09, 'A'), beam([QX + 1.25, y0 + 1.7, -0.6 + dz], [QX + 1.35, y0 + 0.95, -0.6 + dz], 0.08, 'A')));
+    // A road to the truck rack (front), the rack.
+    out.push(part(box(1.0, 0.03, 4.8), '#6b7078', { p: [0.4, y0 + 0.015, 2.8] }));
+    out.push(part(rbox(1.6, 0.1, 1.4, 0.03), 'A', { p: [0.4, y0 + 1.9, 2.0] }), [[-0.7, 1.4], [0.7, 1.4], [-0.7, 2.6], [0.7, 2.6]].map(([x, z]) => part(box(0.08, 1.85, 0.08), K.steelDk, { p: [0.4 + x, y0 + 0.93, z] })));
+    [[-4.6, 1.2], [-3.2, 2.2], [-4.6, -1.0]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.5 + R() * 0.15)));
+    // ---- moving parts (one 16 s cycle)
+    const P = 16, F = (t) => cyc(t, P);
+    const batch = (c) => merge(part(new THREE.CylinderGeometry(0.13, 0.13, 0.28, 14), c, { r: [0, 0, Math.PI / 2] }), part(new THREE.TorusGeometry(0.12, 0.025, 6, 14), K.white, { r: [0, Math.PI / 2, 0] }));
+    const ride = (path, c, n, per, off = 0) => { for (let k = 0; k < n; k++) moving.push({ geo: batch(c), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, per, k / n + off), p = path.getPointAt(u * 0.999), d = path.getTangentAt(u * 0.999); return { x: p.x, y: p.y, z: p.z, q: new THREE.Quaternion().setFromUnitVectors(new V(1, 0, 0), d), s: Math.min(1, u / 0.05, (1 - u) / 0.05) }; } }); };
+    ride(inbound, '#d8a33a', 4, 4); ride(toTanks, '#9ad0f0', 2, 3); ride(toJetty, '#9ad0f0', 2, 3, 0.4);
+    // The trains' fan banks turn; frost breath from the exchangers.
+    for (let k = 0; k < 2; k++) [-0.7, 0.1, 0.9].forEach((dx) => { out.push(part(cyl(0.3, 0.3, 0.12, 18), '#9aa1a9', { p: [LX + dx, y0 + 0.97, LZ + k * 1.6] })); moving.push({ geo: merge(ring(4, (a) => part(box(0.26, 0.02, 0.08), K.dark, { p: [Math.cos(a) * 0.13, 0, Math.sin(a) * 0.13], r: [0, -a, 0.4] }))), pivot: [LX + dx, y0 + 1.05, LZ + k * 1.6], anim: (t) => ({ ry: t * 9 + k }) }); });
+    for (let k = 0; k < 3; k++) moving.push({ geo: puff(0.25), pivot: [LX + 0.1, y0 + 1.1, LZ + 0.8], anim: (t) => { const u = cyc(t, 2.5, k / 3); return { y: u * 0.8, x: (k - 1) * 0.6, s: (0.4 + u) * (1 - u) * 1.8 }; } });
+    // The LNG carrier: in, loads (sitting lower), sails; the next comes in.
+    const ship = merge(
+      part(extrude([[-3.0, 0], [2.4, 0], [3.1, 0.5], [2.95, 0.8], [-3.0, 0.8]], 1.6), '#2b2f36', { r: [0, Math.PI / 2, 0] }), part(extrude([[-3.0, 0.6], [2.95, 0.6], [3.02, 0.8], [-3.0, 0.8]], 1.62), 'A', { r: [0, Math.PI / 2, 0] }),
+      part(box(1.5, 0.06, 5.6), '#7a3a2f', { p: [0, 0.82, -0.1] }), part(rbox(1.4, 1.0, 0.8, 0.05), K.white, { p: [0, 1.32, -2.5] }), part(box(1.42, 0.12, 0.82), '#2a3c50', { p: [0, 1.6, -2.5] }), part(cyl(0.12, 0.14, 0.5, 12), 'B', { p: [0, 2.0, -2.7] }),
+      [-1.4, -0.1, 1.2, 2.3].map((z, i) => merge(part(new THREE.SphereGeometry(i === 3 ? 0.5 : 0.62, hi() ? 28 : 12, hi() ? 18 : 8), i % 2 ? '#f4f5f6' : 'B', { p: [0, 1.15, z] }), part(cyl(0.66, 0.66, 0.12, 24), '#c9ced6', { p: [0, 0.95, z] }))));
+    moving.push({ geo: ship, pivot: [(QX + 5.2) / 2 + 0.3, SEA - 0.38, 0.0], anim: (t) => { const f = F(t), load = win(f, 0.12, 0.75), arrive = 1 - easeOut(win(f, 0, 0.12)), leave = easeIn(win(f, 0.82, 1)); return { y: -load * 0.2 + Math.sin(t * 1.3) * 0.03, z: (leave - arrive) * 3.0, rz: Math.sin(t * 0.9) * 0.015, s: clamp01(1 - Math.max(arrive, leave) * 1.25) * 0.999 + 0.001 }; } });
+    // LNG flows down the arms while it loads.
+    for (let k = 0; k < 3; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.08, 8, 6), '#bfe6ff'), pivot: [QX + 1.3, y0 + 1.6, -1.2], anim: (t) => { const f = F(t), u = cyc(t, 0.9, k / 3); return { y: -u * 0.7, s: f > 0.14 && f < 0.75 ? 1 : 0.001 }; } });
+    // The road tanker fills at the rack and drives away down the road.
+    moving.push({ geo: tankTruck('A', '#dfe3e8', 'B'), pivot: [0.4, y0, 0], anim: (t) => { const f = cyc(t, 10), z = f < 0.15 ? 5.6 - (5.6 - 2.0) * easeOut(f / 0.15) : f < 0.55 ? 2.0 : 2.0 + easeIn(win(f, 0.55, 0.8)) * 3.6; return { z, ry: Math.PI / 2, s: clamp01((5.0 - Math.abs(z)) / 0.6) * 0.75 + 0.001 }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-1.4, y0, 3.7], topAt: [-0.6, y0 + TH + 0.45, -2.8] };
+  },
 };
