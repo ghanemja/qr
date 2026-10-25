@@ -535,28 +535,86 @@ export const HEROES = {
     };
   } },
 
-  // ExxonMobil: oil and gas at the largest scale, from the well to the tanker. An offshore
-  // platform drills and flares at sea while a tanker loads and sails its circuit.
+  // ExxonMobil: integration, from the well to the pump. An offshore platform drills and flares at
+  // sea; oil pulses ashore along a jetty pipeline past a moored tanker into the refinery's columns
+  // and tanks; a tanker truck carries fuel to the station where a car fills up.
   exxon: { finder: '#e31937', build: () => {
-    const hull = merge(part(extrude([[-2.3, 0], [1.8, 0], [2.6, 0.5], [2.3, 0.9], [-2.4, 0.9]], 1.3).rotateX(-Math.PI / 2).rotateX(Math.PI / 2), '#b8202a'),
-      part(box(4.4, 0.25, 1.32), '#2b2f36', { p: [-0.1, 0.95, 0] }), part(rbox(0.9, 1.1, 1.1, 0.15), K.white, { p: [-1.7, 1.6, 0] }), part(cyl(0.16, 0.18, 0.6, 12), '#e31937', { p: [-1.9, 2.4, 0] }),
-      ring(3, (a, i) => part(cyl(0.32, 0.32, 0.2, 20), '#d8dde3', { p: [-0.4 + i * 0.85, 1.12, 0] })));
-    const legsAt = [[-1.6, -1.6], [1.6, -1.6], [1.6, 1.6], [-1.6, 1.6]];
-    const derrick = merge(legsAt.map(([x, z]) => beam([x * 0.55, 4.6, z * 0.55], [x * 0.12, 9.6, z * 0.12], 0.14, '#e31937')),
-      [5.6, 6.6, 7.6, 8.6].flatMap((y) => { const k = 0.55 - (y - 4.6) * 0.086; return legsAt.map(([x, z], i) => beam([x * k, y, z * k], [legsAt[(i + 1) % 4][0] * k, y, legsAt[(i + 1) % 4][1] * k], 0.07, K.white)); }));
+    const R = rand(41), RED = '#e31937', BLUE = '#0047ba', out = [], SEA = 1.3, LAND = 1.5, XS = -0.8;
+    // ---- the block: sea on one side (live water over blue strata), land on the other
+    out.push(part(rbox(10.4, 0.2, 10.4, 0.06), '#0d3b5c', { p: [0, 0.1, 0] }));
+    out.push(part(new THREE.PlaneGeometry(XS + 5.2, 10.4).rotateX(-Math.PI / 2), 'W', { p: [(XS - 5.2) / 2, SEA, 0] }));
+    out.push(part(new THREE.PlaneGeometry(XS + 5.2, SEA, 8, 6).translate(0, SEA / 2, 0), (X, Y) => shade('#1f6f9e', 0.55 + (Y / SEA) * 0.55), { p: [(XS - 5.2) / 2, 0, 5.2] }));
+    out.push(part(box(5.2 - XS, LAND, 10.4), '#a07a56', { p: [(XS + 5.2) / 2, LAND / 2, 0] }), part(box(5.2 - XS, 0.12, 10.4), '#cfd2d6', { p: [(XS + 5.2) / 2, LAND + 0.06, 0] }));
+    for (let y = 0.25; y < LAND; y += 0.35) out.push(part(box(5.2 - XS + 0.01, 0.03, 10.42), '#8a6a4e', { p: [(XS + 5.2) / 2, y, 0] }));
+    out.push(part(box(0.3, LAND + 0.15, 10.4), '#9aa1a9', { p: [XS - 0.12, (LAND + 0.15) / 2, 0] }));
+    const gy = LAND + 0.12;
+    // ---- the offshore platform
+    const P = [-3.1, -2.2], deck = 3.9;
+    // Four legs, X-braced between neighbours in two bays.
+    const corners = [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sz]) => [P[0] + sx * 1.1, P[1] + sz * 1.1]);
+    corners.forEach(([x, z], i) => {
+      out.push(part(cyl(0.22, 0.28, deck, 16), '#f2c94c', { p: [x, deck / 2, z] }));
+      const [nx, nz] = corners[(i + 1) % 4];
+      [[0.5, 1.9], [1.9, 3.3]].forEach(([y0b, y1b]) => out.push(beam([x, y0b, z], [nx, y1b, nz], 0.07, '#d4a92e'), beam([x, y1b, z], [nx, y0b, nz], 0.07, '#d4a92e')));
+      out.push(beam([x, 1.9, z], [nx, 1.9, nz], 0.07, '#d4a92e'));
+    });
+    out.push(part(box(3.0, 0.3, 3.0), '#5b616b', { p: [P[0], deck, P[1]] }), part(box(2.9, 0.04, 2.9), '#7d8792', { p: [P[0], deck + 0.17, P[1]] }));
+    out.push(part(rbox(1.2, 0.8, 1.0, 0.06), '#f4f5f6', { p: [P[0] - 0.75, deck + 0.55, P[1] + 0.85] }), part(rbox(1.2, 0.14, 1.0, 0.04), BLUE, { p: [P[0] - 0.75, deck + 0.98, P[1] + 0.85] }), part(rbox(0.9, 0.6, 0.8, 0.06), '#c9ced6', { p: [P[0] + 0.85, deck + 0.45, P[1] + 0.9] }));
+    for (let k = 0; k < 4; k++) out.push(part(box(0.25, 0.2, 0.03), '#2c3e55', { p: [P[0] - 1.15 + k * 0.28, deck + 0.6, P[1] + 1.36] }));
+    // Helipad cantilevered out, and orange lifeboats.
+    out.push(part(cyl(0.75, 0.75, 0.08, 32), '#3a3f47', { p: [P[0] - 1.5, deck + 0.5, P[1] - 1.3] }), part(torus(0.6, 0.03, TAU, 32), K.yellow, { p: [P[0] - 1.5, deck + 0.55, P[1] - 1.3], r: [Math.PI / 2, 0, 0] }), beam([P[0] - 1.2, deck + 0.2, P[1] - 1.0], [P[0] - 1.5, deck + 0.45, P[1] - 1.3], 0.08, '#5b616b'),
+      part(box(0.08, 0.02, 0.5), K.white, { p: [P[0] - 1.65, deck + 0.55, P[1] - 1.3] }), part(box(0.08, 0.02, 0.5), K.white, { p: [P[0] - 1.35, deck + 0.55, P[1] - 1.3] }), part(box(0.3, 0.02, 0.08), K.white, { p: [P[0] - 1.5, deck + 0.55, P[1] - 1.3] }));
+    [0, 1].forEach((k) => out.push(part(new THREE.CapsuleGeometry(0.16, 0.45, 6, 12), K.orange, { p: [P[0] + 1.6, deck - 0.25, P[1] - 0.6 + k * 0.5], r: [Math.PI / 2, 0, 0] })));
+    // The derrick: a tapered lattice tower.
+    const D = [P[0] + 0.3, P[1] - 0.4], legs = [[-1, -1], [1, -1], [1, 1], [-1, 1]];
+    legs.forEach(([sx, sz]) => out.push(beam([D[0] + sx * 0.55, deck + 0.15, D[1] + sz * 0.55], [D[0] + sx * 0.12, deck + 3.6, D[1] + sz * 0.12], 0.08, RED)));
+    for (let k = 0; k < 6; k++) { const y = deck + 0.15 + k * 0.58, w = 0.55 - (k * 0.58) * 0.12, w2 = 0.55 - ((k + 1) * 0.58) * 0.12; legs.forEach(([sx, sz], i) => { const [nx, nz] = legs[(i + 1) % 4]; out.push(beam([D[0] + sx * w, y, D[1] + sz * w], [D[0] + nx * w, y, D[1] + nz * w], 0.035, K.white), beam([D[0] + sx * w, y, D[1] + sz * w], [D[0] + nx * w2, y + 0.58, D[1] + nz * w2], 0.025, '#e9e6df')); }); }
+    out.push(part(box(0.4, 0.25, 0.4), '#3a3f47', { p: [D[0], deck + 3.7, D[1]] }));
+    // The flare boom.
+    out.push(beam([P[0] + 1.4, deck, P[1] - 1.4], [P[0] + 2.6, deck + 2.2, P[1] - 2.6], 0.12, '#7d8792'), [0.3, 0.6].map((k) => beam([P[0] + 1.4 + 1.2 * k, deck + 2.2 * k, P[1] - 1.4 - 1.2 * k], [P[0] + 1.4 + 1.2 * k + 0.2, deck + 2.2 * k - 0.4, P[1] - 1.4 - 1.2 * k], 0.04, '#7d8792')));
+    // ---- the jetty carrying the pipeline ashore, with the tanker moored alongside
+    const jz = 1.6, jy = SEA + 0.5;
+    out.push(part(box(Math.abs(XS - P[0]) + 0.4, 0.12, 0.7), '#7d8792', { p: [(XS + P[0]) / 2, jy, jz] }));
+    for (let x = P[0]; x < XS; x += 0.7) out.push(part(cyl(0.06, 0.06, jy, 8), '#5b616b', { p: [x, jy / 2, jz - 0.25] }), part(cyl(0.06, 0.06, jy, 8), '#5b616b', { p: [x, jy / 2, jz + 0.25] }));
+    const pipe = new THREE.CatmullRomCurve3([[P[0] + 0.6, deck - 0.2, P[1] + 1.2], [P[0] + 0.6, jy + 0.3, jz - 0.6], [P[0] + 0.8, jy + 0.18, jz], [XS, jy + 0.18, jz], [XS + 0.8, gy + 0.6, jz], [1.4, gy + 0.6, jz], [1.9, gy + 0.6, -0.4], [1.9, gy + 0.6, -1.4]].map((p) => new V(...p)));
+    out.push(part(new THREE.TubeGeometry(pipe, hi() ? 160 : 40, 0.1, hi() ? 12 : 6, false), '#c9ced6'));
+    const ship = merge(part(extrude([[-2.2, 0], [1.6, 0], [2.4, 0.45], [2.2, 0.85], [-2.3, 0.85]], 1.2).rotateY(0), (x, y) => (y < 0.4 ? '#1d1f24' : '#b8202a')), part(box(4.2, 0.08, 1.15), '#5b616b', { p: [-0.05, 0.88, 0] }),
+      Array.from({ length: 6 }, (_, i) => part(cyl(0.06, 0.06, 3.4, 8), '#d4a92e', { p: [0.0, 0.98, -0.35 + (i % 3) * 0.35], r: [0, 0, Math.PI / 2] })).slice(0, 3),
+      part(rbox(0.8, 1.1, 1.0, 0.06), K.white, { p: [-1.75, 1.45, 0] }), part(box(0.82, 0.12, 1.02), '#2c3e55', { p: [-1.75, 1.8, 0] }), part(cyl(0.16, 0.2, 0.5, 14), RED, { p: [-1.95, 2.25, 0] }), part(cyl(0.17, 0.17, 0.1, 14), '#1d1f24', { p: [-1.95, 2.52, 0] }));
+    // ---- the refinery: distillation columns, tanks, pipe rack, its own flare
+    const column = (x, z, r, h) => { out.push(part(cyl(r, r * 1.05, h, 24), '#e9e6df', { p: [x, gy + h / 2, z] }), part(new THREE.SphereGeometry(r, 24, 10, 0, TAU, 0, Math.PI / 2), '#e9e6df', { p: [x, gy + h, z] })); for (let y = 1; y < h; y += 1.1) out.push(part(torus(r + 0.12, 0.03, TAU, 24), '#7d8792', { p: [x, gy + y, z], r: [Math.PI / 2, 0, 0] }), part(cyl(r + 0.12, r + 0.12, 0.04, 24), '#9aa1a9', { p: [x, gy + y - 0.02, z] })); out.push(beam([x + r + 0.05, gy, z + 0.1], [x + r + 0.05, gy + h, z + 0.1], 0.04, '#5b616b'), beam([x + r + 0.05, gy, z - 0.1], [x + r + 0.05, gy + h, z - 0.1], 0.04, '#5b616b')); };
+    column(2.3, -2.6, 0.45, 5.2); column(3.4, -1.9, 0.35, 4.0); column(1.3, -3.4, 0.3, 3.2);
+    const tank = (x, z, r, h) => { out.push(part(cyl(r, r, h, 32), '#f4f5f6', { p: [x, gy + h / 2, z] }), part(cyl(r * 1.01, r * 1.01, 0.22, 32), RED, { p: [x, gy + h * 0.72, z] }), part(new THREE.SphereGeometry(r, 32, 8, 0, TAU, 0, 0.45), '#e9e6df', { p: [x, gy + h - r * Math.cos(0.45), z] })); for (let k = 0; k < 10; k++) { const a = k * 0.35; out.push(part(box(0.18, 0.04, 0.1), '#7d8792', { p: [x + Math.cos(a) * (r + 0.07), gy + (k / 10) * h, z + Math.sin(a) * (r + 0.07)], r: [0, -a, 0] })); } };
+    tank(4.1, -3.8, 0.8, 1.3); tank(4.1, -0.3, 0.7, 1.1); tank(0.5, -1.2, 0.6, 1.0);
+    [-0.4, -1.2, -2.0].forEach((z) => out.push(part(box(0.08, 1.2, 0.08), '#5b616b', { p: [1.5, gy + 0.6, z] }), part(box(0.08, 1.2, 0.08), '#5b616b', { p: [2.3, gy + 0.6, z] }), part(box(0.9, 0.06, 0.08), '#5b616b', { p: [1.9, gy + 1.2, z] })));
+    [0, 1, 2].forEach((k) => out.push(part(cyl(0.06, 0.06, 2.2, 8), ['#c9ced6', '#d4a92e', BLUE][k], { p: [1.65 + k * 0.25, gy + 1.28, -1.2], r: [Math.PI / 2, 0, 0] })));
+    out.push(part(cyl(0.1, 0.14, 4.6, 12), '#7d8792', { p: [4.6, gy + 2.3, -2.2] }));
+    // ---- the filling station
+    const S = [2.6, 3.0];
+    out.push(part(box(3.6, 0.04, 2.6), '#5b616b', { p: [S[0], gy + 0.02, S[1]] }), part(rbox(3.2, 0.32, 1.9, 0.08), K.white, { p: [S[0], gy + 1.75, S[1]] }), part(box(3.22, 0.1, 1.92), RED, { p: [S[0], gy + 1.67, S[1]] }), part(box(3.22, 0.07, 1.92), BLUE, { p: [S[0], gy + 1.58, S[1]] }));
+    [[-1.2, -0.7], [1.2, -0.7], [-1.2, 0.7], [1.2, 0.7]].forEach(([dx, dz]) => out.push(part(cyl(0.07, 0.07, 1.6, 10), '#c9ced6', { p: [S[0] + dx, gy + 0.8, S[1] + dz] })));
+    [-0.6, 0.6].forEach((dx) => out.push(part(rbox(0.35, 0.8, 0.28, 0.05), K.white, { p: [S[0] + dx, gy + 0.4, S[1]] }), part(box(0.36, 0.14, 0.29), RED, { p: [S[0] + dx, gy + 0.72, S[1]] }), part(box(0.2, 0.14, 0.02), '#2c3e55', { p: [S[0] + dx, gy + 0.5, S[1] + 0.15] })));
+    out.push(part(rbox(1.6, 1.0, 1.0, 0.06), '#f4f5f6', { p: [4.3, gy + 0.5, 3.6] }), part(box(1.0, 0.6, 0.03), '#9dd0f2', { p: [4.3, gy + 0.45, 4.11] }), part(box(1.62, 0.16, 1.02), BLUE, { p: [4.3, gy + 1.0, 3.6] }));
+    out.push(part(cyl(0.06, 0.06, 2.6, 10), '#9aa1a9', { p: [0.9, gy + 1.3, 4.6] }), part(rbox(0.9, 0.7, 0.12, 0.06), K.white, { p: [0.9, gy + 2.7, 4.6] }), part(box(0.7, 0.18, 0.13), RED, { p: [0.9, gy + 2.85, 4.6] }), part(box(0.7, 0.12, 0.13), BLUE, { p: [0.9, gy + 2.6, 4.6] }));
+    const truck = merge(part(lathe([[0, -1.3], [0.42, -1.25], [0.45, 1.2], [0.4, 1.3], [0, 1.32]], 24).rotateZ(Math.PI / 2), '#e9ecef', { p: [-0.5, 0.85, 0] }), part(box(2.6, 0.08, 0.02), RED, { p: [-0.5, 0.85, 0.44] }),
+      part(rbox(0.9, 0.95, 0.95, 0.15), BLUE, { p: [1.25, 0.72, 0] }), part(box(0.05, 0.38, 0.8), '#22303e', { p: [1.72, 0.9, 0] }), part(box(3.4, 0.14, 0.9), '#3a3f47', { p: [-0.1, 0.32, 0] }),
+      [[-1.3, 0.45], [-0.8, 0.45], [1.25, 0.45], [-1.3, -0.45], [-0.8, -0.45], [1.25, -0.45]].flatMap(([x, z]) => [part(cyl(0.22, 0.22, 0.16, 16), '#1d1f24', { p: [x, 0.22, z], r: [Math.PI / 2, 0, 0] }), part(cyl(0.11, 0.11, 0.17, 12), '#c9ced6', { p: [x, 0.22, z], r: [Math.PI / 2, 0, 0] })]));
+    const flame = flameGeo();
     return {
       bare: true, move: () => ({}),
-      geo: merge(part(cyl(5.4, 5.6, 0.6, 56), 'W', { p: [0, 0.3, 0] }),
-        legsAt.flatMap(([x, z]) => [part(cyl(0.38, 0.45, 4.4, 20), '#f2c94c', { p: [x, 2.2, z] }), part(cyl(0.5, 0.5, 0.3, 20), '#3a3f47', { p: [x, 0.65, z] })]),
-        part(box(4.6, 0.5, 4.6), '#5b6470', { p: [0, 4.4, 0] }), part(box(4.4, 0.08, 4.4), '#7d8792', { p: [0, 4.7, 0] }),
-        part(box(1.8, 1.2, 1.4), K.white, { p: [-1.2, 5.3, 1.4] }), part(box(1.9, 0.18, 1.5), '#0047ba', { p: [-1.2, 5.95, 1.4] }),
-        part(cyl(1.1, 1.1, 0.12, 32), '#3a3f47', { p: [1.3, 4.78, 1.4] }), part(torus(0.6, 0.06, TAU, 24), K.yellow, { p: [1.3, 4.85, 1.4], r: [Math.PI / 2, 0, 0] }),
-        derrick, beam([1.8, 4.6, -1.8], [4.2, 7.2, -3.2], 0.16, K.steelDk)),
+      geo: merge(out),
       moving: [
-        { geo: merge(part(cyl(0.16, 0.16, 4.2, 12), K.steel), part(box(0.6, 0.3, 0.6), '#3a3f47', { p: [0, 2.1, 0] })), pivot: [0, 6.9, 0], anim: (t) => ({ ry: t * 3, y: Math.sin(t * 0.7) * 0.3 }) },
-        { geo: flameGeo(), pivot: [4.25, 7.4, -3.25], anim: (t) => ({ rx: Math.PI, s: 0.75, sy: 0.7 + Math.sin(t * 17) * 0.12 + Math.sin(t * 7) * 0.08, rz: Math.sin(t * 5) * 0.15 }) },
-        { geo: null, pivot: [0, 0.55, 0], anim: (t) => ({ ry: -t * 0.32 }) },
-        { geo: hull, pivot: [0, 0, 4.3], parent: 2, anim: (t) => ({ ry: Math.PI, y: Math.sin(t * 1.4) * 0.06, rx: Math.sin(t * 1.1) * 0.03 }) },
+        { geo: merge(part(cyl(0.08, 0.08, 3.4, 10), K.steel, { p: [0, -1.2, 0] }), part(box(0.5, 0.18, 0.5), '#3a3f47', { p: [0, 0.4, 0] })), pivot: [D[0], deck + 1.7, D[1]], anim: (t) => ({ ry: t * 3, y: Math.sin(t * 0.7) * 0.25 }) },
+        { geo: flame, pivot: [P[0] + 2.62, deck + 2.3, P[1] - 2.62], anim: (t) => ({ rx: Math.PI, s: 0.6, sy: 0.55 + Math.sin(t * 17) * 0.1 + Math.sin(t * 7) * 0.07, rz: Math.sin(t * 5) * 0.15 }) },
+        { geo: flame, pivot: [4.6, gy + 4.65, -2.2], anim: (t) => ({ rx: Math.PI, s: 0.42, sy: 0.4 + Math.sin(t * 19) * 0.08 + Math.sin(t * 6) * 0.05, rz: Math.cos(t * 4) * 0.15 }) },
+        { geo: ship, pivot: [-2.6, SEA - 0.25, 2.65], anim: (t) => ({ y: Math.sin(t * 1.3) * 0.06, rx: Math.sin(t * 1.0) * 0.025, rz: Math.cos(t * 0.8) * 0.02 }) },
+        // Oil pulsing ashore along the pipeline.
+        ...Array.from({ length: hi() ? 8 : 3 }, (_, i) => ({ geo: part(torus(0.13, 0.04, TAU, 16), K.gold), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 5, i / (hi() ? 8 : 3)), p = pipe.getPointAt(u), d = pipe.getTangentAt(u); return { x: p.x, y: p.y, z: p.z, q: new THREE.Quaternion().setFromUnitVectors(new V(0, 0, 1), d) }; } })),
+        // Steam from the columns.
+        ...[0, 1, 2].map((i) => ({ geo: part(ball(0.4), '#f1eee8'), pivot: [3.4, gy + 4.3, -1.9], anim: (t) => { const f = cyc(t, 3, i / 3); return { y: f * 2.4, x: f * 0.8, s: (0.5 + f) * life(f, 0, 0.12, 0.6, 1) }; } })),
+        // A tanker truck runs from the refinery to the station; a car pulls in to fill up.
+        { geo: truck, pivot: [0, gy, 1.0], anim: (t) => { const f = cyc(t, 12), x = f < 0.4 ? -0.2 + 3.6 * easeIO(win(f, 0.05, 0.4)) : f < 0.6 ? 3.4 : 3.4 + 2.8 * easeIn(win(f, 0.6, 0.85)); return { x, s: Math.max(0.001, Math.min(1, (5.4 - x) / 0.6)) }; } },
+        { geo: sedan('#3d7be0'), pivot: [0, gy, S[1] + 0.45], anim: (t) => { const f = cyc(t, 9, 0.3), x = f < 0.3 ? -0.2 + 2.2 * easeOut(win(f, 0, 0.3)) : f < 0.7 ? 2.0 : 2.0 + 3.2 * easeIn(win(f, 0.7, 0.95)); return { x, s: 0.75 * Math.max(0.001, Math.min(1, (x + 0.2) / 0.4, (5.3 - x) / 0.5)) }; } },
       ],
     };
   } },
