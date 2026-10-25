@@ -49,7 +49,8 @@
   "cocacola": "Bottled for the world",
   "mcdonalds": "Billions served",
   "spacex": "Land and fly again",
-  "jpmorgan": "The fortress"
+  "jpmorgan": "The fortress",
+  "unitedhealth": "Coverage and care"
  },
  "bank": [
   "Bank of America",
@@ -162,7 +163,6 @@
   "Markel"
  ],
  "health": [
-  "UnitedHealth Group",
   "CVS Health",
   "McKesson",
   "AmerisourceBergen",
@@ -1249,7 +1249,6 @@
   "AmerisourceBergen": 9,
   "Owens & Minor": 9,
   "Henry Schein": 9,
-  "UnitedHealth Group": 1,
   "Stryker": 1,
   "Boston Scientific": 1,
   "Zimmer Biomet Holdings": 1,
@@ -1543,5 +1542,8 @@
  ],
  "jpmorgan": [
   "JPMorgan Chase"
+ ],
+ "unitedhealth": [
+  "UnitedHealth Group"
  ]
 }

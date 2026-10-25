@@ -1248,5 +1248,75 @@ export const HEROES = {
     moving.push({ geo: merge(part(box(0.2, 0.012, 0.1), '#7fb77e'), part(box(0.2, 0.012, 0.1), '#8fc58c', { p: [0.01, 0.014, 0.005] })), pivot: [ATX, y0 + 0.42, ATZ + 0.09], anim: (t) => { const f = cyc(t, 12); return f > 0.4 && f < 0.56 ? { z: easeOut(win(f, 0.4, 0.46)) * 0.14, s: 1 } : { s: 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // UnitedHealth Group: insurer and care provider in one loop. Premiums flow in from the homes to
+  // the hub; care flows out to its own Optum clinic, the hospital and the pharmacy; an ambulance
+  // and an Optum van circle the ring road, a helicopter lifts off, and a heartbeat circles the hub.
+  unitedhealth: { finder: '#002677', build: () => {
+    const R = rand(41), out = [], y0 = 0.24, NAVY = '#002677', BLUE = '#196ecf', OPT = '#ff612b', RR = 2.9;
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#86c766', { p: [0, 0.12, 0] }));
+    // The ring road and the plaza inside it.
+    out.push(part(new THREE.RingGeometry(RR - 0.5, RR + 0.5, hi() ? 96 : 32, 1).rotateX(-Math.PI / 2), '#4f545c', { p: [0, y0 + 0.012, 0] }));
+    out.push(part(new THREE.RingGeometry(RR - 0.03, RR + 0.03, hi() ? 96 : 32, 1, 0, TAU).rotateX(-Math.PI / 2), '#f2c94c', { p: [0, y0 + 0.016, 0] }));
+    out.push(part(cyl(RR - 0.5, RR - 0.5, 0.06, 64), '#e8e2d4', { p: [0, y0 + 0.03, 0] }));
+    for (const [x, z] of [[-1, 1], [1, -1], [-1, -1], [1, 1]]) { const a = Math.atan2(z, x), r0 = RR + 0.5, r1 = 4.1; out.push(part(box(r1 - r0 + 0.2, 0.02, 0.8), '#4f545c', { p: [Math.cos(a) * (r0 + r1) / 2, y0 + 0.012, Math.sin(a) * (r0 + r1) / 2], r: [0, -a, 0] })); }
+    // ---- the hub: a glass drum with a navy band, and the U on its roof
+    const HY = y0 + 0.06;
+    out.push(part(lathe([[0, 0], [1.45, 0], [1.45, 0.12], [1.3, 0.14], [1.3, 1.5], [1.38, 1.5], [1.38, 1.66], [0, 1.66]], 56), (px, py) => (py < HY + 0.13 ? '#d6d0c4' : py > HY + 1.49 ? '#f4f5f6' : '#5d7fa3'), { p: [0, HY, 0] }));
+    if (hi()) for (let i = 0; i < 40; i++) { const a = (i / 40) * TAU; out.push(part(box(0.03, 1.36, 0.03), '#e9ecef', { p: [Math.cos(a) * 1.31, HY + 0.82, Math.sin(a) * 1.31] })); }
+    out.push(part(cyl(1.33, 1.33, 0.22, 56), NAVY, { p: [0, HY + 1.15, 0] }));
+    out.push(part(tube([[-0.55, 1.15, 0], [-0.55, 0.45, 0], [-0.35, 0.12, 0], [0, 0.02, 0], [0.35, 0.12, 0], [0.55, 0.45, 0], [0.55, 1.15, 0]], 0.13), BLUE, { p: [0, HY + 1.66, 0], r: [0, Math.PI / 4, 0] }));
+    [0.78, 0.98, 1.18].forEach((r, i) => out.push(part(torus(r, 0.045, Math.PI * 0.62, 24), i === 1 ? OPT : NAVY, { p: [0, HY + 1.66 + 0.95, 0], r: [0, Math.PI / 4, Math.PI * 0.19] })));
+    // ---- the homes the members live in
+    const house = (x, z, c, roof, ry) => [part(rbox(1.0, 0.75, 0.9, 0.04), c, { p: [x, y0 + 0.375, z], r: [0, ry, 0] }), part(prism(1.15, 0.5, 1.0), roof, { p: [x, y0 + 0.75, z], r: [0, ry + Math.PI / 2, 0] }),
+      part(box(0.22, 0.42, 0.04), '#6b4f3a', { p: [x + Math.sin(ry) * 0.46, y0 + 0.21, z + Math.cos(ry) * 0.46], r: [0, ry, 0] }), part(box(0.24, 0.22, 0.04), '#9dc3e6', { p: [x + Math.sin(ry) * 0.46 + Math.cos(ry) * 0.28, y0 + 0.48, z + Math.cos(ry) * 0.46 - Math.sin(ry) * 0.28], r: [0, ry, 0] })];
+    out.push(house(-3.3, 4.3, '#f6e7c8', '#b8452f', Math.PI * 0.75), house(-4.4, 3.1, '#d9e7f2', '#4a5d74', Math.PI * 0.75), house(-4.5, 4.5, '#f2d0c9', '#6b4f3a', Math.PI * 0.75));
+    // ---- the Optum clinic
+    const CX = 3.75, CZ = -3.75;
+    out.push(part(rbox(2.4, 1.1, 1.8, 0.05), '#f4f5f6', { p: [CX, y0 + 0.55, CZ], r: [0, -Math.PI / 4, 0] }), part(rbox(2.46, 0.16, 1.86, 0.04), OPT, { p: [CX, y0 + 1.02, CZ], r: [0, -Math.PI / 4, 0] }));
+    out.push(part(rbox(1.5, 0.6, 0.06, 0.03), '#24384d', { p: [CX + 0.86, y0 + 0.45, CZ + 0.86], r: [0, Math.PI / 4, 0] }), part(rbox(0.9, 0.22, 0.08, 0.04), OPT, { p: [CX + 0.87, y0 + 1.32, CZ + 0.87], r: [0, Math.PI / 4, 0] }));
+    // ---- the hospital, with its red cross and helipad
+    const HX = -3.75, HZ = -3.75;
+    out.push(part(rbox(2.2, 3.0, 1.9, 0.05), '#f4f5f6', { p: [HX, y0 + 1.5, HZ], r: [0, Math.PI / 4, 0] }), part(rbox(2.6, 0.9, 1.0, 0.05), '#e9ecef', { p: [HX - 0.55, y0 + 0.45, HZ + 0.55], r: [0, Math.PI / 4, 0] }));
+    if (hi()) for (let j = 0; j < 7; j++) for (let i = 0; i < 4; i++) { const o = -0.66 + i * 0.44, d = 0.96; out.push(part(box(0.3, 0.2, 0.03), '#5d7fa3', { p: [HX + (o + d) * Math.SQRT1_2, y0 + 1.1 + j * 0.24, HZ + (d - o) * Math.SQRT1_2], r: [0, Math.PI / 4, 0] })); }
+    out.push(part(cyl(0.7, 0.7, 0.08, 40), '#5b616b', { p: [HX, y0 + 3.04, HZ] }), part(box(0.1, 0.02, 0.5), '#f4f5f6', { p: [HX - 0.15, y0 + 3.09, HZ] }), part(box(0.1, 0.02, 0.5), '#f4f5f6', { p: [HX + 0.15, y0 + 3.09, HZ] }), part(box(0.3, 0.02, 0.1), '#f4f5f6', { p: [HX, y0 + 3.09, HZ] }));
+    out.push(part(rbox(0.55, 0.16, 0.08, 0.03), '#e31837', { p: [HX - 0.8, y0 + 2.6, HZ + 0.8], r: [0, -Math.PI / 4, 0] }), part(rbox(0.16, 0.55, 0.08, 0.03), '#e31837', { p: [HX - 0.8, y0 + 2.6, HZ + 0.8], r: [0, -Math.PI / 4, 0] }));
+    // ---- the pharmacy, with a turning green cross out front and giant pill bottles
+    const PX = 3.75, PZ = 3.6;
+    out.push(part(rbox(2.0, 1.0, 1.6, 0.05), '#eef3ea', { p: [PX, y0 + 0.5, PZ], r: [0, Math.PI / 4, 0] }), part(rbox(2.06, 0.14, 1.66, 0.03), '#2f8f5b', { p: [PX, y0 + 0.98, PZ], r: [0, Math.PI / 4, 0] }));
+    out.push(part(rbox(1.0, 0.55, 0.06, 0.03), '#24384d', { p: [PX + 0.58, y0 + 0.4, PZ + 0.58], r: [0, Math.PI / 4, 0] }));
+    [[PX + 0.2, PZ - 1.45, 0.3], [PX + 0.62, PZ - 1.2, 0.24]].forEach(([x, z, r]) => out.push(part(cyl(r, r, r * 2.6, 24), '#f29a3a', { p: [x, y0 + r * 1.3, z] }), part(cyl(r * 1.08, r * 1.08, r * 0.6, 24), '#f4f5f6', { p: [x, y0 + r * 2.9, z] }), part(box(r * 1.2, r * 1.2, 0.02), '#f4f5f6', { p: [x, y0 + r * 1.3, z + r * 0.99] })));
+    out.push(part(cyl(0.05, 0.05, 1.5, 10), '#5b616b', { p: [PX - 1.3, y0 + 0.75, PZ - 0.3] }));
+    // Trees round the edges.
+    [[-1.2, 4.6], [1.4, 4.6], [-4.6, -1.0], [-4.6, 1.2], [4.6, -1.2], [4.6, 1.0], [1.2, -4.6], [-1.4, -4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.75 + R() * 0.25)));
+    // ---- moving parts
+    const moving = [];
+    // The ambulance and the Optum van on the ring.
+    const van = (body, stripe) => merge(part(rbox(1.5, 0.85, 0.85, 0.08), body, { p: [-0.2, 0.62, 0] }), part(rbox(0.55, 0.6, 0.82, 0.12), body, { p: [0.75, 0.5, 0] }), part(box(0.04, 0.3, 0.7), '#26323f', { p: [1.02, 0.68, 0] }),
+      part(box(1.52, 0.12, 0.87), stripe, { p: [-0.2, 0.55, 0] }), [[-0.6, 0.4], [0.6, 0.4], [-0.6, -0.4], [0.6, -0.4]].map(([x, z]) => part(new THREE.CylinderGeometry(0.18, 0.18, 0.12, 16), '#1d1f24', { p: [x, 0.18, z], r: [Math.PI / 2, 0, 0] })));
+    const onRing = (P, off, dir, r) => (t) => { const th = dir * cyc(t, P, off) * TAU; return { x: Math.cos(th) * r, z: Math.sin(th) * r, ry: Math.atan2(-Math.cos(th) * dir, -Math.sin(th) * dir) }; };
+    const amb = moving.length;
+    moving.push({ geo: van('#f4f5f6', '#e31837'), pivot: [0, y0, 0], anim: onRing(9, 0, 1, RR + 0.22) });
+    moving.push({ geo: part(rbox(0.2, 0.08, 0.3, 0.03), '#e31837'), pivot: [-0.55, 1.1, 0.12], parent: amb, anim: (t) => ({ s: Math.sin(t * 14) > 0 ? 1 : 0.4 }) }, { geo: part(rbox(0.2, 0.08, 0.3, 0.03), '#2e8bff'), pivot: [-0.55, 1.1, -0.12], parent: amb, anim: (t) => ({ s: Math.sin(t * 14) > 0 ? 0.4 : 1 }) });
+    moving.push({ geo: van('#f4f5f6', OPT), pivot: [0, y0, 0], anim: onRing(12, 0.5, -1, RR - 0.22) });
+    // The helicopter lifts off the roof, circles and lands again.
+    const heli = moving.length;
+    moving.push({ geo: merge(part(capsule(0.28, 0.5), '#e31837', { r: [0, 0, Math.PI / 2] }), part(box(0.3, 0.2, 0.5), '#26323f', { p: [0.32, 0.06, 0] }), part(cyl(0.05, 0.03, 0.9, 8), '#e31837', { p: [-0.75, 0.08, 0], r: [0, 0, Math.PI / 2] }), part(box(0.05, 0.3, 0.2), '#f4f5f6', { p: [-1.18, 0.2, 0] }),
+      [-0.2, 0.2].map((z) => part(box(0.9, 0.03, 0.04), '#3a3f47', { p: [0, -0.32, z] })), part(cyl(0.04, 0.04, 0.2, 8), '#3a3f47', { p: [0, 0.38, 0] })),
+      pivot: [HX, y0 + 3.45, HZ], anim: (t) => { const f = cyc(t, 14), up = easeIO(win(f, 0.1, 0.25)) * (1 - easeIO(win(f, 0.75, 0.9))), a = easeIO(win(f, 0.25, 0.75)) * TAU; return { y: up * 1.8, x: Math.sin(a) * 1.4 * up, z: (1 - Math.cos(a)) * 1.2 * up, ry: -a + Math.PI * 0.75, rz: Math.sin(a) * 0.15 * up }; } });
+    moving.push({ geo: merge(part(box(1.9, 0.02, 0.1), '#3a3f47'), part(box(0.1, 0.02, 1.9), '#3a3f47')), pivot: [0, 0.5, 0], parent: heli, anim: (t) => { const f = cyc(t, 14); return { ry: t * (f > 0.05 && f < 0.95 ? 30 : 2) }; } });
+    // The green cross turning on its pole.
+    moving.push({ geo: merge(part(rbox(0.6, 0.2, 0.08, 0.04), '#2fbf5b'), part(rbox(0.2, 0.6, 0.08, 0.04), '#2fbf5b')), pivot: [PX - 1.3, y0 + 1.6, PZ - 0.3], anim: (t) => ({ ry: t * 1.2 }) });
+    // A heartbeat travelling round the hub's band.
+    moving.push({ geo: merge(part(ball(0.07), '#7cf0ff'), part(capsule(0.04, 0.22), '#7cf0ff', { p: [0, 0, 0.14], r: [Math.PI / 2, 0, 0], s: [1, 1, 1] })), pivot: [0, HY + 1.15, 0], anim: (t) => { const a = t * 1.6, k = cyc(t * 1.6, TAU / 4); const spike = k > 0.4 && k < 0.6 ? Math.sin((k - 0.4) / 0.2 * TAU) * 0.35 : 0; return { x: Math.cos(-a) * 1.36, z: Math.sin(-a) * 1.36, y: spike, ry: a }; } });
+    // Premiums flowing in from the homes (coins), care flowing out (crosses).
+    const hub = [0, HY + 1.9, 0];
+    const flows = [[[-3.9, y0 + 1.1, 3.9], hub, 'coin'], [[-4.4, y0 + 1.1, 3.1], hub, 'coin'], [hub, [CX, y0 + 1.3, CZ], 'care'], [hub, [HX, y0 + 3.2, HZ], 'care'], [hub, [PX, y0 + 1.2, PZ], 'care'], [hub, [-3.6, y0 + 1.2, 4.2], 'care']];
+    const coin = merge(part(cyl(0.16, 0.16, 0.05, 24), '#f2c14e', { r: [Math.PI / 2, 0, 0] }), part(cyl(0.11, 0.11, 0.06, 24), '#e0a93a', { r: [Math.PI / 2, 0, 0] }));
+    const care = merge(part(rbox(0.3, 0.1, 0.06, 0.03), BLUE), part(rbox(0.1, 0.3, 0.06, 0.03), BLUE));
+    flows.forEach(([A, B, kind], i) => { const c = curve([A, [(A[0] + B[0]) / 2, Math.max(A[1], B[1]) + 1.4, (A[2] + B[2]) / 2], B]); for (let k = 0; k < 2; k++) moving.push({ geo: kind === 'coin' ? coin : care, pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 3.2, i * 0.13 + k * 0.5), p = c.getPointAt(u); return { x: p.x, y: p.y, z: p.z, ry: t * 3, s: Math.min(1, u / 0.08, (1 - u) / 0.08) + 0.001 }; } }); });
+    // A member walking from home to the clinic.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 16), a = Math.PI * (0.75 - f), r = RR + 0.75; return { x: Math.cos(a) * r, z: Math.sin(a) * r, ry: Math.atan2(Math.cos(a), Math.sin(a)), s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: OPT, pants: '#2b3a55', y: y0 }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
