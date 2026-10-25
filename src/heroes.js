@@ -1168,5 +1168,85 @@ export const HEROES = {
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, 9), x = -4.2 + f * 5.0; return { x, z: 1.0, ry: 0, s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: '#2f8f5b', pants: '#2b3a55', y: y0, carry: part(cyl(0.07, 0.06, 0.2, 12), RED, { p: [0.25, 1.05, 0.28] }) }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // JPMorgan Chase: a fortress balance sheet with a branch on every corner. The Park Avenue tower
+  // stands on its splayed columns; payments stream between it, a Chase branch and the city; a
+  // customer draws cash at the ATM; and the vault door swings open on the gold.
+  jpmorgan: { finder: '#117aca', build: () => {
+    const R = rand(12), out = [], y0 = 0.24, CH = '#117aca', GLASS = '#5d7f a3'.replace(' ', ''), MUL = '#d3dbe4';
+    // The Chase octagon: four pinwheel blades round a square hole.
+    const blade = [[-0.25, 0.27], [0.6, 0.27], [0.6, 0.36], [0.36, 0.6], [-0.25, 0.6]];
+    const octagon = (c = '#ffffff', d = 0.05) => merge([0, 1, 2, 3].map((k) => part(extrude(blade, d), c, { r: [0, 0, (k * Math.PI) / 2] })));
+    // ---- the block: pavement, the avenue in front, kerbs and trees
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#c9c6bf', { p: [0, 0.12, 0] }));
+    out.push(part(box(10.4, 0.02, 2.2), '#43474e', { p: [0, y0 + 0.01, 4.1] }), part(box(10.4, 0.1, 0.12), '#a9a59c', { p: [0, y0 + 0.05, 2.95] }));
+    for (let i = 0; i < 7; i++) out.push(part(box(0.7, 0.012, 0.07), '#f2c94c', { p: [-4.5 + i * 1.5, y0 + 0.025, 4.1] }));
+    for (let i = 0; i < 6; i++) out.push(part(box(0.18, 0.012, 1.6), '#f4f4f0', { p: [3.2 + (i % 3) * 0.32 - 0.32, y0 + 0.025, 4.1] }));
+    if (hi()) for (let i = 0; i < 11; i++) out.push(part(box(0.02, 0.006, 10.2), '#bbb7ae', { p: [-5 + i, y0 + 0.003, -0.2] }), part(box(10.2, 0.006, 0.02), '#bbb7ae', { p: [0, y0 + 0.003, -5 + i * 0.8] }));
+    [[-4.5, 2.5], [0.9, 2.6], [4.6, 2.5], [-4.6, -4.6], [4.6, -4.4]].forEach(([x, z]) => out.push(part(cyl(0.35, 0.35, 0.06, 20), '#6b5a48', { p: [x, y0 + 0.03, z] }), miniTree(R, x, y0, z, 0.8 + R() * 0.2)));
+    out.push(lampPost(-2.2, y0, 2.7, Math.PI / 2), lampPost(2.0, y0, 2.7, Math.PI / 2));
+    // ---- the tower: splayed columns, a glass shaft in three setbacks, and its crown
+    const TX = -1.9, TZ = -2.0, base = y0 + 1.0;
+    out.push(part(rbox(3.2, 0.06, 3.2, 0.02), '#9aa1a9', { p: [TX, y0 + 0.03, TZ] }), part(rbox(1.5, 0.95, 1.5, 0.05), '#24384d', { p: [TX, y0 + 0.5, TZ] }));
+    for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+      out.push(beam([TX + sx * 0.5, y0, TZ + sz * 1.35], [TX + sx * 1.25, base, TZ + sz * 1.25], 0.09, MUL), beam([TX + sx * 1.35, y0, TZ + sz * 0.5], [TX + sx * 1.25, base, TZ + sz * 1.25], 0.09, MUL));
+    }
+    const tier = (w, y, h) => {
+      out.push(part(rbox(w, h, w, 0.04), GLASS, { p: [TX, y + h / 2, TZ] }), part(box(w + 0.06, 0.06, w + 0.06), MUL, { p: [TX, y + h, TZ] }));
+      if (hi()) for (let i = 1; i < Math.round(w / 0.22); i++) { const o = -w / 2 + i * w / Math.round(w / 0.22); out.push(part(box(0.025, h, 0.03), MUL, { p: [TX + o, y + h / 2, TZ + w / 2 + 0.01] }), part(box(0.03, h, 0.025), MUL, { p: [TX + w / 2 + 0.01, y + h / 2, TZ + o] })); }
+      if (hi()) for (let j = 1; j < Math.round(h / 0.3); j++) out.push(part(box(w + 0.02, 0.012, w + 0.02), '#7f9bb8', { p: [TX, y + j * h / Math.round(h / 0.3), TZ] }));
+    };
+    tier(2.6, base, 2.9); tier(2.1, base + 2.9, 1.3); tier(1.5, base + 4.2, 0.8);
+    out.push(part(rbox(1.2, 0.3, 1.2, 0.05), '#24384d', { p: [TX, base + 5.15, TZ] }), part(cyl(0.03, 0.03, 0.6, 6), MUL, { p: [TX + 0.3, base + 5.6, TZ + 0.3] }));
+    out.push(place(octagon('#ffffff', 0.04), { p: [TX, base + 4.6, TZ + 0.77], s: 0.5 }), place(octagon('#ffffff', 0.04), { p: [TX + 0.77, base + 4.6, TZ], r: [0, Math.PI / 2, 0], s: 0.5 }));
+    // ---- the Chase branch, with its sign and ATM
+    const BX = 2.3, BZ = -1.7;
+    out.push(part(rbox(3.0, 1.4, 2.2, 0.05), '#e9e6df', { p: [BX, y0 + 0.7, BZ] }), part(rbox(3.1, 0.12, 2.3, 0.03), '#5b616b', { p: [BX, y0 + 1.46, BZ] }));
+    out.push(part(rbox(1.8, 0.95, 0.06, 0.03), '#24384d', { p: [BX + 0.45, y0 + 0.62, BZ + 1.11] }), part(box(0.04, 0.95, 0.07), MUL, { p: [BX + 0.45, y0 + 0.62, BZ + 1.12] }));
+    out.push(part(rbox(1.5, 0.32, 0.12, 0.04), CH, { p: [BX + 0.45, y0 + 1.24, BZ + 1.14] }), place(octagon('#ffffff', 0.03), { p: [BX - 0.12, y0 + 1.24, BZ + 1.21], s: 0.22 }));
+    if (hi()) for (const [k, c] of [[0, '#ffffff'], [1, '#ffffff'], [2, '#ffffff'], [3, '#ffffff'], [4, '#ffffff']]) out.push(part(box(0.1, 0.1, 0.02), c, { p: [BX + 0.15 + k * 0.17, y0 + 1.24, BZ + 1.21] }));
+    // The ATM, recessed into the wall to the left of the windows.
+    const ATX = BX - 0.95, ATZ = BZ + 1.1;
+    out.push(part(rbox(0.6, 1.1, 0.14, 0.04), '#2b2f36', { p: [ATX, y0 + 0.62, ATZ] }), part(box(0.36, 0.26, 0.02), '#7cc4ff', { p: [ATX, y0 + 0.88, ATZ + 0.075] }), part(box(0.3, 0.12, 0.05), '#5b616b', { p: [ATX, y0 + 0.6, ATZ + 0.08], r: [-0.6, 0, 0] }),
+      part(box(0.24, 0.03, 0.03), '#111418', { p: [ATX, y0 + 0.42, ATZ + 0.08] }), part(rbox(0.66, 0.1, 0.24, 0.03), CH, { p: [ATX, y0 + 1.2, ATZ + 0.04] }));
+    // ---- the vault: a cutaway room, shelves of gold behind a round door
+    const VX = -2.4, VZ = 1.0;
+    out.push(part(rbox(2.6, 0.12, 1.6, 0.03), '#5b616b', { p: [VX, y0 + 0.06, VZ] }), part(rbox(2.6, 1.6, 0.14, 0.03), '#7b828c', { p: [VX, y0 + 0.86, VZ - 0.75] }), part(rbox(0.14, 1.6, 1.6, 0.03), '#7b828c', { p: [VX - 1.25, y0 + 0.86, VZ] }),
+      part(rbox(0.5, 1.6, 0.18, 0.03), '#8a919b', { p: [VX + 1.05, y0 + 0.86, VZ + 0.72] }), part(rbox(0.5, 1.6, 0.18, 0.03), '#8a919b', { p: [VX - 1.05, y0 + 0.86, VZ + 0.72] }), part(rbox(2.6, 0.3, 0.18, 0.03), '#8a919b', { p: [VX, y0 + 1.51, VZ + 0.72] }));
+    out.push(part(torus(0.62, 0.08, TAU, 32), '#c9ced6', { p: [VX, y0 + 0.82, VZ + 0.82] }));
+    const bar = extrude([[-0.17, 0], [0.17, 0], [0.13, 0.11], [-0.13, 0.11]], 0.09);
+    for (const sy of [0.12, 0.62]) {
+      out.push(part(box(2.0, 0.04, 0.6), '#5b616b', { p: [VX, y0 + sy, VZ - 0.35] }));
+      for (let i = 0; i < 5; i++) for (let l = 0; l < (sy > 0.5 ? 2 : 3); l++) out.push(part(bar, '#f2c14e', { p: [VX - 0.8 + i * 0.4, y0 + sy + 0.02 + l * 0.11, VZ - 0.35 + (l % 2) * 0.12 - 0.06], r: [0, Math.PI / 2, 0], s: [1, 1, 1] }));
+    }
+    // ---- the payments network: arcs between the tower, the branch, the vault and beyond
+    const nodes = { tower: [TX, base + 3.4, TZ], branch: [BX, y0 + 1.6, BZ], vault: [VX, y0 + 1.7, VZ], e: [4.75, y0 + 0.5, 0.6], n: [0.6, y0 + 0.5, -4.75], w: [-4.75, y0 + 0.5, -0.9] };
+    const links = [['tower', 'branch'], ['tower', 'vault'], ['branch', 'e'], ['tower', 'n'], ['vault', 'w'], ['branch', 'vault']];
+    const arcs = links.map(([a, b]) => { const A = nodes[a], B = nodes[b], m = [(A[0] + B[0]) / 2, Math.max(A[1], B[1]) + 1.0, (A[2] + B[2]) / 2]; return curve([A, m, B]); });
+    arcs.forEach((c) => out.push(part(tubeOn(c, 0.025, hi() ? 48 : 12), '#8fc3f0')));
+    out.push(...Object.values(nodes).map((p) => part(ball(0.09), CH, { p })), ...['e', 'n', 'w'].map((k) => { const [x, y, z] = nodes[k]; return [part(cyl(0.05, 0.07, y - y0, 10), '#5b616b', { p: [x, (y + y0) / 2, z] }), part(cyl(0.3, 0.34, 0.06, 24), CH, { p: [x, y0 + 0.03, z] })]; }));
+    // ---- moving parts
+    const moving = [];
+    arcs.forEach((c, i) => { for (let k = 0; k < 2; k++) moving.push({ geo: part(rbox(0.2, 0.13, 0.13, 0.04), k ? '#2ecc71' : '#7cc4ff'), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 2.6 + (i % 3) * 0.4, i * 0.17 + k * 0.5), u = k ? 1 - f : f, a = along(c, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry, s: Math.min(1, u / 0.06, (1 - u) / 0.06) + 0.001 }; } }); });
+    // The vault door: swings open on its hinge, holds, swings shut, with its wheel spinning first.
+    const door = moving.length;
+    moving.push({ geo: merge(part(cyl(0.6, 0.6, 0.16, 40), '#b9bec6', { p: [0.62, 0, 0], r: [Math.PI / 2, 0, 0] }), part(cyl(0.48, 0.48, 0.18, 40), '#a3a9b2', { p: [0.62, 0, 0], r: [Math.PI / 2, 0, 0] }),
+      ring(8, (a) => part(cyl(0.035, 0.035, 0.12, 8), '#e9ecef', { p: [0.62 + Math.cos(a) * 0.52, Math.sin(a) * 0.52, -0.1], r: [Math.PI / 2, 0, 0] })), part(box(0.12, 0.3, 0.2), '#7b828c', { p: [0.03, 0, -0.02] })),
+      pivot: [VX - 0.62, y0 + 0.82, VZ + 0.92], anim: (t) => { const f = cyc(t, 10); return { ry: -1.75 * (easeIO(win(f, 0.12, 0.3)) - easeIO(win(f, 0.8, 0.95))) }; } });
+    moving.push({ geo: merge(part(torus(0.2, 0.03, TAU, 24), '#e9ecef'), ring(3, (a) => part(box(0.5, 0.04, 0.04), '#e9ecef', { r: [0, 0, a] })), part(cyl(0.05, 0.05, 0.16, 12), '#e9ecef', { r: [Math.PI / 2, 0, 0] })),
+      pivot: [0.62, 0, 0.14], parent: door, anim: (t) => { const f = cyc(t, 10); return { rz: -TAU * easeIO(win(f, 0.0, 0.12)) + TAU * easeIO(win(f, 0.95, 1)) }; } });
+    // Taxis and cars along the avenue.
+    [['#f2c94c', 4.65, 1, 9], ['#3d6ea8', 3.55, -1, 11], ['#f2c94c', 3.55, -1, 11, 0.5], ['#2b2f36', 4.65, 1, 9, 0.55]].forEach(([c, z, dir, P, o = 0]) => moving.push({ geo: sedan(c), pivot: [0, y0, z], anim: (t) => { const f = cyc(t, P, o), x = dir * (-5.6 + f * 11.2); return { x, ry: dir > 0 ? 0 : Math.PI, s: clamp01((5.2 - Math.abs(x)) / 0.5) + 0.001 }; } }));
+    // A customer walks up to the ATM, takes cash, and leaves; the notes slide out.
+    const A = [4.6, 2.3], B = [ATX, ATZ + 0.55], C = [-0.6, 2.4];
+    const cust = (t) => {
+      const f = cyc(t, 12);
+      if (f < 0.3) { const k = easeIO(f / 0.3); return { x: A[0] + (B[0] - A[0]) * k, z: A[1] + (B[1] - A[1]) * k, ry: Math.atan2(-(B[1] - A[1]), B[0] - A[0]), s: Math.min(1, f / 0.04) }; }
+      if (f < 0.62) return { x: B[0], z: B[1], ry: Math.PI / 2, still: true };
+      const k = easeIO(win(f, 0.62, 1)); return { x: B[0] + (C[0] - B[0]) * k, z: B[1] + (C[1] - B[1]) * k, ry: Math.atan2(-(C[1] - B[1]), C[0] - B[0]), s: Math.min(1, (1 - f) / 0.04) };
+    };
+    moving.push(...walker(moving.length, cust, { shirt: '#c0392b', pants: '#2b3a55', y: y0 }));
+    moving.push({ geo: merge(part(box(0.2, 0.012, 0.1), '#7fb77e'), part(box(0.2, 0.012, 0.1), '#8fc58c', { p: [0.01, 0.014, 0.005] })), pivot: [ATX, y0 + 0.42, ATZ + 0.09], anim: (t) => { const f = cyc(t, 12); return f > 0.4 && f < 0.56 ? { z: easeOut(win(f, 0.4, 0.46)) * 0.14, s: 1 } : { s: 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

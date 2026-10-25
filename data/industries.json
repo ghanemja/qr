@@ -48,10 +48,10 @@
   "disney": "The magic kingdom",
   "cocacola": "Bottled for the world",
   "mcdonalds": "Billions served",
-  "spacex": "Land and fly again"
+  "spacex": "Land and fly again",
+  "jpmorgan": "The fortress"
  },
  "bank": [
-  "JPMorgan Chase",
   "Bank of America",
   "Wells Fargo",
   "Citigroup",
@@ -1540,5 +1540,8 @@
  ],
  "spacex": [
   "SpaceX"
+ ],
+ "jpmorgan": [
+  "JPMorgan Chase"
  ]
 }
