@@ -54,7 +54,8 @@
   "cvs": "The pharmacy next door",
   "boeing": "Built to fly",
   "homedepot": "Built by the pros",
-  "netflix": "Made for streaming"
+  "netflix": "Made for streaming",
+  "starbucks": "The third place"
  },
  "bank": [
   "Bank of America",
@@ -540,8 +541,7 @@
   "PepsiCo",
   "Keurig Dr Pepper",
   "Molson Coors Brewing",
-  "Constellation Brands",
-  "Starbucks"
+  "Constellation Brands"
  ],
  "care": [
   "Procter & Gamble",
@@ -1555,5 +1555,8 @@
  ],
  "netflix": [
   "Netflix"
+ ],
+ "starbucks": [
+  "Starbucks"
  ]
 }

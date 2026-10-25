@@ -1583,5 +1583,60 @@ export const HEROES = {
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, 10), x = -4.4 + f * 8.8; return { x, z: 0.0, ry: 0, s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: DK, pants: '#2b3a55', y: y0, carry: part(rbox(0.25, 0.32, 0.03, 0.02), '#f4f5f6', { p: [0.25, 1.1, 0.25] }) }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Starbucks: the third place, now in your pocket. Beans tumble in the roaster out back; a giant
+  // cup steams on the roof; cars roll through the drive-thru; mobile orders ping and appear on the
+  // pickup shelf for whoever ordered them.
+  starbucks: { finder: '#00704a', build: () => {
+    const R = rand(61), out = [], y0 = 0.24, GR = '#00704a', DG = '#1e3932';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#55595f', { p: [0, 0.12, 0] }));
+    // ---- the café
+    const CX = -0.6, CZ = -1.4, W = 4.4, D = 3.0, H = 1.7;
+    out.push(part(rbox(W + 0.5, 0.1, D + 1.5, 0.03), '#d8cdb8', { p: [CX, y0 + 0.05, CZ + 0.5] }));
+    out.push(part(rbox(W, H, D, 0.05), '#6b4f3a', { p: [CX, y0 + H / 2, CZ] }), part(rbox(W + 0.1, 0.16, D + 0.1, 0.04), '#3a2a20', { p: [CX, y0 + H, CZ] }));
+    if (hi()) for (let i = 0; i < 22; i++) out.push(part(box(0.03, H - 0.3, 0.02), '#5a4030', { p: [CX - W / 2 + 0.1 + i * 0.2, y0 + (H - 0.3) / 2 + 0.15, CZ + D / 2 + 0.01] }));
+    for (const x of [-1.5, -0.5, 0.5]) out.push(part(rbox(0.85, 1.0, 0.05, 0.03), '#2c3e3a', { p: [CX + x, y0 + 0.62, CZ + D / 2 + 0.02] }));
+    out.push(part(rbox(0.7, 1.15, 0.06, 0.03), '#2c3e3a', { p: [CX + 1.5, y0 + 0.6, CZ + D / 2 + 0.02] }));
+    out.push(part(rbox(3.2, 0.06, 0.6, 0.03), (px, py, pz) => (Math.floor((px - CX + 4) * 4) % 2 ? GR : '#f4f1ea'), { p: [CX - 0.5, y0 + 1.3, CZ + D / 2 + 0.3], r: [0.35, 0, 0] }));
+    // The siren roundel.
+    out.push(part(cyl(0.48, 0.48, 0.08, 40), GR, { p: [CX + 1.5, y0 + 1.42, CZ + D / 2 + 0.06], r: [Math.PI / 2, 0, 0] }), part(torus(0.36, 0.035, TAU, 40), '#ffffff', { p: [CX + 1.5, y0 + 1.42, CZ + D / 2 + 0.11] }), part(cyl(0.16, 0.16, 0.02, 24), '#ffffff', { p: [CX + 1.5, y0 + 1.45, CZ + D / 2 + 0.11], r: [Math.PI / 2, 0, 0] }), part(cone(0.1, 0.1, 3), '#ffffff', { p: [CX + 1.5, y0 + 1.63, CZ + D / 2 + 0.11], r: [Math.PI / 2, 0, 0] }));
+    // The pickup shelf by the door.
+    out.push(part(rbox(0.9, 0.06, 0.3, 0.02), '#d9cdb8', { p: [CX + 2.35, y0 + 0.8, CZ + D / 2 - 0.1] }), part(rbox(0.06, 0.8, 0.3, 0.02), '#3a2a20', { p: [CX + 2.78, y0 + 0.4, CZ + D / 2 - 0.1] }), part(rbox(0.06, 0.8, 0.3, 0.02), '#3a2a20', { p: [CX + 1.92, y0 + 0.4, CZ + D / 2 - 0.1] }));
+    // ---- the giant cup on the roof
+    const UX = CX - 0.6, UZ = CZ - 0.2, UY = y0 + H + 0.08;
+    out.push(part(lathe([[0, 0], [0.52, 0], [0.7, 1.6], [0, 1.6]], 40), '#f8f6f1', { p: [UX, UY, UZ] }), part(lathe([[0.57, 0.45], [0.66, 1.25], [0.0, 1.25]], 40).translate(0, 0, 0), GR, { p: [UX, UY, UZ], s: [1.02, 1, 1.02] }));
+    out.push(part(lathe([[0.72, 0], [0.74, 0.12], [0.55, 0.22], [0.15, 0.28], [0, 0.28]], 40), '#f8f6f1', { p: [UX, UY + 1.6, UZ] }), part(cyl(0.2, 0.2, 0.02, 24), GR, { p: [UX, UY + 0.85, UZ + 0.62], r: [Math.PI / 2 - 0.11, 0, 0] }));
+    // ---- the roastery out back: a copper drum roaster over a cooling tray
+    const RX = -3.0, RZ = 3.4;
+    out.push(part(rbox(2.6, 0.08, 2.0, 0.03), '#3a3f47', { p: [RX, y0 + 0.04, RZ] }), part(rbox(0.9, 1.0, 0.9, 0.06), '#2b2f36', { p: [RX - 0.6, y0 + 0.5, RZ] }));
+    out.push(part(cyl(0.08, 0.1, 1.2, 12), '#b87333', { p: [RX - 0.6, y0 + 2.3, RZ - 0.2] }), part(lathe([[0, 0], [0.38, 0.0], [0.3, 0.35], [0.12, 0.6], [0, 0.6]], 24), '#b87333', { p: [RX - 0.6, y0 + 1.7, RZ + 0.2] }));
+    out.push(part(cyl(0.65, 0.65, 0.2, 40), '#b87333', { p: [RX + 0.6, y0 + 0.55, RZ + 0.1] }), part(cyl(0.6, 0.6, 0.06, 40), '#4a2c1a', { p: [RX + 0.6, y0 + 0.64, RZ + 0.1] }), part(cyl(0.08, 0.1, 0.45, 12), '#2b2f36', { p: [RX + 0.6, y0 + 0.22, RZ + 0.1] }));
+    [[RX - 1.4, RZ + 1.1], [RX - 1.0, RZ + 1.3], [RX + 1.5, RZ + 1.2]].forEach(([x, z], i) => out.push(part(rbox(0.5, 0.45, 0.35, 0.12), '#c8b48e', { p: [x, y0 + 0.23, z], r: [0, i * 0.5, 0] }), part(box(0.3, 0.12, 0.01), GR, { p: [x, y0 + 0.28, z + 0.18], r: [0, i * 0.5, 0] })));
+    // ---- the patio, the drive-thru lane and the planting
+    [[-2.6, 1.6], [-1.2, 2.0]].forEach(([x, z]) => out.push(part(cyl(0.32, 0.32, 0.04, 20), '#f4f1ea', { p: [x, y0 + 0.62, z] }), part(cyl(0.03, 0.03, 1.4, 8), '#3a2a20', { p: [x, y0 + 0.7, z] }), part(lathe([[0.85, 0], [0.6, 0.16], [0, 0.3]], 24), (px, py, pz) => (Math.floor((Math.atan2(pz - z, px - x) / TAU + 0.5) * 8) % 2 ? GR : '#f4f1ea'), { p: [x, y0 + 1.35, z] }),
+      [0, 1, 2].map((k) => part(rbox(0.22, 0.4, 0.22, 0.05), '#3a2a20', { p: [x + Math.cos(k * 2.1 + 0.4) * 0.55, y0 + 0.2, z + Math.sin(k * 2.1 + 0.4) * 0.55] }))));
+    const lane = curve([[4.8, y0, 4.8], [2.9, y0, 3.2], [2.35, y0, 1.0], [2.3, y0, -1.0], [2.4, y0, -3.0], [2.6, y0, -4.9]]);
+    lane.curveType = 'centripetal';
+    for (const sd of [-0.62, 0.62]) out.push(part(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(lane.getSpacedPoints(80).map((p, i) => { const d = lane.getTangentAt(Math.min(i / 80, 1)); return new V(p.x - d.z * sd, y0 + 0.01, p.z + d.x * sd); })), hi() ? 160 : 40, 0.025, 4), '#f2c94c'));
+    out.push(part(rbox(0.06, 0.55, 0.6, 0.03), '#9cc4dd', { p: [CX + W / 2 + 0.01, y0 + 0.95, CZ + 0.4] }));
+    [[-4.6, -4.4], [-4.6, -1.8], [4.6, 0.4], [-2.4, -4.6], [0.6, 4.7], [4.6, -2.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.75 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // Steam curling up from the cup.
+    for (let i = 0; i < 4; i++) moving.push({ geo: part(ball(0.18), '#ffffff'), pivot: [UX, UY + 1.95, UZ], anim: (t) => { const f = cyc(t, 3, i / 4); return { y: f * 1.4, x: Math.sin(f * 5 + i) * 0.18, s: (0.6 + f * 1.1) * Math.min(1, f / 0.15, (1 - f) / 0.3) + 0.001 }; } });
+    // The roaster: its drum turns, beans tumble into the cooling tray where the arm stirs.
+    moving.push({ geo: merge(part(cyl(0.45, 0.45, 0.8, 32), '#b87333', { r: [Math.PI / 2, 0, 0] }), ring(6, (a) => part(box(0.06, 0.82, 0.04), '#8a5426', { p: [Math.cos(a) * 0.45, Math.sin(a) * 0.45, 0], r: [Math.PI / 2, 0, 0] })), part(cyl(0.3, 0.3, 0.06, 24), '#2b2f36', { p: [0, 0, 0.42], r: [Math.PI / 2, 0, 0] })), pivot: [RX - 0.6, y0 + 1.25, RZ], anim: (t) => ({ rz: t * 1.8 }) });
+    moving.push({ geo: merge(part(box(1.1, 0.04, 0.06), '#d6d9dd'), part(box(0.06, 0.04, 1.1), '#d6d9dd'), part(cyl(0.05, 0.05, 0.2, 10), '#d6d9dd', { p: [0, 0.1, 0] })), pivot: [RX + 0.6, y0 + 0.7, RZ + 0.1], anim: (t) => ({ ry: t * 1.4 }) });
+    for (let i = 0; i < 8; i++) moving.push({ geo: part(ball(0.05), '#5a3418', { s: [1.2, 0.8, 0.9] }), pivot: [RX - 0.25, y0 + 1.2, RZ], anim: (t) => { const f = cyc(t, 1.4, i / 8); return { x: f * 0.85, y: -f * f * 0.55, z: 0.1 + Math.sin(i) * 0.12, rx: f * 9, s: Math.min(1, (1 - f) / 0.1) + 0.001 }; } });
+    // Drive-thru: cars move up one slot at a time.
+    const N = 4, P = 3.4, gap = 1 / N, uw = (() => { let best = 0, bd = 1e9; for (let i = 0; i <= 400; i++) { const p = lane.getPointAt(i / 400), d = (p.x - 2.3) ** 2 + (p.z - CZ - 0.4) ** 2; if (d < bd) { bd = d; best = i / 400; } } return best; })(), shift = uw - Math.round(uw / gap) * gap;
+    ['#e5e2da', '#c0392b', '#3d6ea8', '#7a8a6a'].forEach((c, k) => moving.push({ geo: sedan(c), pivot: [0, y0, 0], anim: (t) => { const slot = Math.floor(t / P), fr = easeIO(win((t / P) % 1, 0, 0.4)), u = ((((slot + fr + k) * gap + shift) % 1) + 1) % 1, a = along(lane, u); return { x: a.p.x, z: a.p.z, ry: a.ry, s: clamp01(Math.min(u, 1 - u) / 0.04) + 0.001 }; } }));
+    // Mobile orders: a phone pings above the shelf, a cup appears, a customer takes it.
+    const cupGeo = merge(part(lathe([[0, 0], [0.07, 0], [0.09, 0.24], [0, 0.24]], 16), '#f8f6f1'), part(cyl(0.085, 0.08, 0.08, 16), GR, { p: [0, 0.12, 0] }), part(cyl(0.095, 0.095, 0.03, 16), '#f8f6f1', { p: [0, 0.255, 0] }));
+    for (let k = 0; k < 3; k++) moving.push({ geo: cupGeo, pivot: [CX + 2.1 + k * 0.25, y0 + 0.83, CZ + D / 2 - 0.1], anim: (t) => { const f = cyc(t, 9); const at = 0.1 + k * 0.08; return f > at && f < 0.62 + k * 0.12 ? { s: back(win(f, at, at + 0.05)) + 0.001 } : { s: 0.001 }; } });
+    moving.push({ geo: merge(part(rbox(0.32, 0.56, 0.04, 0.05), '#1d1f24'), part(rbox(0.27, 0.46, 0.01, 0.03), GR, { p: [0, 0, 0.025] }), part(cyl(0.06, 0.06, 0.01, 16), '#ffffff', { p: [0, 0.05, 0.035], r: [Math.PI / 2, 0, 0] })), pivot: [CX + 2.35, y0 + 2.0, CZ + D / 2 + 0.2], anim: (t) => { const f = cyc(t, 3); return { ry: Math.PI / 4, y: Math.sin(t * 2) * 0.06, rz: bump(f, 0.05, 0.02) * 0.2 - bump(f, 0.09, 0.02) * 0.2 }; } });
+    moving.push({ geo: part(torus(0.3, 0.025, TAU, 32), GR), pivot: [CX + 2.35, y0 + 2.0, CZ + D / 2 + 0.2], anim: (t) => { const f = cyc(t, 3); return { ry: Math.PI / 4, s: 0.6 + f * 1.4, sz: 1 }; } });
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 9), A = [CX + 4.2, 2.6], B = [CX + 2.35, CZ + D / 2 + 0.45]; if (f < 0.35) { const k = easeIO(f / 0.35); return { x: A[0] + (B[0] - A[0]) * k, z: A[1] + (B[1] - A[1]) * k, ry: Math.atan2(-(B[1] - A[1]), B[0] - A[0]), s: Math.min(1, f / 0.05) }; } if (f < 0.6) return { x: B[0], z: B[1], ry: Math.PI / 2, still: true }; const k = easeIO(win(f, 0.6, 1)); return { x: B[0] + (A[0] - 0.8 - B[0]) * k, z: B[1] + (A[1] + 1.6 - B[1]) * k, ry: Math.atan2(-(A[1] + 1.6 - B[1]), A[0] - 0.8 - B[0]), s: Math.min(1, (1 - f) / 0.05) }; }, { shirt: '#d6336c', pants: '#2b3a55', y: y0 }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
