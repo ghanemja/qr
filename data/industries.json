@@ -154,7 +154,8 @@
   "runway": "Films from a sentence",
   "discord": "Where communities hang out and talk",
   "plaid": "The plumbing between apps and banks",
-  "ramp": "The corporate card that saves money"
+  "ramp": "The corporate card that saves money",
+  "nuro": "Delivery with no one in the driver's seat"
  },
  "bank": [
   "PNC Financial Services",
@@ -436,7 +437,6 @@
   "Thor Industries",
   "Polaris Industries",
   "Oshkosh",
-  "Nuro",
   "Applied Intuition",
   "Bolt"
  ],
@@ -1819,5 +1819,8 @@
  ],
  "ramp": [
   "Ramp"
+ ],
+ "nuro": [
+  "Nuro"
  ]
 }

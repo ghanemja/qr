@@ -2180,4 +2180,29 @@ export const HEROES2 = {
     moving.push({ geo: part(cyl(0.68, 0.68, 1.4, 24), (x, y) => (Math.floor(y * 10) % 2 ? '#e9b949' : '#f6d66e'), { p: [0, 0.7, 0] }), pivot: [JX, y0 + 0.05, JZ], anim: (t) => ({ sy: 0.15 + 0.8 * cyc(t, P * 3) }) });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Nuro: delivery with no one in the driver's seat. The narrow electric pod pulls away from the
+  // grocery, rolls down the street by itself, stops at the house and lifts its door for the
+  // customer to take the bags.
+  nuro: { finder: '#00b2a9', build: () => {
+    const R = rand(167), out = [], TEAL = '#00b2a9';
+    out.push(ground('#8fc66f'), part(box(10.2, 0.03, 1.3), '#5b616b', { p: [0, y0 + 0.015, 0.6] }), part(box(10.2, 0.06, 0.6), '#d8d4ca', { p: [0, y0 + 0.03, 1.6] }), part(box(10.2, 0.06, 0.6), '#d8d4ca', { p: [0, y0 + 0.03, -0.4] }));
+    // ---- the grocery store, back left; the houses, front right
+    out.push(part(rbox(3.2, 1.5, 2.2, 0.05), '#f4efe6', { p: [-2.8, y0 + 0.75, -2.4] }), part(box(3.22, 0.3, 2.22), '#2f9e6e', { p: [-2.8, y0 + 1.4, -2.4] }), part(box(1.6, 0.8, 0.04), '#9cc3e0', { p: [-2.8, y0 + 0.5, -1.28] }), place(pixText('GROCER', 0.05, K.white, 0.02), { p: [-2.8, y0 + 1.4, -1.28] }));
+    out.push(place(house2('#fbf3e3', '#5b6b7d', '#3d7be0'), { p: [2.2, y0, 3.2], r: [0, Math.PI, 0], s: 0.75 }), place(home('#e8eef4', '#a35a3c', 1.5, 1.3, 1.0), { p: [-1.6, y0, 3.4], r: [0, Math.PI, 0] }), place(home('#f6e7e1', '#3f6f8f', 1.5, 1.3, 1.0), { p: [2.8, y0, -2.6] }));
+    out.push(part(box(0.8, 0.04, 1.0), '#d8d4ca', { p: [2.2, y0 + 0.03, 2.2] }));
+    out.push(trees(R, [[-4.6, 3.4], [4.6, 3.6], [0.4, 3.6], [0.4, -2.6], [4.6, -4.4], [-0.6, -4.6]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 12;
+    // The pod: tall, narrow, rounded, no cabin, with its two compartment doors.
+    const pod = merge(part(rbox(1.7, 1.2, 0.95, 0.25), K.white, { p: [0, 0.8, 0] }), part(rbox(1.72, 0.3, 0.97, 0.12), TEAL, { p: [0, 0.35, 0] }), part(rbox(0.06, 0.4, 0.8, 0.1), '#26323f', { p: [0.86, 1.05, 0] }), part(rbox(0.3, 0.12, 0.3, 0.05), '#3a3f47', { p: [0.2, 1.46, 0] }), part(cyl(0.08, 0.08, 0.1, 12), '#4fc3f7', { p: [0.2, 1.56, 0] }), [[-0.55, 0.47], [0.55, 0.47], [-0.55, -0.47], [0.55, -0.47]].map(([x, z]) => part(new THREE.CylinderGeometry(0.22, 0.22, 0.14, 14), '#1d1f24', { p: [x, 0.22, z], r: [Math.PI / 2, 0, 0] })));
+    const xAt = (f) => (f < 0.08 ? -2.4 : f < 0.4 ? -2.4 + easeIO(win(f, 0.08, 0.4)) * 4.6 : f < 0.7 ? 2.2 : 2.2 + easeIn(win(f, 0.7, 1)) * 3.6);
+    const pi = moving.length;
+    moving.push({ geo: pod, pivot: [0, y0, 0.6], anim: (t) => { const f = cyc(t, P), x = xAt(f); return { x, s: clamp01((5.2 - Math.abs(x)) / 0.6) + 0.001 }; } });
+    moving.push({ geo: part(rbox(0.7, 0.55, 0.04, 0.05), '#e9ecef'), pivot: [0.2, 0.75 + 0.27, 0.49], parent: pi, anim: (t) => { const f = cyc(t, P); return { y: 0.5 * (easeIO(win(f, 0.42, 0.48)) - easeIO(win(f, 0.62, 0.68))) }; } });
+    moving.push({ geo: merge(part(rbox(0.28, 0.32, 0.2, 0.03), '#d8c6a5', { p: [0.0, 0.16, 0] }), part(rbox(0.26, 0.3, 0.2, 0.03), '#d8c6a5', { p: [0.3, 0.15, 0] }), part(new THREE.SphereGeometry(0.06, 8, 6), '#e5533d', { p: [0.05, 0.35, 0] })), pivot: [0.05, 0.6, 0.25], parent: pi, anim: (t) => { const f = cyc(t, P); return f < 0.58 ? {} : { s: 0.001 }; } });
+    // The customer comes down the path, takes the bags, goes back in.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.4, 0.5)) - easeIO(win(f, 0.6, 0.7)); return { x: 2.4, z: 2.4 - u * 0.9, ry: u > 0 && f < 0.55 ? Math.PI / 2 : -Math.PI / 2, still: f > 0.5 && f < 0.6, s: f < 0.38 || f > 0.72 ? 0.001 : 1 }; }, { shirt: '#d6336c', pants: '#2b3a55', y: y0, carry: null }));
+    moving.push({ geo: part(rbox(0.28, 0.32, 0.2, 0.03), '#d8c6a5'), pivot: [2.4, y0 + 0.9, 1.75], anim: (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.6, 0.7)); return f > 0.58 && f < 0.72 ? { z: u * 0.9 } : { s: 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
