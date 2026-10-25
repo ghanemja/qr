@@ -1710,36 +1710,43 @@ export const HEROES2 = {
     moving.push({ geo: place(sedan(TEAL), { s: 0.45 }), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P); if (f < 0.3) return { x: VX + Math.cos(a0) * 0.7, y: y0 + 0.45 + 3 * LH, z: VZ + Math.sin(a0) * 0.7, ry: -a0 }; if (f < 0.38) { const u = easeIO(win(f, 0.3, 0.38)); return { x: VX + Math.cos(a0) * 0.7 * (1 - u), y: y0 + 0.45 + 3 * LH, z: VZ + Math.sin(a0) * 0.7 * (1 - u), ry: -a0 }; } if (f < 0.58) return { x: VX, y: y0 + 0.45 + liftY(f), z: VZ, ry: -a0 }; const u = easeIO(win(f, 0.6, 0.85)), path = curve([[VX, 0, VZ], [VX + 1.6, 0, VZ + 1.6], [0.8, 0, 1.6], [0.8, 0, 3.6]]), a = along(path, u); return { x: a.p.x, y: y0 + 0.45 * (1 - Math.min(1, u * 8)) + 0.02, z: a.p.z, ry: a.ry, s: f > 0.95 ? 1 - win(f, 0.95, 1) + 0.001 : 1 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // CarMax: the no-haggle used car, done at scale. A car comes in to be appraised, goes through
-  // the reconditioning bay (washed, fixed, inspected), gets its one fixed price, and drives off
-  // with its new owner.
+  // CarMax: used cars, done like a factory. A car comes in and gets an instant offer, goes
+  // through the reconditioning centre (lift, wash, inspection, every box ticked), gets one fixed
+  // price, and either joins the lot or rides the car hauler to a store across the country.
   carmax: { finder: '#053361', build: () => {
-    const R = rand(151), out = [], NAVY = '#053361', YEL = '#ffd520';
-    out.push(ground('#5b616b'), part(box(10.2, 0.02, 10.2), '#6a7079', { p: [0, y0 + 0.01, 0] }));
-    // ---- the store, back left, and the reconditioning bay, back right
-    out.push(part(rbox(4.0, 1.8, 2.2, 0.05), '#eef0f2', { p: [-2.6, y0 + 0.9, -3.4] }), part(box(4.02, 0.4, 2.22), NAVY, { p: [-2.6, y0 + 1.6, -3.4] }), place(pixText('CARMAX', 0.08, YEL, 0.03), { p: [-2.6, y0 + 1.6, -2.28] }), part(box(2.0, 0.9, 0.04), '#9cc3e0', { p: [-2.6, y0 + 0.6, -2.28] }));
-    out.push(part(rbox(3.2, 1.8, 2.2, 0.05), '#d8dde3', { p: [2.6, y0 + 0.9, -3.4] }), part(box(1.8, 1.3, 0.04), '#3a3f47', { p: [2.6, y0 + 0.65, -2.28] }), part(box(3.22, 0.3, 2.22), YEL, { p: [2.6, y0 + 1.65, -3.4] }));
-    // ---- the lot: rows of cars with price stickers
-    const lot = [];
-    for (let r = 0; r < 2; r++) for (let k = 0; k < 4; k++) lot.push([-4.0 + k * 1.3, 1.0 + r * 2.2]);
-    lot.forEach(([x, z], i) => out.push(place(sedan(['#e5533d', '#3d7be0', '#f4f5f6', '#1d1f24', '#2f9e6e', '#9aa1a9', '#f2c94c', '#8a1538'][i]), { p: [x, y0, z], r: [0, Math.PI / 2, 0], s: 0.85 }), part(box(0.4, 0.3, 0.02), YEL, { p: [x, y0 + 0.75, z + 1.0] })));
-    for (let k = 0; k < 5; k++) out.push(part(box(0.05, 0.012, 2.0), K.white, { p: [-4.65 + k * 1.3, y0 + 0.02, 1.0] }));
-    out.push(trees(R, [[4.6, 4.6], [4.6, 1.4], [0.4, -4.6]], 0.55));
+    const R = rand(222), out = [], NAVY = '#053361', YEL = '#ffd520';
+    out.push(ground('#8fc66f'), part(rbox(9.8, 0.04, 9.8, 0.05), '#6a7079', { p: [0, y0 + 0.02, 0] }));
+    // ---- the appraisal booth, front right
+    const AX = 3.4, AZ = 2.6;
+    out.push(part(rbox(1.4, 1.3, 1.2, 0.05), K.white, { p: [AX + 0.6, y0 + 0.65, AZ + 1.4] }), part(box(1.42, 0.3, 1.22), YEL, { p: [AX + 0.6, y0 + 1.25, AZ + 1.4] }), place(pixText('OFFER', 0.045, NAVY, 0.03), { p: [AX + 0.6, y0 + 1.25, AZ + 0.78] }));
+    out.push(part(rbox(2.4, 0.04, 2.0, 0.03), '#9aa1a9', { p: [AX, y0 + 0.05, AZ] }));
+    // ---- the reconditioning centre, back right: an open-sided shed with a lift, wash and inspection
+    const CX = 2.0, CZ = -2.6;
+    out.push(part(rbox(5.6, 0.2, 2.6, 0.04), '#d8dde3', { p: [CX, y0 + 2.4, CZ] }), [[-2.7, -1.2], [2.7, -1.2], [-2.7, 1.2], [2.7, 1.2], [0, -1.2], [0, 1.2]].map(([x, z]) => part(box(0.16, 2.3, 0.16), '#9aa1a9', { p: [CX + x, y0 + 1.15, CZ + z] })), part(box(5.6, 0.4, 0.04), NAVY, { p: [CX, y0 + 2.2, CZ + 1.3] }), place(pixText('RECONDITIONING', 0.04, K.white, 0.02), { p: [CX, y0 + 2.2, CZ + 1.33] }));
+    [-0.6, 0.6].forEach((dz) => out.push(part(box(0.14, 1.6, 0.14), '#c0392b', { p: [CX - 2.2, y0 + 0.8, CZ + dz] })));
+    out.push(part(rbox(0.4, 1.4, 0.06, 0.03), K.white, { p: [CX + 2.2, y0 + 1.0, CZ - 1.1] }));
+    // ---- the lot on the left: rows with yellow price stickers
+    for (let r = 0; r < 2; r++) for (let k = 0; k < 3; k++) { const x = -4.0 + k * 1.3, z = -2.6 + r * 2.4; out.push(place(sedan(['#e5533d', '#3d7be0', '#f4f5f6', '#1d1f24', '#2f9e6e', '#9aa1a9'][r * 3 + k]), { p: [x, y0 + 0.04, z], r: [0, Math.PI / 2, 0], s: 0.85 }), part(box(0.45, 0.3, 0.02), YEL, { p: [x, y0 + 0.78, z + 1.0] })); }
+    // The store, back left corner, with its sign.
+    out.push(part(rbox(2.4, 1.5, 1.0, 0.05), '#eef0f2', { p: [-3.6, y0 + 0.75, -4.4] }), part(box(2.42, 0.4, 1.02), NAVY, { p: [-3.6, y0 + 1.3, -4.4] }), place(pixText('CARMAX', 0.06, YEL, 0.03), { p: [-3.6, y0 + 1.3, -3.88] }));
+    // The road out along the front for the hauler.
+    out.push(part(box(10.2, 0.03, 1.1), '#4a4f57', { p: [0, y0 + 0.04, 4.6] }));
     // ---- moving parts
-    const moving = [], P = 12;
-    // The car: drives in, appraised, into the bay, out clean with its price, sold and away.
-    const path = curve([[5.6, 0, 0.3], [3.0, 0, 0.3], [2.6, 0, -1.6], [2.6, 0, -2.6], [2.6, 0, -1.6], [1.6, 0, 0.0], [1.2, 0, 2.4], [1.4, 0, 5.6]]);
-    const pos = (f) => (f < 0.15 ? win(f, 0, 0.15) * 0.25 : f < 0.25 ? 0.25 : f < 0.35 ? 0.25 + win(f, 0.25, 0.35) * 0.18 : f < 0.55 ? 0.43 : f < 0.85 ? 0.43 + easeIO(win(f, 0.55, 0.85)) * 0.4 : 0.83 + win(f, 0.85, 1) * 0.17);
+    const moving = [], P = 14;
+    // The car's journey: in, offer, lift, wash, inspection, priced, onto the lot.
+    const path = curve([[5.6, 0, 1.4], [AX, 0, AZ - 0.2], [AX - 0.6, 0, 0.6], [CX - 2.2, 0, CZ + 1.6], [CX - 2.2, 0, CZ], [CX, 0, CZ], [CX + 2.0, 0, CZ], [CX + 2.0, 0, CZ + 1.8], [-0.4, 0, 0.6], [-1.4, 0, -0.2]]);
+    const pos = (f) => { const keys = [[0, 0], [0.08, 0.12], [0.18, 0.12], [0.26, 0.4], [0.36, 0.4], [0.44, 0.53], [0.52, 0.53], [0.6, 0.66], [0.68, 0.66], [0.85, 1.0], [1, 1]]; for (let i = 1; i < keys.length; i++) if (f <= keys[i][0]) { const [f0, u0] = keys[i - 1], [f1, u1] = keys[i]; return u0 + (u1 - u0) * easeIO((f - f0) / (f1 - f0)); } return 1; };
     const car = moving.length;
-    moving.push({ geo: sedan('#c97b5a'), pivot: [0, y0, 0], anim: (t) => { const f = cyc(t, P), a = along(path, pos(f)); return { x: a.p.x, z: a.p.z, ry: f > 0.35 && f < 0.55 ? Math.PI / 2 : a.ry + (f > 0.35 && f < 0.56 ? Math.PI : 0), s: clamp01((5.3 - Math.max(Math.abs(a.p.x), Math.abs(a.p.z))) / 0.5) * 0.85 + 0.001 }; } });
-    // A dull coat that washes off in the bay, and the price sticker that appears after.
-    moving.push({ geo: part(box(1.8, 0.04, 1.0), '#8a7a5a', { p: [0, 1.15, 0] }), pivot: [0, 0, 0], parent: car, anim: (t) => { const f = cyc(t, P); return f < 0.45 ? { s: 1 } : { s: 0.001 }; } });
-    moving.push({ geo: merge(part(box(0.5, 0.36, 0.03), YEL), pixText('$', 0.05, NAVY, 0.04)), pivot: [0.2, 0.85, 0.53], parent: car, anim: (t) => { const f = cyc(t, P); return f > 0.55 ? { s: back(win(f, 0.55, 0.62)) } : { s: 0.001 }; } });
-    // The appraiser with a clipboard, and suds in the bay.
-    moving.push(...walker(moving.length, () => ({ x: 3.0, z: 1.3, ry: Math.PI / 2, still: true }), { shirt: NAVY, pants: '#2b3a55', y: y0 }));
-    for (let k = 0; k < 4; k++) moving.push({ geo: bubbleGeo(0.18), pivot: [2.6 + (k - 1.5) * 0.4, y0 + 1.0, -2.0], anim: (t) => { const f = cyc(t, P), u = cyc(t, 1, k / 4); return f > 0.35 && f < 0.55 ? { y: u * 0.8, s: 1 - u + 0.001 } : { s: 0.001 }; } });
-    // The new owner, walking out to it.
-    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.6, 0.8)); return { x: -1.6 + u * 2.8, z: -2.0 + u * 2.2, ry: -Math.PI / 4, s: f > 0.8 || f < 0.58 ? 0.001 : 1 }; }, { shirt: '#d6336c', pants: '#2b3a55', y: y0 }));
+    moving.push({ geo: place(sedan('#c97b5a'), { s: 0.85 }), pivot: [0, y0 + 0.04, 0], anim: (t) => { const f = cyc(t, P), a = along(path, pos(f)), lift = f > 0.26 && f < 0.36 ? hop(win(f, 0.26, 0.36)) * 0.9 : 0; return { x: a.p.x, y: lift, z: a.p.z, ry: a.ry, s: (f > 0.95 ? 1 - win(f, 0.95, 1) : Math.min(1, f / 0.04)) + 0.001 }; } });
+    moving.push({ geo: part(box(1.6, 0.04, 0.9), '#8a7a5a', { p: [0, 1.0, 0] }), pivot: [0, 0, 0], parent: car, anim: (t) => (cyc(t, P) < 0.46 ? {} : { s: 0.001 }) });
+    moving.push({ geo: merge(part(box(0.55, 0.36, 0.03), YEL), pixText('$', 0.06, NAVY, 0.05)), pivot: [0, 1.4, 0], parent: car, anim: (t) => { const f = cyc(t, P); return f > 0.7 ? { s: back(win(f, 0.7, 0.76)) } : { s: 0.001 }; } });
+    moving.push({ geo: merge(part(rbox(0.9, 0.4, 0.04, 0.06), K.white), pixText('OFFER', 0.035, NAVY, 0.05)), pivot: [AX, y0 + 1.9, AZ - 0.2], anim: (t) => { const f = cyc(t, P); return f > 0.08 && f < 0.2 ? { ry: Math.PI / 4, s: back(win(f, 0.08, 0.12)) } : { s: 0.001 }; } });
+    // The wash brushes and suds, the inspection ticks.
+    [-1, 1].forEach((s) => moving.push({ geo: merge(part(cyl(0.2, 0.2, 1.1, 12), '#4fc3f7'), [0, 1, 2, 3].map((k) => part(box(0.45, 1.0, 0.04), '#7fd3f7', { r: [0, k * Math.PI / 4, 0] }))), pivot: [CX, y0 + 0.65, CZ + s * 0.75], anim: (t) => { const f = cyc(t, P); return { ry: t * (f > 0.42 && f < 0.54 ? 12 : 1) }; } }));
+    for (let k = 0; k < 4; k++) moving.push({ geo: tickGeo(0.13), pivot: [CX + 2.25, y0 + 1.5 - k * 0.3, CZ - 1.05], anim: (t) => { const f = cyc(t, P), a = 0.58 + k * 0.02; return f > a && f < 0.98 ? { s: 1 } : { s: 0.001 }; } });
+    // The car hauler leaving along the front road with a full deck.
+    const hauler = merge(part(rbox(0.9, 0.9, 0.9, 0.08), NAVY, { p: [1.9, 0.65, 0] }), part(box(3.2, 0.1, 0.9), '#7b828c', { p: [0, 0.45, 0] }), part(box(3.0, 0.08, 0.9), '#7b828c', { p: [-0.1, 1.15, 0], r: [0, 0, 0.05] }), [-1.1, 0.4].map((x) => place(sedan('#e5533d'), { p: [x, 0.5, 0], s: 0.55 })), [-1.0, 0.5].map((x) => place(sedan('#3d7be0'), { p: [x, 1.22, 0], s: 0.55 })), [[-1.2, 0.45], [1.9, 0.45], [-1.2, -0.45], [1.9, -0.45]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.12, 12), '#1d1f24', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] })));
+    moving.push({ geo: place(hauler, { s: 0.85 }), pivot: [0, y0 + 0.05, 4.6], anim: (t) => { const x = -6.4 + cyc(t, P, 0.3) * 12.8; return { x, s: clamp01((4.8 - Math.abs(x)) / 0.8) + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // Hertz: a car waiting for everyone off the plane. The jet lands, the traveller walks to the
