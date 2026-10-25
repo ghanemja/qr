@@ -25,16 +25,41 @@ Notes for the next session working on this repo. Live site: https://ghanemja.git
 
 1. **Bespoke models (done for now).** More heroes only if the user asks. Ask before doing Broadcom, Qualcomm, Micron, Anduril or Zipline (already on upgraded shared scenes), or Amgen, Gilead, Regeneron, Halliburton or ConocoPhillips.
 2. **Upgrade the shared shapes** (done for the agreed list; see **Shared-shape upgrades** below for what's done and what's deliberately skipped).
-3. **Advertisement video** of the coolest models, set to music "from Equalizer" (the user wants to advertise Equalizer too).
-   - Equalizer is the user's own music-making app: https://github.com/ghanemja/equalizer (studio: https://ghanemja.github.io/equalizer/). Every sound is an equation; a song is `{ bpm, bars, tracks: [{ name, equation, params, pattern }] }`, and `examples/render.mjs` renders one headlessly to WAV (no samples, no dependencies). Ready-made tracks live in its `docs/audio/` (for example `hyperbolic-808.mp3`, `four-on-the-floor.mp3`). Plan: compose a custom ad track in Equalizer, render it, cut the video to its beat, and show an end card crediting "Soundtrack made in Equalizer" with its link.
-   - **Requested finale:** stack all the models in a grid and do a camera pan, then a zoom-out over all of them.
-   - **Possible approach:** a Playwright-driven headless page that renders heroes, captured frame by frame, then encoded with ffmpeg if it's available.
+3. **Advertisement video. Done and posted** (LinkedIn, "7 days of vibes: Day 3", 25 Oct 2026). See **The ad video** below.
 4. **"Access 3D asset library" button** next to **About** in the header. **Done** (see **3D asset library** below).
    - It should open a page where people can download the 3D models (for example GLB via three's `GLTFExporter`).
    - Every model file must **credit the project and authors** and **embed the open-source licence**. In GLB, use `asset.copyright` and `asset.extras`, and add a LICENSE text alongside. The repo is MIT-licensed (`LICENSE`, chosen by the user); embed that text and the copyright line.
 5. **Small fixes:** tidy the Apple Watch strap; tree shadows don't sway with the leaves.
 
 The Walmart "falling off the edge" fix (region-view lots kept fully on their piece, `tools/build.mjs`) has been merged to `main`.
+
+## The ad video (`tools/video/`, final files in `media/ad/`)
+
+- **Posted:** `media/ad/qr-compass-ad-36s.mp4` (16:9, 1920×1080, 36 s) with `media/ad/cover-16x9.jpg` (crop-safe: LinkedIn's thumbnail preview centre-crops to about 4:3). `cover-4x5.jpg` matches a 4:5 cut that hasn't been rendered yet. Soundtrack: `soundtrack-house-36s.mp3`.
+- **Messaging (agreed with the user):** headline "The economy, built in 3D."; subline "See why every company wins, then scan it."; three acts: 1 · Understand (each world shows the moat), 2 · Scan (every world is a real QR code), 3 · Explore & build (region map, flat map, directory, free MIT models). It names the Fortune 500 *and* the 81 startups. End card: "Built by Janelle Ghanem", the link, and "Soundtrack made in Equalizer". Audience: people who'll use the site, builders, and future employers.
+- **Short cut (posted), 18 bars at 120 bpm:**
+  - 0–2 s: title.
+  - 2–12 s: Walmart, Nvidia, Tesla (Roadster stunt), SpaceX (launch), Anthropic.
+  - 12–22 s: Starbucks → QR. The breakdown plays at half speed and the rebuild at 0.7×, so the model stays on screen after it rebuilds.
+  - 22–28 s: QR world page, library page (opens on `#tesla:0`), then a burst of OpenAI, Stripe, JPMorgan, Alphabet, Disney.
+  - 28–32 s: the drop (white flash and zoom punch from `encode.sh`) into the grid.
+  - 32–36 s: end card.
+  - The full 70 s cut adds the user's favourites as fast cuts, all five site pages and a startup run.
+- **User preferences for the video:**
+  - Feature their favourites: Wells Fargo, Uber, Amazon, Alaska Air, Starbucks, Exxon, Marathon, Plains GP, Berkshire, Northwestern Mutual, CHS, Walmart, Home Depot, FedEx, Verizon, JPMorgan, Caterpillar, Valero, Enterprise Products, RTX, General Dynamics, plus scenes with water and Delta.
+  - The grid's glide path must show the *best* models, and **not ones already shown earlier** (the `SHOWCASE` and `SEEN` lists in `stage.html`).
+  - Databricks' model was judged ugly: keep it out (it could use a redo).
+  - Bells quieter; they loved the build-up and drop synced to the beat.
+- **Pipeline:**
+  - `songs/*.mjs` (Equalizer songs on the bar map in `songs/plan.mjs`; `CUT=short` for the short cut).
+  - `render.cjs` captures the frames. `stage.html` draws the model shots; `qrshot.html` and the live pages are filmed on Playwright's paused fake clock. `FMT=portrait` gives 4:5, `ONLY=stage|qr|page` and `NEED=a-b,...` re-render parts.
+  - `cut.mjs` edits the short cut out of the full cut's frames. `encode.sh <frames> <wav> <out> <drop s>` adds the music and the drop.
+  - `cover.cjs` makes covers (`FEATURE=slug@x,y@t;...`, `SHIFT`, `SAFE=1`).
+  - Rendering is slow in the cloud container (software GL, 4 cores): about an hour for everything, 10–20 min per re-shot. Re-render only what changed.
+- **Open ideas:**
+  - A 4:5 render of the short cut (`FMT=portrait NEED=...`; it needs the QR shot and grid in portrait).
+  - A podcast or series, one world per episode, with an angle helping up-and-comers spot gaps (from a LinkedIn comment).
+  - An AMD signature model: AMD hit a $1T market cap on 21 Sep 2026, and it currently sits on a shared chip scene.
 
 ## Shared-shape upgrades
 

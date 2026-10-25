@@ -23,11 +23,13 @@ const CSS = `#cover { position: absolute; z-index: 9; display: flex; flex-direct
   await p.goto(`${HOST}/tools/video/stage.html${PORTRAIT ? '?fmt=portrait' : ''}`);
   await p.waitForFunction(() => document.title === 'ready', null, { timeout: 180000 });
   await p.addStyleTag({ content: CSS });
+  // SAFE=1: keep everything inside the middle 4:3 of a 16:9 cover (LinkedIn's thumbnail preview crops to it).
+  if (process.env.SAFE && !PORTRAIT) await p.addStyleTag({ content: `#cover h2 { font-size: 92px; } #cover p { max-width: 560px; font-size: 29px; } #cover .brand { font-size: 40px; } #cover .url { font-size: 32px; }` });
   // A: Disney's castle with its fireworks, the headline beside (or above) it. B: the grid, under a soft shade.
   for (const [name, T, shade, pos] of [
     ['model', 19.2, '', PORTRAIT ? 'left:72px;right:72px;top:70px' : 'left:96px;top:0;bottom:0;justify-content:center'],
-    ['grid', 59.3, PORTRAIT ? 'linear-gradient(180deg,rgba(246,241,231,.96) 0%,rgba(246,241,231,.9) 48%,rgba(246,241,231,0) 72%)' : 'linear-gradient(90deg,rgba(246,241,231,.97) 0%,rgba(246,241,231,.92) 42%,rgba(246,241,231,0) 68%)',
-      PORTRAIT ? 'left:72px;right:72px;top:70px' : 'left:96px;top:0;bottom:0;justify-content:center'],
+    ['grid', 59.3, PORTRAIT ? 'linear-gradient(180deg,rgba(246,241,231,.96) 0%,rgba(246,241,231,.9) 48%,rgba(246,241,231,0) 72%)' : (process.env.SAFE ? 'linear-gradient(90deg,rgba(246,241,231,.97) 0%,rgba(246,241,231,.92) 48%,rgba(246,241,231,0) 66%)' : 'linear-gradient(90deg,rgba(246,241,231,.97) 0%,rgba(246,241,231,.92) 42%,rgba(246,241,231,0) 68%)'),
+      (PORTRAIT ? 'left:72px;right:72px;top:70px' : `left:${process.env.SAFE ? 300 : 96}px;top:0;bottom:0;justify-content:center`)],
   ]) {
     await p.evaluate((T) => window.frame(T), T);
     if (name === 'model') await p.evaluate((portrait) => (portrait ? window.shift(0, 330) : window.shift(330, 30)), PORTRAIT);
@@ -44,7 +46,7 @@ const CSS = `#cover { position: absolute; z-index: 9; display: flex; flex-direct
       document.body.insertAdjacentHTML('beforeend', `<div id="shade" style="background:${shade}"></div><div id="cover" style="${pos}">${html}</div>`);
     }, [TEXT, shade, pos, PORTRAIT]);
     await p.evaluate(() => document.fonts.ready);
-    await p.screenshot({ path: `${out}/cover-${name}${process.env.FEATURE && name === 'grid' ? '-featured' : ''}-${PORTRAIT ? '4x5' : '16x9'}.jpg`, type: 'jpeg', quality: 95 });
+    await p.screenshot({ path: `${out}/cover-${name}${process.env.FEATURE && name === 'grid' ? '-featured' : ''}${process.env.SAFE ? '-safe' : ''}-${PORTRAIT ? '4x5' : '16x9'}.jpg`, type: 'jpeg', quality: 95 });
     console.log(name);
   }
   await b.close();
