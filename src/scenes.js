@@ -1130,4 +1130,65 @@ export const SCENES = {
     moving.push({ geo: part(new THREE.CylinderGeometry(0.012, 0.012, 1, 5), '#f2c94c', { p: [0, 0.5, 0] }), pivot: [0, 0, 0], anim: (t) => { const f = F(t), a = GP(f).add(new V(0.15, y0 + 1.0, 0)), b = ringPos(f), d = b.clone().sub(a), L = d.length(); const on = f > 0.35 && f < 0.74; return { x: a.x, y: a.y, z: a.z, q: new THREE.Quaternion().setFromUnitVectors(new V(0, 1, 0), d.normalize()), sx: on ? 1 : 0.001, sy: on ? Math.max(0.001, L) : 0.001, sz: on ? 1 : 0.001 }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.6, y0, -2.3], topAt: [TX, y0 + TH + 1.45, TZ - 0.1] };
   },
+
+  // Hourglass (life insurers, annuities, title and specialty insurers): security over a lifetime.
+  // A giant hourglass trickles gold from top to bottom and turns over each cycle; around it a path
+  // runs through life (a couple's first home, a family with a child on the swing, a retired couple
+  // rocking on their porch), and cheques fly from the hourglass to the retirees.
+  'insurance:3': () => {
+    const R = rand(1401), out = [], moving = [];
+    out.push(slab('#9fcf7a'));
+    // ---- the path through life
+    const path = curve([[-4.6, 0, 4.2], [-2.6, 0, 2.0], [0, 0, 2.6], [2.4, 0, 1.6], [2.6, 0, -1.2], [1.4, 0, -3.4], [3.4, 0, -4.6]]);
+    for (let i = 0, n = hi() ? 70 : 20; i < n; i++) { const { p, ry } = along(path, i / n); out.push(part(rbox(0.5, 0.04, 0.5, 0.06), '#e6dcc8', { p: [p.x, y0 + 0.02, p.z], r: [0, ry + (i % 2) * 0.3, 0] })); }
+    // ---- the hourglass on its plinth
+    const GX = -0.6, GZ = -0.4, PH = 0.5, H = 1.6, GY = y0 + PH + 0.2 + H;
+    out.push(part(cyl(1.3, 1.4, PH, 32), K.stone, { p: [GX, y0 + PH / 2, GZ] }), part(cyl(1.42, 1.44, 0.14, 32), 'A', { p: [GX, y0 + 0.07, GZ] }));
+    // ---- three homes along the path
+    out.push(place(home('#f3ead8', 'Bd', 1.5, 1.3, 1.0), { p: [-3.6, y0, 3.3], r: [0, 0.7, 0] }));
+    out.push(place(house2('#e4ecf0', '#5a6b7d', 'B'), { p: [3.3, y0, 3.3], r: [0, -0.6, 0], s: 0.85 }));
+    // The retirees' porch house at the back right, with rocking chairs.
+    const OX = 3.2, OZ = -2.4;
+    out.push(place(home('#efe2cc', 'Ad', 2.0, 1.6, 1.2), { p: [OX, y0, OZ - 0.6], r: [0, -0.3, 0] }), part(rbox(2.2, 0.12, 0.9, 0.03), '#b98a5a', { p: [OX + 0.25, y0 + 0.08, OZ + 0.45], r: [0, -0.3, 0] }));
+    // A swing set by the family home.
+    const SX = 1.6, SZ = 4.0;
+    out.push(beam([SX - 0.8, y0, SZ - 0.4], [SX - 0.8, y0 + 1.8, SZ], 0.06, '#d6336c'), beam([SX - 0.8, y0, SZ + 0.4], [SX - 0.8, y0 + 1.8, SZ], 0.06, '#d6336c'), beam([SX + 0.8, y0, SZ - 0.4], [SX + 0.8, y0 + 1.8, SZ], 0.06, '#d6336c'), beam([SX + 0.8, y0, SZ + 0.4], [SX + 0.8, y0 + 1.8, SZ], 0.06, '#d6336c'), beam([SX - 0.8, y0 + 1.8, SZ], [SX + 0.8, y0 + 1.8, SZ], 0.06, '#d6336c'));
+    [[-4.5, 0.4], [-2.3, -3.6], [0.4, -4.4], [4.5, 0.6], [-4.4, -2.0], [0.6, 4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.55 + R() * 0.25)));
+    if (hi()) for (let i = 0; i < 12; i++) out.push(tuft(R, -4.6 + R() * 9.2, -4.6 + R() * 9.2, 0.2, 5, ['#7fcf3f', '#6cc23a', '#94d84f'], 0.3).map((g) => place(g, { p: [0, y0, 0] })));
+    // ---- moving parts (one 10 s cycle per turn of the glass)
+    const P = 10, F = (t) => cyc(t, P), n = (t) => Math.floor(t / P), flow = (t) => win(F(t), 0.05, 0.84);
+    const turn = (t) => Math.PI * (n(t) + easeIO(win(F(t), 0.86, 1)));
+    const glass = moving.length;
+    // The frame: caps, posts and a glass outline (hoops) around two bulbs.
+    // The glass, drawn as ribs and hoops along the two bulbs' profile.
+    const prof = [[0.12, 0.02], [0.55, 0.3], [0.85, 0.75], [0.82, 1.2], [0.6, 1.5]];
+    const ribs = [-1, 1].flatMap((sg) => ring(hi() ? 10 : 5, (a) => part(tube(prof.map(([r, y]) => [Math.cos(a) * r, sg * y, Math.sin(a) * r]), 0.025), '#cfeefc')));
+    const hoops = [-1, 1].flatMap((sg) => [[0.85, 0.75], [0.6, 1.5]].map(([r, y]) => part(torus(r, 0.03, TAU, 32), '#cfeefc', { p: [0, sg * y, 0], r: [Math.PI / 2, 0, 0] })));
+    moving.push({ geo: merge(part(cyl(1.05, 1.05, 0.22, 32), K.wood, { p: [0, H + 0.11, 0] }), part(cyl(1.05, 1.05, 0.22, 32), K.wood, { p: [0, -H - 0.11, 0] }), part(cyl(1.08, 1.08, 0.06, 32), 'A', { p: [0, H + 0.24, 0] }), part(cyl(1.08, 1.08, 0.06, 32), 'A', { p: [0, -H - 0.24, 0] }),
+      ring(3, (a) => part(cyl(0.07, 0.07, 2 * H, 10), K.woodDk, { p: [Math.cos(a) * 0.95, 0, Math.sin(a) * 0.95] })), ribs, hoops),
+      pivot: [GX, GY, GZ], anim: (t) => ({ rz: turn(t) }) });
+    // Gold heaps in each bulb: the one on top drains while the one below fills; they swap roles each turn.
+    const heap = (sgn) => part(lathe([[0, 0], [0.78, 0.0], [0.6, 0.35], [0.12, 0.7], [0, 0.72]], 28), (x, y, z) => (Math.floor((x + z) * 6) % 2 ? K.gold : '#e3b23c'), { r: sgn > 0 ? [Math.PI, 0, 0] : [0, 0, 0] });
+    moving.push({ geo: heap(1), pivot: [0, H, 0], parent: glass, anim: (t) => { const k = n(t) % 2 ? flow(t) : 1 - flow(t); return { sy: Math.max(0.02, k), sx: 0.4 + 0.6 * Math.sqrt(k), sz: 0.4 + 0.6 * Math.sqrt(k) }; } });
+    moving.push({ geo: heap(-1), pivot: [0, -H, 0], parent: glass, anim: (t) => { const k = n(t) % 2 ? 1 - flow(t) : flow(t); return { sy: Math.max(0.02, k), sx: 0.4 + 0.6 * Math.sqrt(k), sz: 0.4 + 0.6 * Math.sqrt(k) }; } });
+    // The stream through the neck, and coins tumbling in it.
+    moving.push({ geo: part(cyl(0.04, 0.04, 1, 8), K.gold, { p: [0, -0.5, 0] }), pivot: [GX, GY, GZ], anim: (t) => { const f = F(t), on = f > 0.05 && f < 0.84; return { sy: on ? H - 0.2 : 0.001, s: on ? 1 : 0.001 }; } });
+    for (let k = 0; k < 4; k++) moving.push({ geo: part(new THREE.CylinderGeometry(0.09, 0.09, 0.03, 14), K.gold), pivot: [GX, GY, GZ], anim: (t) => { const f = F(t), u = cyc(t, 0.6, k / 4); return { y: -u * (H - 0.3), rx: u * 9, s: f > 0.05 && f < 0.84 ? 1 : 0.001 }; } });
+    // Cheques fly out to the retired couple.
+    const OUT = new V(GX + 1.2, y0 + PH + 0.3, GZ), TO = new V(OX - 0.2, y0 + 1.1, OZ + 0.6);
+    for (let k = 0; k < 2; k++) moving.push({ geo: merge(part(box(0.42, 0.02, 0.26), K.white), part(box(0.12, 0.025, 0.1), 'A', { p: [0.12, 0, -0.05] }), part(box(0.25, 0.026, 0.02), K.ink, { p: [-0.05, 0, 0.06] })), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 5, k / 2), k2 = easeIO(win(u, 0.1, 0.7)), p = OUT.clone().lerp(TO, k2); return { x: p.x, y: p.y + hop(k2) * 1.6, z: p.z, ry: k2 * 3, rz: Math.sin(u * 20) * 0.2, s: life(u, 0.08, 0.14, 0.7, 0.8) }; } });
+    // The retirees rock on their porch.
+    [[-0.45, '#8fc4e8'], [0.45, '#d6336c']].forEach(([dx, c], i) => {
+      const cx = OX + dx * Math.cos(0.3), cz = OZ + 0.55 + dx * Math.sin(0.3);
+      const chair = moving.length;
+      moving.push({ geo: merge(part(rbox(0.45, 0.06, 0.45, 0.02), K.woodDk, { p: [0, 0.35, 0] }), part(rbox(0.06, 0.6, 0.45, 0.02), K.woodDk, { p: [-0.22, 0.65, 0] }), [-0.2, 0.2].map((z) => part(torus(0.5, 0.025, 0.9, 10), K.woodDk, { p: [0, 0.5, z], r: [0, 0, -Math.PI / 2 - 0.45] }))), pivot: [cx, y0 + 0.14, cz], anim: (t) => ({ ry: -0.3 + Math.PI, rz: Math.sin(t * 1.6 + i) * 0.12 }) });
+      moving.push({ geo: merge(part(capsule(0.17, 0.3), c, { p: [0, 0.65, 0] }), part(new THREE.SphereGeometry(0.15, 12, 9), '#e9b98f', { p: [0, 1.05, 0] }), part(new THREE.SphereGeometry(0.155, 12, 9), '#e6e6e6', { p: [-0.02, 1.1, 0], s: [1, 0.75, 1] }), part(capsule(0.08, 0.3), '#3b4a5c', { p: [0.2, 0.42, 0.08], r: [0, 0, Math.PI / 2] }), part(capsule(0.08, 0.3), '#3b4a5c', { p: [0.2, 0.42, -0.08], r: [0, 0, Math.PI / 2] })), pivot: [0, 0, 0], parent: chair, anim: () => ({}) });
+    });
+    // A young couple strolls the path; a child swings.
+    [0, 0.04].forEach((o, i) => moving.push(...walker(moving.length, (t) => { const u = cyc(t, 22, -o), { p, ry } = along(path, Math.min(0.999, u * 0.999)); return { x: p.x, z: p.z + (i ? 0.25 : -0.25), ry, s: Math.min(1, u / 0.03, (1 - u) / 0.03) }; }, { shirt: i ? '#f29a3a' : 'B', pants: '#2b3a55', y: y0 })));
+    const sw = moving.length;
+    moving.push({ geo: merge([-0.25, 0.25].map((z) => part(cyl(0.01, 0.01, 1.4, 4), K.ink, { p: [0, -0.7, z] })), part(rbox(0.3, 0.05, 0.6, 0.02), K.wood, { p: [0, -1.4, 0] })), pivot: [SX, y0 + 1.78, SZ], anim: (t) => ({ rz: Math.sin(t * 2.2) * 0.6, ry: Math.PI / 2 }) });
+    moving.push({ geo: merge(part(capsule(0.12, 0.2), '#f2c94c', { p: [0, 0.2, 0] }), part(new THREE.SphereGeometry(0.12, 10, 8), '#e9b98f', { p: [0, 0.5, 0] }), part(capsule(0.05, 0.25), '#3d7be0', { p: [0.15, 0.0, 0], r: [0, 0, Math.PI / 2] })), pivot: [0, -1.38, 0], parent: sw, anim: () => ({ ry: -Math.PI / 2 }) });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.6, y0, -1.2], topAt: [OX + 0.2, y0 + 1.95, OZ - 0.6] };
+  },
 };
