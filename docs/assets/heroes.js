@@ -337,6 +337,24 @@ export const HEROES = {
       moving.push({ geo: part(capsule(0.07, 0.3), K.white, { r: [0, 0, Math.PI / 2] }), pivot: [0, 0, 0], anim: (t) => { const a = t * 0.5 + i * 2.1; return { x: Math.cos(a) * (3 + i * 0.6), y: 8.5 + i * 0.6 + Math.sin(t + i) * 0.3, z: Math.sin(a) * (2.6 + i * 0.5), ry: -a - Math.PI / 2 }; } });
       [1, -1].forEach((side) => moving.push({ geo: gull(side), pivot: [0, 0, 0], parent: me, anim: (t) => ({ rx: side * Math.sin(t * 7 + i) * 0.6 }) }));
     });
+    // A little launch pad on its own island in the far corner: a Starship stack lifts off on its
+    // flame and climbs out of the frame while the booster rests on the droneship, then is restacked.
+    const PX = 4.05, PZ = -4.05, padY = SEA + 0.32;
+    out.push(part(cyl(1.0, 1.15, 0.5, 32), '#cfc6b4', { p: [PX, SEA + 0.07, PZ] }), part(cyl(0.7, 0.7, 0.06, 32), '#9aa1a9', { p: [PX, padY + 0.03, PZ] }));
+    out.push(part(box(0.22, 2.6, 0.22), '#3a3f47', { p: [PX - 0.55, padY + 1.3, PZ - 0.35] }), part(box(0.5, 0.06, 0.06), '#3a3f47', { p: [PX - 0.33, padY + 2.2, PZ - 0.35] }), part(box(0.5, 0.06, 0.06), '#3a3f47', { p: [PX - 0.33, padY + 1.4, PZ - 0.35] }));
+    const ship = merge(part(lathe([[0, 0], [0.24, 0], [0.24, 1.55], [0.2, 1.85], [0.1, 2.02], [0, 2.06]], hi() ? 24 : 10), '#d9dde2'), part(cyl(0.245, 0.245, 0.03, 20), '#9aa1a9', { p: [0, 0.9, 0] }),
+      ...[0, 1].map((k) => part(box(0.28, 0.32, 0.03), '#3a3f47', { p: [0, 0.2 + k * 1.3, 0.24], r: [0, k * 0.0, 0] })));
+    const shipFlame = merge(part(lathe([[0, 0], [0.2, -0.15], [0.22, -0.55], [0.1, -1.2], [0, -1.5]], 16), '#ff8a2a'), part(lathe([[0, 0], [0.12, -0.12], [0.12, -0.45], [0, -0.9]], 14), '#ffd36b'));
+    // f in the booster's 10 s cycle: launch while it rests on the deck (0.45-0.7), restacked later.
+    const climb = (f) => (f < 0.47 ? 0 : 7 * easeIn(win(f, 0.47, 0.7)));
+    const SHIP = moving.length;
+    moving.push({ geo: ship, pivot: [PX, padY + 0.06, PZ], anim: (t) => { const f = cyc(t, 10), y = climb(f); return { y, rz: y > 0.5 ? -0.08 * win(f, 0.52, 0.7) : 0, s: f > 0.69 && f < 0.97 ? 0.001 : Math.min(1, (f < 0.47 ? 1 : 1), f > 0.97 ? (f - 0.97) / 0.03 : 1) * Math.max(0.001, y > 5 ? 1 - (y - 5) / 2 : 1) }; } });
+    moving.push({ geo: shipFlame, pivot: [0, 0, 0], parent: SHIP, anim: (t) => { const f = cyc(t, 10); return f > 0.44 && f < 0.7 ? { sy: 0.9 + Math.sin(t * 41) * 0.15, sx: 1 + Math.sin(t * 33) * 0.08 } : { s: 0.001 }; } });
+    // Its exhaust cloud spreading over the pad.
+    for (let i = 0; i < (hi() ? 6 : 3); i++) { const a = (i / (hi() ? 6 : 3)) * TAU; moving.push({ geo: part(ball(0.45), '#efece6'), pivot: [PX, padY + 0.2, PZ], anim: (t) => {
+      const f = cyc(t, 10), k = win(f, 0.45, 0.55) * (1 - win(f, 0.6, 0.75));
+      return { x: Math.cos(a) * (0.3 + k * 0.9), z: Math.sin(a) * (0.3 + k * 0.9), y: k * 0.2, s: Math.max(0.001, k * (0.7 + (i % 2) * 0.3)) };
+    } }); }
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 
@@ -999,7 +1017,7 @@ export const HEROES = {
     const parked = [[stalls[0], '#f4f5f6'], [stalls[2], RED], [stalls[3], '#1d1f24']];
     parked.forEach(([x, paint]) => { out.push(place(carGeo(paint), { p: [x, y0, -1.3], r: [0, Math.PI / 2, 0] })); out.push(part(tube([[x, y0 + 0.9, -2.83], [x + 0.15, y0 + 0.6, -2.55], [x + 0.35, y0 + 0.5, -2.35], [x + 0.42, y0 + 0.55, -2.25]], 0.035), '#1d1f24')); });
     out.push(part(rbox(0.5, 2.2, 0.16, 0.06), '#f4f5f6', { p: [3.9, y0 + 1.1, 4.3] }), part(extrude([[-0.16, 0.12], [0.16, 0.12], [0.14, 0.06], [0.03, 0.06], [0.03, -0.2], [-0.03, -0.2], [-0.03, 0.06], [-0.14, 0.06]], 0.04), RED, { p: [3.9, y0 + 1.75, 4.37], s: 1.1 }));
-    out.push(place(cyber, { p: [1.6, y0, 2.2], r: [0, -0.3, 0], s: 0.95 }));
+    out.push(place(cyber, { p: [2.1, y0, 1.05], r: [0, -0.25, 0], s: 0.95 }));
     // ---- moving parts
     const charge = (i) => (t) => 0.25 + 0.75 * cyc(t, 9 + i * 2, i * 0.3);
     const moving = [
@@ -1017,6 +1035,47 @@ export const HEROES = {
       // The Megapacks' cooling fans.
       ...[0, 1].map((k) => ({ geo: merge(part(cyl(0.22, 0.22, 0.04, 20), '#9aa1a9'), ring(5, (a) => part(box(0.18, 0.015, 0.06), '#5b616b', { p: [Math.cos(a) * 0.1, 0.03, Math.sin(a) * 0.1], r: [0.3, -a, 0] }))), pivot: [-3.4, y0 + 1.33, 3.6 + k * 0.75], anim: (t) => ({ ry: t * 9 }) })),
     ];
+    // ---- the new Roadster's party trick: up the curled ramp, off it upside down on cold-gas
+    // thrusters, a half roll in the air, and down on its wheels.
+    const SX = -0.6, SZ = 3.35, LR = 1.05, EXIT = 2.2;
+    const onRamp = (a) => [SX - LR * Math.sin(a), y0 + LR - LR * Math.cos(a)];
+    for (let i = 0; i < 22; i++) {
+      const a0 = (EXIT * i) / 22, a1 = (EXIT * (i + 1)) / 22, am = (a0 + a1) / 2, [x, y] = onRamp(am);
+      out.push(part(box(LR * (a1 - a0) + 0.02, 0.08, 1.25), i % 4 < 2 ? '#e9ecef' : RED, { p: [x - 0.04 * Math.sin(am), y - 0.04 * Math.cos(am), SZ], r: [0, 0, -am] }));
+    }
+    // Its back rail and the struts that hold the curl up (behind the car's path).
+    const rail = [...Array(17)].map((_, i) => { const [x, y] = onRamp((EXIT * i) / 16); return [x - 0.08 * Math.sin((EXIT * i) / 16), y - 0.08 * Math.cos((EXIT * i) / 16), SZ - 0.66]; });
+    out.push(part(tube(rail, 0.04), '#c9ced6'), part(tube(rail.map(([x, y, z]) => [x, y, z + 1.32]), 0.03), '#c9ced6'));
+    [1.0, 1.6, 2.2].forEach((a) => { const [x, y] = onRamp(a); out.push(part(cyl(0.045, 0.045, y - y0, 8), '#9aa1a9', { p: [x - 0.1, (y + y0) / 2, SZ - 0.66] })); });
+    out.push(part(box(5.6, 0.012, 0.05), '#e9e6df', { p: [1.6, y0 + 0.006, SZ - 0.7] }), part(box(5.6, 0.012, 0.05), '#e9e6df', { p: [1.6, y0 + 0.006, SZ + 0.7] }));
+    // The Roadster: low, wedge-nosed, with a spoiler and a thruster nozzle at the tail.
+    const roadster = merge(
+      part(new THREE.ExtrudeGeometry(sideShape([[-1.05, 0.14], [-1.1, 0.14], [-1.1, 0.3], [-1.08, 0.46], [-0.8, 0.5], [-0.35, 0.72], [0.05, 0.72], [0.4, 0.66], [0.7, 0.42], [1.1, 0.34], [1.15, 0.24], [1.15, 0.14], [1.0, 0.14], [0, 0.14], [-1.05, 0.14]]), { depth: 0.82, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.06, bevelSegments: hi() ? 4 : 1, curveSegments: hi() ? 10 : 3 }).translate(0, 0, -0.41), RED),
+      part(new THREE.ExtrudeGeometry(sideShape([[-0.55, 0.5], [-0.35, 0.68], [0.05, 0.69], [0.32, 0.62], [0.5, 0.48], [0, 0.48], [-0.55, 0.5]]), { depth: 0.7, bevelEnabled: true, bevelThickness: 0.04, bevelSize: 0.03, bevelSegments: hi() ? 3 : 1, curveSegments: hi() ? 8 : 3 }).translate(0, 0.03, -0.35), '#1e2a36'),
+      part(box(0.22, 0.03, 0.9), '#1d1f24', { p: [-1.0, 0.66, 0] }), ...[-0.32, 0.32].map((z) => part(box(0.04, 0.16, 0.04), '#1d1f24', { p: [-0.98, 0.56, z] })),
+      part(cyl(0.09, 0.12, 0.12, 14), '#5b616b', { p: [-1.16, 0.3, 0], r: [0, 0, Math.PI / 2] }),
+      part(box(0.02, 0.04, 0.7), '#e8f4ff', { p: [1.17, 0.3, 0] }), part(box(0.02, 0.05, 0.8), '#d1101a', { p: [-1.12, 0.42, 0] }),
+      [[0.72, 0.44], [-0.68, 0.44], [0.72, -0.44], [-0.68, -0.44]].flatMap(([x, z]) => [part(cyl(0.18, 0.18, 0.14, 24), '#1d1f24', { p: [x, 0.18, z], r: [Math.PI / 2, 0, 0] }), part(cyl(0.11, 0.11, 0.15, 20), '#b9bec6', { p: [x, 0.18, z], r: [Math.PI / 2, 0, 0] })]));
+    // One 6 s run: in from the right, the curl (0.6 s), the flight (1.4 s), down, and away.
+    const qA = new THREE.Quaternion(), qB = new THREE.Quaternion(), Yaw = new THREE.Quaternion().setFromAxisAngle(new V(0, 1, 0), Math.PI), Zax = new V(0, 0, 1);
+    const [ex, ey] = onRamp(EXIT), LAND = 2.0, FLY = 1.4, vx = (LAND - ex) / FLY, vy = vx * Math.sin(EXIT) / -Math.cos(EXIT), g = (2 * (ey - y0 + vy * FLY)) / (FLY * FLY);
+    const stunt = (t) => {
+      const T = ((t % 6) + 6) % 6;
+      if (T < 1.6) { const u = easeIn(T / 1.6); return { x: (4.3 - SX) * (1 - u), q: Yaw, s: Math.max(0.001, Math.min(1, T / 0.25)) }; }
+      if (T < 2.2) { const a = EXIT * ((T - 1.6) / 0.6), [x, y] = onRamp(a); return { x: x - SX, y: y - y0, q: qA.copy(Yaw).multiply(qB.setFromAxisAngle(Zax, a)) }; }
+      if (T < 2.2 + FLY) {
+        const k = T - 2.2, e = easeIO(k / FLY);
+        qA.copy(Yaw).multiply(qB.setFromAxisAngle(Zax, EXIT)); // leaving the curl: nose up and back, belly to the sky
+        return { x: ex + vx * k - SX, y: ey + vy * k - 0.5 * g * k * k - y0, q: qA.slerp(qB.identity(), e) };
+      }
+      const k = T - 2.2 - FLY;
+      return { x: LAND - SX + easeIn(Math.min(1, k / 2)) * 2.3, y: Math.max(0, Math.sin(Math.min(1, k / 0.3) * Math.PI) * 0.12), s: k < 1.8 ? 1 : Math.max(0.001, 1 - (k - 1.8) / 0.2) };
+    };
+    const ROADSTER = moving.length;
+    moving.push({ geo: roadster, pivot: [SX, y0, SZ], anim: (t) => stunt(t) });
+    // Cold-gas thruster puffs, only while it flies.
+    [[-1.2, 0.3, 0], [0, 0.05, 0.3], [0, 0.05, -0.3]].forEach(([x, y, z], i) => moving.push({ geo: part(new THREE.SphereGeometry(0.16, 10, 8), '#f4f7fb'), parent: ROADSTER, pivot: [x, y, z],
+      anim: (t) => { const T = ((t % 6) + 6) % 6, on = T > 2.15 && T < 2.2 + FLY; return on ? { x: i ? 0 : -0.25 * ((T * 7 + i) % 1), y: i ? -0.25 * ((T * 7 + i * 0.4) % 1) : 0, s: 0.6 + 0.6 * ((T * 7 + i * 0.3) % 1) } : { s: 0.001 }; } }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 
