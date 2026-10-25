@@ -1746,5 +1746,59 @@ export const HEROES = {
     moving.push({ geo: sedan('#c0392b'), pivot: [GX - 0.0, y0 + 0.08, GZ + 0.85], anim: (t) => { const f = cyc(t, 10), x = f < 0.3 ? -4 * (1 - easeOut(f / 0.3)) : f < 0.7 ? 0 : 4 * easeIn(win(f, 0.7, 0.95)); return { x, s: clamp01((2.9 - Math.abs(x)) / 0.5) + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Anthropic: AI built to be helpful and safe. The Claude spark turns in the courtyard; the open
+  // constitution turns its pages and its words drift into the spark; people talk with Claude at the
+  // café tables, replies popping up; the research building lights its windows behind.
+  anthropic: { finder: '#d97757', build: () => {
+    const R = rand(83), out = [], y0 = 0.24, CLAY = '#d97757', CREAM = '#f0eee6', INK = '#3d3929';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#b9c99a', { p: [0, 0.12, 0] }));
+    // Paths of warm paving round a central court.
+    out.push(part(cyl(2.3, 2.3, 0.04, 64), '#e8dfcc', { p: [0, y0 + 0.02, 0.2] }), part(box(1.0, 0.03, 10.2), '#e8dfcc', { p: [0, y0 + 0.015, 0] }), part(box(10.2, 0.03, 1.0), '#e8dfcc', { p: [0, y0 + 0.015, 0.2] }));
+    // ---- the research building: clay brick, many windows, a roof garden
+    const BX = -0.4, BZ = -3.6, W = 7.0, D = 2.0, H = 2.5;
+    out.push(part(rbox(W, H, D, 0.05), '#c4a487', { p: [BX, y0 + H / 2, BZ] }), part(rbox(W + 0.1, 0.12, D + 0.1, 0.03), '#a8876b', { p: [BX, y0 + H, BZ] }), part(box(W - 0.4, 0.1, D - 0.4), '#7fa65a', { p: [BX, y0 + H + 0.08, BZ] }));
+    for (let j = 0; j < 3; j++) for (let i = 0; i < 12; i++) out.push(part(rbox(0.36, 0.48, 0.05, 0.03), '#34413d', { p: [BX - W / 2 + 0.45 + i * 0.555, y0 + 0.5 + j * 0.72, BZ + D / 2 + 0.01] }));
+    out.push(part(rbox(1.0, 1.0, 0.08, 0.03), '#f6efe3', { p: [BX, y0 + 0.5, BZ + D / 2 + 0.02] }));
+    if (hi()) for (let i = 0; i < 5; i++) out.push(miniTree(R, BX - 2.6 + i * 1.3, y0 + H + 0.12, BZ + (i % 2 ? -0.3 : 0.3), 0.4));
+    // ---- the constitution on its lectern
+    const LX = -2.9, LZ = 1.4;
+    out.push(part(rbox(0.9, 0.9, 0.6, 0.06), '#8a5a3a', { p: [LX, y0 + 0.45, LZ] }), part(rbox(1.3, 0.1, 0.9, 0.04), '#8a5a3a', { p: [LX, y0 + 0.95, LZ], r: [0.3, Math.PI / 4, 0] }));
+    const page = (w, d) => part(box(w, 0.02, d), CREAM);
+    const bookAt = new THREE.Euler(0.3, Math.PI / 4, 0);
+    out.push(place(merge(part(rbox(1.5, 0.08, 1.0, 0.03), CLAY, { p: [0, 0, 0] }), part(box(0.7, 0.06, 0.92), CREAM, { p: [-0.37, 0.06, 0], r: [0, 0, 0.06] }), part(box(0.7, 0.06, 0.92), CREAM, { p: [0.37, 0.06, 0], r: [0, 0, -0.06] }),
+      hi() ? [...Array(8)].flatMap((_, i) => [part(box(0.5, 0.005, 0.03), '#8f8778', { p: [-0.38, 0.095, -0.32 + i * 0.09] }), part(box(0.5, 0.005, 0.03), '#8f8778', { p: [0.38, 0.095, -0.32 + i * 0.09] })]) : []), { p: [LX, y0 + 1.06, LZ], r: [0.3, Math.PI / 4, 0] }));
+    // ---- the café tables where people talk with Claude
+    const tables = [[2.5, 1.0], [3.6, 2.6], [1.6, 3.2]];
+    const sitter = (x, z, a, shirt, skin, hair) => { const c = Math.cos(a), s = Math.sin(a); return [part(capsule(0.16, 0.28), shirt, { p: [x, y0 + 0.78, z] }), part(ball(0.14), skin, { p: [x, y0 + 1.18, z] }), part(ball(0.15), hair, { p: [x - c * 0.02, y0 + 1.23, z - s * 0.02], s: [1, 0.75, 1] }), part(rbox(0.3, 0.45, 0.3, 0.05), INK, { p: [x - c * 0.05, y0 + 0.22, z - s * 0.05] })]; };
+    tables.forEach(([x, z], i) => {
+      out.push(part(cyl(0.42, 0.42, 0.05, 28), CREAM, { p: [x, y0 + 0.62, z] }), part(cyl(0.04, 0.05, 0.6, 10), INK, { p: [x, y0 + 0.31, z] }));
+      out.push(part(rbox(0.36, 0.02, 0.24, 0.01), '#b9bec6', { p: [x, y0 + 0.66, z + 0.05] }), part(rbox(0.36, 0.24, 0.02, 0.01), '#2b2f36', { p: [x, y0 + 0.78, z - 0.07], r: [-0.25, 0, 0] }), part(box(0.3, 0.18, 0.005), CLAY, { p: [x, y0 + 0.78, z - 0.055], r: [-0.25, 0, 0] }));
+      out.push(sitter(x, z + 0.6, Math.PI / 2, ['#5b7f95', '#c97d5d', '#7a8a6a'][i], ['#e9b98f', '#c58c66', '#8d5a3b'][i], ['#3a2a20', '#1d1f24', '#d9b26b'][i]));
+    });
+    [[-4.5, -1.4], [-4.5, 3.8], [4.5, -1.2], [4.5, 4.5], [-1.6, 4.5], [-3.2, -1.6], [3.0, -1.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.75 + R() * 0.25, ['#7fa65a', '#93b86b', '#6b9350', '#a8c47a'])));
+    out.push(lampPost(-1.0, y0, 2.6, Math.PI), lampPost(1.0, y0, -1.6, 0));
+    // ---- moving parts
+    const moving = [];
+    // The Claude spark: rays of different lengths round a core, turning slowly and breathing.
+    const rays = [1.0, 0.82, 0.95, 0.78, 1.05, 0.86, 0.98, 0.8, 1.02, 0.84, 0.92, 0.79];
+    const spark = merge(rays.map((l, i) => { const a = (i / rays.length) * TAU + 0.12 * Math.sin(i * 2.3); return part(capsule(0.13, l * 1.1), CLAY, { p: [Math.cos(a) * l * 0.62, Math.sin(a) * l * 0.62, 0], r: [0, 0, a - Math.PI / 2], s: [1, 1, 0.75] }); }), part(cyl(0.32, 0.32, 0.2, 32), CLAY, { r: [Math.PI / 2, 0, 0] }));
+    out.push(part(lathe([[0, 0], [0.9, 0], [0.8, 0.25], [0.45, 0.35], [0.35, 1.2], [0, 1.2]], 40), CREAM, { p: [0, y0 + 0.04, 0.2] }));
+    moving.push({ geo: spark, pivot: [0, y0 + 2.55, 0.2], anim: (t) => ({ ry: Math.PI / 4 + Math.sin(t * 0.5) * 0.5, rz: t * 0.25, s: 1 + Math.sin(t * 1.6) * 0.04 }) });
+    // Pages turning in the book.
+    for (let k = 0; k < 3; k++) moving.push({ geo: part(box(0.68, 0.015, 0.9), '#fbf8f0', { p: [0.34, 0, 0] }), pivot: [LX, y0 + 1.15, LZ], anim: (t) => { const f = cyc(t, 4.5, k / 3), a = Math.PI * easeIO(win(f, 0.1, 0.6)); return { q: new THREE.Quaternion().setFromEuler(bookAt).multiply(new THREE.Quaternion().setFromAxisAngle(new V(0, 0, 1), a)), s: f > 0.62 ? 0.001 : 1 }; } });
+    // Words drifting from the book into the spark.
+    const drift = curve([[LX, y0 + 1.3, LZ], [-2.0, y0 + 2.8, 1.2], [-0.9, y0 + 3.0, 0.6], [0, y0 + 2.55, 0.2]]);
+    for (let k = 0; k < 7; k++) moving.push({ geo: part(rbox(0.22, 0.06, 0.03, 0.02), k % 3 ? INK : CLAY), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 3.5, k / 7), p = drift.getPointAt(u); return { x: p.x, y: p.y, z: p.z, ry: Math.PI / 4, rz: Math.sin(u * 6 + k) * 0.4, s: Math.min(1, u / 0.1, (1 - u) / 0.15) + 0.001 }; } });
+    // Conversations: a question rises from each table, then Claude's answer.
+    const bubble = (c, dots) => merge(part(rbox(0.6, 0.36, 0.06, 0.12), c), part(cone(0.07, 0.14, 3), c, { p: [-0.18, -0.2, 0], r: [0, 0, Math.PI] }), [-0.14, 0, 0.14].map((x) => part(ball(0.04), dots, { p: [x, 0, 0.04] })));
+    tables.forEach(([x, z], i) => {
+      moving.push({ geo: bubble('#ffffff', INK), pivot: [x - 0.2, y0 + 1.6, z + 0.5], anim: (t) => { const f = cyc(t, 6, i * 0.33); return f < 0.45 ? { s: back(win(f, 0, 0.08)) + 0.001, y: f * 0.5, ry: Math.PI / 4 } : { s: 0.001 }; } });
+      moving.push({ geo: bubble(CLAY, '#ffffff'), pivot: [x + 0.25, y0 + 1.5, z], anim: (t) => { const f = cyc(t, 6, i * 0.33); return f > 0.4 && f < 0.95 ? { s: back(win(f, 0.4, 0.48)) + 0.001, y: (f - 0.4) * 0.6, ry: Math.PI / 4, sx: -1 } : { s: 0.001 }; } });
+    });
+    // People strolling through the court.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 12), z = 4.8 - f * 6.8; return { x: -1.6, z, ry: Math.PI / 2, s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: CLAY, pants: INK, y: y0 }));
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 14, 0.4), x = -4.8 + f * 9.6; return { x, z: -2.35, ry: 0, s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: '#5b7f95', pants: '#2b3a55', skin: '#c58c66', hair: '#1d1f24', y: y0, carry: part(rbox(0.3, 0.02, 0.22, 0.01), '#b9bec6', { p: [0.2, 1.05, 0.25] }) }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

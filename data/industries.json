@@ -57,7 +57,8 @@
   "netflix": "Made for streaming",
   "starbucks": "The third place",
   "visa": "The network",
-  "chevron": "Barrels from the Permian"
+  "chevron": "Barrels from the Permian",
+  "anthropic": "Helpful, honest, harmless"
  },
  "bank": [
   "Bank of America",
@@ -639,7 +640,6 @@
  ],
  "ai": [
   "OpenAI",
-  "Anthropic",
   "Scale AI",
   "Perplexity",
   "Thinking Machines Lab",
@@ -1437,7 +1437,6 @@
   "Cohere": 2,
   "Mistral AI": 2,
   "OpenAI": 0,
-  "Anthropic": 0,
   "Perplexity": 0,
   "Ripple": 3,
   "Chainalysis": 3,
@@ -1563,5 +1562,8 @@
  ],
  "chevron": [
   "Chevron"
+ ],
+ "anthropic": [
+  "Anthropic"
  ]
 }
