@@ -141,7 +141,8 @@
   "carvana": "Buy it on your phone, pick it up from the vending machine",
   "carmax": "The no-haggle used car, reconditioned and priced at scale",
   "hertz": "The airport counter with a car for everyone off the plane",
-  "goodyear": "The tyre maker the whole world can see"
+  "goodyear": "The tyre maker the whole world can see",
+  "paccar": "The premium trucks drivers ask for, and the parts that keep them running"
  },
  "bank": [
   "PNC Financial Services",
@@ -420,7 +421,6 @@
   "Genuine Parts",
   "LKQ",
   "Navistar International",
-  "Paccar",
   "Cummins",
   "Avis Budget Group",
   "Harley-Davidson",
@@ -1338,7 +1338,6 @@
   "Harley-Davidson": 3,
   "Polaris Industries": 3,
   "Thor Industries": 4,
-  "Paccar": 5,
   "Navistar International": 5,
   "Oshkosh": 5,
   "Cummins": 6,
@@ -1789,5 +1788,8 @@
  ],
  "goodyear": [
   "Goodyear Tire & Rubber"
+ ],
+ "paccar": [
+  "Paccar"
  ]
 }

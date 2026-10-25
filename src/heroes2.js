@@ -1790,4 +1790,30 @@ export const HEROES2 = {
     ['#e5533d', BLUE, YEL, '#2f9e6e'].forEach((c, i) => moving.push({ geo: racer(c), pivot: [TX, y0, TZ], anim: (t) => { const u = cyc(t, 5 + i * 0.4, i * 0.22) * TAU, a = 3.3 - (i % 2) * 0.35, b = 2.45 - (i % 2) * 0.35; return { x: Math.cos(u) * a, z: Math.sin(u) * b, ry: Math.atan2(-Math.cos(u) * b, -Math.sin(u) * a) }; } }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Paccar: the premium trucks drivers ask for. Kenworths and Peterbilts roll off the line and
+  // out onto the highway, and when they stop in, the parts counter keeps them running.
+  paccar: { finder: '#003a70', build: () => {
+    const R = rand(154), out = [], NAVY = '#003a70';
+    out.push(ground('#8fc66f'), part(box(10.2, 0.03, 2.2), '#4a4f57', { p: [0, y0 + 0.015, 2.6] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(0.6, 0.01, 0.06), '#f2c94c', { p: [-4.6 + i * 1.3, y0 + 0.035, 2.6] }));
+    // A long-nose conventional: chrome grille, sleeper, stacks; nose along +x, on y = 0.
+    const rig = (c, trail = true) => merge(part(rbox(1.1, 0.55, 0.9, 0.12), c, { p: [1.2, 0.75, 0] }), part(rbox(0.12, 0.6, 0.8, 0.04), '#d8dde3', { p: [1.78, 0.75, 0] }), part(rbox(0.8, 1.15, 0.95, 0.1), c, { p: [0.3, 1.0, 0] }), part(box(0.04, 0.35, 0.8), '#26323f', { p: [0.71, 1.3, 0] }), part(rbox(0.7, 1.25, 0.95, 0.1), shade(c, 0.85), { p: [-0.45, 1.05, 0] }), [-0.48, 0.48].map((z) => part(cyl(0.05, 0.05, 1.3, 10), '#d8dde3', { p: [0.7, 1.5, z] })), [[1.3, 0.48], [1.3, -0.48], [-0.4, 0.48], [-0.4, -0.48], [-0.9, 0.48], [-0.9, -0.48]].map(([x, z]) => part(new THREE.CylinderGeometry(0.28, 0.28, 0.16, 16), '#1d1f24', { p: [x, 0.28, z], r: [Math.PI / 2, 0, 0] })),
+      trail ? [part(rbox(3.6, 1.4, 1.0, 0.05), K.white, { p: [-2.9, 1.2, 0] }), part(box(3.0, 0.3, 1.02), c, { p: [-2.9, 1.2, 0] }), [[-3.8, 0.48], [-3.8, -0.48], [-4.3, 0.48], [-4.3, -0.48]].map(([x, z]) => part(new THREE.CylinderGeometry(0.26, 0.26, 0.14, 16), '#1d1f24', { p: [x, 0.26, z], r: [Math.PI / 2, 0, 0] }))] : []);
+    // ---- the plant, back left, with its rollout door
+    out.push(part(rbox(5.0, 2.2, 2.4, 0.05), '#e6e9ed', { p: [-2.4, y0 + 1.1, -3.3] }), part(box(5.02, 0.35, 2.42), NAVY, { p: [-2.4, y0 + 2.0, -3.3] }), place(pixText('PACCAR', 0.08, K.white, 0.03), { p: [-3.2, y0 + 2.0, -2.08] }), part(box(1.4, 1.5, 0.04), '#3a3f47', { p: [-1.0, y0 + 0.75, -2.08] }));
+    // ---- the dealer and parts counter, back right
+    out.push(part(rbox(2.6, 1.6, 2.0, 0.05), '#f4efe6', { p: [3.2, y0 + 0.8, -3.4] }), part(box(2.62, 0.35, 2.02), '#c8102e', { p: [3.2, y0 + 1.45, -3.4] }), place(pixText('PARTS', 0.07, K.white, 0.03), { p: [3.2, y0 + 1.45, -2.38] }), part(box(1.2, 0.8, 0.04), '#9cc3e0', { p: [3.2, y0 + 0.5, -2.38] }));
+    // Two new trucks on the forecourt.
+    out.push(place(rig('#c8102e', false), { p: [1.4, y0, -0.6], r: [0, Math.PI / 6, 0], s: 0.8 }), place(rig('#2f9e6e', false), { p: [-2.4, y0, 0.0], r: [0, Math.PI / 4, 0], s: 0.8 }));
+    out.push(trees(R, [[4.6, 4.6], [-4.6, 4.6], [0.4, 4.4], [4.6, 0.6], [0.8, -4.6]], 0.55));
+    // ---- moving parts
+    const moving = [];
+    // Rigs on the highway, both ways.
+    [['#003a70', 0, 7, 2.1], ['#f29a3a', 0.5, 8, 3.1]].forEach(([c, o, P, z], i) => moving.push({ geo: place(rig(c), { s: 0.6, r: [0, i ? Math.PI : 0, 0] }), pivot: [0, y0, z], anim: (t) => { const x = (i ? 7 : -7) + (i ? -1 : 1) * cyc(t, P, o) * 14; return { x, s: clamp01((4.6 - Math.abs(x)) / 0.8) + 0.001 }; } }));
+    // A new truck rolling out of the plant door.
+    moving.push({ geo: place(rig('#5b6b7d', false), { r: [0, -Math.PI / 2, 0], s: 0.8 }), pivot: [-1.0, y0, -2.6], anim: (t) => { const f = cyc(t, 9), u = easeIO(win(f, 0.1, 0.6)); return { z: u * 1.8, s: f > 0.85 ? 1 - win(f, 0.85, 1) + 0.001 : Math.min(1, f / 0.1) + 0.001 }; } });
+    // Parts boxes from the counter into the stopped rig.
+    for (let k = 0; k < 3; k++) moving.push(rider(part(rbox(0.3, 0.25, 0.25, 0.03), '#c99a62'), curve([[3.2, y0 + 1.0, -2.3], [2.6, y0 + 2.0, -1.4], [1.8, y0 + 1.3, -0.5]]), 4, k / 3, 0, 0.7));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
