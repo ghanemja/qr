@@ -6,7 +6,7 @@
 // (at topAt, no higher than 4.7 since a topper can be 2 tall). Keyed `kind:variant` (see models.js).
 // Same conventions as the heroes: slab top y0 = 0.24, keep within ±5.2, rest height ≤ 6.8, the
 // camera looks from +x, +z.
-import { THREE, V, part, windy, rand, taper, shade, tuft, bladeShape, merge, place, box, cyl, lathe, tube, ball, capsule, cone, torus, extrude, prism, star, beam, ring, hi, TAU, clamp01, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, K } from './kit.js';
+import { THREE, V, part, windy, rand, taper, leafShape, shade, tuft, bladeShape, merge, place, box, cyl, lathe, tube, ball, capsule, cone, torus, extrude, prism, star, beam, ring, hi, TAU, clamp01, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, K } from './kit.js';
 import { rbox, curve, tubeOn, along, miniTree, lampPost, sedan, cartGeo, walker, parcel, puff, flameGeo } from './heroes.js';
 
 const y0 = 0.24;
@@ -263,6 +263,12 @@ const molecule = (a = 'A', b = K.white, c = 'B') => { const at = [[0, 0, 0, a, 0
   return merge(at.map(([x, y, z, col, r]) => part(new THREE.SphereGeometry(r, hi() ? 18 : 8, hi() ? 12 : 6), col, { p: [x, y, z] })), bonds.map(([i, j]) => beam(at[i].slice(0, 3), at[j].slice(0, 3), 0.06, '#c9ced6'))); };
 // A red cross-out mark facing +z.
 const crossGeo = (r = 0.3) => merge(part(cyl(r, r, 0.06, 24), '#e5533d', { r: [Math.PI / 2, 0, 0] }), [1, -1].map((s) => part(box(r * 1.2, r * 0.26, 0.08), K.white, { p: [0, 0, 0.03], r: [0, 0, s * Math.PI / 4] })));
+
+// A padlock body (keyhole on the +z face), w wide, about 0.85w tall, standing on y = 0. Its
+// shackle is separate (padShackle), hinged at its left leg.
+const padBody = (w = 2.4, c = 'A', d = 1.0) => merge(part(rbox(w, w * 0.82, d, w * 0.12), c, { p: [0, w * 0.41, 0] }), part(rbox(w * 0.9, w * 0.08, d + 0.04, 0.03), K.gold, { p: [0, w * 0.74, 0] }),
+  part(cyl(w * 0.1, w * 0.1, 0.06, 20), K.dark, { p: [0, w * 0.42, d / 2 + 0.01], r: [Math.PI / 2, 0, 0] }), part(box(w * 0.07, w * 0.16, 0.06), K.dark, { p: [0, w * 0.32, d / 2 + 0.01] }), part(torus(w * 0.14, 0.04, TAU, 24), K.gold, { p: [0, w * 0.42, d / 2 + 0.02] }));
+const padShackle = (w = 2.4, c = K.steel) => { const r = w * 0.3, t = w * 0.075; return merge(part(torus(r, t, Math.PI, 20), c, { p: [r, w * 0.32, 0] }), part(cyl(t, t, w * 0.36, 16), c, { p: [0, w * 0.14, 0] }), part(cyl(t, t, w * 0.36, 16), c, { p: [r * 2, w * 0.14, 0] })); };
 
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
@@ -2104,5 +2110,59 @@ export const SCENES = {
     moving.push(...walker(moving.length, (t) => { const k = Math.sin(t * 0.45); return { x: -1.6 + k * 2.2, z: -1.4, ry: Math.cos(t * 0.45) > 0 ? 0 : Math.PI }; }, { shirt: K.white, pants: '#2b3a55', y: y0 }));
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, P, 0.5), c = curve([[FX - 1.4, 0, 5.0], [FX - 0.6, 0, 4.3], [FX + 0.3, 0, FZ + 0.7]]), k = win(f, 0, 0.5), { p, ry } = along(c, k * 0.999); return { x: p.x, z: p.z, ry, s: f > 0.55 ? 0.001 : Math.min(1, f / 0.03), still: f > 0.5 }; }, { shirt: '#8a6cf0', pants: '#2b3a55', y: y0 }));
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.6, y0, -3.4], topAt: [PX, y0 + 1.6, PZ] };
+  },
+
+  // Padlock (property, casualty and supplemental insurers): your cover, locked away until you need
+  // it. A family carries its policy to the giant padlock, which opens, takes it and snaps shut;
+  // then a gust topples the big tree onto the corner shop's roof, the padlock opens again and pays
+  // out, the crew clear the tree and mend the roof, and a new sapling grows back.
+  'insurance:4': () => {
+    const R = rand(2901), out = [], moving = [];
+    out.push(slab('#a9d384'));
+    out.push(part(box(10.4, 0.03, 1.2), '#6b7078', { p: [0, y0 + 0.015, 4.4] }), part(box(10.4, 0.05, 0.5), '#e6dcc8', { p: [0, y0 + 0.025, 3.5] }));
+    for (let i = 0; i < 9; i++) out.push(part(box(0.5, 0.012, 0.06), K.white, { p: [-4.4 + i * 1.1, y0 + 0.035, 4.4] }));
+    // ---- the giant padlock on its plinth (back left)
+    const LX = -2.2, LZ = -2.7, LW = 2.6, LY = y0 + 0.45;
+    out.push(part(rbox(3.4, 0.45, 1.8, 0.06), K.stone, { p: [LX, y0 + 0.225, LZ] }), part(box(3.42, 0.08, 1.82), 'Bd', { p: [LX, y0 + 0.38, LZ] }), place(padBody(LW, 'A'), { p: [LX, LY, LZ] }));
+    out.push(part(rbox(1.6, 0.04, 2.4, 0.02), '#e6dcc8', { p: [LX, y0 + 0.02, LZ + 2.0] }));
+    // ---- the family home (front left), the corner shop (front right), an office (back right)
+    const HX = -3.3, HZ = 1.5;
+    out.push(place(house2(K.cream, 'Ad', 'B'), { p: [HX, y0, HZ], r: [0, 0.15, 0] }), part(box(0.06, 0.4, 2.2), K.white, { p: [HX - 1.8, y0 + 0.2, HZ + 1.0] }));
+    const SX = 2.0, SZ = 1.6, SW = 2.4, SD = 1.8, SH = 1.5;
+    out.push(part(rbox(SW, SH, SD, 0.05), '#f3e6d0', { p: [SX, y0 + SH / 2, SZ] }), part(rbox(1.8, 0.7, 0.05, 0.02), '#9fcdea', { p: [SX - 0.1, y0 + 0.65, SZ + SD / 2 + 0.01] }), part(rbox(0.5, 0.9, 0.06, 0.02), K.woodDk, { p: [SX + 0.85, y0 + 0.45, SZ + SD / 2 + 0.01] }));
+    out.push(part(extrude([[0, 0], [0.7, -0.35], [0.7, -0.42], [0, -0.07]], SW - 0.2), (x, y, z) => (Math.floor((z + SW) * 2.5) % 2 ? 'B' : K.white), { p: [SX, y0 + 1.25, SZ + SD / 2], r: [0, -Math.PI / 2, 0] }));
+    const OX = 2.8, OZ = -3.0;
+    out.push(part(rbox(2.6, 2.4, 2.0, 0.06), '#e4e9ee', { p: [OX, y0 + 1.2, OZ] }), part(box(2.62, 0.2, 2.02), 'A', { p: [OX, y0 + 2.2, OZ] }));
+    for (let f = 0; f < 2; f++) for (let i = 0; i < 3; i++) out.push(part(rbox(0.55, 0.5, 0.05, 0.02), '#9fcdea', { p: [OX - 0.8 + i * 0.8, y0 + 0.6 + f * 0.85, OZ + 1.01] }));
+    [[-4.6, -0.6], [-0.3, -4.6], [4.6, 3.0], [0.6, -0.4]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.5 + R() * 0.15)));
+    out.push(lampPost(-0.4, y0, 3.3, -Math.PI / 2));
+    // ---- moving parts (one 14 s cycle)
+    const P = 14, F = (t) => cyc(t, P);
+    // The shackle: opens for the policy, shuts; opens again to pay out, shuts.
+    const open = (f) => easeIO(win(f, 0.16, 0.2)) * (1 - easeIO(win(f, 0.27, 0.31))) + easeIO(win(f, 0.52, 0.56)) * (1 - easeIO(win(f, 0.7, 0.74)));
+    moving.push({ geo: padShackle(LW, '#c9ced6'), pivot: [LX - LW * 0.3, LY + LW * 0.7, LZ], anim: (t) => { const k = open(F(t)); return { y: Math.min(1, k * 2) * LW * 0.2, ry: Math.max(0, k * 2 - 1) * 1.6 }; } });
+    // A glint on the lock each time it snaps shut.
+    moving.push({ geo: part(star(0.3, 0.06), K.yellow), pivot: [LX + LW * 0.38, LY + LW * 0.78, LZ + 0.55], anim: (t) => { const f = F(t); return { rz: t * 2, s: life(f, 0.31, 0.33, 0.36, 0.39) + life(f, 0.74, 0.76, 0.79, 0.82) + 0.001 }; } });
+    // The family carries the policy to the lock; it floats up and in.
+    const walkIn = curve([[HX + 0.6, 0, HZ + 1.0], [HX + 1.6, 0, HZ + 0.4], [LX + 0.3, 0, LZ + 2.6], [LX + 0.3, 0, LZ + 1.3]]);
+    const fam = (o, shirt, s) => moving.push(...walker(moving.length, (t) => { const f = F(t), k = win(f, 0, 0.16), back = win(f, 0.3, 0.46), { p, ry } = along(walkIn, Math.min(0.999, Math.max(0.001, k - back) * 0.999)); return { x: p.x + o, z: p.z + o * 0.3, ry: ry + (back > 0 && back < 1 ? Math.PI : 0), s: f > 0.46 ? 0.001 : s * Math.min(1, f / 0.03), still: (f > 0.16 && f < 0.3) }; }, { shirt, pants: '#2b3a55', y: y0 }));
+    fam(0, '#3d7be0', 1); fam(-0.55, '#e5533d', 0.95);
+    const doc = merge(part(rbox(0.5, 0.66, 0.04, 0.02), K.white), part(box(0.36, 0.05, 0.05), '#9aa1a9', { p: [0, 0.15, 0] }), part(box(0.3, 0.05, 0.05), '#9aa1a9', { p: [0, 0.03, 0] }), part(box(0.12, 0.12, 0.06), 'A', { p: [0.12, -0.18, 0] }));
+    moving.push({ geo: doc, pivot: [0, 0, 0], anim: (t) => { const f = F(t), k = win(f, 0, 0.16), { p } = along(walkIn, Math.min(0.999, k * 0.999)), up = easeIO(win(f, 0.18, 0.27)), top = new V(LX, LY + LW * 1.0, LZ); return { x: p.x + (top.x - p.x) * up + 0.3 * (1 - up), y: y0 + 1.15 + (top.y - y0 - 1.15) * up + hop(up) * 0.8, z: p.z + (top.z - p.z) * up, ry: Math.PI / 4, s: f < 0.28 ? Math.max(0.001, 1 - win(f, 0.25, 0.28)) : 0.001 }; } });
+    // The gust: leaves blow across, the big tree beside the shop topples onto its roof.
+    const TX = 3.9, TZ = 1.1, dir = new V(SX - TX, 0, SZ - TZ).normalize(), axis = new V(dir.z, 0, -dir.x).normalize(), qT = new THREE.Quaternion();
+    const treeGeo = hi() ? merge(miniTree(R, 0, 0, 0, 1.35)) : part(cone(0.6, 1.8, 8), '#6fbf4c', { p: [0, 1.4, 0] });
+    moving.push({ geo: treeGeo, pivot: [TX, y0, TZ], anim: (t) => { const f = F(t), k = easeIn(win(f, 0.38, 0.45)) * 0.78 - bump(f, 0.45, 0.01) * 0.05, sway = f < 0.38 ? Math.sin(t * 5) * 0.06 * win(f, 0.3, 0.38) : 0; return { q: qT.setFromAxisAngle(axis, k + sway), s: f < 0.66 ? 1 : f < 0.7 ? Math.max(0.001, 1 - win(f, 0.66, 0.7)) : Math.max(0.001, easeOut(win(f, 0.8, 0.98))) }; } });
+    out.push(part(cyl(0.16, 0.2, 0.12, 12), K.wood, { p: [TX, y0 + 0.06, TZ] }));
+    for (let k = 0; k < 5; k++) moving.push({ geo: part(leafShape(0), shade('#7fcf3f', 0.9 + k * 0.04), { s: 0.25 }), pivot: [-5.0, y0 + 1.0 + k * 0.35, -1.0 + k * 0.5], anim: (t) => { const f = F(t), u = win(f, 0.26 + k * 0.012, 0.46 + k * 0.012); return { x: u * 9.6, y: Math.sin(u * 9 + k) * 0.4, rx: u * 12, ry: u * 7, s: u > 0 && u < 1 ? 1 : 0.001 }; } });
+    // The shop's roof sags under the tree, then is mended.
+    moving.push({ geo: merge(part(rbox(SW + 0.1, 0.16, SD + 0.1, 0.04), 'Ad'), part(box(0.6, 0.2, 0.5), '#c9ced6', { p: [-0.6, 0.15, -0.3] })), pivot: [SX, y0 + SH + 0.08, SZ], anim: (t) => { const f = F(t), d = win(f, 0.44, 0.46) * (1 - easeIO(win(f, 0.68, 0.76))); return { rz: d * 0.12, rx: -d * 0.08, y: -d * 0.15 }; } });
+    // The payout: coins arc from the lock to the shop.
+    for (let k = 0; k < 3; k++) moving.push({ geo: coin(0.3, 0.09).rotateX(Math.PI / 2), pivot: [0, 0, 0], anim: (t) => { const f = F(t), a = 0.56 + k * 0.03, u = easeIO(win(f, a, a + 0.1)), A = new V(LX, LY + LW * 1.05, LZ), B = new V(SX, y0 + SH + 0.6, SZ), p = A.lerp(B, u); return { x: p.x, y: p.y + hop(u) * 2.2, z: p.z, ry: u * 12, s: f > a && f < a + 0.11 ? 1 : 0.001 }; } });
+    // The claims crew: a van pulls up at the shop.
+    moving.push({ geo: van(K.white, 'A'), pivot: [0, y0, 4.1], anim: (t) => { const f = F(t), x = f < 0.6 ? -6 : f < 0.66 ? -5.6 + (SX + 5.4) * easeOut(win(f, 0.6, 0.66)) : f < 0.8 ? SX - 0.2 : SX - 0.2 + 6 * easeIn(win(f, 0.8, 0.92)); return { x, s: clamp01((5.0 - Math.abs(x)) / 0.6) * 0.85 + 0.001 }; } });
+    moving.push(...walker(moving.length, (t) => { const f = F(t), on = f > 0.66 && f < 0.8; return { x: SX + 1.3, z: SZ + 0.6 - Math.sin(t * 1.2) * 0.4, ry: Math.PI / 2 + 0.6, s: on ? 1 : 0.001, still: true, push: on && Math.sin(t * 6) > 0 }; }, { shirt: K.orange, pants: '#2b3a55', y: y0, carry: part(new THREE.SphereGeometry(0.19, 12, 8, 0, TAU, 0, Math.PI / 2), '#ffd23f', { p: [0, 1.62, 0] }) }));
+    moving.push({ geo: tickGeo(0.3), pivot: [SX, y0 + SH + 1.0, SZ + 0.3], anim: (t) => { const f = F(t); return { y: easeOut(win(f, 0.76, 0.8)) * 0.3, ry: Math.PI / 4, s: life(f, 0.76, 0.79, 0.86, 0.9) }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.0, y0, 2.4], topAt: [OX, y0 + 2.4, OZ] };
   },
 };
