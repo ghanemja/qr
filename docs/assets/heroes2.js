@@ -1677,4 +1677,33 @@ export const HEROES2 = {
     moving.push({ geo: place(sedan('#f4f5f6'), { s: 0.7 }), pivot: [0, y0, 3.7], anim: (t) => { const x = -5.6 + cyc(t, 9) * 11.2; return { x, s: clamp01((5.0 - Math.abs(x)) / 0.5) + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Carvana: buy a car on your phone and pick it up from a vending machine. The coin goes in,
+  // the glass tower's lift brings a car down from its bay and rolls it out to its new owner.
+  carvana: { finder: '#00aed9', build: () => {
+    const R = rand(150), out = [], TEAL = '#00aed9', NAVY = '#183558';
+    out.push(ground('#8fc66f'), part(cyl(2.4, 2.4, 0.05, 48), '#d8dde3', { p: [-1.6, y0 + 0.025, -1.6] }), part(box(1.4, 0.03, 6.0), '#5b616b', { p: [0.8, y0 + 0.015, 2.2] }));
+    // ---- the vending tower: an octagonal glass shaft with bays of cars
+    const VX = -1.6, VZ = -1.6, VR = 1.6, LV = 6, LH = 0.85;
+    out.push(part(cyl(VR + 0.2, VR + 0.25, 0.3, 8), NAVY, { p: [VX, y0 + 0.15, VZ] }));
+    for (let k = 0; k < 8; k++) { const a = k * TAU / 8 + TAU / 16; out.push(part(box(0.1, LV * LH + 0.4, 0.1), K.white, { p: [VX + Math.cos(a) * VR, y0 + 0.3 + (LV * LH + 0.4) / 2, VZ + Math.sin(a) * VR] })); }
+    for (let l = 0; l <= LV; l++) out.push(part(torus(VR, 0.05, TAU, 8), l === LV ? TEAL : K.white, { p: [VX, y0 + 0.4 + l * LH, VZ], r: [Math.PI / 2, 0, TAU / 16] }));
+    out.push(part(cone(VR + 0.15, 0.5, 8), NAVY, { p: [VX, y0 + 0.65 + LV * LH, VZ], r: [0, TAU / 16, 0] }), place(pixText('CARVANA', 0.06, NAVY, 0.03), { p: [VX + 1.1, y0 + LV * LH - 0.2, VZ + 1.1], r: [0, Math.PI / 4, 0] }));
+    // Cars parked in the bays, facing out.
+    const cols = ['#e5533d', '#3d7be0', '#f2c94c', '#2f9e6e', K.white, '#1d1f24', '#8a6cf0', '#f29a3a'];
+    for (let l = 1; l < LV; l++) for (let k = 0; k < 4; k++) { if (l === 3 && k === 1) continue; const a = -Math.PI / 4 + (k - 1.5) * 0.9 + Math.PI; out.push(place(sedan(cols[(l * 3 + k) % 8]), { p: [VX + Math.cos(a) * 0.7, y0 + 0.45 + l * LH, VZ + Math.sin(a) * 0.7], r: [0, -a, 0], s: 0.45 })); }
+    // ---- the coin and the customer's spot
+    out.push(part(rbox(0.6, 1.0, 0.4, 0.05), NAVY, { p: [1.6, y0 + 0.5, -0.4], r: [0, Math.PI / 4, 0] }), part(cyl(0.12, 0.12, 0.04, 16), K.gold, { p: [1.62, y0 + 0.8, -0.2], r: [Math.PI / 2, 0, Math.PI / 4] }));
+    out.push(trees(R, [[4.6, -4.6], [4.6, -1.6], [-4.6, 4.6], [-2.0, 4.4], [3.6, 4.6]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 10;
+    // The customer drops the giant coin in.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P); return { x: 2.1, z: 0.2, ry: Math.PI * 0.75, still: true, push: f < 0.12 }; }, { shirt: '#d6336c', pants: '#2b3a55', y: y0 }));
+    moving.push(rider(place(coin(0.25, 0.08), { r: [Math.PI / 2, 0, 0] }), curve([[2.0, y0 + 1.6, 0.0], [1.8, y0 + 1.4, -0.2], [1.62, y0 + 0.85, -0.25]]), P, 0, 0, 0.12, (t) => ({ ry: Math.PI / 4 })));
+    // The lift: from the ground up to level 3, takes the car, comes down, car rolls out to the road.
+    const liftY = (f) => (f < 0.12 ? 0 : f < 0.3 ? easeIO(win(f, 0.12, 0.3)) : f < 0.38 ? 1 : f < 0.58 ? 1 - easeIO(win(f, 0.38, 0.58)) : 0) * 3 * LH;
+    moving.push({ geo: merge(part(cyl(0.9, 0.9, 0.08, 24), TEAL), part(box(1.8, 0.02, 0.1), K.white, { p: [0, 0.05, 0] })), pivot: [VX, y0 + 0.4, VZ], anim: (t) => ({ y: liftY(cyc(t, P)) }) });
+    const a0 = -Math.PI / 4 + (1 - 1.5) * 0.9 + Math.PI;
+    moving.push({ geo: place(sedan(TEAL), { s: 0.45 }), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P); if (f < 0.3) return { x: VX + Math.cos(a0) * 0.7, y: y0 + 0.45 + 3 * LH, z: VZ + Math.sin(a0) * 0.7, ry: -a0 }; if (f < 0.38) { const u = easeIO(win(f, 0.3, 0.38)); return { x: VX + Math.cos(a0) * 0.7 * (1 - u), y: y0 + 0.45 + 3 * LH, z: VZ + Math.sin(a0) * 0.7 * (1 - u), ry: -a0 }; } if (f < 0.58) return { x: VX, y: y0 + 0.45 + liftY(f), z: VZ, ry: -a0 }; const u = easeIO(win(f, 0.6, 0.85)), path = curve([[VX, 0, VZ], [VX + 1.6, 0, VZ + 1.6], [0.8, 0, 1.6], [0.8, 0, 3.6]]), a = along(path, u); return { x: a.p.x, y: y0 + 0.45 * (1 - Math.min(1, u * 8)) + 0.02, z: a.p.z, ry: a.ry, s: f > 0.95 ? 1 - win(f, 0.95, 1) + 0.001 : 1 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

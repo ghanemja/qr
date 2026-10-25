@@ -137,7 +137,8 @@
   "southwest": "One kind of plane, point to point, turned around fast",
   "lasvegassands": "The integrated resort: Marina Bay Sands and its SkyPark",
   "mgm": "The Strip's biggest landlord, and BetMGM in every pocket",
-  "caesars": "One rewards card across a whole Strip of casinos"
+  "caesars": "One rewards card across a whole Strip of casinos",
+  "carvana": "Buy it on your phone, pick it up from the vending machine"
  },
  "bank": [
   "PNC Financial Services",
@@ -1460,8 +1461,7 @@
   "Frontier Communications": 3,
   "Windstream Holdings": 3,
   "CenturyLink": 3,
-  "Discord": 0,
-  "Carvana": 1
+  "Discord": 0
  },
  "amazon": [
   "Amazon.com"
@@ -1777,5 +1777,8 @@
  ],
  "caesars": [
   "Caesars Entertainment"
+ ],
+ "carvana": [
+  "Carvana"
  ]
 }
