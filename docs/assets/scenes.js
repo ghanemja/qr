@@ -1808,4 +1808,69 @@ export const SCENES = {
     moving.push({ geo: coin(0.32, 0.1).rotateX(Math.PI / 2), pivot: [SX, y0 + 2.1, 2.6], anim: (t) => { const f = F(t); return { y: easeOut(win(f, 0.6, 0.72)) * 0.6, ry: f * 18, s: life(f, 0.6, 0.65, 0.74, 0.78) }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [3.2, y0, -0.9], topAt: [CR[0], y0 + 1.0, CR[1]] };
   },
+
+  // Ticker board (asset managers, brokers, ratings and index houses): where prices are made. On the
+  // exchange the ticker runs along the frieze and round the corner tower; on the plaza the big
+  // board prints the day's candles one by one, trending up, and traders hurry between them.
+  'bank:11': () => {
+    const R = rand(2501), out = [], moving = [];
+    out.push(slab('#d9d2c4'));
+    // Plaza paving, the street along the front with its kerb.
+    out.push(part(box(10.4, 0.03, 1.4), '#5b616b', { p: [0, y0 + 0.015, 4.2] }), part(box(10.4, 0.1, 0.12), K.stoneDk, { p: [0, y0 + 0.05, 3.44] }));
+    for (let i = 0; i < 9; i++) out.push(part(box(0.5, 0.012, 0.06), K.white, { p: [-4.4 + i * 1.1, y0 + 0.035, 4.2] }));
+    if (hi()) for (let x = -5; x < 5; x += 0.8) out.push(part(box(0.02, 0.012, 7.0), '#cfc6b4', { p: [x, y0 + 0.006, -0.1] }));
+    // ---- the exchange (back left): steps, six columns, the pediment and a frieze for the ticker
+    const EX = -2.3, EZ = -3.3, W = 4.4, H = 2.6, fl = y0 + 0.42, front = EZ + 0.95;
+    for (let i = 0; i < 3; i++) out.push(part(rbox(W + 0.7 - i * 0.2, 0.14, 2.6 - i * 0.15, 0.03), i % 2 ? K.stone : K.stoneDk, { p: [EX, y0 + 0.07 + i * 0.14, EZ + 0.15 - i * 0.05] }));
+    out.push(part(rbox(W - 0.2, H, 1.4, 0.04), K.cream, { p: [EX, fl + H / 2, EZ - 0.35] }));
+    for (let i = 0; i < 6; i++) { const x = EX - W / 2 + 0.35 + i * ((W - 0.7) / 5); out.push(part(cyl(0.15, 0.18, H - 0.3, 16), K.white, { p: [x, fl + (H - 0.3) / 2, front] }), part(rbox(0.42, 0.12, 0.42, 0.03), K.stone, { p: [x, fl + H - 0.25, front] })); }
+    out.push(part(rbox(W + 0.2, 0.5, 2.0, 0.04), K.stone, { p: [EX, fl + H + 0.05, EZ] }), part(box(W - 0.2, 0.32, 0.04), '#1d232b', { p: [EX, fl + H + 0.05, EZ + 1.01] }));
+    out.push(part(prism(W + 0.2, 0.8, 0.3), 'Ad', { p: [EX, fl + H + 0.3, front + 0.05] }), part(prism(W - 0.4, 0.55, 0.06), K.white, { p: [EX, fl + H + 0.36, front + 0.22] }), part(rbox(W, 0.5, 1.4, 0.04), K.stoneDk, { p: [EX, fl + H + 0.55, EZ - 0.3] }));
+    out.push(part(rbox(1.0, 1.4, 0.06, 0.03), '#2a3c50', { p: [EX, fl + 0.7, EZ + 0.36] }));
+    [-1, 1].forEach((s) => out.push(part(rbox(0.3, 2.0, 0.06, 0.02), 'A', { p: [EX + s * 1.5, fl + 1.1, EZ + 0.36] })));
+    // ---- the corner tower (back right) with its wraparound ticker
+    const TX = 2.5, TZ = -2.7, TR = 1.15, TH = 4.9;
+    out.push(part(new THREE.CylinderGeometry(TR, TR, TH, hi() ? 48 : 16, hi() ? 12 : 1), (x, y) => (Math.floor(y * 2.4) % 2 ? '#a9c6dc' : '#d7e3ec'), { p: [TX, y0 + TH / 2, TZ] }));
+    out.push(part(cyl(TR + 0.08, TR + 0.08, 0.2, 48), 'A', { p: [TX, y0 + TH + 0.1, TZ] }), part(cyl(TR * 0.7, TR * 0.8, 0.4, 32), '#c9ced6', { p: [TX, y0 + TH + 0.4, TZ] }), part(cyl(0.04, 0.04, 0.9, 8), K.steelDk, { p: [TX, y0 + TH + 1.05, TZ] }));
+    out.push(part(cyl(TR + 0.04, TR + 0.04, 0.62, 48), '#1d232b', { p: [TX, y0 + 3.2, TZ] }), part(cyl(TR + 0.1, TR + 0.1, 0.06, 48), K.steelDk, { p: [TX, y0 + 3.54, TZ] }), part(cyl(TR + 0.1, TR + 0.1, 0.06, 48), K.steelDk, { p: [TX, y0 + 2.86, TZ] }));
+    out.push(part(rbox(1.2, 1.2, 0.3, 0.04), '#2a3c50', { p: [TX + 0.55, y0 + 0.6, TZ + 0.85], r: [0, Math.PI / 4, 0] }), part(rbox(1.6, 0.1, 0.7, 0.03), 'A', { p: [TX + 0.75, y0 + 1.3, TZ + 1.05], r: [0, Math.PI / 4, 0] }));
+    // ---- the candle board on the plaza (front left), facing the camera
+    const BX = -2.5, BZ = 1.7, BA = Math.PI / 4, BW = 3.2, BH = 1.9, BY = y0 + 0.9, q = new THREE.Quaternion().setFromAxisAngle(new V(0, 1, 0), BA);
+    const at = (lx, ly, lz) => new V(lx, ly, lz).applyQuaternion(q).add(new V(BX, 0, BZ));
+    const board = [part(rbox(BW + 0.3, BH + 0.3, 0.2, 0.06), K.dark, { p: [0, BY + BH / 2, 0] }), part(box(BW, BH, 0.04), '#141a22', { p: [0, BY + BH / 2, 0.11] }), part(rbox(BW + 0.3, 0.26, 0.24, 0.05), 'A', { p: [0, BY + BH + 0.2, 0] })];
+    [-1, 1].forEach((s) => board.push(part(rbox(0.16, BY, 0.16, 0.04), K.steelDk, { p: [s * BW * 0.35, BY / 2, 0] })));
+    if (hi()) for (let i = 1; i < 4; i++) board.push(part(box(BW - 0.1, 0.012, 0.01), '#2c3644', { p: [0, BY + i * BH / 4, 0.135] }));
+    out.push(place(merge(board), { p: [BX, 0, BZ], r: [0, BA, 0] }));
+    // ---- trees in planters, lamps, a bench
+    [[0.3, -0.3], [4.4, 0.8], [-4.5, -0.2], [4.4, 3.0]].forEach(([x, z]) => out.push(part(rbox(0.8, 0.3, 0.8, 0.05), K.stoneDk, { p: [x, y0 + 0.15, z] }), miniTree(R, x, y0 + 0.3, z, 0.5 + R() * 0.15)));
+    out.push(lampPost(-0.4, y0, 3.1, -Math.PI / 2), lampPost(3.4, y0, 3.1, -Math.PI / 2));
+    out.push(part(rbox(1.2, 0.08, 0.4, 0.03), K.wood, { p: [1.8, y0 + 0.42, 1.6] }), [-0.5, 0.5].map((x) => part(box(0.06, 0.4, 0.36), K.dark, { p: [1.8 + x, y0 + 0.2, 1.6] })));
+    // ---- moving parts
+    // The tower's ticker ring: green, red and white quotes running round.
+    const tiles = [];
+    for (let i = 0, n = hi() ? 56 : 24; i < n; i++) { const a = (i / n) * TAU, c = R() < 0.6 ? '#46d36b' : R() < 0.6 ? '#ff5a4a' : '#f4f5f6', w = 0.08 + R() * 0.06; tiles.push(part(box(w, 0.16 + (i % 3 ? 0 : 0.1), 0.03), c, { p: [Math.cos(a) * (TR + 0.07), 0, Math.sin(a) * (TR + 0.07)], r: [0, -a + Math.PI / 2, 0] })); }
+    moving.push({ geo: merge(tiles), pivot: [TX, y0 + 3.2, TZ], anim: (t) => ({ ry: t * 0.45 }) });
+    // The frieze ticker: quotes sliding along the exchange's front.
+    const FW = W - 0.3;
+    for (let k = 0; k < 8; k++) { const c = k % 3 === 1 ? '#ff5a4a' : '#46d36b'; moving.push({ geo: merge(part(box(0.32, 0.14, 0.03), c), part(cone(0.07, 0.1, 3), c, { p: [0.24, 0, 0], r: [0, 0, c === '#46d36b' ? 0 : Math.PI] })), pivot: [EX + FW / 2, fl + H + 0.05, EZ + 1.04], anim: (t) => { const u = cyc(t, 8, k / 8); return { x: -u * FW, s: Math.min(1, u / 0.04, (1 - u) / 0.04) * 0.999 + 0.001 }; } }); }
+    // The board's candles print left to right, trending up; an arrow pops at the close.
+    const P = 10, F = (t) => cyc(t, P), N = 8, levels = [0.3, 0.55, 0.45, 0.75, 0.95, 0.82, 1.2, 1.5].map((v) => v * 0.95);
+    for (let i = 0; i < N; i++) {
+      const lo = Math.min(levels[i], i ? levels[i - 1] : 0.25), hiL = Math.max(levels[i], i ? levels[i - 1] : 0.25), up = !i || levels[i] >= levels[i - 1], c = up ? '#46d36b' : '#ff5a4a', h = hiL - lo + 0.12;
+      const p = at(-BW / 2 + 0.3 + i * ((BW - 0.6) / (N - 1)), BY + 0.1 + lo, 0.15);
+      moving.push({ geo: merge(part(box(0.26, h, 0.05), c, { p: [0, h / 2, 0] }), part(box(0.04, h + 0.26, 0.03), c, { p: [0, h / 2, -0.01] })).applyQuaternion(q), pivot: p.toArray(), anim: (t) => { const f = F(t), k = easeOut(win(f, 0.05 + i * 0.09, 0.12 + i * 0.09)); return { sy: k * 0.999 + 0.001, s: f > 0.93 ? 1 - win(f, 0.93, 0.99) * 0.999 : 1 }; } });
+    }
+    const arrow = merge(part(box(0.18, 0.4, 0.08), '#46d36b', { p: [0, 0.2, 0] }), part(cone(0.24, 0.3, 4), '#46d36b', { p: [0, 0.55, 0], r: [0, Math.PI / 4, 0] })).applyQuaternion(q);
+    const ap = at(BW / 2 - 0.1, BY + BH + 0.4, 0.1);
+    moving.push({ geo: arrow, pivot: ap.toArray(), anim: (t) => { const f = F(t); return { y: easeOut(win(f, 0.8, 0.88)) * 0.4, s: life(f, 0.8, 0.85, 0.93, 0.97) }; } });
+    // The exchange's flags.
+    [-1, 1].forEach((s) => { out.push(part(cyl(0.025, 0.025, 1.0, 8), K.steelDk, { p: [EX + s * 1.6, fl + H + 1.05, EZ - 0.3] })); moving.push({ geo: part(box(0.5, 0.3, 0.02), s < 0 ? 'A' : 'B', { p: [0.25, 0, 0] }), pivot: [EX + s * 1.6 + 0.02, fl + H + 1.4, EZ - 0.3], anim: (t) => ({ ry: Math.sin(t * 2.2 + s) * 0.35 }) }); });
+    // Traders crossing the plaza with their briefcases.
+    const bag = place(merge(part(rbox(0.32, 0.24, 0.1, 0.03), K.woodDk), part(torus(0.06, 0.015, Math.PI, 8), K.dark, { p: [0, 0.12, 0] })), { p: [0.05, 0.62, 0.3] });
+    const p1 = curve([[-4.6, 0, 3.0], [-0.6, 0, 2.6], [0.8, 0, 0.6], [TX + 0.6, 0, TZ + 1.6]]), p2 = curve([[4.6, 0, 2.6], [1.0, 0, 2.0], [-1.0, 0, -0.8], [EX, 0, EZ + 1.4]]);
+    [[p1, 'B', 0], [p2, '#3a4a6b', 0.5]].forEach(([c, shirt, o]) => moving.push(...walker(moving.length, (t) => { const f = cyc(t, 9, o), { p, ry } = along(c, f * 0.999); return { x: p.x, z: p.z, ry, s: Math.min(1, f / 0.05, (1 - f) / 0.05) * 0.999 + 0.001 }; }, { shirt, pants: '#2b2f36', y: y0, carry: bag })));
+    // Taxis along the street.
+    [0, 0.5].forEach((o) => moving.push({ geo: sedan('#f2c230'), pivot: [0, y0, 4.2 + (o ? -0.3 : 0.3)], anim: (t) => { const f = cyc(t, 7, o), x = (o ? 1 : -1) * (-5.4 + f * 10.8); return { x, ry: o ? 0 : Math.PI, s: clamp01((5.0 - Math.abs(x)) / 0.6) * 0.75 + 0.001 }; } }));
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [1.2, y0, 0.2], topAt: [EX, fl + H + 0.8, EZ - 0.3] };
+  },
 };
