@@ -240,6 +240,16 @@ const tankTruck = (cab = 'A', tank = '#dfe3e8', stripe = 'B') => merge(
   part(rbox(0.3, 0.1, 0.3, 0.03), K.steelDk, { p: [-0.35, 1.32, 0] }),
   [[-1.25, 0.4], [-0.85, 0.4], [1.0, 0.4], [-1.25, -0.4], [-0.85, -0.4], [1.0, -0.4]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.14, 14), '#1d1f24', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] })));
 
+// A rocket standing on y = 0, h tall, facing +z: white body with a brand band, nose cone, fins.
+const rocketGeo = (h = 4, body = '#f4f5f6', band = 'A', nose = 'Ad') => { const r = h * 0.075; return merge(
+  part(lathe([[r * 0.8, 0], [r, h * 0.06], [r, h * 0.72], [r * 0.97, h * 0.74], [0.001, h * 0.74]], 32), body), part(lathe([[r * 0.97, 0], [r * 0.85, h * 0.1], [r * 0.45, h * 0.2], [0.001, h * 0.26]], 32), nose, { p: [0, h * 0.74, 0] }),
+  part(new THREE.CylinderGeometry(r * 1.01, r * 1.01, h * 0.08, hi() ? 32 : 12, 1, true), band, { p: [0, h * 0.5, 0] }), part(new THREE.CylinderGeometry(r * 1.01, r * 1.01, h * 0.025, hi() ? 32 : 12, 1, true), band, { p: [0, h * 0.6, 0] }),
+  ring(4, (a) => part(extrude([[0, 0], [r * 1.5, -h * 0.02], [r * 1.5, h * 0.08], [0, h * 0.2]], 0.05), band, { p: [Math.cos(a + Math.PI / 4) * r * 0.9, h * 0.02, Math.sin(a + Math.PI / 4) * r * 0.9], r: [0, -a - Math.PI / 4, 0] })),
+  part(cyl(r * 0.6, r * 0.8, h * 0.05, 16), K.dark, { p: [0, -h * 0.015, 0] })); };
+// A radar dish on a turning mount (dish faces +x, tilted up), base at y = 0.
+const radarDish = (r = 0.8, c = K.white) => merge(part(new THREE.SphereGeometry(r, hi() ? 28 : 10, hi() ? 10 : 4, 0, TAU, 0, Math.PI * 0.32), c, { r: [0, 0, Math.PI / 2 + 0.6], p: [-r * 0.5, 0, 0] }),
+  beam([0, 0, 0], [r * 0.45, r * 0.32, 0], 0.04, K.steelDk), part(new THREE.SphereGeometry(0.08, 10, 8), 'A', { p: [r * 0.47, r * 0.34, 0] }), part(cyl(0.12, 0.16, 0.3, 12), K.steelDk, { p: [-0.2, -0.15, 0] }));
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -1872,5 +1882,76 @@ export const SCENES = {
     // Taxis along the street.
     [0, 0.5].forEach((o) => moving.push({ geo: sedan('#f2c230'), pivot: [0, y0, 4.2 + (o ? -0.3 : 0.3)], anim: (t) => { const f = cyc(t, 7, o), x = (o ? 1 : -1) * (-5.4 + f * 10.8); return { x, ry: o ? 0 : Math.PI, s: clamp01((5.0 - Math.abs(x)) / 0.6) * 0.75 + 0.001 }; } }));
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [1.2, y0, 0.2], topAt: [EX, fl + H + 0.8, EZ - 0.3] };
+  },
+
+  // Launch pad (defence and aerospace primes, defence tech): see first, answer first. On the test
+  // range the radar sweeps, locks onto an incoming target drone, and an interceptor leaps from the
+  // launcher truck to meet it; patrol drones circle, and on the pad the rocket lifts off its gantry.
+  'rocket:0': () => {
+    const R = rand(2601), out = [], moving = [];
+    out.push(slab('#d6c29a'));
+    // Range roads and the pad's apron.
+    out.push(part(box(1.2, 0.03, 10.4), '#b8ab8e', { p: [0.4, y0 + 0.015, 0] }), part(box(10.4, 0.03, 1.0), '#b8ab8e', { p: [0, y0 + 0.015, 2.4] }));
+    if (hi()) for (let i = 0; i < 24; i++) out.push(part(new THREE.SphereGeometry(0.1 + R() * 0.14, 7, 5), '#bba77e', { p: [(R() - 0.5) * 10, y0, (R() - 0.5) * 10], s: [1, 0.5, 1] }));
+    // ---- the launch pad and gantry (back left)
+    const PX = -3.0, PZ = -3.0, RH = 4.2, py = y0 + 0.5;
+    out.push(part(cyl(1.7, 1.9, 0.5, 40), '#c9c4b8', { p: [PX, y0 + 0.25, PZ] }), part(cyl(0.55, 0.55, 0.06, 24), K.dark, { p: [PX, py, PZ] }), part(box(1.2, 0.3, 0.5), '#9aa1a9', { p: [PX + 1.5, y0 + 0.15, PZ + 1.2], r: [0, -0.8, 0] }));
+    [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sz]) => out.push(part(box(0.18, 0.4, 0.18), K.steelDk, { p: [PX + sx * 0.45, py + 0.2, PZ + sz * 0.45] })));
+    const GX = PX - 1.35, GZ = PZ - 0.6, GH = 4.9, gw = 0.32;
+    [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sz]) => out.push(part(box(0.08, GH, 0.08), K.red, { p: [GX + sx * gw, py + GH / 2, GZ + sz * gw] })));
+    for (let y = 0.4; y < GH; y += 0.5) { out.push(part(box(gw * 2, 0.05, 0.06), K.redDk, { p: [GX, py + y, GZ - gw] }), part(box(0.06, 0.05, gw * 2), K.redDk, { p: [GX - gw, py + y, GZ] })); if (hi()) out.push(beam([GX + gw, py + y, GZ - gw], [GX + gw, py + y + 0.5, GZ + gw], 0.03, K.redDk), beam([GX - gw, py + y, GZ + gw], [GX + gw, py + y + 0.5, GZ + gw], 0.03, K.redDk)); }
+    out.push(part(rbox(0.9, 0.1, 0.9, 0.03), K.steelDk, { p: [GX, py + GH, GZ] }), part(cyl(0.03, 0.03, 0.6, 6), K.steelDk, { p: [GX, py + GH + 0.3, GZ] }));
+    // A water tower and the fuel spheres beside the pad.
+    out.push(part(new THREE.SphereGeometry(0.55, hi() ? 24 : 10, hi() ? 16 : 6), K.white, { p: [-0.9, y0 + 0.95, -4.3] }), part(cyl(0.6, 0.6, 0.16, 20), 'A', { p: [-0.9, y0 + 0.95, -4.3] }), ring(4, (a) => beam([-0.9 + Math.cos(a) * 0.4, y0, -4.3 + Math.sin(a) * 0.4], [-0.9 + Math.cos(a) * 0.3, y0 + 0.7, -4.3 + Math.sin(a) * 0.3], 0.05, K.steelDk)));
+    // ---- the radar site (back right) and mission control (front left)
+    const DX = 2.9, DZ = -2.8;
+    out.push(part(rbox(1.6, 0.9, 1.6, 0.06), '#e3e0da', { p: [DX, y0 + 0.45, DZ] }), part(box(1.62, 0.14, 1.62), 'A', { p: [DX, y0 + 0.83, DZ] }), part(cyl(0.3, 0.4, 0.8, 16), '#c9ced6', { p: [DX, y0 + 1.3, DZ] }));
+    out.push(part(new THREE.SphereGeometry(0.7, hi() ? 28 : 10, hi() ? 18 : 6), K.white, { p: [4.2, y0 + 1.2, -4.4] }), part(cyl(0.5, 0.6, 0.6, 20), '#c9ced6', { p: [4.2, y0 + 0.3, -4.4] }));
+    const MX = -3.2, MZ = 1.6;
+    out.push(part(rbox(2.6, 1.2, 1.8, 0.06), '#eef0f2', { p: [MX, y0 + 0.6, MZ] }), part(box(2.62, 0.2, 1.82), 'A', { p: [MX, y0 + 1.1, MZ] }), part(rbox(2.0, 0.4, 0.05, 0.02), '#2a3c50', { p: [MX, y0 + 0.65, MZ + 0.91] }), part(rbox(0.05, 0.4, 1.2, 0.02), '#2a3c50', { p: [MX + 1.31, y0 + 0.65, MZ] }));
+    out.push(part(cyl(0.03, 0.03, 0.9, 6), K.steelDk, { p: [MX - 0.8, y0 + 1.65, MZ - 0.5] }), part(cyl(0.03, 0.03, 0.7, 6), K.steelDk, { p: [MX - 0.5, y0 + 1.55, MZ - 0.5] }));
+    // ---- the launcher truck (front right): eight-wheeler with its cell pack raised
+    const LX = 2.6, LZ = 1.5;
+    out.push(part(rbox(3.0, 0.3, 1.1, 0.04), '#5b6650', { p: [LX, y0 + 0.5, LZ] }), part(rbox(0.9, 0.8, 1.1, 0.1), '#6b7760', { p: [LX + 1.35, y0 + 0.95, LZ] }), part(box(0.04, 0.3, 0.9), '#26323f', { p: [LX + 1.81, y0 + 1.1, LZ] }));
+    for (let i = 0; i < 4; i++) [-0.5, 0.5].forEach((z) => out.push(part(new THREE.CylinderGeometry(0.24, 0.24, 0.18, 14), '#1d1f24', { p: [LX - 1.1 + i * 0.75, y0 + 0.24, LZ + z], r: [Math.PI / 2, 0, 0] })));
+    const cells = [part(rbox(1.3, 1.6, 0.95, 0.05), '#6b7760', { p: [0, 0.8, 0] }), part(box(1.32, 0.12, 0.97), 'A', { p: [0, 1.3, 0] })];
+    for (let i = 0; i < 2; i++) for (let j = 0; j < 2; j++) cells.push(part(cyl(0.2, 0.2, 0.04, 16), K.dark, { p: [-0.3 + i * 0.6, 1.61, -0.22 + j * 0.44] }));
+    out.push(place(merge(cells), { p: [LX - 0.5, y0 + 0.65, LZ], r: [0, 0, -0.35] }));
+    [[4.5, 4.3], [-4.6, 4.4], [-1.4, 4.4]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.45 + R() * 0.15)));
+    // ---- moving parts (one 12 s cycle)
+    const P = 12, F = (t) => cyc(t, P);
+    // The radar sweeps, then holds on the target from the lock to the intercept.
+    const tgt = (f) => new V(5.8, 7.0, -4.8).lerp(new V(2.8, 5.4, -0.6), easeIO(win(f, 0, 0.6)) * 0.85 + win(f, 0, 0.6) * 0.15);
+    const lockYaw = (f) => { const p = tgt(f); return Math.atan2(-(p.z - DZ), p.x - DX); };
+    moving.push({ geo: radarDish(0.85, K.white), pivot: [DX, y0 + 1.9, DZ], anim: (t) => { const f = F(t), sweep = t * 1.6, lock = win(f, 0.25, 0.32) * (1 - win(f, 0.62, 0.68)); return { ry: sweep * (1 - lock) + lockYaw(Math.min(f, 0.6)) * lock }; } });
+    // The lock ring pulses round the radar.
+    moving.push({ geo: part(torus(0.9, 0.04, TAU, 32), '#ff5a4a', { r: [Math.PI / 2, 0, 0] }), pivot: [DX, y0 + 0.95, DZ], anim: (t) => { const f = F(t), k = cyc(f, 0.1); return { s: f > 0.28 && f < 0.6 ? 0.6 + k * 0.9 : 0.001 }; } });
+    // The target drone, flying in high from the right.
+    const tDrone = merge(part(capsule(0.16, 0.7), '#e5533d', { r: [0, 0, Math.PI / 2] }), part(box(0.1, 0.03, 1.3), '#b83a2a'), part(box(0.06, 0.25, 0.03), '#b83a2a', { p: [-0.4, 0.12, 0] }));
+    moving.push({ geo: tDrone, pivot: [0, 0, 0], anim: (t) => { const f = F(t), p = tgt(Math.min(f, 0.6)), a = new V(2.8, 5.4, -0.6).sub(new V(5.8, 7.0, -4.8)); return { x: p.x, y: p.y, z: p.z, ry: Math.atan2(-a.z, a.x), s: f < 0.6 ? Math.min(1, f / 0.04) : 0.001 }; } });
+    // The interceptor, out of the cell pack and up to meet it.
+    const L0 = new V(LX - 0.5 + 0.28, y0 + 2.4, LZ);
+    const iPath = (u) => { const T = tgt(0.6); return new V().lerpVectors(L0, T, u).add(new V(0, Math.sin(u * Math.PI) * 1.2, 0)); };
+    moving.push({ geo: merge(part(capsule(0.09, 0.6), K.white), part(cone(0.09, 0.2, 12), 'A', { p: [0, 0.42, 0] }), ring(4, (a) => part(box(0.02, 0.16, 0.12), K.steelDk, { p: [Math.cos(a) * 0.08, -0.24, Math.sin(a) * 0.08], r: [0, -a, 0] })), place(flameGeo(), { p: [0, -0.36, 0], s: [0.18, 0.25, 0.18] })), pivot: [0, 0, 0], anim: (t) => {
+      const f = F(t), u = easeIn(win(f, 0.4, 0.6)), p = iPath(u), d = iPath(Math.min(1, u + 0.02)).sub(p).normalize();
+      return { x: p.x, y: p.y, z: p.z, q: new THREE.Quaternion().setFromUnitVectors(new V(0, 1, 0), d.lengthSq() ? d : new V(0, 1, 0)), s: f > 0.4 && f < 0.6 ? 1 : 0.001 };
+    } });
+    // The intercept: a white flash and a ring of smoke.
+    const T6 = tgt(0.6);
+    moving.push({ geo: merge(puff(0.6), part(new THREE.SphereGeometry(0.4, 16, 12), K.yellow, {})), pivot: [0, 0, 0], anim: (t) => { const f = F(t), k = win(f, 0.6, 0.78); return { x: T6.x, y: T6.y, z: T6.z, s: f > 0.6 && f < 0.78 ? 0.4 + easeOut(k) * 1.2 : 0.001 }; } });
+    for (let k = 0; k < 6; k++) { const a = (k / 6) * TAU; moving.push({ geo: part(box(0.12, 0.08, 0.16), '#7d4a3a'), pivot: [0, 0, 0], anim: (t) => { const f = F(t), u = win(f, 0.6, 0.82); return { x: T6.x + Math.cos(a) * u * 1.2, y: T6.y + u * 0.4 - u * u * 3, z: T6.z + Math.sin(a) * u * 1.2, rx: u * 9, s: f > 0.6 && f < 0.82 ? 1 : 0.001 }; } }); }
+    // The rocket on the pad: the gantry arm swings back, it lifts off on its flame, a fresh one is raised.
+    const lift = (f) => easeIn(win(f, 0.72, 0.98)) * 14;
+    const rk = moving.length;
+    moving.push({ geo: rocketGeo(RH, '#f4f5f6', 'A', 'Ad'), pivot: [PX, py + 0.1, PZ], anim: (t) => { const f = F(t); return { y: lift(f) + (f < 0.08 ? -(1 - easeOut(f / 0.08)) * RH : 0), s: f < 0.08 ? Math.max(0.001, f / 0.08) : f > 0.97 ? 0.001 : 1 }; } });
+    moving.push({ geo: place(flameGeo(), { s: [0.55, 0.7, 0.55] }), pivot: [0, -0.1, 0], parent: rk, anim: (t) => { const f = F(t); return { sy: f > 0.7 && f < 0.97 ? 0.8 + Math.sin(t * 30) * 0.15 : 0.001, s: f > 0.7 && f < 0.97 ? 1 : 0.001 }; } });
+    moving.push({ geo: merge(part(box(1.0, 0.1, 0.14), K.redDk, { p: [0.5, 0, 0] }), part(rbox(0.14, 0.4, 0.4, 0.03), K.red, { p: [1.0, 0, 0] })), pivot: [GX + gw, py + RH * 0.7, GZ], anim: (t) => { const f = F(t), k = easeIO(win(f, 0.62, 0.7)) - easeIO(win(f, 0.05, 0.12)) * (f < 0.5 ? 1 : 0); return { ry: Math.atan2(-(PZ - GZ), PX - GX) - (f < 0.5 ? 1 - easeIO(win(f, 0.05, 0.12)) : k) * 1.3 }; } });
+    // Smoke billowing off the pad at lift-off.
+    for (let k = 0; k < 5; k++) { const a = (k / 5) * TAU + 0.4; moving.push({ geo: puff(0.5), pivot: [PX, py, PZ], anim: (t) => { const f = F(t), u = win(f, 0.72, 0.99); return { x: Math.cos(a) * (0.6 + u * 1.4), z: Math.sin(a) * (0.6 + u * 1.4), y: u * 0.5, s: f > 0.72 && f < 0.99 ? (0.5 + u * 0.9) * (1 - win(f, 0.9, 0.99)) + 0.001 : 0.001 }; } }); }
+    // Patrol drones circling the range.
+    [[0, 3.4, 2.0], [Math.PI, 3.0, 2.6]].forEach(([o, h, r]) => moving.push({ geo: drone('A'), pivot: [0.2, y0 + h, 0.3], anim: (t) => { const a = t * 0.5 + o; return { x: Math.cos(a) * r, z: Math.sin(a) * r, y: Math.sin(t * 2 + o) * 0.08, ry: -a }; } }));
+    // A crew member walking from mission control toward the pad.
+    moving.push(...walker(moving.length, (t) => { const k = Math.sin(t * 0.35); return { x: -1.0 + k * 0.1, z: 0.2 + k * 1.4, ry: Math.cos(t * 0.35) > 0 ? -Math.PI / 2 : Math.PI / 2 }; }, { shirt: K.orange, pants: '#3a4a3a', y: y0 }));
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-0.6, y0, 3.7], topAt: [MX - 0.2, y0 + 1.2, MZ + 0.2] };
   },
 };
