@@ -3129,37 +3129,52 @@ export const HEROES = {
     moving.push({ geo: merge(part(rbox(1.2, 0.25, 0.5, 0.1), '#f4f5f6', { p: [0, 0.12, 0] }), part(rbox(0.7, 0.3, 0.4, 0.05), BLUE, { p: [0, 0.38, 0] })), pivot: [0, y0 + 0.04, 0], anim: (t) => { const f = cyc(t, 12), z = 2.2 - f * 4.4; return { x: -1.0, z, ry: Math.PI / 2, s: clamp01((2.1 - Math.abs(z)) / 0.4) + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // Stripe: payments in a few lines of code. On the giant laptop the code types itself; each call
-  // shoots out to one of the online shops around the plaza, whose screen flashes paid; the
-  // business grows a little each time.
+  // Stripe: the payments layer underneath the internet's businesses. A street of online businesses
+  // stands on a cut-away purple deck; a shopper taps Pay on the giant phone, the payment drops into
+  // Stripe's layer, runs along the rails under the street, and comes up as money at the business
+  // it was for, whose sign lights up.
   stripe: { finder: '#635bff', build: () => {
-    const R = rand(9), out = [], y0 = 0.24, PURP = '#635bff', INK = '#0a2540';
-    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#f6f9fc', { p: [0, 0.12, 0] }));
-    // A gradient band of stripes across the plaza.
-    for (let i = 0; i < 7; i++) out.push(part(box(10.2, 0.012, 0.5), new THREE.Color().setHSL(0.68 - i * 0.05, 0.75, 0.62).getStyle(), { p: [0, y0 + 0.006, -3.0 + i * 0.52], r: [0, 0.25, 0] }));
-    // ---- the laptop: base, keyboard, open screen with a code editor
-    const LX = -0.6, LZ = 0.4;
-    out.push(part(rbox(3.0, 0.12, 2.0, 0.08), '#c9ced6', { p: [LX, y0 + 0.06, LZ] }), part(box(2.5, 0.02, 1.0), '#3a3f47', { p: [LX, y0 + 0.13, LZ + 0.15] }), part(box(0.9, 0.02, 0.5), '#9aa1a9', { p: [LX, y0 + 0.13, LZ + 0.75] }));
-    out.push(part(rbox(3.0, 1.9, 0.08, 0.08), '#c9ced6', { p: [LX, y0 + 1.0, LZ - 1.05], r: [-0.18, 0, 0] }), part(box(2.7, 1.6, 0.02), INK, { p: [LX, y0 + 1.02, LZ - 1.0], r: [-0.18, 0, 0] }));
-    // ---- the shops: little storefront screens around the plaza
-    const shops = [[-3.8, -3.4], [3.2, -3.4], [3.8, 0.6], [3.2, 3.6], [-3.8, 3.4], [-4.2, -0.2]];
-    const cols = ['#e5533d', '#2f9e6e', '#f29a3a', '#3d7be0', '#d6336c', '#00d4ff'];
-    shops.forEach(([x, z], i) => { const a = Math.atan2(LX - x, LZ - z); out.push(part(rbox(1.0, 0.9, 0.7, 0.06), '#ffffff', { p: [x, y0 + 0.45, z], r: [0, a, 0] }), part(rbox(1.2, 0.22, 0.9, 0.05), cols[i], { p: [x, y0 + 0.98, z], r: [0, a, 0] }), part(cyl(0.04, 0.04, 0.9, 8), '#c9ced6', { p: [x, y0 + 1.5, z] }), part(rbox(0.5, 0.3, 0.05, 0.04), cols[i], { p: [x, y0 + 1.95, z], r: [0, a, 0] }), part(box(0.6, 0.4, 0.02), '#e9ecef', { p: [x + Math.sin(a) * 0.36, y0 + 0.5, z + Math.cos(a) * 0.36], r: [0, a, 0] })); });
-    [[-4.7, -4.7], [4.7, -4.7], [4.7, 4.7], [-4.7, 4.7]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.55 + R() * 0.2)));
-    // ---- moving parts
-    const moving = [];
-    // Code lines typing themselves on the screen, then scrolling clear.
-    const lines = [[0.9, '#c1a7ff'], [1.4, '#7cf0ff'], [0.7, '#ffd479'], [1.6, '#a8e6a1'], [1.1, '#c1a7ff'], [0.5, '#ff9e9e'], [1.3, '#7cf0ff']];
-    lines.forEach(([w, c], i) => moving.push({ geo: part(box(1, 0.09, 0.01), c, { p: [0.5, 0, 0] }), pivot: [LX - 1.15 + (i % 3 === 1 ? 0.2 : 0), y0 + 1.62 - i * 0.18, LZ - 0.99 + i * 0.032], anim: (t) => { const f = cyc(t, 6), k = clamp01((f - i * 0.1) / 0.08); return f > 0.92 ? { s: 0.001 } : { rx: -0.18, sx: Math.max(0.001, k * w) }; } }));
-    // API calls: purple orbs out of the screen to each shop; the shop flashes paid.
-    shops.forEach(([x, z], i) => {
-      const c = curve([[LX, y0 + 1.6, LZ - 0.9], [(LX + x) / 2, y0 + 3.0, (LZ + z) / 2], [x, y0 + 1.1, z]]), at = i / shops.length;
-      moving.push({ geo: part(ball(0.2), PURP), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 6, -at), u = win(f, 0.5, 0.75); if (f < 0.5 || f > 0.76) return { s: 0.001 }; const p = c.getPointAt(u); return { x: p.x, y: p.y, z: p.z, s: 0.7 }; } });
-      const a = Math.atan2(LX - x, LZ - z);
-      moving.push({ geo: merge(part(box(0.6, 0.4, 0.02), '#2fbf5b'), part(rbox(0.08, 0.18, 0.02, 0.02), '#ffffff', { p: [-0.07, -0.02, 0.015], r: [0, 0, 0.7] }), part(rbox(0.08, 0.3, 0.02, 0.02), '#ffffff', { p: [0.06, 0.03, 0.015], r: [0, 0, -0.6] })), pivot: [x + Math.sin(a) * 0.375, y0 + 0.5, z + Math.cos(a) * 0.375], anim: (t) => { const f = cyc(t, 6, -at); return f > 0.75 && f < 0.95 ? { ry: a, s: back(win(f, 0.75, 0.8)) + 0.001 } : { s: 0.001 }; } });
+    const R = rand(9), out = [], PURP = '#635bff', INK = '#0a2540';
+    // ---- the infrastructure layer, cut open along the front and right
+    out.push(part(rbox(10.4, 0.2, 10.4, 0.06), INK, { p: [0, 0.1, 0] }), part(box(10.2, 0.02, 10.2), '#3b3f8f', { p: [0, 0.21, 0] }), part(box(10.2, 1.5, 0.1), '#2a2f6b', { p: [0, 0.95, -5.05] }), part(box(0.1, 1.5, 10.2), '#2a2f6b', { p: [-5.05, 0.95, 0] }));
+    for (let i = 0; i < 5; i++) for (let j = 0; j < 5; j++) out.push(part(new THREE.BoxGeometry(0.12, 1.48, 0.12), '#2a2f6b', { p: [-4.0 + i * 2.0, 0.95, -4.0 + j * 2.0] }));
+    const DY = 1.7, y0 = DY + 0.14;
+    out.push(part(box(10.4, 0.14, 10.4), '#f6f9fc', { p: [0, DY + 0.07, 0] }), part(box(10.42, 0.04, 10.42), PURP, { p: [0, DY - 0.02, 0] }));
+    // Rails glowing inside the layer, seen through the cut faces.
+    const railZ = [-3.2, -1.0, 1.2, 3.4];
+    for (const z of railZ) out.push(part(new THREE.BoxGeometry(10.0, 0.1, 0.1), '#b8b3ff', { p: [0, 0.8, z] }));
+    out.push(part(new THREE.BoxGeometry(0.1, 0.1, 10.0), '#b8b3ff', { p: [-3.8, 0.8, 0] }));
+    // ---- the street of businesses on the deck
+    const biz = [[-1.4, -3.4, '#e5533d', 'bakery'], [1.2, -3.4, '#2f9e6e', 'shop'], [3.6, -3.4, '#f2c94c', 'app'], [3.6, -0.6, '#3d7be0', 'rocket'], [1.2, 1.4, '#d6336c', 'studio'], [3.6, 2.6, '#00d4ff', 'cloud']];
+    biz.forEach(([x, z, c, kind]) => {
+      out.push(part(rbox(1.6, 1.1, 1.3, 0.05), '#ffffff', { p: [x, y0 + 0.55, z] }), part(rbox(1.66, 0.14, 1.36, 0.04), c, { p: [x, y0 + 1.1, z] }), part(rbox(1.0, 0.6, 0.04, 0.03), '#e9ecef', { p: [x, y0 + 0.45, z + 0.66] }));
+      if (kind === 'bakery') out.push(part(torus(0.18, 0.08, TAU, 20), '#d9a05b', { p: [x, y0 + 1.45, z], r: [Math.PI / 2, 0, 0] }));
+      if (kind === 'shop') out.push(part(rbox(0.4, 0.4, 0.3, 0.05), '#c99a62', { p: [x, y0 + 1.4, z] }));
+      if (kind === 'app') out.push(part(rbox(0.3, 0.5, 0.06, 0.06), INK, { p: [x, y0 + 1.45, z] }));
+      if (kind === 'rocket') out.push(part(lathe([[0, 0], [0.12, 0.05], [0.14, 0.4], [0.08, 0.6], [0, 0.7]], 16), '#f4f5f6', { p: [x, y0 + 1.18, z] }));
+      if (kind === 'studio') out.push(part(cone(0.22, 0.3, 3), '#ffffff', { p: [x, y0 + 1.35, z], r: [0, 0, -Math.PI / 2] }));
+      if (kind === 'cloud') out.push(part(ball(0.22), '#ffffff', { p: [x - 0.12, y0 + 1.38, z] }), part(ball(0.18), '#ffffff', { p: [x + 0.15, y0 + 1.35, z] }));
     });
-    // The developer at the keyboard.
-    moving.push(...walker(moving.length, () => ({ x: LX, z: LZ + 1.5, ry: Math.PI / 2, still: true, push: true }), { shirt: PURP, pants: INK, skin: '#c58c66', hair: '#1d1f24', y: y0 }));
+    // ---- the shopper's giant phone, front left
+    const PX = -2.8, PZ = 2.6;
+    out.push(part(rbox(1.5, 2.8, 0.16, 0.2), INK, { p: [PX, y0 + 1.5, PZ], r: [0, Math.PI / 4, 0] }), part(rbox(1.34, 2.5, 0.02, 0.14), '#f6f9fc', { p: [PX + 0.06, y0 + 1.5, PZ + 0.06], r: [0, Math.PI / 4, 0] }));
+    const scr = (dx, dy, w, h, c) => part(rbox(w, h, 0.02, Math.min(w, h) * 0.3), c, { p: [PX + 0.08 + dx * 0.707, y0 + 1.5 + dy, PZ + 0.08 - dx * 0.707], r: [0, Math.PI / 4, 0] });
+    out.push(scr(0, 0.8, 1.0, 0.5, '#e9ecef'), scr(0, 0.25, 1.0, 0.1, '#c9ced6'), scr(0, 0.05, 1.0, 0.1, '#c9ced6'), scr(0, -0.15, 0.6, 0.1, '#c9ced6'));
+    out.push(part(rbox(0.6, 0.12, 0.6, 0.04), '#c9ced6', { p: [PX, y0 + 0.06, PZ] }));
+    [[-4.6, -4.6], [-4.6, -1.6], [0.4, 4.6], [4.7, 4.7]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.6 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [], P = 9;
+    // The Pay button pulsing, then pressed.
+    moving.push({ geo: merge(part(rbox(1.0, 0.3, 0.04, 0.12), PURP), part(box(0.3, 0.06, 0.01), '#ffffff', { p: [0, 0, 0.025] })), pivot: [PX + 0.09 + 0, y0 + 0.9 - 0.25, PZ + 0.09], anim: (t) => { const f = cyc(t, P); return { ry: Math.PI / 4, s: f < 0.12 ? 1 + Math.sin(t * 8) * 0.04 : f < 0.16 ? 0.9 : 1 }; } });
+    // The shopper tapping.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P); return { x: PX + 1.1, z: PZ - 0.5, ry: Math.PI * 1.1, still: true, push: f > 0.06 && f < 0.18 }; }, { shirt: '#e5533d', pants: '#2b3a55', y: y0 }));
+    // Each payment: from the phone down into the layer, along the rails to a business, up as money.
+    biz.forEach(([bx, bz, c], i) => {
+      const rz = railZ.reduce((a, b) => (Math.abs(b - bz) < Math.abs(a - bz) ? b : a)), path = curve([[PX, y0 + 0.4, PZ], [PX, 0.95, PZ - 0.1], [-3.8, 0.95, PZ - 0.5], [-3.8, 0.95, rz + 0.3], [-3.0, 0.95, rz], [bx, 0.95, rz], [bx, 0.97, bz], [bx, y0 + 1.6, bz]]);
+      const off = i / biz.length;
+      moving.push({ geo: merge(part(cyl(0.24, 0.24, 0.06, 20), '#ffd479', { r: [Math.PI / 2, 0, 0] }), part(cyl(0.15, 0.15, 0.065, 16), PURP, { r: [Math.PI / 2, 0, 0] })), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P, -off), u = win(f, 0.16, 0.8); if (f < 0.16 || f > 0.85) return { s: 0.001 }; const p = path.getPointAt(u); return { x: p.x, y: p.y, z: p.z, ry: t * 4 }; } });
+      moving.push({ geo: part(rbox(1.68, 0.16, 1.38, 0.04), '#ffffff'), pivot: [bx, y0 + 1.1, bz], anim: (t) => { const f = cyc(t, P, -off); return f > 0.78 && f < 0.95 ? { s: 1, sy: 1 + Math.sin(win(f, 0.78, 0.95) * Math.PI) * 0.6 } : { s: 0.001 }; } });
+    });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // Kroger: the grocer with robots in the back room. On the fulfilment grid little robots zip along
@@ -3178,7 +3193,7 @@ export const HEROES = {
     // ---- the store front with produce stands
     const SX = 2.4, SZ = -2.0;
     out.push(part(rbox(3.6, 1.6, 2.4, 0.05), '#e9e4da', { p: [SX + 0.4, y0 + 0.8, SZ - 0.8] }), part(rbox(3.66, 0.4, 0.12, 0.04), BLUE, { p: [SX + 0.4, y0 + 1.4, SZ + 0.43] }), part(box(1.6, 0.16, 0.02), '#ffffff', { p: [SX + 0.4, y0 + 1.4, SZ + 0.5] }), part(rbox(1.2, 0.9, 0.05, 0.03), '#2a3c50', { p: [SX + 0.4, y0 + 0.5, SZ + 0.41] }));
-    const pile = (x, z, c, r) => { const g = [part(rbox(0.9, 0.5, 0.6, 0.04), '#8a5a3a', { p: [x, y0 + 0.25, z] })]; for (let l = 0; l < 3; l++) for (let i = 0; i < 4 - l; i++) for (let j = 0; j < 3 - l; j++) g.push(part(ball(r), c, { p: [x - 0.3 + l * 0.08 + i * 0.18, y0 + 0.55 + l * 0.14, z - 0.18 + l * 0.08 + j * 0.18] })); return g; };
+    const pile = (x, z, c, r) => { const g = [part(rbox(0.9, 0.5, 0.6, 0.04), '#8a5a3a', { p: [x, y0 + 0.25, z] })]; for (let l = 0; l < 3; l++) for (let i = 0; i < 4 - l; i++) for (let j = 0; j < 3 - l; j++) g.push(part(new THREE.SphereGeometry(r, 10, 7), c, { p: [x - 0.3 + l * 0.08 + i * 0.18, y0 + 0.55 + l * 0.14, z - 0.18 + l * 0.08 + j * 0.18] })); return g; };
     if (hi()) out.push(pile(1.4, 0.4, '#e5533d', 0.09), pile(2.6, 0.4, '#f29a3a', 0.09), pile(3.8, 0.4, '#8fc46a', 0.09));
     else out.push(part(box(3.4, 0.6, 0.6), '#8a5a3a', { p: [2.6, y0 + 0.3, 0.4] }));
     // Parking and a cart corral.
