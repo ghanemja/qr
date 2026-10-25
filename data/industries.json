@@ -123,7 +123,8 @@
   "publix": "Owned by the people who work there: every order walked out to your car",
   "albertsons": "One grocer behind the local names, one fleet stocking them all",
   "sysco": "The truck behind the menu: restaurants, schools, hospitals, stadiums",
-  "tyson": "From the egg to the supermarket, all in one company"
+  "tyson": "From the egg to the supermarket, all in one company",
+  "kraftheinz": "The brands already in every pantry"
  },
  "bank": [
   "PNC Financial Services",
@@ -537,7 +538,6 @@
   "Darden Restaurants",
   "US Foods Holding",
   "Performance Food Group",
-  "Kraft Heinz",
   "Mondelez International",
   "General Mills",
   "Kellogg",
@@ -1442,7 +1442,6 @@
   "TreeHouse Foods": 3,
   "Hershey": 4,
   "Mondelez International": 4,
-  "Kraft Heinz": 5,
   "Dean Foods": 5,
   "Campbell Soup": 6,
   "Conagra Brands": 6,
@@ -1736,5 +1735,8 @@
  ],
  "tyson": [
   "Tyson Foods"
+ ],
+ "kraftheinz": [
+  "Kraft Heinz"
  ]
 }

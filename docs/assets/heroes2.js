@@ -1218,4 +1218,36 @@ export const HEROES2 = {
     moving.push({ geo: place(semi(RED, K.white, NAVY), { s: 0.55 }), pivot: [0, y0, 3.6], anim: (t) => { const f = cyc(t, P), x = f < 0.5 ? 3.0 : 3.0 - easeIn(win(f, 0.5, 0.95)) * 9; return { x, ry: Math.PI, s: clamp01((5.6 - Math.abs(x)) / 0.6) + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Kraft Heinz: the brands already in every pantry. The giant Heinz bottle tips and lays down
+  // the ketchup on the fries and the burger, the Kraft mac and cheese steams, and the shelf of
+  // familiar labels stands behind.
+  kraftheinz: { finder: '#c8102e', build: () => {
+    const R = rand(136), out = [], RED = '#c8102e', KBLUE = '#1c5aa6';
+    out.push(ground('#8fc66f'), part(rbox(7.0, 0.08, 6.0, 0.03), '#f1e7d6', { p: [-0.6, y0 + 0.04, -0.6] }));
+    // ---- the pantry shelf, back
+    out.push(part(rbox(7.0, 3.2, 0.5, 0.04), K.wood, { p: [-0.6, y0 + 1.6, -4.4] }));
+    for (let r = 0; r < 3; r++) { out.push(part(box(6.8, 0.06, 0.5), '#8a5a36', { p: [-0.6, y0 + 0.4 + r * 0.95, -4.15] })); for (let k = 0; k < 11; k++) { const x = -3.7 + k * 0.6, kind = (k + r) % 4; out.push(kind === 0 ? place(bottle(0.6, RED, K.white), { p: [x, y0 + 0.43 + r * 0.95, -4.1] }) : kind === 1 ? part(rbox(0.4, 0.6, 0.15, 0.03), KBLUE, { p: [x, y0 + 0.73 + r * 0.95, -4.1] }) : kind === 2 ? part(cyl(0.16, 0.16, 0.4, 16), ['#f2c94c', '#3fb8a8', '#e5533d'][r], { p: [x, y0 + 0.63 + r * 0.95, -4.1] }) : part(rbox(0.35, 0.5, 0.12, 0.03), ['#f29a3a', '#8a6cf0', '#2f9e6e'][r], { p: [x, y0 + 0.68 + r * 0.95, -4.1] })); } }
+    // ---- the table: a plate with fries and a burger, the mac and cheese bowl, the box
+    const TX = 0.8, TZ = 0.8;
+    out.push(part(cyl(1.2, 1.2, 0.08, 40), K.white, { p: [TX, y0 + 0.12, TZ] }), part(torus(1.2, 0.06, TAU, 48), '#e9e6df', { p: [TX, y0 + 0.16, TZ], r: [Math.PI / 2, 0, 0] }));
+    for (let k = 0; k < (hi() ? 18 : 6); k++) { const a = R() * TAU, d = R() * 0.5; out.push(part(box(0.08, 0.08, 0.6), '#f2c14e', { p: [TX + 0.4 + Math.cos(a) * d, y0 + 0.22 + R() * 0.1, TZ + 0.3 + Math.sin(a) * d], r: [R() * 0.3, R() * TAU, 0] })); }
+    out.push(part(cyl(0.45, 0.48, 0.18, 24), '#d9a05b', { p: [TX - 0.45, y0 + 0.25, TZ - 0.2] }), part(cyl(0.48, 0.48, 0.12, 24), '#6f3b22', { p: [TX - 0.45, y0 + 0.4, TZ - 0.2] }), part(cyl(0.5, 0.5, 0.04, 24), '#f2c94c', { p: [TX - 0.45, y0 + 0.48, TZ - 0.2] }), part(new THREE.SphereGeometry(0.46, 24, 12, 0, TAU, 0, Math.PI / 2), '#d9a05b', { p: [TX - 0.45, y0 + 0.5, TZ - 0.2], s: [1, 0.55, 1] }));
+    const BX = -2.6, BZ = 1.4;
+    out.push(part(cyl(0.7, 0.55, 0.45, 32), K.white, { p: [BX, y0 + 0.25, BZ] }), part(cyl(0.62, 0.62, 0.06, 32), '#f5a623', { p: [BX, y0 + 0.47, BZ] }));
+    if (hi()) for (let k = 0; k < 16; k++) { const a = R() * TAU, d = R() * 0.5; out.push(part(torus(0.06, 0.025, Math.PI, 8), '#ffc53d', { p: [BX + Math.cos(a) * d, y0 + 0.52, BZ + Math.sin(a) * d], r: [Math.PI / 2, 0, R() * TAU] })); }
+    out.push(part(rbox(0.9, 1.3, 0.3, 0.04), KBLUE, { p: [-3.6, y0 + 0.69, 0.0], r: [0, Math.PI / 4, 0] }), place(merge(part(rbox(0.6, 0.3, 0.02, 0.1), K.white), pixText('KRAFT', 0.035, KBLUE, 0.03)), { p: [-3.48, y0 + 1.0, 0.12], r: [0, Math.PI / 4, 0] }), part(box(0.6, 0.3, 0.02), '#ffc53d', { p: [-3.48, y0 + 0.55, 0.12], r: [0, Math.PI / 4, 0] }));
+    out.push(trees(R, [[4.6, 4.6], [4.6, -3.6], [-4.6, 4.6], [1.6, 4.6]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 7;
+    // The bottle: hangs over the plate, turns upside down, squeezes, rights itself.
+    const btl = merge(part(lathe([[0, 0], [0.42, 0.02], [0.46, 0.2], [0.44, 1.3], [0.28, 1.75], [0.2, 1.95], [0, 1.96]], 32), RED), part(cyl(0.21, 0.21, 0.25, 20), K.white, { p: [0, 2.05, 0] }), part(new THREE.CylinderGeometry(0.47, 0.47, 0.55, hi() ? 32 : 12, 1, true), '#f4ead2', { p: [0, 0.85, 0] }), place(pixText('HEINZ', 0.045, RED, 0.03), { p: [0, 0.9, 0.47] }), part(cone(0.1, 0.15, 12), K.white, { p: [0, 2.24, 0] })).translate(0, -1.1, 0);
+    const tip = (t) => { const f = cyc(t, P); return easeIO(win(f, 0.1, 0.3)) - easeIO(win(f, 0.75, 0.9)); };
+    moving.push({ geo: btl, pivot: [TX + 0.4, y0 + 2.6, TZ + 0.3], anim: (t) => ({ ry: Math.PI / 4, rz: tip(t) * Math.PI, y: Math.sin(t * 2) * 0.05 }) });
+    // The ketchup ribbon landing on the fries.
+    moving.push({ geo: part(capsule(0.09, 0.6), '#a30d1e', { r: [0, 0, Math.PI / 2] }), pivot: [TX + 0.4, y0 + 0.38, TZ + 0.3], anim: (t) => { const f = cyc(t, P); return f > 0.35 && f < 0.95 ? { sx: Math.min(1, win(f, 0.35, 0.7)) * 1.4 + 0.001, ry: 0.6 } : { s: 0.001 }; } });
+    moving.push({ geo: part(cyl(0.05, 0.08, 1.0, 12), '#c8102e', { p: [0, -0.5, 0] }), pivot: [TX + 0.4, y0 + 1.35, TZ + 0.3], anim: (t) => { const f = cyc(t, P); return f > 0.32 && f < 0.72 ? { sy: 0.9 + Math.sin(t * 20) * 0.08 } : { s: 0.001 }; } });
+    // Steam off the mac and cheese.
+    for (let k = 0; k < 3; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.16, 10, 8), '#f4f1ea'), pivot: [BX + (k - 1) * 0.2, y0 + 0.6, BZ], anim: (t) => { const u = cyc(t, 2.4, k / 3); return { y: u * 1.4, x: Math.sin(u * 6 + k) * 0.1, s: Math.sin(u * Math.PI) * 1.2 + 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
