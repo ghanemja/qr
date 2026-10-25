@@ -1742,30 +1742,39 @@ export const HEROES2 = {
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.6, 0.8)); return { x: -1.6 + u * 2.8, z: -2.0 + u * 2.2, ry: -Math.PI / 4, s: f > 0.8 || f < 0.58 ? 0.001 : 1 }; }, { shirt: '#d6336c', pants: '#2b3a55', y: y0 }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // Hertz: the airport counter with a car for everyone. A plane lands, travellers come off
-  // with their bags, pick up keys at the yellow counter and drive away, while returned cars are
-  // washed, charged and lined up for the next flight.
+  // Hertz: a car waiting for everyone off the plane. The jet lands, the traveller walks to the
+  // yellow counter and drives a car out of the gate, while a returned car rolls through the wash,
+  // gets charged and parks in the empty bay for the next flight.
   hertz: { finder: '#ffd100', build: () => {
-    const R = rand(152), out = [], YEL = '#ffd100', INK = '#1d1f24';
-    out.push(ground('#8fc66f'), part(box(10.2, 0.02, 2.0), '#4a4f57', { p: [0, y0 + 0.01, -3.6] }), part(box(10.2, 0.02, 6.0), '#6a7079', { p: [0, y0 + 0.01, 1.6] }));
-    // ---- the counter building, middle left
-    out.push(part(rbox(3.0, 1.6, 1.6, 0.05), '#eef0f2', { p: [-2.8, y0 + 0.8, -1.6] }), part(box(3.02, 0.45, 1.62), YEL, { p: [-2.8, y0 + 1.4, -1.6] }), place(pixText('HERTZ', 0.09, INK, 0.03), { p: [-2.8, y0 + 1.4, -0.78] }), part(rbox(1.8, 0.9, 0.5, 0.04), YEL, { p: [-2.8, y0 + 0.45, -0.4] }));
-    // ---- the rows of rental cars, the charging posts
-    const spots = [];
-    for (let k = 0; k < 6; k++) spots.push([-4.0 + k * 1.5, 3.4]);
-    spots.forEach(([x, z], i) => out.push(part(box(0.05, 0.012, 2.0), K.white, { p: [x - 0.75, y0 + 0.02, z] }), part(rbox(0.2, 0.9, 0.2, 0.04), '#2f9e6e', { p: [x, y0 + 0.45, z - 1.3] })));
-    spots.forEach(([x, z], i) => { if (i !== 2) out.push(place(sedan(['#f4f5f6', '#1d1f24', '#3d7be0', '#9aa1a9', '#e5533d', '#f4f5f6'][i]), { p: [x, y0, z], r: [0, Math.PI / 2, 0], s: 0.85 })); });
-    out.push(trees(R, [[4.6, -1.6], [1.6, -1.8], [4.6, 0.4]], 0.55));
+    const R = rand(221), out = [], YEL = '#ffd100', INK = '#1d1f24';
+    out.push(ground('#8fc66f'), part(box(10.2, 0.02, 1.4), '#4a4f57', { p: [0, y0 + 0.01, -4.0] }), part(rbox(9.6, 0.04, 7.0, 0.03), '#6a7079', { p: [0, y0 + 0.02, 0.6] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(0.55, 0.01, 0.06), '#f4f4f0', { p: [-4.4 + i * 1.25, y0 + 0.02, -4.0] }));
+    // ---- the terminal and the yellow counter canopy, back
+    out.push(part(rbox(4.4, 1.4, 1.4, 0.05), '#e3e7eb', { p: [-2.4, y0 + 0.7, -2.7] }), part(box(4.2, 0.6, 0.02), '#7fa6c8', { p: [-2.4, y0 + 0.8, -1.99] }), part(box(4.5, 0.15, 1.5), '#9aa1a9', { p: [-2.4, y0 + 1.45, -2.7] }));
+    out.push(part(rbox(3.0, 0.3, 1.8, 0.05), YEL, { p: [1.6, y0 + 2.0, -2.2] }), [[-1.3, -0.8], [1.3, -0.8], [-1.3, 0.8], [1.3, 0.8]].map(([x, z]) => part(cyl(0.06, 0.06, 2.0, 8), '#c9ced6', { p: [1.6 + x, y0 + 1.0, -2.2 + z] })), place(pixText('HERTZ', 0.09, INK, 0.03), { p: [1.6, y0 + 2.0, -1.28] }), part(rbox(2.0, 0.9, 0.5, 0.04), YEL, { p: [1.6, y0 + 0.45, -2.7] }), place(fan(INK), { p: [1.6, y0, -3.1], s: 1.3 }));
+    // ---- the lot: three rows of bays with cars and chargers
+    const bays = [];
+    for (let r = 0; r < 2; r++) for (let k = 0; k < 6; k++) bays.push([-3.8 + k * 1.3, 0.3 + r * 2.2]);
+    bays.forEach(([x, z], i) => { out.push(part(box(0.05, 0.012, 1.8), K.white, { p: [x - 0.65, y0 + 0.05, z] })); if (i % 6 === 5) out.push(part(box(0.05, 0.012, 1.8), K.white, { p: [x + 0.65, y0 + 0.05, z] })); if (i !== 3 && i !== 8) out.push(place(sedan(['#f4f5f6', INK, YEL, '#9aa1a9', '#3d7be0', '#e5533d'][i % 6]), { p: [x, y0 + 0.04, z], r: [0, Math.PI / 2, 0], s: 0.85 })); out.push(part(rbox(0.2, 0.8, 0.2, 0.04), '#2f9e6e', { p: [x, y0 + 0.4, z - 1.05] })); });
+    // ---- the car wash lane, front right: an arch with brushes
+    const WX = 3.6, WZ = 4.3;
+    out.push(part(rbox(0.3, 1.6, 0.3, 0.04), '#3d7be0', { p: [WX - 0.9, y0 + 0.8, WZ - 0.6] }), part(rbox(0.3, 1.6, 0.3, 0.04), '#3d7be0', { p: [WX - 0.9, y0 + 0.8, WZ + 0.6] }), part(rbox(0.4, 0.3, 1.5, 0.04), '#3d7be0', { p: [WX - 0.9, y0 + 1.7, WZ] }));
+    out.push(trees(R, [[4.8, -2.4], [-4.8, 4.8], [4.8, 2.2]], 0.45));
     // ---- moving parts
-    const moving = [], P = 12;
-    // The plane landing on the runway at the back.
-    moving.push({ geo: place(jet('#3d7be0'), { s: 0.8 }), pivot: [0, y0, -3.6], anim: (t) => { const f = cyc(t, P), x = -6 + easeOut(win(f, 0, 0.3)) * 12, y = (1 - easeOut(win(f, 0, 0.18))) * 2.5; return { x, y, rz: -y * 0.05, s: clamp01((5.6 - Math.abs(x)) / 0.6) * Math.min(1, f / 0.03) + 0.001 }; } });
-    // A traveller: from the runway side to the counter, then to the car.
-    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.25, 0.45)), v = easeIO(win(f, 0.55, 0.7)); return f < 0.5 ? { x: 0.4 - u * 2.8, z: -2.6 + u * 2.6, ry: Math.PI * 0.8, still: f > 0.45, s: f < 0.22 ? 0.001 : 1 } : { x: -2.4 + v * 1.4, z: 0.0 + v * 2.2, ry: -1.2, s: f > 0.7 ? 0.001 : 1 }; }, { shirt: '#d6336c', pants: '#2b3a55', y: y0, carry: part(rbox(0.3, 0.4, 0.18, 0.04), INK, { p: [0, 0.3, 0.35] }) }));
-    // The rented car pulls out of spot 2 and away.
-    moving.push({ geo: place(sedan(YEL), { r: [0, Math.PI / 2, 0], s: 0.85 }), pivot: [spots[2][0], y0, spots[2][1]], anim: (t) => { const f = cyc(t, P), u = easeIn(win(f, 0.72, 0.95)); return f < 0.12 ? { s: f / 0.12 + 0.001 } : { z: -u * 2.2, s: f > 0.88 ? 1 - win(f, 0.88, 0.95) + 0.001 : 1 }; } });
-    // Charging pulses on the posts.
-    spots.forEach(([x, z], i) => moving.push({ geo: part(box(0.12, 0.12, 0.02), '#62d35f'), pivot: [x, y0 + 0.75, z - 1.19], anim: (t) => ({ s: Math.sin(t * 3 + i) > 0 ? 1 : 0.4 }) }));
+    const moving = [], P = 14;
+    // The jet landing along the back runway.
+    moving.push({ geo: place(jet('#3d7be0'), { s: 0.7 }), pivot: [0, y0, -3.88], anim: (t) => { const f = cyc(t, P), x = -6 + easeOut(win(f, 0, 0.3)) * 12, y = (1 - easeOut(win(f, 0, 0.2))) * 2.5; return { x, y, s: clamp01((5.4 - Math.abs(x)) / 0.6) * Math.min(1, f / 0.03) + 0.001 }; } });
+    // The traveller: off the plane to the counter, then to bay 3.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.2, 0.35)), v = easeIO(win(f, 0.42, 0.55)); return f < 0.4 ? { x: -0.6 + u * 2.2, z: -1.8 + u * 0.4, ry: -0.2, still: f > 0.35, s: f < 0.18 ? 0.001 : 1 } : { x: 1.6 + v * (bays[3][0] - 1.6 - 0.6), z: -1.4 + v * (bays[3][1] - 0.4 + 1.4), ry: -1.4, s: f > 0.56 ? 0.001 : 1 }; }, { shirt: '#d6336c', pants: '#2b3a55', y: y0, carry: part(rbox(0.3, 0.4, 0.18, 0.04), INK, { p: [0, 0.3, 0.35] }) }));
+    // Her car: in bay 3 until she arrives, then out of the lot and away.
+    moving.push({ geo: place(sedan(YEL), { r: [0, Math.PI / 2, 0], s: 0.85 }), pivot: [bays[3][0], y0 + 0.04, bays[3][1]], anim: (t) => { const f = cyc(t, P), u = easeIn(win(f, 0.58, 0.85)); return f < 0.04 ? { s: f / 0.04 + 0.001 } : { z: u * 4.6, s: f > 0.8 ? Math.max(0.001, 1 - win(f, 0.8, 0.86)) : 1 }; } });
+    // A returned car: through the wash, along the lane, into bay 8.
+    const ret = curve([[5.6, y0 + 0.04, WZ], [WX - 0.9, y0 + 0.04, WZ], [1.0, y0 + 0.04, WZ - 0.2], [bays[8][0], y0 + 0.04, bays[8][1] + 1.3], [bays[8][0], y0 + 0.04, bays[8][1]]]);
+    moving.push({ geo: place(sedan('#2f9e6e'), { s: 0.85 }), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P, 0.5), u = f < 0.3 ? easeOut(win(f, 0, 0.3)) * 0.25 : f < 0.45 ? 0.25 : f < 0.85 ? 0.25 + easeIO(win(f, 0.45, 0.85)) * 0.75 : 1, a = along(ret, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry, s: (f > 0.95 ? 1 - win(f, 0.95, 1) : Math.min(1, f / 0.05)) + 0.001 }; } });
+    [-1, 1].forEach((s) => moving.push({ geo: merge(part(cyl(0.22, 0.22, 1.2, 14), '#4fc3f7'), [0, 1, 2, 3].map((k) => part(box(0.5, 1.1, 0.04), '#7fd3f7', { r: [0, k * Math.PI / 4, 0] }))), pivot: [WX - 0.9, y0 + 0.7, WZ + s * 0.42], anim: (t) => { const f = cyc(t, P, 0.5); return { ry: t * (f > 0.25 && f < 0.48 ? 12 : 1) }; } }));
+    for (let k = 0; k < 4; k++) moving.push({ geo: bubbleGeo(0.16), pivot: [WX - 0.9 + (k - 1.5) * 0.25, y0 + 1.2, WZ], anim: (t) => { const f = cyc(t, P, 0.5), u = cyc(t, 0.8, k / 4); return f > 0.25 && f < 0.48 ? { y: u * 0.8, s: 1 - u + 0.001 } : { s: 0.001 }; } });
+    // Charging lights on the posts.
+    bays.forEach(([x, z], i) => moving.push({ geo: part(box(0.12, 0.12, 0.02), '#62d35f'), pivot: [x, y0 + 0.65, z - 0.94], anim: (t) => ({ s: Math.sin(t * 3 + i) > 0 ? 1 : 0.4 }) }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // Goodyear: the tyre maker the whole world can see. The blimp drifts over the race track while
