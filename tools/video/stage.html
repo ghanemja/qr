@@ -1,58 +1,63 @@
 <!doctype html>
 <!-- SPDX-License-Identifier: MIT · Copyright (c) 2026 Janelle Ghanem -->
 <!-- The ad video's stage: renders any moment of the cut with window.frame(seconds), so
-     tools/video/render.cjs can capture it frame by frame (the timeline is in shots below). -->
+     tools/video/render.cjs can capture it frame by frame (the timeline is in shots below).
+     'qr' and 'page' shots are filmed from qrshot.html and the live site by render.cjs instead. -->
 <meta charset="utf-8">
 <title>QR Compass ad</title>
 <style>
-  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #f4efe4; font-family: Inter, sans-serif; color: #17202c; }
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #f6f1e7; font-family: Inter, sans-serif; color: #17202c; }
   canvas { position: absolute; inset: 0; }
   .ov { position: absolute; opacity: 0; will-change: opacity, transform; }
-  #cap { left: 96px; bottom: 92px; }
+  #cap { left: 96px; bottom: 92px; text-shadow: 0 0 18px #f6f1e7, 0 0 8px #f6f1e7, 0 0 3px #f6f1e7; }
   #cap .name { font: 800 92px/1 'Inter Display', Inter, sans-serif; letter-spacing: -2px; }
-  #cap .label { margin-top: 18px; font: 500 38px/1.2 Inter, sans-serif; color: #4a5566; }
+  #cap .label { margin-top: 18px; max-width: 760px; font: 500 38px/1.2 Inter, sans-serif; color: #4a5566; }
   #cap .bar { width: 72px; height: 8px; border-radius: 4px; background: #e07a3f; margin-bottom: 26px; }
-  #idx { right: 96px; bottom: 98px; font: 600 30px/1 'JetBrains Mono', monospace; color: #8a93a0; }
+  #cap .kick { margin-bottom: 14px; font: 700 28px/1 Inter, sans-serif; letter-spacing: 1.5px; text-transform: uppercase; color: #c9652c; }
+  #act { left: 96px; top: 80px; padding: 14px 26px; border-radius: 999px; background: #17202c; color: #f6f1e7; font: 700 30px/1 Inter, sans-serif; }
+  #act b { color: #f0a46b; margin-right: 12px; }
   .card { inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-  .card .logo { width: 150px; height: 150px; margin-bottom: 34px; }
-  .card h1 { margin: 0; font: 800 150px/1 'Inter Display', Inter, sans-serif; letter-spacing: -4px; }
-  .card p { margin: 26px 0 0; font: 500 46px/1.3 Inter, sans-serif; color: #3d4757; }
-  .card .url { margin-top: 38px; font: 600 40px/1 'JetBrains Mono', monospace; color: #e07a3f; }
-  .card .credit { margin-top: 70px; font: 500 30px/1.4 Inter, sans-serif; color: #5b6778; }
+  .card .brand { display: flex; align-items: center; gap: 22px; margin-bottom: 40px; font: 800 54px/1 'Inter Display', Inter, sans-serif; letter-spacing: -1px; }
+  .card .brand img { width: 84px; height: 84px; }
+  .card h2 { margin: 0; font: 800 124px/1.02 'Inter Display', Inter, sans-serif; letter-spacing: -3px; }
+  .card p { margin: 28px 0 0; font: 500 46px/1.3 Inter, sans-serif; color: #3d4757; }
+  .card p b { color: #17202c; }
+  .card .url { margin-top: 38px; font: 600 44px/1 'JetBrains Mono', monospace; color: #e07a3f; }
+  .card .credit { margin-top: 56px; font: 500 28px/1.4 Inter, sans-serif; color: #5b6778; }
   .card .credit b { color: #17202c; }
-  .day { display: inline-block; margin-bottom: 30px; padding: 12px 26px; border-radius: 999px; background: #17202c; color: #f4efe4; font: 700 30px/1 Inter, sans-serif; letter-spacing: 0.5px; }
+  .day { display: inline-block; margin-bottom: 34px; padding: 12px 26px; border-radius: 999px; background: #17202c; color: #f6f1e7; font: 700 30px/1 Inter, sans-serif; letter-spacing: 0.5px; }
   .day b { color: #f0a46b; }
-  #veil { inset: 0; background: #f4efe4; }
-  #big { left: 0; right: 0; top: 70px; text-align: center; font: 800 84px/1.05 'Inter Display', Inter, sans-serif; letter-spacing: -2px; text-shadow: 0 2px 30px #f4efe4, 0 0 12px #f4efe4; }
+  #veil { inset: 0; background: #f6f1e7; }
+  #big { left: 0; right: 0; top: 70px; text-align: center; font: 800 84px/1.05 'Inter Display', Inter, sans-serif; letter-spacing: -2px; text-shadow: 0 2px 30px #f6f1e7, 0 0 12px #f6f1e7; }
   #big small { display: block; margin-top: 16px; font: 600 38px/1 Inter, sans-serif; letter-spacing: 0; color: #4a5566; }
 </style>
 <script type="importmap">{"imports":{"three":"/qr/assets/three.module.min.js"}}</script>
 <div id="veil" class="ov"></div>
-<div id="cap" class="ov"><div class="bar"></div><div class="name"></div><div class="label"></div></div>
-<div id="idx" class="ov"></div>
+<div id="cap" class="ov"><div class="bar"></div><div class="kick"></div><div class="name"></div><div class="label"></div></div>
+<div id="act" class="ov"></div>
 <div id="big" class="ov"></div>
 <div id="title" class="ov card">
   <div class="day">7 days of vibes: <b>Day 3</b></div>
-  <img class="logo" src="/qr/assets/icon.svg">
-  <h1>QR Compass</h1>
-  <p>Every Fortune 500 company and top startup,<br>built as a living 3D world.</p>
+  <div class="brand"><img src="/qr/assets/icon.svg">QR Compass</div>
+  <h2>The economy, built in 3D.</h2>
+  <p>All of the Fortune 500 and 81 top startups, each a living 3D world.<br><b>See why every company wins, then scan it.</b></p>
 </div>
 <div id="end" class="ov card">
   <div class="day">7 days of vibes: <b>Day 3</b></div>
-  <img class="logo" src="/qr/assets/icon.svg">
-  <h1>QR Compass</h1>
-  <p>Find a company. Watch why it wins. Scan it.</p>
+  <div class="brand"><img src="/qr/assets/icon.svg">QR Compass</div>
+  <h2>The economy, built in 3D.</h2>
   <div class="url">ghanemja.github.io/qr</div>
+  <p style="font-size:36px">Built by <b>Janelle Ghanem</b> · open source, every model free to download</p>
   <div class="credit">Soundtrack made in <b>Equalizer</b>, where every sound is an equation<br><span style="font-family:'JetBrains Mono',monospace;color:#e07a3f">ghanemja.github.io/equalizer</span></div>
 </div>
 <script type="module">
 import * as THREE from 'three';
 const M = await import('/qr/assets/models.js');
-const { centerpiece, modelMaterial, setBrands, motion, mountMovers, poseMovers } = M;
+const { centerpiece, modelMaterial, setBrands, motion, mountMovers, poseMovers, propGeo, topperGeo } = M;
 const { RoomEnvironment } = await import('/qr/assets/RoomEnvironment.js');
 const IND = await (await fetch('heroes.json')).json(); // { id: [name, label] }
 
-const W = 1920, H = 1080, BG = '#f4efe4';
+const W = 1920, H = 1080, BG = '#f6f1e7';
 const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
 r.setPixelRatio(1); r.setSize(W, H); r.outputColorSpace = THREE.SRGBColorSpace;
 r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap; r.setClearColor(BG);
@@ -61,24 +66,48 @@ const env = new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(), 0.04).t
 
 const scene = new THREE.Scene();
 scene.environment = env; scene.environmentIntensity = 0.45; scene.background = new THREE.Color(BG);
-scene.fog = new THREE.Fog(BG, 160, 520);
+scene.fog = new THREE.Fog(BG, 160, 560);
 scene.add(new THREE.HemisphereLight('#fffaf0', '#d8cbb5', 0.95));
 const sun = new THREE.DirectionalLight('#fff4e0', 2.1);
 sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0004;
 scene.add(sun, sun.target);
 const floor = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshStandardMaterial({ color: '#e9e1d2' }));
 floor.rotation.x = -Math.PI / 2; floor.position.y = -0.02; floor.receiveShadow = true; scene.add(floor);
-const cam = new THREE.PerspectiveCamera(30, W / H, 0.5, 600);
+const cam = new THREE.PerspectiveCamera(30, W / H, 0.5, 700);
 
 const mat = modelMaterial();
-const mk = (geo) => { const m = new THREE.InstancedMesh(geo, mat, 1); m.setMatrixAt(0, new THREE.Matrix4()); setBrands(m, [['#e5533d', '#2b5aa8']]); m.castShadow = m.receiveShadow = true; m.frustumCulled = false; return m; };
+const mesh = (brand) => (geo, at) => {
+  const m = new THREE.InstancedMesh(geo, mat, 1);
+  m.setMatrixAt(0, at ? new THREE.Matrix4().makeTranslation(...at) : new THREE.Matrix4());
+  setBrands(m, [brand]); m.castShadow = m.receiveShadow = true; m.frustumCulled = false; return m;
+};
+// A company as its page shows it: the page's look picks the variant, base, brand colours,
+// companion prop and topper (a signature model ignores all but the colours).
+const COMPANY = new Map();
+async function company(slug) {
+  if (!COMPANY.has(slug)) {
+    const html = await (await fetch(`/qr/c/${slug}.html`)).text();
+    const C = JSON.parse(html.match(/window\.COMPANY=(\{.*?\});<\/script>/)[1]);
+    C.hint = (html.match(/id="hint">([^<·]*)/) || [])[1]?.trim();
+    // "Fortune 500 · No. 2", or "AI startup · San Francisco, CA", as the page's own subtitle has it.
+    C.kicker = (html.match(/Fortune 500 · No\. \d+/) || html.match(/[A-Za-z&' -]*startup · [^<]*/) || [''])[0].trim();
+    COMPANY.set(slug, C);
+  }
+  return COMPANY.get(slug);
+}
 // One model, wrapped so the whole-model motion and its place in the grid don't fight.
 const models = new Map();
-function model(id, detail) {
-  const k = id + ':' + detail;
+function model(id, detail, look = { v: 0, base: 0, a: '#e5533d', b: '#2b5aa8' }) {
+  const k = `${id}:${detail}:${look.v}:${look.base}:${look.a}:${look.b}:${look.prop}:${look.topper}`;
   if (!models.has(k)) {
-    const cp = centerpiece(id, 0, 0, detail), g = new THREE.Group(), outer = new THREE.Group();
-    g.add(mk(cp.geo)); const nodes = mountMovers(cp, g, mk); outer.add(g);
+    const cp = centerpiece(id, look.v, look.base, detail), g = new THREE.Group(), outer = new THREE.Group(), mk = mesh([look.a, look.b]);
+    g.add(mk(cp.geo));
+    if (!cp.bare) {
+      if (look.prop != null) g.add(mk(propGeo(look.prop, detail), cp.propAt));
+      const tg = look.topper ? topperGeo(look.topper, detail) : null;
+      if (tg) g.add(mk(tg, cp.topAt));
+    }
+    const nodes = mountMovers(cp, g, mk); outer.add(g);
     const h = new THREE.Box3().setFromBufferAttribute(cp.geo.attributes.position).max.y;
     models.set(k, { id, cp, g, outer, nodes, h });
   }
@@ -92,26 +121,47 @@ function pose(m, t) {
 const shown = new Set();
 function show(list) { for (const m of shown) if (!list.includes(m)) scene.remove(m.outer); shown.clear(); for (const m of list) { scene.add(m.outer); shown.add(m); } }
 
-// ---- timeline (seconds; 120 bpm, a bar is 2 s) ----
+// ---- timeline (seconds; 120 bpm, a bar is 2 s; the soundtracks follow songs/plan.mjs) ----
 const BAR = 2;
-const FEATURE = ['spacex', 'apple', 'disney', 'nvidia', 'cocacola', 'amazon', 'tesla', 'mcdonalds'];
-const QUICK1 = ['netflix', 'caterpillar', 'airbnb', 'visa'];
-const QUICK2 = ['boeing', 'nike', 'stripe', 'deere', 'exxon', 'cisco', 'openai', 'mastercard'];
+// 1 · Understand, and the fast cuts later on: companies by page slug.
+const FEATURE = ['walmart', 'nvidia', 'jpmorgan-chase', 'tesla', 'spacex', 'anthropic', 'amazon', 'walt-disney', 'meta-platforms', 'alphabet'];
+const QUICK1 = ['wells-fargo', 'uber-technologies', 'home-depot', 'fedex'];
+const QUICK2 = ['verizon-communications', 'exxon-mobil', 'berkshire-hathaway', 'alaska-air-group', 'marathon-petroleum', 'plains-gp-holdings', 'northwestern-mutual', 'chs'];
+// A run of the startups, under a "+ 81 top startups" chip.
+const STARTUPS = ['openai', 'stripe', 'figure-ai', 'waymo', 'hugging-face', 'ramp', 'runway', 'perplexity'];
+// 3 · Explore & build: the site's own pages, filmed live by render.cjs.
+const PAGES = [
+  ['index.html', 'Explore every region in 3D'], ['map.html', 'Every headquarters on one map'], ['companies.html', 'Look up any company'],
+  ['about.html', 'Open source, MIT licensed'], ['library.html#tesla:0', 'Download every 3D model, free'],
+];
+// Why-it-wins lines for companies on a shared scene (their page only names the scene).
+const CAPTION = {
+  'alaska-air-group': "The West Coast's airline", 'marathon-petroleum': "America's biggest refiner", 'plains-gp-holdings': 'Crude from the Permian to the coast',
+  'northwestern-mutual': 'Steady in any storm', chs: 'Farmer-owned, from field to market',
+  tesla: 'Charge and go. Now the Roadster flies', spacex: 'Launch, land, and fly again',
+};
+// The three acts, as a chip in the corner.
+const ACTS = { understand: ['1', 'Understand: why every company wins'], scan: ['2', 'Scan: every world is a real QR code'], explore: ['3', 'Explore & build'], startups: ['+', '81 top startups, too'] };
 const shots = [];
 let at = 0;
 const add = (len, s) => { shots.push({ t0: at, t1: at + len, ...s }); at += len; };
-add(2 * BAR, { kind: 'title', id: 'walmart' });
-FEATURE.forEach((id) => add(BAR, { kind: 'hero', id }));
-QUICK1.forEach((id) => add(BAR / 2, { kind: 'hero', id, quick: true }));
-QUICK2.forEach((id) => add(BAR / 4, { kind: 'hero', id, quick: true }));
+add(2 * BAR, { kind: 'title', slug: 'walmart' });
+FEATURE.forEach((slug, i) => add(BAR, { kind: 'hero', slug, act: 'understand', first: i === 0 }));
+add(4 * BAR, { kind: 'qr', slug: 'starbucks', act: 'scan' });
+PAGES.forEach(([page, caption], i) => add(BAR, { kind: 'page', page, caption, act: 'explore', first: i === 0 }));
+QUICK1.forEach((slug) => add(BAR / 2, { kind: 'hero', slug, quick: true }));
+QUICK2.forEach((slug) => add(BAR / 4, { kind: 'hero', slug, quick: true }));
+STARTUPS.forEach((slug, i) => add(BAR / 4, { kind: 'hero', slug, quick: true, act: 'startups', first: i === 0 }));
 add(4 * BAR, { kind: 'grid', grid: true });
-add(2 * BAR, { kind: 'end', grid: true });
+add(3 * BAR, { kind: 'end', grid: true });
 window.DURATION = at;
-let heroNo = 0; for (const s of shots) if (s.kind === 'hero') s.no = ++heroNo;
-// Where each model's own clock starts in its shot, so it's mid-action (seconds).
+window.SHOTS = shots.map(({ kind, t0, t1, slug, page, caption, act, first }) => ({ kind, t0, t1, slug, page, caption, first, act: act && ACTS[act] }));
+shots.filter((s) => s.kind === 'hero').forEach((s, i) => (s.no = i));
+await Promise.all(shots.filter((s) => s.slug).map((s) => company(s.slug)));
 // Models whose moving parts rise well above their base, framed wider: [target height, distance].
 const FRAME = { spacex: [4.6, 36] };
-const START = { spacex: 11, cocacola: 1, amazon: 2, tesla: 1.5, boeing: 2, openai: 2, deere: 2 };
+// Where each model's own clock starts in its shot, so it's mid-action (seconds).
+const START = { spacex: 4.4, amazon: 2, tesla: 1.3, deere: 2 };
 
 const $ = (id) => document.getElementById(id);
 const ease = (x) => x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x);
@@ -120,15 +170,15 @@ function hideAll() { for (const e of document.querySelectorAll('.ov')) { e.style
 function set(id, o, dy = 0, s = 1) { const e = $(id); e.style.opacity = o; e.style.transform = `translateY(${dy}px) scale(${s})`; }
 function lightFor(cx, cz, span) {
   sun.position.set(cx - 10, 22, cz + 7); sun.target.position.set(cx, 0, cz);
-  const c = sun.shadow.camera; c.left = c.bottom = -span; c.right = c.top = span; c.far = 120; c.updateProjectionMatrix();
+  const c = sun.shadow.camera; c.left = c.bottom = -span; c.right = c.top = span; c.far = 140; c.updateProjectionMatrix();
 }
 function orbit(target, dist, elev, az) {
   cam.position.set(target.x + dist * Math.cos(elev) * Math.sin(az), target.y + dist * Math.sin(elev), target.z + dist * Math.cos(elev) * Math.cos(az));
   cam.lookAt(target);
 }
 
-// The grid: every signature model, 10 across.
-const GRID = Object.keys(IND), COLS = 10, GAP = 13;
+// The grid: every signature model.
+const GRID = Object.keys(IND), COLS = 14, GAP = 13, WIDE = 300;
 const ROWS = Math.ceil(GRID.length / COLS);
 const gridPos = (i) => {
   const row = Math.floor(i / COLS), inRow = row === ROWS - 1 ? GRID.length - row * COLS : COLS; // centre a short last row
@@ -139,51 +189,53 @@ window.frame = async (T) => {
   const s = shots.find((x) => T >= x.t0 && T < x.t1) || shots[shots.length - 1];
   const u = (T - s.t0) / (s.t1 - s.t0), lt = T - s.t0;
   hideAll();
+  if (s.kind === 'qr' || s.kind === 'page') return s.kind;
   if (!s.grid) {
-    const m = model(s.id, 'high'); show([m]); m.outer.position.set(0, 0, 0);
-    pose(m, (START[s.id] ?? 0) + lt);
+    const C = COMPANY.get(s.slug), id = C.model;
+    const m = model(id, 'high', C.look); show([m]); m.outer.position.set(0, 0, 0);
+    pose(m, (START[id] ?? 0) + lt);
     lightFor(0, 0, 9);
-    const tgt = new THREE.Vector3(0, FRAME[s.id]?.[0] ?? Math.max(2.6, m.h * 0.42), 0);
+    const tgt = new THREE.Vector3(0, FRAME[id]?.[0] ?? Math.max(2.6, m.h * 0.42), 0);
     if (s.kind === 'hero') {
       // Slow orbit and push-in; quick cuts swing a little harder.
       const sw = s.quick ? 0.5 : 0.38;
-      orbit(tgt, (FRAME[s.id]?.[1] ?? Math.max(27, m.h * 3.4)) - 3.5 * u, 0.5 - 0.06 * u, Math.PI / 4 + sw * (u - 0.5) + (s.no % 2 ? 0.12 : -0.12));
+      orbit(tgt, (FRAME[id]?.[1] ?? Math.max(27, m.h * 3.4)) - 3.5 * u, 0.5 - 0.06 * u, Math.PI / 4 + sw * (u - 0.5) + (s.no % 2 ? 0.12 : -0.12));
       // Shift the framing so the model sits right of the caption.
       cam.setViewOffset(W, H, -W * 0.08, 0, W, H);
-      const [name, label] = IND[s.id];
-      $('cap').querySelector('.name').textContent = name;
-      $('cap').querySelector('.label').textContent = label;
+      $('cap').querySelector('.kick').textContent = C.kicker;
+      $('cap').querySelector('.name').textContent = C.name;
+      $('cap').querySelector('.label').textContent = CAPTION[s.slug] || IND[id]?.[1] || C.hint;
       const inT = s.quick ? 0.08 : 0.12;
       set('cap', fade(u, 0, inT, 0.9, 1.01), (1 - ease(u / inT)) * 30);
-      $('idx').textContent = String(s.no).padStart(2, '0') + ' / ' + GRID.length;
-      set('idx', fade(u, 0, inT, 0.9, 1.01));
+      // The act's chip stays up through the act, fading in with its first shot.
+      if (s.act) { const [n, text] = ACTS[s.act]; $('act').innerHTML = `<b>${n}</b>${text}`; set('act', s.first ? ease((u - 0.05) / 0.2) : 1); }
     } else {
       // The title card, over a soft veil so it reads above the model turning behind it.
       cam.clearViewOffset();
       orbit(tgt, 40, 0.42, Math.PI / 4 + 0.25 * u);
-      set('title', fade(u, 0.04, 0.2, 0.86, 1.0), (1 - ease((u - 0.04) / 0.16)) * 40);
-      set('veil', fade(u, -1, 0, 0.85, 1.0) * 0.82);
+      set('title', fade(u, 0.04, 0.2, 0.88, 1.0), (1 - ease((u - 0.04) / 0.16)) * 40);
+      set('veil', fade(u, -1, 0, 0.88, 1.0) * 0.85);
     }
   } else {
     cam.clearViewOffset();
     const list = GRID.map((id, i) => { const m = model(id, 'low'); const [x, z] = gridPos(i); m.outer.position.set(x, 0, z); return m; });
     show(list);
     list.forEach((m, i) => pose(m, (s.kind === 'end' ? lt + 8 : lt) + i * 0.37 + 3));
-    lightFor(0, 0, 75);
+    lightFor(0, 0, 100);
     // First half: a low glide across the grid; second half: rise and pull back over all of it.
     const a = ease(u / 0.5), b = ease((u - 0.45) / 0.55);
-    const glide = new THREE.Vector3(-45 + 70 * (u / 0.5 > 1 ? 1 : u / 0.5), 2, 18 - 24 * Math.min(1, u / 0.5));
+    const glide = new THREE.Vector3(-45 + 70 * Math.min(1, u / 0.5), 2, 18 - 24 * Math.min(1, u / 0.5));
     const wide = new THREE.Vector3(0, 0, 0);
     const tgt = glide.clone().lerp(wide, b);
-    const dist = 38 + (245 - 38) * b, elev = 0.32 + (0.72 - 0.32) * b, az = Math.PI / 4 + 0.25 * (1 - a) - 0.15 * b;
-    if (s.kind === 'end') orbit(wide, 245 + 10 * u, 0.72, Math.PI / 4 - 0.15 - 0.08 * u);
+    const dist = 38 + (WIDE - 38) * b, elev = 0.32 + (0.72 - 0.32) * b, az = Math.PI / 4 + 0.25 * (1 - a) - 0.15 * b;
+    if (s.kind === 'end') orbit(wide, WIDE + 12 * u, 0.72, Math.PI / 4 - 0.15 - 0.08 * u);
     else orbit(tgt, dist, elev, az);
     // Make room for the headline above the grid as it pulls back.
     const lift = s.kind === 'end' ? 1 : ease((u - 0.6) / 0.25);
     cam.setViewOffset(W, H, 0, -H * 0.07 * lift, W, H);
-    $('big').innerHTML = `${GRID.length} signature models<small>and a living world for every one of 500+ companies</small>`;
+    $('big').innerHTML = `${GRID.length} signature models<small>plus a living 3D world for all of the Fortune 500 and 81 top startups</small>`;
     if (s.kind === 'grid') set('big', fade(u, 0.72, 0.82, 0.97, 1.01), (1 - ease((u - 0.72) / 0.1)) * -30);
-    else { set('veil', ease(u / 0.2) * 0.86); set('end', ease((u - 0.08) / 0.2), (1 - ease((u - 0.08) / 0.2)) * 40); }
+    else { set('veil', ease(u / 0.15) * 0.88); set('end', ease((u - 0.06) / 0.15), (1 - ease((u - 0.06) / 0.15)) * 40); }
   }
   r.render(scene, cam);
   return s.kind;

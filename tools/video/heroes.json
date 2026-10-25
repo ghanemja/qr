@@ -237,7 +237,7 @@
 ],
 "citigroup": [
 "Citigroup",
-"Money on Citi's own rails"
+"A global network: money for the world's companies moves on Citi's own rails"
 ],
 "morganstanley": [
 "Morgan Stanley",
@@ -270,5 +270,229 @@
 "block": [
 "Block",
 "Square on the counter, Cash App in the pocket: the money goes round inside Block"
+],
+"dell": [
+"Dell Technologies",
+"Built to order and shipped direct, straight from the line to your door"
+],
+"hp": [
+"HP",
+"The printer in every home, and the ink that keeps coming"
+],
+"supermicro": [
+"Super Micro Computer",
+"First to ship the newest AI servers: building blocks, liquid-cooled"
+],
+"adobe": [
+"Adobe",
+"The tools every creative works in: layers, PDFs and the red A"
+],
+"intuit": [
+"Intuit",
+"The money software for households and small businesses: refunds and books"
+],
+"workday": [
+"Workday",
+"One system for a company's people and its pay"
+],
+"motorolasolutions": [
+"Motorola Solutions",
+"The radios first responders bet their lives on"
+],
+"charter": [
+"Charter Communications",
+"The cable already runs to every house on the street"
+],
+"lowes": [
+"Lowe's",
+"Everything for the job, from the store's lumber yard to the deck in your backyard"
+],
+"bestbuy": [
+"Best Buy",
+"Try it in the store, and the Geek Squad sets it up at home"
+],
+"tjx": [
+"TJX",
+"The treasure hunt: brand surplus, a new mix every day, at a fraction of the price"
+],
+"macys": [
+"Macy's",
+"The store on Herald Square that New York parades past"
+],
+"gap": [
+"Gap",
+"One maker, four brands for every budget, and the denim to fill them"
+],
+"lululemon": [
+"Lululemon athletica",
+"A brand built on a community: the free yoga class and the run club"
+],
+"ulta": [
+"Ulta Beauty",
+"Every price point under one roof, and the points that bring members back"
+],
+"dollargeneral": [
+"Dollar General",
+"The store close to everyone in rural America"
+],
+"dollartree": [
+"Dollar Tree",
+"One low price on everything, from candy to party balloons"
+],
+"autozone": [
+"AutoZone",
+"The right part today, and help fitting it in the lot"
+],
+"oreilly": [
+"O'Reilly Automotive",
+"The pros' parts store: from the warehouse to the repair bay within the hour"
+],
+"publix": [
+"Publix Super Markets",
+"Owned by the people who work there: every order walked out to your car"
+],
+"albertsons": [
+"Albertsons",
+"One grocer behind the local names, one fleet stocking them all"
+],
+"sysco": [
+"Sysco",
+"The truck behind the menu: restaurants, schools, hospitals, stadiums"
+],
+"tyson": [
+"Tyson Foods",
+"From the egg to the supermarket, all in one company"
+],
+"kraftheinz": [
+"Kraft Heinz",
+"The brands already in every pantry"
+],
+"generalmills": [
+"General Mills",
+"From the mill by the river to the breakfast bowl"
+],
+"mondelez": [
+"Mondelēz International",
+"The snacks the world reaches for: twist, lick, dunk"
+],
+"hershey": [
+"Hershey",
+"America's chocolate town: every Kiss wrapped in silver"
+],
+"keurigdrpepper": [
+"Keurig Dr Pepper",
+"The brewer in the kitchen and the pods that keep coming"
+],
+"monster": [
+"Monster Beverage",
+"A brand riders wear, carried by Coca-Cola's trucks"
+],
+"chipotle": [
+"Chipotle Mexican Grill",
+"A fresh line that never stops, straight out to the Chipotlane"
+],
+"doordash": [
+"DoorDash",
+"The most dashers on the most streets"
+],
+"abbott": [
+"Abbott Laboratories",
+"Medicine you can wear: the sensor that reads glucose all day"
+],
+"marriott": [
+"Marriott International",
+"Thirty brands, one membership: every stay builds the Bonvoy card"
+],
+"southwest": [
+"Southwest Airlines",
+"One kind of plane, point to point, turned around fast"
+],
+"lasvegassands": [
+"Las Vegas Sands",
+"The integrated resort: Marina Bay Sands and its SkyPark"
+],
+"mgm": [
+"MGM Resorts International",
+"The Strip's biggest landlord, and BetMGM in every pocket"
+],
+"caesars": [
+"Caesars Entertainment",
+"One rewards card across a whole Strip of casinos"
+],
+"carvana": [
+"Carvana",
+"Buy it on your phone, pick it up from the vending machine"
+],
+"carmax": [
+"CarMax",
+"The no-haggle used car, reconditioned and priced at scale"
+],
+"hertz": [
+"Hertz Global Holdings",
+"The airport counter with a car for everyone off the plane"
+],
+"goodyear": [
+"Goodyear Tire & Rubber",
+"The tyre maker the whole world can see"
+],
+"paccar": [
+"Paccar",
+"The premium trucks drivers ask for, and the parts that keep them running"
+],
+"northrop": [
+"Northrop Grumman",
+"The planes and telescopes no one else can build"
+],
+"internationalpaper": [
+"International Paper",
+"The boxes the online world ships in, from the managed forest"
+],
+"newmont": [
+"Newmont",
+"The world's biggest gold miner, decades of ore in the ground"
+],
+"databricks": [
+"Databricks",
+"The lakehouse: every kind of data in one lake, turned into answers"
+],
+"perplexity": [
+"Perplexity",
+"An answer engine that shows its sources"
+],
+"neuralink": [
+"Neuralink",
+"Thought into action, placed with a robot's precision"
+],
+"scaleai": [
+"Scale AI",
+"The labelled data behind the models"
+],
+"huggingface": [
+"Hugging Face",
+"Where the AI community shares its models"
+],
+"runway": [
+"Runway",
+"Films from a sentence"
+],
+"discord": [
+"Discord",
+"Where communities hang out and talk"
+],
+"plaid": [
+"Plaid",
+"The plumbing between apps and banks"
+],
+"ramp": [
+"Ramp",
+"The corporate card that saves money"
+],
+"nuro": [
+"Nuro",
+"Delivery with no one in the driver's seat"
+],
+"figureai": [
+"Figure AI",
+"General-purpose humanoids at work on the factory floor"
 ]
 }
