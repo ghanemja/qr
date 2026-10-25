@@ -111,7 +111,8 @@
   "charter": "The cable already runs to every house on the street",
   "lowes": "Everything for the job, from the store's lumber yard to the deck in your backyard",
   "bestbuy": "Try it in the store, and the Geek Squad sets it up at home",
-  "tjx": "The treasure hunt: brand surplus, a new mix every day, at a fraction of the price"
+  "tjx": "The treasure hunt: brand surplus, a new mix every day, at a fraction of the price",
+  "macys": "The store on Herald Square that New York parades past"
  },
  "bank": [
   "PNC Financial Services",
@@ -323,7 +324,6 @@
  "retail": [
   "Albertsons",
   "Publix Super Markets",
-  "Macy's",
   "Dollar General",
   "Dollar Tree",
   "Kohl's",
@@ -1176,7 +1176,6 @@
   "SpartanNash": 3,
   "Supervalu": 3,
   "United Natural Foods": 3,
-  "Macy's": 4,
   "Nordstrom": 4,
   "Kohl's": 4,
   "J.C. Penney": 4,
@@ -1710,5 +1709,8 @@
  ],
  "tjx": [
   "TJX"
+ ],
+ "macys": [
+  "Macy's"
  ]
 }

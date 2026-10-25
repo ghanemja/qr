@@ -840,4 +840,38 @@ export const HEROES2 = {
     [0, 0.5].forEach((o, i) => moving.push(...walker(moving.length, (t) => { const f = cyc(t, P, o), u = win(f, 0, 0.8); return { x: -1.8 + u * 5.0 + i * 0.4, z: 2.0 + u * 2.0 - i * 0.6, ry: -0.4, s: f > 0.8 ? 0.001 : Math.min(1, u / 0.05, (1 - u) / 0.05) }; }, { shirt: ['#d6336c', '#3d7be0'][i], pants: '#2b3a55', y: y0, carry: part(rbox(0.3, 0.35, 0.12, 0.03), RED, { p: [0.05, 0.75, 0.32] }) })));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Macy's: the store on Herald Square that New York parades past. The giant balloon floats down
+  // the avenue with its handlers below, under the red star.
+  macys: { finder: '#e21a2c', build: () => {
+    const R = rand(124), out = [], RED = '#e21a2c';
+    out.push(ground('#5b616b'), part(box(10.2, 0.02, 2.4), '#4a4f57', { p: [0, y0 + 0.01, 1.4] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(0.6, 0.01, 0.06), K.white, { p: [-4.6 + i * 1.3, y0 + 0.025, 1.4] }));
+    out.push(part(box(10.2, 0.08, 2.0), '#cfc8ba', { p: [0, y0 + 0.04, 3.7] }), part(box(10.2, 0.08, 1.0), '#cfc8ba', { p: [0, y0 + 0.04, -0.3] }));
+    // ---- the flagship, back: brick and stone with the awning, windows and the red star
+    const SX = -0.6, SZ = -3.0;
+    out.push(part(rbox(8.0, 3.6, 2.6, 0.04), '#b9653f', { p: [SX, y0 + 1.8, SZ] }), part(box(8.04, 0.6, 2.64), '#efe6d6', { p: [SX, y0 + 0.3, SZ] }));
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 10; c++) out.push(part(box(0.38, 0.4, 0.04), '#f3e7c9', { p: [SX - 3.6 + c * 0.8, y0 + 1.1 + r * 0.65, SZ + 1.31] }));
+    out.push(part(rbox(8.0, 0.12, 0.7, 0.03), RED, { p: [SX, y0 + 0.75, SZ + 1.5] }), part(box(2.4, 0.4, 0.04), RED, { p: [SX, y0 + 3.2, SZ + 1.32] }), place(pixText("MACY'S", 0.07, K.white, 0.03), { p: [SX - 0.15, y0 + 3.2, SZ + 1.36] }), part(star(0.16, 0.06), K.white, { p: [SX + 0.75, y0 + 3.2, SZ + 1.37] }));
+    for (let k = 0; k < 4; k++) out.push(part(box(1.1, 0.5, 0.04), ['#2f9e6e', '#f2c94c', '#3d7be0', '#d6336c'][k], { p: [SX - 2.4 + k * 1.6, y0 + 0.35, SZ + 1.32] }));
+    out.push(part(star(0.7, 0.3), RED, { p: [SX - 3.0, y0 + 4.3, SZ + 0.6] }), part(cyl(0.05, 0.05, 0.6, 8), '#9aa1a9', { p: [SX - 3.0, y0 + 3.7, SZ + 0.6] }));
+    // ---- the crowd along the kerb, front
+    for (let k = 0; k < 14; k++) out.push(place(fan(['#e5533d', '#3d7be0', '#2f9e6e', '#f2c94c', '#8a6cf0', '#d6336c', '#f29a3a'][k % 7], ['#e9b98f', '#8d5a3b', '#c58c66'][k % 3]), { p: [-4.4 + k * 0.66 + R() * 0.2, y0 + 0.08, 3.4 + R() * 0.6], s: 1.2 }));
+    out.push(trees(R, [[-4.6, 4.6], [4.6, 4.6], [4.6, -0.3], [-4.6, -0.3]], 0.5));
+    // ---- moving parts
+    const moving = [], P = 16;
+    // The balloon: a big round-eared bear in red and white, bobbing as it drifts along.
+    const bear = merge(part(ball(0.9), '#c8553d', { s: [1, 1.1, 0.9] }), part(ball(0.6), '#c8553d', { p: [0, 1.25, 0] }), [-1, 1].map((s) => part(ball(0.25), '#c8553d', { p: [0, 1.75, s * 0.42] })), part(ball(0.25), '#f4d8b8', { p: [0.5, 1.15, 0], s: [0.8, 0.7, 1] }), part(ball(0.07), '#1d1f24', { p: [0.68, 1.2, 0] }), [-1, 1].map((s) => part(ball(0.07), '#1d1f24', { p: [0.5, 1.4, s * 0.2] })),
+      [-1, 1].map((s) => part(capsule(0.22, 0.5), '#c8553d', { p: [0.3, 0.2, s * 0.85], r: [s * 0.9, 0, 0] })), part(box(0.6, 0.3, 1.5), RED, { p: [0.1, 0.55, 0] }).translate(0.0, 0, 0), part(star(0.18, 0.05), K.white, { p: [0.58, 0.55, 0], r: [0, Math.PI / 2, 0] }));
+    const bx = (t) => { const f = cyc(t, P); return -6.2 + f * 12.4; };
+    moving.push({ geo: bear, pivot: [0, y0 + 3.6, 1.4], anim: (t) => { const x = bx(t); return { x, y: Math.sin(t * 1.2) * 0.15, rz: Math.sin(t * 0.9) * 0.08, ry: Math.sin(t * 0.5) * 0.15, s: clamp01((5.6 - Math.abs(x)) / 0.8) + 0.001 }; } });
+    // Its handlers walking below, ropes up to it.
+    [-0.6, 0.6].forEach((dz, i) => [-0.7, 0.7].forEach((dx, j) => {
+      moving.push(...walker(moving.length, (t) => { const x = bx(t) + dx; return { x, z: 1.4 + dz * 1.4, ry: 0, s: clamp01((5.0 - Math.abs(x)) / 0.4) }; }, { shirt: '#3d7be0', pants: K.white, y: y0 }));
+      moving.push({ geo: beam([0, 0, 0], [-dx * 0.7, 2.0, -dz * 1.0], 0.025, '#e9e6df'), pivot: [0, y0 + 1.3, 1.4 + dz * 1.4], anim: (t) => { const x = bx(t) + dx; return { x, s: clamp01((5.0 - Math.abs(x)) / 0.4) + 0.001 }; } });
+    }));
+    // Confetti over the avenue.
+    for (let k = 0; k < (hi() ? 22 : 6); k++) { const x0 = -4 + R() * 8, z0 = 0.6 + R() * 2.0, c = ['#f2c94c', '#e5533d', '#3d7be0', '#2f9e6e', K.white][k % 5];
+      moving.push({ geo: part(new THREE.BoxGeometry(0.1, 0.02, 0.06), c), pivot: [x0, y0 + 3.0, z0], anim: (t) => { const u = cyc(t, 3, k / 22); return { y: -u * 2.8, x: Math.sin(u * 7 + k) * 0.2, rx: u * 12 + k, rz: u * 6, s: u > 0.95 ? 0.001 : 1 }; } }); }
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
