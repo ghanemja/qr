@@ -78,7 +78,8 @@
   "mastercard": "Accepted everywhere",
   "att": "Fibre to the door",
   "wellsfargo": "Since 1852",
-  "goldman": "Ring the bell"
+  "goldman": "Ring the bell",
+  "pfizer": "Made at global scale"
  },
  "bank": [
   "Citigroup",
@@ -196,7 +197,6 @@
   "Cigna",
   "HCA Healthcare",
   "Johnson & Johnson",
-  "Pfizer",
   "Merck",
   "AbbVie",
   "Abbott Laboratories",
@@ -1221,7 +1221,6 @@
   "Molina Healthcare": 4,
   "WellCare Health Plans": 4,
   "Magellan Health": 4,
-  "Pfizer": 5,
   "Merck": 5,
   "Bristol-Myers Squibb": 5,
   "AbbVie": 5,
@@ -1618,5 +1617,8 @@
  ],
  "goldman": [
   "Goldman Sachs Group"
+ ],
+ "pfizer": [
+  "Pfizer"
  ]
 }

@@ -2708,5 +2708,45 @@ export const HEROES = {
     [[-2.6, 1.2], [1.4, 1.4], [-0.4, -0.8]].forEach(([x, z], i) => moving.push(...walker(moving.length, (t) => { const f = cyc(t, 7, i * 0.3); return { x: HX + x + Math.sin(f * TAU) * 0.6, z: HZ + z + Math.cos(f * TAU) * 0.4, ry: -f * TAU, push: Math.sin(t * 4 + i) > 0.6 }; }, { shirt: ['#ffffff', '#cfe3f2', '#f4f1ea'][i], pants: NAVY, skin: ['#e9b98f', '#c58c66', '#8d5a3b'][i], y: y0 + 0.04 })));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Pfizer: medicines and vaccines made and shipped at global scale. Vials ride the filling line
+  // under the nozzles and get capped; the freezer farm breathes frost; insulated boxes roll out to
+  // the truck, packed with dry ice.
+  pfizer: { finder: '#0000c9', build: () => {
+    const R = rand(37), out = [], y0 = 0.24, BLUE = '#0000c9', SKY = '#3f8ae0';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#c9ced6', { p: [0, 0.12, 0] }), part(box(10.2, 0.012, 10.2), '#d5e0ee', { p: [0, y0 + 0.006, 0] }), part(box(7.0, 0.014, 1.6), '#b9cbe3', { p: [-0.4, y0 + 0.008, 1.2] }));
+    // ---- the filling line: conveyor, filler head and capper
+    const LZ = 1.2;
+    out.push(part(rbox(6.4, 0.1, 0.5, 0.03), '#9aa1a9', { p: [-0.4, y0 + 0.8, LZ] }), part(box(6.4, 0.02, 0.42), '#c9ced6', { p: [-0.4, y0 + 0.86, LZ] }));
+    for (let i = 0; i < 7; i++) out.push(part(box(0.06, 0.8, 0.4), '#7b828c', { p: [-3.4 + i * 1.0, y0 + 0.4, LZ] }));
+    out.push(part(rbox(1.0, 0.9, 0.8, 0.06), '#f4f5f6', { p: [-1.6, y0 + 1.7, LZ] }), part(box(0.06, 0.8, 0.06), '#7b828c', { p: [-2.0, y0 + 1.2, LZ - 0.35] }), part(box(0.06, 0.8, 0.06), '#7b828c', { p: [-1.2, y0 + 1.2, LZ - 0.35] }), part(box(0.6, 0.12, 0.02), BLUE, { p: [-1.6, y0 + 1.9, LZ + 0.41] }));
+    out.push(part(rbox(0.8, 0.8, 0.7, 0.06), '#f4f5f6', { p: [0.6, y0 + 1.65, LZ] }), part(box(0.06, 0.8, 0.06), '#7b828c', { p: [0.3, y0 + 1.2, LZ - 0.3] }), part(box(0.06, 0.8, 0.06), '#7b828c', { p: [0.9, y0 + 1.2, LZ - 0.3] }));
+    // Clean glass shields over the line.
+    out.push(part(box(4.6, 0.04, 0.8), '#cfe3f2', { p: [-0.6, y0 + 1.3, LZ] }));
+    // ---- the freezer farm: rows of upright ultra-cold freezers
+    for (let r = 0; r < 2; r++) for (let i = 0; i < 6; i++) { const x = -3.8 + i * 0.75, z = -3.2 + r * 1.3; out.push(part(rbox(0.65, 1.5, 0.6, 0.05), '#f4f5f6', { p: [x, y0 + 0.75, z] }), part(box(0.5, 0.12, 0.02), '#1d2a3a', { p: [x, y0 + 1.25, z + 0.31] }), part(box(0.2, 0.05, 0.01), '#7cf0ff', { p: [x - 0.1, y0 + 1.25, z + 0.33] }), part(box(0.04, 0.4, 0.04), '#9aa1a9', { p: [x + 0.25, y0 + 0.8, z + 0.33] })); }
+    // ---- the shipping dock
+    out.push(part(rbox(2.6, 0.6, 2.0, 0.04), '#9aa1a9', { p: [3.6, y0 + 0.3, -2.6] }), part(rbox(2.6, 1.8, 0.14, 0.04), '#e9ecef', { p: [3.6, y0 + 1.5, -3.55] }), part(rbox(1.6, 0.3, 0.06, 0.03), BLUE, { p: [3.6, y0 + 2.1, -3.47] }));
+    const ship = curve([[1.6, y0 + 0.9, LZ], [2.6, y0 + 0.9, LZ], [3.2, y0 + 0.75, 0.0], [3.4, y0 + 0.65, -1.8]]);
+    out.push(part(tubeOn(ship, 0.18, hi() ? 40 : 10), '#7b828c', { s: [1, 1, 1] }));
+    [[-4.6, 4.6], [-2.2, 4.6], [4.6, 4.6], [4.7, 1.4]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.7 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // Vials stepping down the line: filled at the head, capped, then off to shipping.
+    const vial = (cap) => merge(part(lathe([[0, 0], [0.08, 0], [0.08, 0.2], [0.05, 0.24], [0.05, 0.28], [0, 0.28]], 16), '#dff0ff'), part(cyl(0.075, 0.075, 0.12, 16), SKY, { p: [0, 0.07, 0] }), cap ? part(cyl(0.065, 0.065, 0.06, 16), '#f29a3a', { p: [0, 0.3, 0] }) : []);
+    for (let k = 0; k < 12; k++) { const capped = place(vial(true), { s: 1.7 }), open = place(vial(false), { s: 1.7 }); const u0 = k / 12;
+      moving.push({ geo: open, pivot: [0, y0 + 0.88, LZ], anim: (t) => { const u = cyc(Math.floor(t / 0.7) * 0.7 + easeIO(((t / 0.7) % 1)) * 0.7, 8.4, u0), x = -3.4 + u * 5.0; return x < 0.6 ? { x, s: Math.min(1, u / 0.04) + 0.001 } : { s: 0.001 }; } });
+      moving.push({ geo: capped, pivot: [0, y0 + 0.88, LZ], anim: (t) => { const u = cyc(Math.floor(t / 0.7) * 0.7 + easeIO(((t / 0.7) % 1)) * 0.7, 8.4, u0), x = -3.4 + u * 5.0; return x >= 0.6 ? { x, s: Math.min(1, (1 - u) / 0.04) + 0.001 } : { s: 0.001 }; } }); }
+    moving.push({ geo: merge(part(cyl(0.03, 0.03, 0.3, 8), '#9aa1a9'), part(cone(0.04, 0.08, 8), '#9aa1a9', { p: [0, -0.18, 0], r: [Math.PI, 0, 0] })), pivot: [-1.6, y0 + 1.25, LZ], anim: (t) => ({ y: -Math.max(0, Math.sin((t / 0.7) * Math.PI * 2)) * 0.1 }) });
+    moving.push({ geo: part(cyl(0.12, 0.12, 0.2, 16), '#c9ced6'), pivot: [0.6, y0 + 1.3, LZ], anim: (t) => ({ y: -Math.max(0, Math.sin((t / 0.7) * Math.PI * 2)) * 0.12, ry: t * 8 }) });
+    // Frost breathing from the freezer doors.
+    for (let i = 0; i < 6; i++) moving.push({ geo: part(ball(0.18), '#eef7ff'), pivot: [-3.8 + i * 0.75, y0 + 0.3, -1.6], anim: (t) => { const f = cyc(t, 3, i / 6); return { y: f * 0.3, z: f * 0.4, s: (0.4 + f) * (1 - f) * 1.6 + 0.001 }; } });
+    // Insulated shippers riding to the dock, then the truck carries them away.
+    for (let k = 0; k < 4; k++) moving.push({ geo: merge(part(rbox(0.34, 0.28, 0.3, 0.04), '#e9ecef'), part(box(0.35, 0.06, 0.31), SKY, { p: [0, 0.05, 0] }), part(box(0.12, 0.08, 0.01), BLUE, { p: [0, -0.04, 0.16] })), pivot: [0, 0.16, 0], anim: (t) => { const u = cyc(t, 4, k / 4), a = along(ship, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry }; } });
+    moving.push({ geo: merge(part(rbox(0.8, 0.85, 0.95, 0.1), BLUE, { p: [1.3, 0.6, 0] }), part(box(0.04, 0.32, 0.8), '#26323f', { p: [1.71, 0.8, 0] }), part(rbox(2.2, 1.15, 1.0, 0.06), '#f4f5f6', { p: [-0.3, 0.8, 0] }), part(box(1.4, 0.18, 0.02), BLUE, { p: [-0.3, 0.9, 0.51] }), [[-1.0, 0.45], [1.3, 0.45], [-1.0, -0.45], [1.3, -0.45]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.14, 14), '#1d1f24', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] }))),
+      pivot: [0, y0, -0.6], anim: (t) => { const f = cyc(t, 12), x = f < 0.25 ? 6 - 2.8 * easeOut(f / 0.25) : f < 0.6 ? 3.2 : 3.2 - 9 * easeIn(win(f, 0.6, 0.95)); return { x, ry: 0, s: clamp01((5.4 - Math.abs(x)) / 0.5) + 0.001 }; } });
+    // Technicians in white coats.
+    [[-2.4, 2.1], [1.0, 2.1]].forEach(([x, z], i) => moving.push(...walker(moving.length, (t) => { const f = cyc(t, 8, i * 0.5), xx = x + Math.sin(f * TAU) * 0.9; return { x: xx, z, ry: Math.cos(f * TAU) > 0 ? 0 : Math.PI }; }, { shirt: '#f4f5f6', pants: '#2b3a55', skin: ['#e9b98f', '#8d5a3b'][i], hair: ['#3a2a20', '#1d1f24'][i], y: y0 })));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
