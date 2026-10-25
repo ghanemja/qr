@@ -113,7 +113,8 @@
   "bestbuy": "Try it in the store, and the Geek Squad sets it up at home",
   "tjx": "The treasure hunt: brand surplus, a new mix every day, at a fraction of the price",
   "macys": "The store on Herald Square that New York parades past",
-  "gap": "One maker, four brands for every budget, and the denim to fill them"
+  "gap": "One maker, four brands for every budget, and the denim to fill them",
+  "lululemon": "A brand built on a community: the free yoga class and the run club"
  },
  "bank": [
   "PNC Financial Services",
@@ -1714,5 +1715,8 @@
  ],
  "gap": [
   "Gap"
+ ],
+ "lululemon": [
+  "Lululemon athletica"
  ]
 }

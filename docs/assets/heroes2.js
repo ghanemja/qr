@@ -911,4 +911,38 @@ export const HEROES2 = {
     stores.forEach(([x, z], i) => { const path = curve([[SX, y0 + 1.8, SZ], [(x + SX) / 2, y0 + 3.0, (z + SZ) / 2], [x, y0 + 2.2, z]]); moving.push(rider(jeans(0.45), path, P / 2, i / 4, 0.1, 0.6, (t, u) => ({ rz: u * 3 }))); });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Lululemon: a brand built on a community. Outside the store the free yoga class flows
+  // through its sun salutations and the run club laps the block; the members walk out in the
+  // leggings everyone wants.
+  lululemon: { finder: '#d31f30', build: () => {
+    const R = rand(126), out = [], RED = '#d31f30';
+    out.push(ground('#8fc66f'), part(rbox(9.6, 0.05, 9.6, 0.05), '#d9d4c8', { p: [0, y0 + 0.025, 0] }), part(rbox(7.0, 0.06, 7.0, 0.05), '#8fc66f', { p: [-0.2, y0 + 0.04, -0.2] }));
+    // ---- the store, back left: wood and glass, the red omega
+    const SX = -2.4, SZ = -3.0;
+    out.push(part(rbox(4.0, 2.2, 2.2, 0.05), '#e8dcc6', { p: [SX, y0 + 1.1, SZ] }), part(box(3.0, 1.5, 0.04), '#a9c9de', { p: [SX + 0.3, y0 + 0.85, SZ + 1.11] }), part(box(4.04, 0.35, 2.24), '#b08560', { p: [SX, y0 + 2.05, SZ] }));
+    const omega = merge(part(torus(0.36, 0.09, Math.PI * 1.45, 24), RED, { r: [0, 0, -Math.PI * 0.22] }), part(rbox(0.3, 0.12, 0.12, 0.04), RED, { p: [-0.35, -0.3, 0] }), part(rbox(0.3, 0.12, 0.12, 0.04), RED, { p: [0.35, -0.3, 0] }));
+    out.push(part(cyl(0.6, 0.6, 0.08, 32), K.white, { p: [SX - 1.2, y0 + 1.3, SZ + 1.16], r: [Math.PI / 2, 0, 0] }), place(omega, { p: [SX - 1.2, y0 + 1.33, SZ + 1.22] }));
+    // Mannequins in leggings in the window.
+    [0, 1, 2].forEach((k) => out.push(part(capsule(0.12, 0.3), ['#1d1f24', RED, '#5b6b7d'][k], { p: [SX - 0.3 + k * 0.7, y0 + 1.15, SZ + 0.9] }), part(capsule(0.08, 0.5), '#1d1f24', { p: [SX - 0.3 + k * 0.7, y0 + 0.5, SZ + 0.9] })));
+    // ---- the yoga lawn: rows of mats
+    const mats = [];
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) mats.push([-2.4 + c * 1.3, 0.2 + r * 1.2]);
+    mats.forEach(([x, z], i) => out.push(part(rbox(0.5, 0.03, 1.0, 0.02), ['#d31f30', '#5b2a86', '#3fb8a8', '#f29a3a'][i % 4], { p: [x, y0 + 0.08, z] })));
+    out.push(part(rbox(1.0, 0.05, 1.2, 0.02), '#c9a36b', { p: [1.6, y0 + 0.08, -1.2] }));
+    out.push(trees(R, [[4.0, -4.0], [1.6, -3.6], [-4.0, 4.0], [3.0, 3.0], [-4.2, 1.2]]));
+    // ---- moving parts
+    const moving = [], P = 6;
+    // Each yogi: a body that dips forward and arms that sweep up overhead and down.
+    const yogi = (x, z, c, k, ry) => {
+      const bi = moving.length;
+      moving.push({ geo: merge(part(capsule(0.17, 0.4), c, { p: [0, 0.75, 0] }), part(ball(0.14), '#e9b98f', { p: [0, 1.23, 0] }), part(capsule(0.07, 0.45), '#1d1f24', { p: [0, 0.3, 0.1] }), part(capsule(0.07, 0.45), '#1d1f24', { p: [0, 0.3, -0.1] })), pivot: [x, y0 + 0.1, z], anim: (t) => { const f = cyc(t, P, k * 0.02); return { ry, rz: -bump(f, 0.55, 0.12) * 1.1 }; } });
+      [-0.22, 0.22].forEach((dz) => moving.push({ geo: part(capsule(0.05, 0.4), c, { p: [0, -0.25, 0] }), pivot: [0, 1.0, dz], parent: bi, anim: (t) => { const f = cyc(t, P, k * 0.02); return { rz: -Math.PI * 0.95 * (bump(f, 0.25, 0.14) + bump(f, 0.85, 0.12)) }; } }));
+    };
+    mats.forEach(([x, z], i) => yogi(x, z, ['#1d1f24', RED, '#5b6b7d', '#3fb8a8', K.white, '#5b2a86'][i % 6], i, Math.PI));
+    // The teacher on the front platform, leading.
+    yogi(1.6, -1.2, RED, 0, 0);
+    // The run club round the path.
+    [0, 0.18, 0.36, 0.54].forEach((o, i) => moving.push(...walker(moving.length, (t) => { const u = cyc(t, 14, o) * 4, side = Math.floor(u), w = u - side, L = 4.2; const pts = [[-L, -L], [L, -L], [L, L], [-L, L]], a = pts[side], b = pts[(side + 1) % 4]; return { x: a[0] + (b[0] - a[0]) * w, z: a[1] + (b[1] - a[1]) * w, ry: [0, -Math.PI / 2, Math.PI, Math.PI / 2][side] }; }, { shirt: [RED, '#3fb8a8', '#f29a3a', '#5b2a86'][i], pants: '#1d1f24', y: y0 })));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
