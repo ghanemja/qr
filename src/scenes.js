@@ -1542,4 +1542,73 @@ export const SCENES = {
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, 12), k = f < 0.5 ? easeIO(f * 2) : 1 - easeIO((f - 0.5) * 2); return { x: -2.2 + k * 0.4, z: 3.8 - k * 5.2, ry: f < 0.5 ? Math.PI / 2 : -Math.PI / 2 }; }, { shirt: K.orange, pants: '#2b3a55', y: y0, carry: part(rbox(0.36, 0.03, 0.26, 0.01), K.dark, { p: [0.3, 0.95, 0] }) }));
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-2.9, y0, -1.1], topAt: [KX, y0 + 0.5, KZ + 0.4] };
   },
+
+  // Excavator (engineering and construction, contractors, equipment rental): big projects, built.
+  // A bridge goes up over the river: the crawler crane swings the last deck span off the trailer
+  // into place; an excavator digs at the river bank and loads a dump truck, which drives off full
+  // as an empty one comes back; hard-hat crews work the site.
+  'industrial:3': () => {
+    const R = rand(2101), out = [], moving = [];
+    // ---- ground with a river channel running along z
+    const W0 = -1.7, W1 = 0.3, SEA = y0 - 0.12;
+    out.push(part(rbox(W0 + 5.2, 0.24, 10.4, 0.06), '#b99a72', { p: [(W0 - 5.2) / 2, 0.12, 0] }), part(rbox(5.2 - W1, 0.24, 10.4, 0.06), '#b99a72', { p: [(W1 + 5.2) / 2, 0.12, 0] }), part(box(W1 - W0, 0.08, 10.4), '#5a6f86', { p: [(W0 + W1) / 2, 0.04, 0] }));
+    out.push(part(new THREE.PlaneGeometry(W1 - W0, 10.4).rotateX(-Math.PI / 2), 'W', { p: [(W0 + W1) / 2, SEA, 0] }));
+    if (hi()) for (let i = 0; i < 16; i++) out.push(part(new THREE.SphereGeometry(0.12 + R() * 0.12, 7, 5), '#8e8a82', { p: [(R() < 0.5 ? W0 : W1) + (R() - 0.5) * 0.3, y0 - 0.05, -5 + R() * 10], s: [1, 0.6, 1] }));
+    // ---- the bridge across, at z = 0: abutments, a pier, three spans in place
+    const BZ = -0.4, DY = y0 + 1.2;
+    [[W0 - 0.9, 1.4], [W1 + 0.9, 1.4]].forEach(([x, w]) => out.push(part(rbox(w, DY - y0, 1.6, 0.04), '#c9c4b8', { p: [x, y0 + (DY - y0) / 2, BZ] })));
+    out.push(part(rbox(0.5, DY - SEA, 1.2, 0.04), '#c9c4b8', { p: [(W0 + W1) / 2, SEA + (DY - SEA) / 2, BZ] }));
+    const span = (L) => merge(part(rbox(L, 0.22, 1.5, 0.03), '#9aa1a9'), part(box(L, 0.05, 1.3), '#5b616b', { p: [0, 0.13, 0] }), [-0.72, 0.72].map((z) => part(box(L, 0.2, 0.05), 'A', { p: [0, 0.25, z] })));
+    out.push(place(span(2.3), { p: [W0 - 1.75, DY + 0.11, BZ] }), place(span(2.3), { p: [W0 + 0.5, DY + 0.11, BZ] }));
+    // Road leading to the bridge on the left; the gap at the right end is the last span's.
+    out.push(part(box(2.0, 0.03, 1.4), '#6b6f75', { p: [-4.2, y0 + 0.02, BZ] }), part(extrude([[-1.0, 0], [0.4, 0], [0.4, 1.0]], 1.4), '#b5a58a', { p: [-2.6, y0, BZ] }));
+    const GAP = new V(W1 + 1.6, DY + 0.11, BZ);
+    // ---- materials on the left bank (pipes, rebar), the dig at the back right on the river bank
+    for (let i = 0; i < 5; i++) out.push(part(new THREE.CylinderGeometry(0.3, 0.3, 1.4, 18, 1, true), '#b8b3a8', { p: [-4.2 + (i % 3) * 0.62, y0 + 0.3 + Math.floor(i / 3) * 0.52, -3.4], r: [Math.PI / 2, 0, 0] }));
+    for (let i = 0; i < 8; i++) out.push(part(cyl(0.04, 0.04, 2.2, 6), '#8a5a3a', { p: [-3.4, y0 + 0.08 + Math.floor(i / 4) * 0.08, -1.9 + (i % 4) * 0.1], r: [0, 0, Math.PI / 2] }));
+    const XX = 3.4, XZ = -3.2;
+    out.push(part(lathe([[0, -0.4], [1.0, -0.35], [1.3, 0]], 24), '#8a6a45', { p: [0.9, y0 + 0.01, XZ] }));
+    // ---- cones and barriers, a site office
+    [[-4.4, 1.6], [-3.4, 1.6], [3.0, 1.4], [4.2, 1.4]].forEach(([x, z]) => out.push(part(cone(0.16, 0.45, 10), (X, Y) => (Y > y0 + 0.22 && Y < y0 + 0.3 ? K.white : K.orange), { p: [x, y0 + 0.22, z] })));
+    out.push(part(rbox(2.0, 1.0, 1.0, 0.04), K.white, { p: [-3.6, y0 + 0.5, 3.6] }), part(box(2.02, 0.2, 1.02), 'A', { p: [-3.6, y0 + 0.9, 3.6] }), part(rbox(0.5, 0.35, 0.04, 0.02), '#9fcdea', { p: [-3.3, y0 + 0.6, 4.12] }));
+    // ---- the crawler crane at the front right, the trailer with the last span
+    const CX = 3.4, CZ = 1.6, CY = y0 + 0.9, TRX = CX, TRZ = 0, toGap = new V(GAP.x - CX, 0, GAP.z - CZ), REACH = toGap.length(), TOP = 3.4;
+    const yawGap = Math.atan2(-toGap.z, toGap.x), yawPick = -Math.PI / 2;
+    out.push(part(rbox(1.8, 0.4, 1.4, 0.06), '#2b2f36', { p: [CX, y0 + 0.2, CZ] }), [-0.6, 0.6].map((z) => part(rbox(2.0, 0.36, 0.36, 0.14), '#1d1f24', { p: [CX, y0 + 0.18, CZ + z] })));
+    const TZ2 = CZ + REACH;
+    out.push(part(rbox(1.2, 0.12, 2.2, 0.03), '#5b616b', { p: [TRX, y0 + 0.55, TZ2 - 0.3] }), [[0.5, -1.0], [-0.5, -1.0], [0.5, 0.4], [-0.5, 0.4]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.14, 14), '#1d1f24', { p: [TRX + x, y0 + 0.22, TZ2 + z], r: [0, 0, Math.PI / 2] })));
+    const P = 12, F = (t) => cyc(t, P);
+    const yaw = (f) => yawPick + (yawGap - yawPick) * (easeIO(win(f, 0.2, 0.45)) - easeIO(win(f, 0.7, 0.92)));
+    const tip = (f) => { const a = yaw(f); return new V(CX + Math.cos(a) * REACH, CY + TOP, CZ - Math.sin(a) * REACH); };
+    const pick = CY + TOP - (y0 + 0.9), set = CY + TOP - (DY + 0.5), up = 1.2;
+    const cable = (f) => (f < 0.08 ? pick : f < 0.18 ? pick + (up - pick) * easeIO(win(f, 0.08, 0.18)) : f < 0.45 ? up : f < 0.56 ? up + (set - up) * easeIO(win(f, 0.45, 0.56)) : f < 0.62 ? set : set + (up - set) * easeIO(win(f, 0.62, 0.7)) + (pick - up) * easeIO(win(f, 0.9, 1)));
+    moving.push({ geo: merge(part(rbox(1.3, 0.8, 1.1, 0.08), '#f2c94c', { p: [-0.2, 0.4, 0] }), part(rbox(0.5, 0.55, 0.5, 0.06), '#9fcdea', { p: [0.4, 0.55, 0.3] }), part(rbox(0.6, 0.6, 1.0, 0.06), '#3a3f47', { p: [-0.85, 0.4, 0] }),
+      beam([0.2, 0.6, 0], [REACH, TOP, 0], 0.18, '#f2c94c'), beam([0.2, 0.55, 0.2], [REACH, TOP, 0], 0.06, '#e0b33a'), beam([0.2, 0.55, -0.2], [REACH, TOP, 0], 0.06, '#e0b33a'), hi() ? ring(7, (a, i) => beam([0.3 + i * 0.4, 0.65 + i * 0.4, 0.15], [0.5 + i * 0.4, 0.85 + i * 0.4, -0.15], 0.03, '#e0b33a')) : [], part(cyl(0.12, 0.12, 0.3, 12), K.ink, { p: [REACH, TOP, 0], r: [Math.PI / 2, 0, 0] })).rotateY(yawPick),
+      pivot: [CX, CY, CZ], anim: (t) => ({ ry: yaw(F(t)) - yawPick }) });
+    moving.push({ geo: part(new THREE.CylinderGeometry(0.02, 0.02, 1, 6), K.ink, { p: [0, -0.5, 0] }), pivot: [0, 0, 0], anim: (t) => { const f = F(t), p = tip(f); return { x: p.x, y: p.y, z: p.z, sy: cable(f) }; } });
+    // The last span: on the trailer, lifted, swung round and lowered into the gap.
+    moving.push({ geo: span(1.6), pivot: [0, 0, 0], anim: (t) => { const f = F(t), at = tip(Math.min(f, 0.6)), h = f < 0.6 ? cable(f) : set; return { x: at.x, y: at.y - h - 0.2, z: at.z, ry: yaw(Math.min(f, 0.6)) - yawGap, sy: f > 0.94 ? 1 - win(f, 0.94, 1) : 1, s: f < 0.04 ? f / 0.04 : 1 }; } });
+    // ---- the excavator: swings between the dig and the truck; boom, stick and bucket work
+    const EP = 6, ef = (t) => cyc(t, EP), swing = (f) => Math.PI + 1.15 * (easeIO(win(f, 0.3, 0.45)) - easeIO(win(f, 0.65, 0.8)));
+    const dig = (f) => bump(f, 0.15, 0.08), dump = (f) => bump(f, 0.55, 0.06);
+    const ex = moving.length;
+    out.push(part(rbox(1.6, 0.36, 1.3, 0.06), '#2b2f36', { p: [XX, y0 + 0.18, XZ] }), [-0.5, 0.5].map((z) => part(rbox(1.8, 0.34, 0.34, 0.14), '#1d1f24', { p: [XX, y0 + 0.17, XZ + z] })));
+    // The arm is built pointing -x (toward the river), so it rests over the dig.
+    moving.push({ geo: merge(part(rbox(1.3, 0.6, 1.1, 0.08), 'A', { p: [0.2, 0.3, 0] }), part(rbox(0.55, 0.6, 0.5, 0.06), '#9fcdea', { p: [-0.25, 0.75, -0.25] }), part(rbox(0.5, 0.5, 1.0, 0.06), 'Ad', { p: [0.7, 0.35, 0] })), pivot: [XX, y0 + 0.4, XZ], anim: (t) => ({ ry: swing(ef(t)) - Math.PI }) });
+    moving.push({ geo: merge(part(rbox(1.6, 0.22, 0.22, 0.06), 'A', { p: [-0.8, 0, 0] }), part(cyl(0.1, 0.1, 0.3, 10), K.dark, { r: [Math.PI / 2, 0, 0] })), pivot: [-0.3, 0.6, 0.15], parent: ex, anim: (t) => { const f = ef(t); return { rz: -(0.55 - dig(f) * 0.6 + dump(f) * 0.1) }; } });
+    moving.push({ geo: merge(part(rbox(1.2, 0.16, 0.18, 0.05), 'Ad', { p: [-0.6, 0, 0] }), part(cyl(0.08, 0.08, 0.26, 10), K.dark, { r: [Math.PI / 2, 0, 0] })), pivot: [-1.6, 0, 0], parent: ex + 1, anim: (t) => { const f = ef(t); return { rz: -(-1.5 + dig(f) * 0.5 - dump(f) * 0.3) }; } });
+    moving.push({ geo: merge(part(extrude([[0, 0.15], [-0.42, 0.1], [-0.42, -0.22], [-0.1, -0.3]], 0.42), '#3a3f47'), hi() ? ring(4, (a, i) => part(cone(0.04, 0.12, 6), K.steel, { p: [-0.12, -0.32, -0.15 + i * 0.1], r: [0, 0, Math.PI] })) : []), pivot: [-1.2, 0, 0], parent: ex + 2, anim: (t) => { const f = ef(t); return { rz: -(-0.4 - dig(f) * 0.9 + dump(f) * 1.6) }; } });
+    // The dump truck: loaded by the excavator, drives off full; an empty one comes back.
+    const tt = (t) => cyc(t, EP * 2), tx = (t) => { const f = tt(t); return f < 0.6 ? 2.0 : f < 0.8 ? 2.0 + easeIn(win(f, 0.6, 0.8)) * 4 : 6.5 - 4.5 * easeOut(win(f, 0.8, 1)); };
+    const truck = moving.length;
+    moving.push({ geo: merge(part(rbox(0.8, 0.8, 1.0, 0.1), '#f2c94c', { p: [0.95, 0.7, 0] }), part(box(0.04, 0.3, 0.8), '#26323f', { p: [1.36, 0.85, 0] }), part(rbox(2.2, 0.2, 1.1, 0.04), K.dark, { p: [0.1, 0.4, 0] }), [[-0.6, 0.5], [0.0, 0.5], [0.95, 0.5], [-0.6, -0.5], [0.0, -0.5], [0.95, -0.5]].map(([x, z]) => part(new THREE.CylinderGeometry(0.24, 0.24, 0.18, 14), '#1d1f24', { p: [x, 0.24, z], r: [Math.PI / 2, 0, 0] }))),
+      pivot: [0, y0, -1.5], anim: (t) => { const x = tx(t); return { x, ry: Math.PI, s: clamp01((5.0 - Math.abs(x)) / 0.8) * 0.999 + 0.001 }; } });
+    moving.push({ geo: merge(part(extrude([[-1.0, 0], [0.5, 0], [0.5, 0.7], [-1.1, 0.75]], 1.1), '#f2c94c'), part(box(1.3, 0.05, 0.95), '#9a7a52', { p: [-0.25, 0.6, 0] })), pivot: [-0.55, 0.5, 0], parent: truck, anim: (t) => { const f = tt(t); return { rz: 0 }; } });
+    // The load in its bed grows with each bucketful.
+    moving.push({ geo: part(lathe([[0.6, 0], [0.3, 0.3], [0, 0.35]], 16), '#9a7a52', { s: [1.1, 1, 0.75] }), pivot: [-0.3, 0.65, 0], parent: truck, anim: (t) => { const f = tt(t), k = Math.min(1, Math.floor(f * 2 / 0.6 * 1.0 + 0.3) / 2 + 0.05); return { s: f < 0.8 ? Math.max(0.1, k) : 0.001 }; } });
+    // Hard-hat crews: one on the bridge deck guiding the span, one at the river bank.
+    moving.push(...walker(moving.length, (t) => ({ x: W0 + 1.4, z: BZ + 0.3, ry: Math.sin(t * 0.6) * 0.3, still: true }), { shirt: K.orange, pants: '#2b3a55', y: DY + 0.24, carry: part(new THREE.SphereGeometry(0.19, 12, 8, 0, TAU, 0, Math.PI / 2), '#ffd23f', { p: [0, 1.62, 0] }) }));
+    moving.push(...walker(moving.length, (t) => { const k = Math.sin(t * 0.4); return { x: 1.2, z: 2.0 + k * 1.2, ry: Math.cos(t * 0.4) > 0 ? -Math.PI / 2 : Math.PI / 2 }; }, { shirt: '#f2c94c', pants: '#2b3a55', y: y0, carry: part(new THREE.SphereGeometry(0.19, 12, 8, 0, TAU, 0, Math.PI / 2), K.white, { p: [0, 1.62, 0] }) }));
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.5, y0, -1.4], topAt: [-3.6, y0 + 1.0, 3.6] };
+  },
 };
