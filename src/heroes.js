@@ -736,34 +736,65 @@ export const HEROES = {
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 
-  // Costco: the membership warehouse. A forklift stacks pallets on towering racks, the
-  // membership card turns overhead, and the $1.50 hot dog combo has never changed price.
+  // Costco: the membership warehouse. Towering racks of bulk pallets, a forklift lifting stock to
+  // the top shelf, a member wheeling out a loaded flatbed, checkouts, and the food court where the
+  // $1.50 hot dog has never changed price; the membership card turns overhead.
   costco: { finder: '#e31837', build: () => {
-    const rack = (x) => merge([-1.4, 1.4].flatMap((z) => [[x - 1.5, z], [x + 1.5, z]].map(([px, pz]) => part(box(0.22, 7.6, 0.22), '#005daa', { p: [px, 3.8, pz] }))),
-      [1.2, 3.6, 6].map((y) => part(box(3.3, 0.18, 3), '#e98b2a', { p: [x, y, 0] })),
-      [1.2, 3.6, 6].flatMap((y, li) => [-0.75, 0.75].map((dx, k) => part(box(1.3, 1.6 - (li + k) % 2 * 0.4, 2.4), ['#c99a62', '#d9b98c', '#b8865a'][(li + k) % 3], { p: [x + dx, y + 0.9 - (li + k) % 2 * 0.2, 0] }))));
-    const lift = (t) => { const f = cyc(t, 6); return easeIO(win(f, 0.25, 0.45)) * (1 - easeIO(win(f, 0.7, 0.9))); };
-    const drive = (t) => { const f = cyc(t, 6); return easeIO(win(f, 0, 0.2)) * (1 - easeIO(win(f, 0.92, 1))); };
-    const forklift = merge(part(rbox(2, 1, 1.5, 0.2), K.yellow, { p: [0, 0.8, 0] }), part(rbox(1.2, 0.6, 1.4, 0.15), K.ink, { p: [-0.5, 1.55, 0] }),
-      [[-0.6, 0.75], [0.6, 0.75], [-0.6, -0.75], [0.6, -0.75]].map(([x, z]) => part(cyl(0.35, 0.35, 0.3, 16), K.ink, { p: [x, 0.35, z], r: [Math.PI / 2, 0, 0] })),
-      [[-0.9, 0.6], [-0.9, -0.6], [0.4, 0.6], [0.4, -0.6]].map(([x, z]) => beam([x, 1.3, z], [x * 0.9, 2.8, z], 0.08, K.ink)), part(box(1.6, 0.1, 1.5), K.ink, { p: [-0.25, 2.85, 0] }),
-      [-0.5, 0.5].map((z) => part(box(0.16, 3.4, 0.16), '#3a3f47', { p: [1.15, 1.9, z] })));
-    const forks = merge([-0.4, 0.4].map((z) => part(box(1.3, 0.08, 0.2), '#7d8792', { p: [0.65, 0, z] })), part(box(0.15, 0.9, 1.2), '#7d8792', { p: [0, 0.4, 0] }),
-      part(box(1.2, 0.18, 1.2), '#c9a072', { p: [0.7, 0.13, 0] }), part(box(1.1, 0.9, 1.1), '#d9b98c', { p: [0.7, 0.68, 0] }));
-    const dog = merge(part(new THREE.CapsuleGeometry(0.42, 2, 8, 20), '#e8b06a', { r: [0, 0, Math.PI / 2], s: [1, 1, 1.25] }), part(new THREE.CapsuleGeometry(0.26, 2.4, 8, 16), '#c0503a', { p: [0, 0.28, 0], r: [0, 0, Math.PI / 2] }),
-      part(tube(Array.from({ length: 9 }, (_, i) => [-1.1 + i * 0.27, 0.56, (i % 2 ? 0.1 : -0.1)]), 0.05), K.yellow));
-    return {
-      bare: true, move: () => ({}),
-      geo: merge(part(box(10, 0.16, 8), '#cfd4da', { p: [0, 0.08, 0] }), rack(-2.4), rack(1.9).translate(0, 0, 0), part(box(9.4, 0.04, 0.2), K.yellow, { p: [0, 0.17, 2.4] }),
-        part(rbox(2.4, 0.15, 1.6, 0.07), '#d9dde2', { p: [3.6, 0.25, 3.2] }), part(cyl(0.4, 0.35, 1, 24), '#e31837', { p: [4.4, 0.8, 3.2] }), part(cyl(0.05, 0.05, 0.9, 8), K.white, { p: [4.5, 1.6, 3.2], r: [0, 0, 0.15] })),
-      moving: [
-        { geo: forklift, pivot: [-0.4, 0.16, 3], anim: (t) => ({ x: -drive(t) * 0.6, z: -drive(t) * 0.9, ry: Math.PI / 2 * drive(t) - Math.PI / 2 * 0 }) },
-        { geo: forks, pivot: [1.2, 0.4, 0], parent: 0, anim: (t) => ({ y: lift(t) * 2.2 }) },
-        { geo: merge(part(rbox(3.2, 2, 0.12, 0.2), K.white), part(box(3.22, 0.5, 0.13), '#e31837', { p: [0, 0.45, 0] }), part(box(3.22, 0.25, 0.13), '#005daa', { p: [0, 0.12, 0] }), part(rbox(0.7, 0.85, 0.14, 0.08), '#9aa4b1', { p: [-1, -0.45, 0] }), part(box(1.3, 0.12, 0.14), '#5b6470', { p: [0.5, -0.4, 0] })),
-          pivot: [0, 9.4, -0.4], anim: (t) => ({ ry: t * 0.9, y: Math.sin(t * 1.4) * 0.2 }) },
-        { geo: dog, pivot: [2.9, 0.75, 3.2], anim: (t) => ({ y: Math.abs(Math.sin(t * 2)) * 0.25, ry: Math.sin(t) * 0.2 }) },
-      ],
+    const R = rand(71), RED = '#e31837', BLUE = '#005daa', out = [], y0 = 0.24;
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#c9ccd0', { p: [0, 0.12, 0] }));
+    for (let i = -4; i <= 4; i++) out.push(part(box(0.02, 0.01, 10), '#b9bdc2', { p: [i * 1.15, y0 + 0.005, 0] }));
+    // ---- the cut-away building: back and side walls with the red and blue bands
+    out.push(part(box(10.4, 4.4, 0.25), '#d9d6cf', { p: [0, y0 + 2.2, -5.05] }), part(box(0.25, 4.4, 10.4), '#d9d6cf', { p: [-5.05, y0 + 2.2, 0] }));
+    out.push(part(box(10.4, 0.5, 0.27), RED, { p: [0, y0 + 3.7, -5.05] }), part(box(10.4, 0.25, 0.27), BLUE, { p: [0, y0 + 3.3, -5.05] }), part(box(0.27, 0.5, 10.4), RED, { p: [-5.05, y0 + 3.7, 0] }), part(box(0.27, 0.25, 10.4), BLUE, { p: [-5.05, y0 + 3.3, 0] }));
+    for (let x = -4.6; x < 5; x += 0.9) out.push(beam([x, y0 + 4.4, -5.0], [x, y0 + 4.4, -3.4], 0.06, '#9aa1a9'));
+    // ---- the racks: blue uprights, orange beams, pallets of bulk goods
+    const goods = [
+      (x, y, z) => [part(rbox(1.0, 0.12, 0.9, 0.02), '#c9a072', { p: [x, y + 0.06, z] }), part(rbox(0.95, 0.75, 0.85, 0.04), '#3d7be0', { p: [x, y + 0.5, z] }), [0, 1, 2].map((k) => part(box(0.96, 0.02, 0.86), '#9fc3e8', { p: [x, y + 0.25 + k * 0.25, z] }))],
+      (x, y, z) => [part(rbox(1.0, 0.12, 0.9, 0.02), '#c9a072', { p: [x, y + 0.06, z] }), ...[[-0.25, -0.22], [0.25, -0.22], [-0.25, 0.22], [0.25, 0.22]].flatMap(([dx, dz]) => [0, 1].map((l) => part(cyl(0.2, 0.2, 0.36, 16), '#f4f5f6', { p: [x + dx, y + 0.32 + l * 0.38, z + dz] })))],
+      (x, y, z) => [part(rbox(1.0, 0.12, 0.9, 0.02), '#c9a072', { p: [x, y + 0.06, z] }), [0, 1, 2].map((k) => part(rbox(0.9, 0.22, 0.8, 0.03), '#1d1f24', { p: [x, y + 0.25 + k * 0.24, z] })), [0, 1, 2].map((k) => part(box(0.5, 0.02, 0.81), '#5b6470', { p: [x, y + 0.25 + k * 0.24, z] }))],
+      (x, y, z) => [part(rbox(1.0, 0.12, 0.9, 0.02), '#c9a072', { p: [x, y + 0.06, z] }), part(rbox(0.95, 0.8, 0.85, 0.04), '#c99a62', { p: [x, y + 0.52, z] }), part(box(0.97, 0.06, 0.2), '#e3c690', { p: [x, y + 0.92, z] })],
+    ];
+    const rack = (z) => {
+      const levels = [0, 1.4, 2.8], xs = [-4.4, -3.2, -2.0, -0.8, 0.4, 1.6];
+      xs.forEach((x) => [-0.5, 0.5].forEach((dz) => out.push(part(box(0.1, 4.0, 0.1), BLUE, { p: [x - 0.6, y0 + 2.0, z + dz] }))));
+      [-0.5, 0.5].forEach((dz) => out.push(part(box(0.1, 4.0, 0.1), BLUE, { p: [xs[xs.length - 1] + 0.6, y0 + 2.0, z + dz] })));
+      levels.forEach((ly) => [-0.5, 0.5].forEach((dz) => out.push(part(box(7.3, 0.12, 0.08), '#f29a3a', { p: [-1.4, y0 + ly + 0.06, z + dz] }))));
+      xs.forEach((x, i) => levels.forEach((ly, j) => { if ((i + j * 2 + Math.floor(z)) % 5 === 4) return; out.push(goods[(i * 3 + j + (z > -3 ? 1 : 0)) % goods.length](x, y0 + ly + 0.12, z)); }));
     };
+    rack(-4.1); rack(-2.3);
+    // ---- checkouts and the member desk at the front
+    [[-3.6, 1.9], [-1.9, 1.9]].forEach(([x, z]) => out.push(part(rbox(1.6, 0.85, 0.6, 0.06), '#e9e6df', { p: [x, y0 + 0.43, z] }), part(box(1.5, 0.04, 0.45), '#1d1f24', { p: [x, y0 + 0.87, z] }), part(rbox(0.3, 0.35, 0.25, 0.04), '#3a3f47', { p: [x + 0.6, y0 + 1.05, z - 0.1] }), part(cyl(0.03, 0.03, 1.2, 8), '#9aa1a9', { p: [x - 0.7, y0 + 1.4, z] }), part(rbox(0.35, 0.3, 0.06, 0.03), RED, { p: [x - 0.7, y0 + 2.0, z] })));
+    // ---- the food court: the stand with the hot dog on its sign, tables under red umbrellas
+    const F = [3.2, 2.6];
+    out.push(part(rbox(2.4, 1.0, 0.9, 0.06), K.white, { p: [F[0], y0 + 0.5, F[1] - 1.2] }), part(box(2.42, 0.18, 0.92), RED, { p: [F[0], y0 + 0.95, F[1] - 1.2] }), part(rbox(2.4, 0.9, 0.08, 0.04), '#1d1f24', { p: [F[0], y0 + 2.2, F[1] - 1.62] }),
+      [0, 1, 2].map((k) => part(box(0.6, 0.6, 0.02), ['#e9b06a', '#c0503a', '#ffd23f'][k], { p: [F[0] - 0.75 + k * 0.75, y0 + 2.2, F[1] - 1.57] })), [-1.1, 1.1].map((dx) => part(box(0.06, 1.3, 0.06), '#5b616b', { p: [F[0] + dx, y0 + 1.6, F[1] - 1.62] })));
+    const hotdog = merge(part(new THREE.CapsuleGeometry(0.42, 1.9, 8, 20), '#e8b06a', { r: [0, 0, Math.PI / 2], s: [1, 1, 1.25] }), part(new THREE.CapsuleGeometry(0.25, 2.3, 8, 16), '#c0503a', { p: [0, 0.3, 0], r: [0, 0, Math.PI / 2] }),
+      part(tube(Array.from({ length: 11 }, (_, i) => [-1.05 + i * 0.21, 0.58, (i % 2 ? 0.1 : -0.1)]), 0.05), K.yellow));
+    out.push(place(hotdog, { p: [F[0], y0 + 3.15, F[1] - 1.6], s: 0.8 }));
+    [[F[0] - 1.0, F[1] + 0.5], [F[0] + 0.9, F[1] + 0.4], [F[0], F[1] + 1.8]].forEach(([x, z]) => out.push(part(cyl(0.45, 0.45, 0.05, 20), K.white, { p: [x, y0 + 0.75, z] }), part(cyl(0.05, 0.05, 0.75, 8), '#9aa1a9', { p: [x, y0 + 0.37, z] }), part(cyl(0.03, 0.03, 1.8, 8), '#9aa1a9', { p: [x, y0 + 1.6, z] }),
+      part(cone(0.95, 0.4, 8), (X, Y, Z) => (Math.floor((Math.atan2(Z - z, X - x) + Math.PI) / (Math.PI / 4)) % 2 ? RED : K.white), { p: [x, y0 + 2.35, z] }), [0, 1, 2].map((k) => { const a = k * 2.1 + 0.4; return part(rbox(0.32, 0.35, 0.32, 0.05), '#3a3f47', { p: [x + Math.cos(a) * 0.7, y0 + 0.18, z + Math.sin(a) * 0.7] }); }),
+      part(rbox(0.18, 0.08, 0.1, 0.03), '#e8b06a', { p: [x + 0.1, y0 + 0.8, z] }), part(cyl(0.06, 0.05, 0.16, 12), RED, { p: [x - 0.15, y0 + 0.86, z + 0.1] })));
+    // Seated diners at two tables.
+    [[F[0] - 1.0, F[1] + 0.5, 0.4, '#3d7be0'], [F[0] + 0.9, F[1] + 0.4, 2.5, '#2f9e6e']].forEach(([x, z, a, c]) => { const px = x + Math.cos(a) * 0.7, pz = z + Math.sin(a) * 0.7; out.push(part(new THREE.CapsuleGeometry(0.16, 0.3, 6, 12), c, { p: [px, y0 + 0.75, pz] }), part(ball(0.14), '#e9b98f', { p: [px, y0 + 1.12, pz] }), part(ball(0.15), '#3a2a20', { p: [px, y0 + 1.17, pz], s: [1, 0.7, 1] })); });
+    // ---- the forklift, its mast and its forks
+    const forklift = merge(part(rbox(1.5, 0.75, 1.0, 0.12), K.yellow, { p: [0, 0.6, 0] }), part(rbox(0.7, 0.55, 0.95, 0.12), '#2b2f36', { p: [-0.45, 0.6, 0] }), part(rbox(0.5, 0.35, 0.5, 0.06), '#1d1f24', { p: [-0.1, 1.15, 0] }),
+      [[-0.45, 0.4], [-0.45, -0.4], [0.5, 0.4], [-0.95, 0.4], [0.5, -0.4], [-0.95, -0.4]].slice(0, 4).map(([x, z]) => part(cyl(0.25, 0.25, 0.2, 16), '#1d1f24', { p: [x === -0.45 ? 0.45 : -0.55, 0.25, z * 1.2], r: [Math.PI / 2, 0, 0] })),
+      [[-0.65, 0.42], [-0.65, -0.42], [0.25, 0.42], [0.25, -0.42]].map(([x, z]) => beam([x, 0.95, z], [x * 0.9, 2.1, z], 0.05, '#1d1f24')), part(box(1.1, 0.06, 1.0), '#1d1f24', { p: [-0.2, 2.12, 0] }),
+      [-0.35, 0.35].map((z) => part(box(0.1, 2.6, 0.1), '#3a3f47', { p: [0.8, 1.35, z] })));
+    const forks = merge([-0.3, 0.3].map((z) => part(box(1.0, 0.06, 0.15), '#7d8792', { p: [0.5, 0, z] })), part(box(0.1, 0.7, 0.9), '#5b616b', { p: [0, 0.35, 0] }), goods[0](0.55, 0.03, 0));
+    const lift = (t) => { const f = cyc(t, 8); return easeIO(win(f, 0.3, 0.5)) * (1 - easeIO(win(f, 0.72, 0.9))); };
+    const drive = (t) => { const f = cyc(t, 8); return easeIO(win(f, 0, 0.25)) * (1 - easeIO(win(f, 0.9, 1))); };
+    const flatbed = merge(part(rbox(1.5, 0.08, 0.7, 0.03), '#9aa1a9', { p: [1.05, 0.3, 0] }), [[0.45, 0.3], [1.65, 0.3], [0.45, -0.3], [1.65, -0.3]].map(([x, z]) => part(cyl(0.1, 0.1, 0.08, 12), '#1d1f24', { p: [x, 0.12, z], r: [Math.PI / 2, 0, 0] })),
+      beam([0.3, 0.3, -0.32], [0.3, 1.1, -0.32], 0.04, '#9aa1a9'), beam([0.3, 0.3, 0.32], [0.3, 1.1, 0.32], 0.04, '#9aa1a9'), beam([0.3, 1.1, -0.32], [0.3, 1.1, 0.32], 0.05, RED),
+      part(rbox(0.6, 0.45, 0.6, 0.04), '#3d7be0', { p: [0.75, 0.57, 0] }), [0, 1].map((k) => part(cyl(0.12, 0.12, 0.3, 12), '#f4f5f6', { p: [1.25 + k * 0.26, 0.5, -0.12] })), part(rbox(0.55, 0.12, 0.45, 0.03), '#1d1f24', { p: [1.35, 0.42, 0.15] }), part(rbox(0.5, 0.35, 0.4, 0.04), '#c99a62', { p: [1.4, 0.68, 0.12] }));
+    const card = merge(part(rbox(3.0, 1.9, 0.1, 0.18), K.white), part(box(3.02, 0.5, 0.11), RED, { p: [0, 0.42, 0] }), part(box(3.02, 0.22, 0.11), BLUE, { p: [0, 0.08, 0] }), part(rbox(0.65, 0.8, 0.12, 0.08), '#9aa4b1', { p: [-0.95, -0.42, 0] }), part(box(1.2, 0.1, 0.12), '#5b6470', { p: [0.5, -0.38, 0] }), part(box(0.9, 0.08, 0.12), '#9aa1a9', { p: [0.4, -0.6, 0] }));
+    const moving = [
+      { geo: forklift, pivot: [0, y0, -0.95], anim: (t) => ({ x: -3.6 + drive(t) * 3.0, y: Math.abs(Math.sin(t * 9)) * 0.01 * (drive(t) > 0 && drive(t) < 1 ? 1 : 0) }) },
+      { geo: forks, pivot: [0.85, 0.35, 0], parent: 0, anim: (t) => ({ y: lift(t) * 2.65, x: lift(t) > 0.98 ? 0.25 : 0 }) },
+      { geo: card, pivot: [0.8, 8.0, -0.6], anim: (t) => ({ ry: t * 0.8, y: Math.sin(t * 1.3) * 0.2 }) },
+    ];
+    moving.push(...walker(3, (t) => { const f = cyc(t, 10), x = -3.0 + f * 7.0; return { x, z: 0.55, ry: 0, s: Math.min(1, f / 0.04, (1 - f) / 0.04), push: true }; }, { shirt: '#f29a3a', pants: '#2b3a55', y: y0, carry: flatbed }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 
   // Meta: billions of people connected. Little people ride the infinity loop, and hearts pop up

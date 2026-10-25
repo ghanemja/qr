@@ -1361,7 +1361,7 @@ function build(id, variant, base) {
     const c = { ...builders[variant % builders.length]() };
     if (c.spin) c.moving = [{ ...c.spin, mode: 'spin' }];
     c.moving = (c.moving || []).map((mv) => ({ ...mv, anim: mv.anim || legacy(mv) }));
-    const make = BASES[base % BASES.length];
+    const make = c.bare ? null : BASES[base % BASES.length]; // a signature scene brings its own ground
     if (make) {
       const bb = new THREE.Box3().setFromBufferAttribute(c.geo.attributes.position);
       const r = Math.min(5.4, Math.max(2.6, Math.max(bb.max.x - bb.min.x, bb.max.z - bb.min.z) * 0.5));
