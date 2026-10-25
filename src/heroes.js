@@ -178,30 +178,77 @@ export const HEROES = {
     };
   } },
 
-  // Berkshire Hathaway: compounding. Buffett's snowball rolls down a long hill of wet snow,
-  // picking up coins and growing as it goes.
+  // Berkshire Hathaway: compounding. Buffett's snowball: a small push at the top of a long wet
+  // hill, and it rolls down gathering coins and growing, carving its track, until it comes to
+  // rest by Berkshire's famously modest head office.
   berkshire: { finder: '#c9a227', build: () => {
-    const X0 = -4.6, X1 = 4.6, hill = (x) => { const u = (x - X0) / (X1 - X0); return 0.7 + 6 * (1 - u) ** 2.2; };
-    const pts = []; for (let i = 0; i <= 40; i++) { const x = X0 + ((X1 - X0) * i) / 40; pts.push([x, hill(x)]); }
-    const slope = extrude([[X0, 0], ...pts, [X1, 0]], 3.6);
-    const pine = (x, z, s) => merge(part(cyl(0.15 * s, 0.2 * s, 0.8 * s, 8), K.wood, { p: [x, hill(x) + 0.3 * s, z] }), [0, 1, 2].map((k) => part(cone((1.1 - k * 0.28) * s, 1.3 * s, 16), '#2f6b4a', { p: [x, hill(x) + (0.9 + k * 0.6) * s, z] })), part(cone(0.5 * s, 0.4 * s, 16), K.white, { p: [x, hill(x) + 2.35 * s, z] }));
-    // The snowball: white with gold coins pressed into it, so its roll is visible.
-    const snowball = merge(part(ball(1), '#f6f8fb'), ring(7, (a, i) => { const d = new V(Math.cos(a) * Math.cos(i), Math.sin(i * 1.7) * 0.8, Math.sin(a) * Math.cos(i)).normalize(); return part(cyl(0.2, 0.2, 0.06, 16), K.gold, { p: d.clone().multiplyScalar(0.98).toArray(), q: new THREE.Quaternion().setFromUnitVectors(new V(0, 1, 0), d) }); }));
-    const roll = (t) => {
-      const f = cyc(t, 6), k = easeIn(win(f, 0.06, 0.82)) * 0.88 + 0.04, x = X0 + (X1 - X0) * k, r = 0.35 + 1.45 * k ** 0.8;
-      const dx = 0.01, n = new V(-(hill(x + dx) - hill(x - dx)) / (2 * dx), 1, 0).normalize();
-      return { f, x, r, c: new V(x, hill(x), 0).addScaledVector(n, r) };
+    const R = rand(23), out = [], X0 = -4.4, X1 = 3.0;
+    // The hillside: steep at the top, easing out at the bottom, with soft bumps and a groove
+    // the snowball follows.
+    const slope = (x) => { const u = Math.min(1, Math.max(0, (x - X0) / (X1 - X0))); return 0.9 + 5.4 * (1 - u) ** 2.1; };
+    const h = (x, z) => slope(x) + 0.18 * Math.sin(x * 1.3 + z * 0.9) * Math.cos(z * 1.1) - 0.32 * Math.exp(-(z * z) / 0.9) * (x < X1 + 0.6 ? 1 : 0) + 0.08 * Math.sin(x * 4.1 + z * 3.3);
+    const N = hi() ? 72 : 20, terr = new THREE.PlaneGeometry(10, 10, N, N).rotateX(-Math.PI / 2), tp = terr.attributes.position;
+    for (let i = 0; i < tp.count; i++) tp.setY(i, h(tp.getX(i), tp.getZ(i)));
+    terr.computeVertexNormals();
+    out.push(part(terr, (x, y, z) => { const n = 0.5 + 0.5 * Math.sin(x * 2.3 + z * 1.7); return shade('#f3f6fa', 0.93 + n * 0.07 - Math.max(0, 0.35 - y * 0.05) * 0.05); }));
+    // The block's sides: layered earth under a snow lip.
+    [[0, 5, 0], [5, 0, Math.PI / 2]].forEach(([x, z, ry]) => {
+      // Rows of vertices up the wall so the strata show as bands: a snow lip, then earth and rock.
+      const rows = hi() ? 40 : 8, wall = new THREE.PlaneGeometry(10, 1, N, rows), wp = wall.attributes.position;
+      for (let i = 0; i < wp.count; i++) { const u = wp.getX(i), f = wp.getY(i) + 0.5, wx = ry ? 5 : u, wz = ry ? -u : 5; wp.setY(i, f * h(wx, wz)); }
+      wall.computeVertexNormals();
+      const strata = ['#8a6a4e', '#a07a56', '#7d5f45', '#9a8a7a', '#6f5440'];
+      out.push(part(wall, (X, Y, Z) => { const top = h(ry ? 5 : X, ry ? Z : 5); if (Y > top - 0.22) return '#eef2f7'; const band = Math.floor((Y + 0.12 * Math.sin(X * 1.7)) / 0.42); return strata[((band % 5) + 5) % 5]; }, { p: [x, 0, z], r: [0, ry, 0] }));
+    });
+    // Pines with snow on their boughs, and rocks through the snow.
+    const pine = (x, z, s) => {
+      const y = h(x, z) - 0.05, g = [part(cyl(0.09 * s, 0.13 * s, 0.6 * s, 8), '#5a3d28', { p: [x, y + 0.3 * s, z] })];
+      for (let k = 0; k < 4; k++) {
+        const ty = y + (0.5 + k * 0.45) * s, r = (0.95 - k * 0.2) * s, tier = new THREE.ConeGeometry(r, 0.8 * s, hi() ? 14 : 7, 1), q = tier.attributes.position;
+        for (let i = 0; i < q.count; i++) if (q.getY(i) < 0) { const j = 0.82 + 0.3 * ((i * 7919) % 13) / 13; q.setX(i, q.getX(i) * j); q.setZ(i, q.getZ(i) * j); }
+        tier.computeVertexNormals();
+        g.push(part(tier, shade('#2f6b4a', 0.85 + k * 0.08), { p: [x, ty + 0.4 * s, z], r: [0, R() * TAU, 0] }));
+        g.push(part(cone(r * 0.62, 0.32 * s, hi() ? 14 : 7), '#f6f8fb', { p: [x, ty + 0.62 * s, z] }));
+      }
+      return g;
     };
+    [[-3.7, -2.6, 0.95], [-2.2, -3.6, 0.8], [-3.2, 2.5, 0.85], [-1.4, 3.3, 0.75], [-0.4, -2.4, 0.7], [0.9, 3.6, 0.8], [1.8, -3.4, 0.9], [-4.3, 0.9, 0.7], [-1.9, -1.4, 0.6]].forEach(([x, z, s]) => out.push(pine(x, z, s)));
+    [[-2.8, 1.5, 0.35], [0.4, -1.6, 0.28], [2.6, 2.2, 0.32], [-0.9, 2.1, 0.22]].forEach(([x, z, r]) => out.push(part(new THREE.IcosahedronGeometry(r, 1), '#8d939a', { p: [x, h(x, z), z], s: [1.3, 0.8, 1] }), part(new THREE.SphereGeometry(r * 0.9, 12, 6, 0, TAU, 0, Math.PI / 3), '#f6f8fb', { p: [x, h(x, z) + r * 0.25, z], s: [1.3, 0.8, 1] })));
+    // Berkshire's small brick head office at the bottom, with a flag.
+    const hx = 3.8, hz = -2.9, hy = h(hx, hz) - 0.05;
+    out.push(part(box(1.8, 1.5, 1.4), '#a4553c', { p: [hx, hy + 0.75, hz] }), part(box(1.9, 0.12, 1.5), '#e9eef4', { p: [hx, hy + 1.56, hz] }));
+    for (let y = 0.2; y < 1.4; y += 0.14) out.push(part(box(1.82, 0.015, 1.42), '#8f4631', { p: [hx, hy + y, hz] }));
+    [[-0.5, 0.95], [0.5, 0.95], [-0.5, 0.45], [0.5, 0.45]].forEach(([dx, y]) => out.push(part(box(0.38, 0.32, 0.03), '#2c3e55', { p: [hx + dx, hy + y, hz + 0.71] }), part(box(0.44, 0.05, 0.06), '#f4f5f6', { p: [hx + dx, hy + y - 0.18, hz + 0.72] })));
+    out.push(part(box(0.36, 0.6, 0.03), '#3a2a20', { p: [hx, hy + 0.3, hz + 0.71] }), part(cyl(0.03, 0.03, 1.4, 8), '#c9ced6', { p: [hx + 0.75, hy + 2.25, hz] }));
+    // ---- the roll
+    const roll = (t) => {
+      const f = cyc(t, 7), k = easeIn(win(f, 0.08, 0.78)) * 0.94 + 0.03, x = X0 + 0.3 + (X1 + 0.2 - X0 - 0.3) * k, r = 0.28 + 1.05 * k ** 0.85;
+      return { f, k, x, r, y: h(x, 0) + r * 0.92 };
+    };
+    const snowball = merge(part(ball(1), '#f6f8fb'), Array.from({ length: 14 }, (_, i) => { const d = new V(Math.cos(i * 2.4) * Math.sin(1 + i * 0.7), Math.cos(1 + i * 0.7), Math.sin(i * 2.4) * Math.sin(1 + i * 0.7)).normalize(); return part(cyl(0.16, 0.16, 0.05, 18), i % 3 ? K.gold : K.goldDk, { p: d.clone().multiplyScalar(0.985).toArray(), q: new THREE.Quaternion().setFromUnitVectors(new V(0, 1, 0), d) }); }));
+    const trackN = hi() ? 26 : 8, coinsOnPath = [-3.4, -2.6, -1.8, -1.0, -0.3, 0.4, 1.1, 1.8, 2.4];
     return {
       bare: true, move: () => ({}),
-      geo: merge(part(slope, '#eef2f6'), part(box(9.6, 0.3, 3.8), '#d9dfe6', { p: [0, 0.15, 0] }), pine(-3.2, -1.2, 0.9), pine(-1, 1.3, 0.7), pine(2.6, -1.3, 0.8),
-        ring(5, (a, i) => part(cyl(0.22, 0.22, 0.06, 16), K.gold, { p: [-3 + i * 1.6, hill(-3 + i * 1.6) + 0.04, (i % 2 ? 0.6 : -0.4)] }))),
-      moving: [{ geo: snowball, pivot: [0, 0, 0], anim: (t) => {
-        const { f, x, r, c } = roll(t);
-        // Rolled distance along the hill, turned into spin.
-        let dist = 0; for (let k = 0, steps = 20, xk = X0 + (X1 - X0) * 0.04; k < steps; k++) { const xa = xk + ((x - xk) * k) / steps, xb = xk + ((x - xk) * (k + 1)) / steps; dist += Math.hypot(xb - xa, hill(xb) - hill(xa)); }
-        return { x: c.x, y: c.y, z: c.z, rz: -dist / Math.max(0.4, r * 0.8), s: r * (f > 0.92 ? 1 - win(f, 0.92, 0.99) : 1) };
-      } }],
+      geo: merge(out),
+      moving: [
+        { geo: snowball, pivot: [0, 0, 0], anim: (t) => {
+          const { f, x, r, y } = roll(t);
+          let d = 0; for (let j = 0, n = 24, xa = X0 + 0.3; j < n; j++) { const a = xa + ((x - xa) * j) / n, b = xa + ((x - xa) * (j + 1)) / n; d += Math.hypot(b - a, slope(b) - slope(a)); }
+          return { x, y, rz: -d / (0.3 + r * 0.7), s: r * (f > 0.93 ? Math.max(0.001, 1 - win(f, 0.93, 0.995)) : 1) };
+        } },
+        // The packed track it leaves behind, as wide as the ball was there.
+        ...Array.from({ length: trackN }, (_, i) => {
+          const x = X0 + 0.5 + ((X1 - X0) * i) / trackN, k = (x - X0 - 0.3) / (X1 + 0.2 - X0 - 0.3), r = 0.28 + 1.05 * Math.max(0, k) ** 0.85;
+          return { geo: part(new THREE.PlaneGeometry(((X1 - X0) / trackN) * 1.15, 1).rotateX(-Math.PI / 2), '#dbe3ec'), pivot: [x, h(x, 0) + 0.02, 0], anim: (t) => { const b = roll(t); return { sz: b.x > x && b.f < 0.95 ? r * 1.2 : 0.001, rz: Math.atan((slope(x - 0.05) - slope(x + 0.05)) / 0.1) }; } };
+        }),
+        // Coins lying in its path, swallowed as it passes.
+        ...coinsOnPath.map((x, i) => ({ geo: part(cyl(0.18, 0.18, 0.05, 18), K.gold, { r: [0.3, i, 0.2] }), pivot: [x, h(x, (i % 2 ? 0.25 : -0.25)) + 0.06, i % 2 ? 0.25 : -0.25], anim: (t) => { const b = roll(t); return { s: b.x < x - 0.1 ? 1 : 0.001, ry: t * 1.5 + i }; } })),
+        // Powder kicked up behind it.
+        ...[0, 1, 2, 3].map((i) => ({ geo: part(ball(0.18), '#ffffff'), pivot: [0, 0, 0], anim: (t) => { const b = roll(t), g = cyc(t, 0.6, i / 4); return b.f > 0.1 && b.f < 0.8 ? { x: b.x - b.r * 0.8 - g * 0.6, y: h(b.x - b.r, 0) + g * 0.7 - g * g * 0.5, z: (i - 1.5) * 0.35 * b.r, s: (1 - g) * (0.6 + b.r * 0.6) } : { s: 0 }; } })),
+        // A small figure in a red scarf gives it the first push.
+        ...walker(1 + trackN + coinsOnPath.length + 4, () => ({ x: X0 - 0.15, z: 0, ry: 0, still: true, push: true, s: 0.8 }), { shirt: '#3a4656', pants: '#2b2f36', hair: '#d9d9d9', carry: part(new THREE.CapsuleGeometry(0.05, 0.4, 4, 8), '#c0392b', { p: [0, 1.38, 0], r: [Math.PI / 2, 0, 0] }), y: slope(X0 - 0.15) - 0.25 }),
+        { geo: part(extrude([[0, 0], [0.7, 0.18], [0, 0.4]], 0.02), '#1f3a5f'), pivot: [hx + 0.77, hy + 2.75, hz], anim: (t) => ({ ry: Math.sin(t * 2.2) * 0.4 }) },
+      ],
     };
   } },
 
