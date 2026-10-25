@@ -3482,4 +3482,57 @@ export const SCENES = {
     moving.push({ geo: merge(part(rbox(0.5, 0.4, 0.4, 0.05), '#f2c94c', { p: [0, 0.35, 0] }), part(box(0.05, 0.8, 0.3), K.dark, { p: [0.3, 0.6, 0] }), place(parcel(0.3), { p: [0.5, 0.45, 0] })), pivot: [-1.2, y0, WZ + WD / 2 + 0.5], anim: (t) => { const k = Math.sin(t * 0.9); return { z: k * 0.5, ry: -Math.PI / 2 }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-2.0, y0, 3.0], topAt: [WX + 2.6, y0 + WH, WZ] };
   },
+
+  // Tower crane (elevators, building systems, contractors and rail equipment): building up. The
+  // tower crane slews, lowers its hook to the staging yard, lifts the next floor and swings it over
+  // to set it on the rising tower, while the glass lift rides up and down the outside and the crew
+  // in hard hats guides the load.
+  'industrial:1': () => {
+    const R = rand(5301), out = [], moving = [];
+    out.push(slab('#cfc6b4'));
+    out.push(part(box(10.4, 0.03, 1.1), '#6b7078', { p: [0, y0 + 0.015, 4.5] }), part(box(10.4, 0.4, 0.06), '#e9ecef', { p: [0, y0 + 0.2, 3.85] }));
+    for (let i = 0; i < 9; i++) out.push(part(box(0.5, 0.012, 0.06), K.white, { p: [-4.4 + i * 1.1, y0 + 0.035, 4.5] }));
+    // ---- the rising tower (back left): finished floors with glass, a core, the lift shaft
+    const BX = -2.4, BZ = -2.4, FW = 2.6, FD = 2.4, FH = 0.62, NF = 4;
+    for (let i = 0; i < NF; i++) {
+      out.push(part(box(FW, 0.1, FD), '#b9b4aa', { p: [BX, y0 + i * FH + 0.05, BZ] }), part(box(FW - 0.1, FH - 0.1, FD - 0.1), '#8fc3e3', { p: [BX, y0 + i * FH + FH / 2 + 0.05, BZ] }));
+      [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sz]) => out.push(part(box(0.12, FH, 0.12), '#e9ecef', { p: [BX + sx * (FW / 2 - 0.06), y0 + i * FH + FH / 2, BZ + sz * (FD / 2 - 0.06)] })));
+    }
+    const TOP = y0 + NF * FH;
+    out.push(part(box(FW, 0.1, FD), '#b9b4aa', { p: [BX, TOP + 0.05, BZ] }), part(box(0.8, 1.0, 0.8), '#c9c4b8', { p: [BX - 0.6, TOP + 0.5, BZ - 0.5] }));
+    const SHX = BX + FW / 2 + 0.25;
+    out.push(part(box(0.5, TOP + 0.9 - y0, 0.06), '#9aa1a9', { p: [SHX, (TOP + 0.9 + y0) / 2, BZ + 0.3] }), part(box(0.5, TOP + 0.9 - y0, 0.06), '#9aa1a9', { p: [SHX, (TOP + 0.9 + y0) / 2, BZ - 0.3] }));
+    // ---- the tower crane (back right of the tower)
+    const MX = 0.8, MZ = -3.6, MH = 5.3, mw = 0.24;
+    out.push(part(rbox(1.0, 0.4, 1.0, 0.04), '#9aa1a9', { p: [MX, y0 + 0.2, MZ] }));
+    [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sz]) => out.push(part(box(0.06, MH, 0.06), K.yellow, { p: [MX + sx * mw, y0 + MH / 2, MZ + sz * mw] })));
+    if (hi()) for (let y = 0.3; y < MH; y += 0.45) out.push(beam([MX - mw, y0 + y, MZ + mw], [MX + mw, y0 + y + 0.45, MZ + mw], 0.03, '#e0b33a'), beam([MX + mw, y0 + y, MZ + mw], [MX + mw, y0 + y + 0.45, MZ - mw], 0.03, '#e0b33a'));
+    // ---- the staging yard (front right): stacked floor modules, a site office
+    const SP = new V(2.6, 0, -0.2);
+    for (let i = 0; i < 2; i++) out.push(part(box(FW * 0.9, 0.5, FD * 0.8), i ? '#b9b4aa' : '#a9a49a', { p: [SP.x + 1.0, y0 + 0.25 + i * 0.5, SP.z + 1.8] }));
+    out.push(part(rbox(2.0, 1.0, 1.0, 0.04), K.white, { p: [-3.4, y0 + 0.5, 2.6] }), part(box(2.02, 0.2, 1.02), 'A', { p: [-3.4, y0 + 0.9, 2.6] }), part(rbox(0.5, 0.35, 0.04, 0.02), '#9fcdea', { p: [-3.1, y0 + 0.6, 3.12] }));
+    [[-4.4, 1.0], [-1.0, 1.4], [4.4, 3.2], [3.4, 1.4]].forEach(([x, z]) => out.push(part(cone(0.16, 0.45, 10), (X, Y) => (Y > y0 + 0.22 && Y < y0 + 0.3 ? K.white : K.orange), { p: [x, y0 + 0.22, z] })));
+    // ---- moving parts (one 14 s cycle)
+    const P = 14, F = (t) => cyc(t, P);
+    const toB = new V(BX - MX, 0, BZ - MZ), toS = new V(SP.x - MX, 0, SP.z - MZ);
+    const yawB = Math.atan2(-toB.z, toB.x), yawS = Math.atan2(-toS.z, toS.x), rB = toB.length(), rS = toS.length();
+    const slew = (f) => (f < 0.2 ? yawS : f < 0.45 ? yawS + (yawB - yawS) * easeIO(win(f, 0.2, 0.45)) : f < 0.62 ? yawB : f < 0.85 ? yawB + (yawS - yawB) * easeIO(win(f, 0.62, 0.85)) : yawS);
+    const reach = (f) => (f < 0.2 ? rS : f < 0.45 ? rS + (rB - rS) * easeIO(win(f, 0.2, 0.45)) : f < 0.62 ? rB : f < 0.85 ? rB + (rS - rB) * easeIO(win(f, 0.62, 0.85)) : rS);
+    const JY = y0 + MH;
+    const hook = (f) => { const lowS = JY - (y0 + 1.25), lowB = JY - (TOP + 0.6), up = 1.0; return f < 0.05 ? lowS : f < 0.2 ? lowS + (up - lowS) * easeIO(win(f, 0.05, 0.2)) : f < 0.45 ? up : f < 0.55 ? up + (lowB - up) * easeIO(win(f, 0.45, 0.55)) : f < 0.62 ? lowB + (up - lowB) * easeIO(win(f, 0.55, 0.62)) : f < 0.85 ? up : up + (lowS - up) * easeIO(win(f, 0.85, 1)); };
+    const jib = moving.length;
+    moving.push({ geo: merge(part(box(4.25, 0.3, 0.3), K.yellow, { p: [2.12, 0, 0] }), part(box(1.6, 0.3, 0.3), K.yellow, { p: [-0.8, 0, 0] }), part(rbox(0.7, 0.7, 0.5, 0.05), '#c9612a', { p: [-1.3, -0.35, 0] }), part(rbox(0.5, 0.45, 0.5, 0.05), '#9fcdea', { p: [0.1, -0.4, 0.3] }), beam([0, 0.15, 0], [0, 0.9, 0], 0.08, K.yellow), beam([0, 0.9, 0], [4.1, 0.15, 0], 0.03, K.steelDk), beam([0, 0.9, 0], [-1.5, 0.15, 0], 0.03, K.steelDk), part(box(0.6, 0.12, 0.32), 'A', { p: [2.0, 0.22, 0] })), pivot: [MX, JY, MZ], anim: (t) => ({ ry: slew(F(t)) }) });
+    const trol = moving.length;
+    moving.push({ geo: part(rbox(0.36, 0.16, 0.36, 0.04), K.dark), pivot: [0, -0.2, 0], parent: jib, anim: (t) => ({ x: reach(F(t)) }) });
+    moving.push({ geo: part(cyl(0.015, 0.015, 1, 6), K.ink, { p: [0, -0.5, 0] }), pivot: [0, -0.08, 0], parent: trol, anim: (t) => ({ sy: hook(F(t)) - 0.3 }) });
+    // The load: a floor module from the stack, swung over and set on the tower.
+    moving.push({ geo: merge(part(box(FW, 0.1, FD), '#b9b4aa'), part(box(FW - 0.1, FH - 0.1, FD - 0.1), '#8fc3e3', { p: [0, FH / 2, 0] }), [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([sx, sz]) => part(box(0.12, FH, 0.12), '#e9ecef', { p: [sx * (FW / 2 - 0.06), FH / 2, sz * (FD / 2 - 0.06)] }))), pivot: [0, 0, 0], anim: (t) => { const f = F(t); if (f >= 0.55) return { x: BX, y: TOP + 0.1, z: BZ, s: f > 0.95 ? Math.max(0.001, 1 - win(f, 0.95, 1)) : 1 }; const a = slew(f), r = reach(f); return { x: MX + Math.cos(a) * r, y: JY - 0.28 - hook(f) - FH + 0.02, z: MZ - Math.sin(a) * r, ry: a - yawS, s: f < 0.03 ? Math.max(0.001, f / 0.03) : 1 }; } });
+    // The glass lift rides the shaft.
+    moving.push({ geo: merge(part(rbox(0.46, 0.5, 0.52, 0.04), '#cfeefc'), part(box(0.48, 0.06, 0.54), 'A', { p: [0, 0.25, 0] })), pivot: [SHX, y0 + 0.3, BZ], anim: (t) => ({ y: (0.5 - 0.5 * Math.cos(t * 0.5)) * (TOP - y0 - 0.2) }) });
+    // The crew: one on the deck guiding the load, one in the yard.
+    const hat = (c) => part(new THREE.SphereGeometry(0.19, 12, 8, 0, TAU, 0, Math.PI / 2), c, { p: [0, 1.62, 0] });
+    moving.push(...walker(moving.length, (t) => ({ x: BX + 0.9, z: BZ + 1.0, ry: Math.PI * 0.75 + Math.sin(t * 0.7) * 0.3, still: true, push: F(t) > 0.45 && F(t) < 0.6 }), { shirt: K.orange, pants: '#2b3a55', y: TOP + 0.1, carry: hat('#ffd23f') }));
+    moving.push(...walker(moving.length, (t) => { const k = Math.sin(t * 0.4); return { x: 1.0 + k * 1.2, z: 2.6, ry: Math.cos(t * 0.4) > 0 ? 0 : Math.PI }; }, { shirt: '#f2c94c', pants: '#2b3a55', y: y0, carry: hat(K.white) }));
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-0.6, y0, 2.6], topAt: [-3.4, y0 + 1.0, 2.6] };
+  },
 };
