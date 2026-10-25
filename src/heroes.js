@@ -15,6 +15,46 @@ const parcel = (s = 1) => merge(part(box(1.3 * s, 0.9 * s, 1 * s), '#c99a62'), p
 const flameGeo = () => merge(part(lathe([[0, 0], [0.55, 0.25], [0.6, 0.7], [0.3, 1.6], [0, 2.4]]), K.orange, { r: [Math.PI, 0, 0] }), part(lathe([[0, 0], [0.32, 0.2], [0.34, 0.6], [0, 1.4]]), K.yellow, { p: [0, -0.1, 0], r: [Math.PI, 0, 0] }));
 const puff = (r = 0.8) => part(ball(r), '#f1eee8');
 
+// ---------- set dressing shared by the heroes ----------
+// A small tree of leaf cards that sways (s ≈ 1 is about 2 units tall).
+const miniTree = (R, x, y, z, s = 1, greens = ['#6fbf4c', '#86cc5f', '#5fae45', '#9bd85f']) => {
+  const leaf = leafShape(0), g = [part(taper([[x, y, z], [x + 0.05 * s, y + 0.8 * s, z], [x, y + 1.45 * s, z + 0.04]], 0.1 * s, 0.05 * s, 8), '#7a5233')];
+  for (let c = 0; c < 4; c++) {
+    const cx = x + (R() - 0.5) * 0.7 * s, cy = y + (1.35 + R() * 0.7) * s, cz = z + (R() - 0.5) * 0.7 * s;
+    for (let i = 0, n = hi() ? 26 : 8; i < n; i++) {
+      const d = new V(R() * 2 - 1, R() * 2 - 0.8, R() * 2 - 1).normalize(), at = new V(cx, cy, cz).addScaledVector(d, 0.45 * s * (0.5 + 0.5 * R()));
+      g.push(windy(part(leaf, shade(greens[Math.floor(R() * greens.length)], 0.72 + 0.35 * (d.y * 0.5 + 0.5)), { p: at.toArray(), q: new THREE.Quaternion().setFromUnitVectors(new V(0, 0, 1), d), s: 0.32 * s * (0.8 + R() * 0.4) }), 0.5));
+    }
+  }
+  return g;
+};
+// A street lamp at (x, y, z), its arm reaching along angle a.
+const lampPost = (x, y, z, a) => [part(cyl(0.06, 0.08, 3.4, 12), '#5b616b', { p: [x, y + 1.7, z] }), beam([x, y + 3.35, z], [x + Math.cos(a) * 0.7, y + 3.45, z + Math.sin(a) * 0.7], 0.06, '#5b616b'),
+  part(rbox(0.45, 0.12, 0.22, 0.05), '#3a3f47', { p: [x + Math.cos(a) * 0.75, y + 3.42, z + Math.sin(a) * 0.75], r: [0, -a, 0] }), part(box(0.38, 0.02, 0.16), '#fff6d8', { p: [x + Math.cos(a) * 0.75, y + 3.35, z + Math.sin(a) * 0.75], r: [0, -a, 0] })];
+// A family car, nose along +x, sitting on y = 0, about 2.3 long.
+const sedan = (color) => merge(part(rbox(2.3, 0.55, 1.05, 0.22), color, { p: [0, 0.48, 0] }), part(rbox(1.25, 0.5, 0.95, 0.22), color, { p: [-0.15, 0.95, 0] }),
+  part(box(1.18, 0.36, 0.97), '#26323f', { p: [-0.15, 0.98, 0] }), part(box(0.04, 0.08, 0.8), '#fff2c6', { p: [1.16, 0.55, 0] }), part(box(0.04, 0.08, 0.8), '#b8202a', { p: [-1.16, 0.55, 0] }),
+  [[-0.72, 0.5], [0.72, 0.5], [-0.72, -0.5], [0.72, -0.5]].flatMap(([x, z]) => [part(cyl(0.22, 0.22, 0.16, 18), '#1d1f24', { p: [x, 0.22, z], r: [Math.PI / 2, 0, 0] }), part(cyl(0.12, 0.12, 0.17, 14), '#c9ced6', { p: [x, 0.22, z], r: [Math.PI / 2, 0, 0] })]));
+// A shopping cart, handle at -x, about 1 long.
+const cartGeo = (handle = '#0071ce') => merge(
+  [[-0.45, -0.32], [0.45, -0.32], [0.45, 0.32], [-0.45, 0.32]].map(([x, z], i, a) => beam([x, 0.42, z], [a[(i + 1) % 4][0], 0.42, a[(i + 1) % 4][1]], 0.04, '#aab3bc')),
+  [[-0.55, -0.4], [0.55, -0.4], [0.55, 0.4], [-0.55, 0.4]].map(([x, z], i, a) => beam([x, 0.9, z], [a[(i + 1) % 4][0], 0.9, a[(i + 1) % 4][1]], 0.045, '#aab3bc')),
+  [[-0.45, -0.32, -0.55, -0.4], [0.45, -0.32, 0.55, -0.4], [0.45, 0.32, 0.55, 0.4], [-0.45, 0.32, -0.55, 0.4]].map(([x0, z0, x1, z1]) => beam([x0, 0.42, z0], [x1, 0.9, z1], 0.04, '#aab3bc')),
+  [-0.2, 0.1, 0.35].map((x) => beam([x, 0.42, -0.34], [x * 1.1, 0.9, -0.42], 0.025, '#aab3bc')), [-0.2, 0.1, 0.35].map((x) => beam([x, 0.42, 0.34], [x * 1.1, 0.9, 0.42], 0.025, '#aab3bc')),
+  beam([-0.55, 0.9, -0.4], [-0.72, 1.05, -0.4], 0.04, '#aab3bc'), beam([-0.55, 0.9, 0.4], [-0.72, 1.05, 0.4], 0.04, '#aab3bc'), part(cyl(0.05, 0.05, 0.86, 10), handle, { p: [-0.72, 1.05, 0], r: [Math.PI / 2, 0, 0] }),
+  part(box(0.9, 0.03, 0.64), '#c8d0d8', { p: [0, 0.42, 0] }), [[-0.38, -0.28], [0.38, -0.28], [0.38, 0.28], [-0.38, 0.28]].flatMap(([x, z]) => [beam([x, 0.42, z], [x, 0.12, z], 0.035, '#aab3bc'), part(cyl(0.08, 0.08, 0.06, 12), '#1d1f24', { p: [x, 0.08, z], r: [Math.PI / 2, 0, 0] })]));
+// A person walking along path(t) → { x, z, ry } (they face +x), with swinging arms and legs.
+// Returns the moving parts; `base` is the index the first one will have in the model's list.
+const walker = (base, path, { shirt = '#3d7be0', pants = '#2b3a55', skin = '#e9b98f', hair = '#3a2a20', y = 0, carry = null } = {}) => {
+  const step = (t, k) => Math.sin(t * 7 + k) * 0.55;
+  return [
+    { geo: merge(part(new THREE.CapsuleGeometry(0.2, 0.42, 6, 14), shirt, { p: [0, 1.02, 0] }), part(ball(0.17), skin, { p: [0, 1.55, 0] }), part(ball(0.18), hair, { p: [-0.02, 1.6, 0], s: [1, 0.7, 1] }), part(box(0.24, 0.12, 0.42), pants, { p: [0, 0.72, 0] }), carry || []),
+      pivot: [0, y, 0], anim: (t) => { const p = path(t); return { x: p.x, z: p.z, ry: p.ry, y: Math.abs(Math.sin(t * 7)) * 0.03, s: p.s ?? 1 }; } },
+    ...[-0.1, 0.1].map((z, i) => ({ geo: part(new THREE.CapsuleGeometry(0.075, 0.5, 4, 10), pants, { p: [0, -0.3, 0] }), pivot: [0, 0.72, z], parent: base, anim: (t) => ({ rz: path(t).still ? 0 : step(t, i * Math.PI) }) })),
+    ...[-0.26, 0.26].map((z, i) => ({ geo: part(new THREE.CapsuleGeometry(0.06, 0.4, 4, 10), shirt, { p: [0, -0.25, 0] }), pivot: [0, 1.25, z], parent: base, anim: (t) => (path(t).push ? { rz: 1.2 } : { rz: path(t).still ? 0 : -step(t, i * Math.PI) * 0.8 }) })),
+  ];
+};
+
 export const HEROES = {
   // Amazon: the logistics machine. A fulfilment centre with a trailer at its dock sends parcels
   // down a smile-shaped conveyor; a delivery drone collects one at the arrow and flies it off,
@@ -210,33 +250,76 @@ export const HEROES = {
     };
   } },
 
-  // Walmart: everyday low prices at enormous scale. Shoppers' carts stream into the supercentre
-  // under its turning spark, and a Rollback price tag drops down with a bounce.
+  // Walmart: everyday low prices at enormous scale. A Supercenter on its car park: shoppers push
+  // carts in, an associate wheels a train of carts back, a Walmart truck rolls up to the dock
+  // (the distribution network is the moat), the spark turns over the door and a Rollback tag drops.
   walmart: { finder: '#ffc220', build: () => {
-    const cart = merge(
-      [[-0.6, -0.45], [0.6, -0.45], [0.6, 0.45], [-0.6, 0.45]].map(([x, z], i, a) => beam([x, 0.7, z], [a[(i + 1) % 4][0], 0.7, a[(i + 1) % 4][1]], 0.06, '#9aa4b1')),
-      [[-0.75, -0.55], [0.75, -0.55], [0.75, 0.55], [-0.75, 0.55]].map(([x, z], i, a) => beam([x, 1.4, z], [a[(i + 1) % 4][0], 1.4, a[(i + 1) % 4][1]], 0.07, '#9aa4b1')),
-      [[-0.6, -0.45, -0.75, -0.55], [0.6, -0.45, 0.75, -0.55], [0.6, 0.45, 0.75, 0.55], [-0.6, 0.45, -0.75, 0.55]].map(([x0, z0, x1, z1]) => beam([x0, 0.7, z0], [x1, 1.4, z1], 0.06, '#9aa4b1')),
-      beam([-0.75, 1.4, -0.55], [-1.05, 1.75, -0.55], 0.06, '#9aa4b1'), beam([-0.75, 1.4, 0.55], [-1.05, 1.75, 0.55], 0.06, '#9aa4b1'), beam([-1.05, 1.75, -0.6], [-1.05, 1.75, 0.6], 0.12, '#0071ce'),
-      part(box(1.1, 0.06, 0.85), '#c8d0d8', { p: [0, 0.72, 0] }), [[-0.5, -0.4], [0.5, -0.4], [0.5, 0.4], [-0.5, 0.4]].flatMap(([x, z]) => [beam([x, 0.7, z], [x, 0.22, z], 0.05, '#9aa4b1'), part(cyl(0.15, 0.15, 0.1, 12), K.ink, { p: [x, 0.15, z], r: [Math.PI / 2, 0, 0] })]),
-      part(box(0.5, 0.4, 0.4), K.orange, { p: [-0.2, 0.95, 0] }), part(box(0.35, 0.5, 0.3), '#5fae5b', { p: [0.3, 1, 0.1] }));
-    const spark = merge(ring(6, (a) => part(new THREE.CapsuleGeometry(0.28, 0.75, 6, 16), '#ffc220', { p: [Math.cos(a) * 0.95, Math.sin(a) * 0.95, 0], r: [0, 0, a - Math.PI / 2] })));
-    const lane = (k) => [4.4 - k * 5.2, 0, 3.6 - k * 1.6];
+    const R = rand(9), BLUE = '#0071ce', YELLOW = '#ffc220', y0 = 0.24, out = [];
+    // A route through points at a steady pace over [a, b] of a `period`-second cycle (people face +x).
+    const route = (pts, period, a = 0, b = 1, off = 0) => {
+      const P = pts.map(([x, z]) => new V(x, 0, z)), seg = P.slice(1).map((p, i) => p.distanceTo(P[i])), total = seg.reduce((x, y) => x + y, 0);
+      return (t) => {
+        const f = cyc(t, period, off), k = win(f, a, b);
+        let d = k * total, i = 0;
+        while (i < seg.length - 1 && d > seg[i]) d -= seg[i++];
+        const p = P[i].clone().lerp(P[i + 1], Math.min(1, d / seg[i])), dir = P[i + 1].clone().sub(P[i]);
+        return { x: p.x, z: p.z, ry: Math.atan2(-dir.z, dir.x), s: f < a || f > b ? 0 : Math.min(1, (f - a) / 0.03, (b - f) / 0.03), still: false, push: true };
+      };
+    };
+    // ---- the lot
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#5b616b', { p: [0, 0.12, 0] }));
+    for (let i = 0; i <= 7; i++) [1.15, 3.55].forEach((z) => out.push(part(box(0.06, 0.012, 1.25), '#eceae4', { p: [-4.35 + i * 1.18, y0 + 0.006, z] })));
+    out.push(part(box(8.4, 0.012, 0.06), '#eceae4', { p: [-0.2, y0 + 0.006, 2.35] }), part(box(0.08, 0.012, 9.6), YELLOW, { p: [4.05, y0 + 0.006, 0] }));
+    out.push(part(rbox(0.7, 0.18, 9.6, 0.06), '#c9c4b8', { p: [-4.95, y0 + 0.09, 0.2] }), part(box(0.5, 0.1, 9.4), '#6aa84f', { p: [-4.95, y0 + 0.16, 0.2] }));
+    [-3.4, -0.6, 2.4].forEach((z) => out.push(miniTree(R, -4.95, y0 + 0.2, z, 0.95)));
+    out.push(tuft(R, -4.95, 1.2, 0.25, hi() ? 14 : 5, ['#6cc23a', '#7fcf3f', '#94d84f'], 0.45).map((g) => g.translate(0, y0 + 0.2, 0)));
+    out.push(lampPost(-0.2, y0, 2.35, 0), lampPost(3.6, y0, 2.35, Math.PI));
+    // Parked cars, in two rows with a few gaps.
+    const paint = ['#b8202a', '#f4f5f6', '#2b2f36', '#9aa4b1', '#3d7be0', '#e9e6df', '#5b6470', '#7a2e3a'];
+    [[1.15, Math.PI / 2], [3.55, -Math.PI / 2]].forEach(([z, ry], row) => {
+      for (let i = 0; i < 7; i++) { if ((i + row * 3) % 4 === 2) continue; out.push(place(sedan(paint[(i * 3 + row * 5) % paint.length]), { p: [-3.76 + i * 1.18, y0, z], r: [0, ry, 0], s: 0.82 })); }
+    });
+    // A cart corral in a bay.
+    const corral = [-0.06, 3.55];
+    out.push(beam([corral[0] - 0.4, y0 + 0.6, corral[1] - 0.55], [corral[0] - 0.4, y0 + 0.6, corral[1] + 0.55], 0.05, BLUE), beam([corral[0] + 0.4, y0 + 0.6, corral[1] - 0.55], [corral[0] + 0.4, y0 + 0.6, corral[1] + 0.55], 0.05, BLUE));
+    [-0.4, 0.4].forEach((dx) => [-0.55, 0.55].forEach((dz) => out.push(beam([corral[0] + dx, y0, corral[1] + dz], [corral[0] + dx, y0 + 0.6, corral[1] + dz], 0.05, BLUE))));
+    [0, 0.32].forEach((dz) => out.push(place(cartGeo(), { p: [corral[0], y0, corral[1] - 0.2 + dz], r: [0, Math.PI / 2, 0], s: 0.6 })));
+    // ---- the Supercenter
+    const S = { x0: -4.6, x1: 3.4, z0: -4.7, z1: -1.2, h: 3 }, cx = (S.x0 + S.x1) / 2, cz = (S.z0 + S.z1) / 2;
+    out.push(part(box(S.x1 - S.x0, S.h, S.z1 - S.z0), '#e6dccb', { p: [cx, y0 + S.h / 2, cz] }));
+    for (let y = 0.3; y < S.h - 0.8; y += 0.26) out.push(part(box(S.x1 - S.x0 + 0.02, 0.025, 0.03), '#d3c6b0', { p: [cx, y0 + y, S.z1 + 0.01] }), part(box(0.03, 0.025, S.z1 - S.z0 + 0.02), '#d3c6b0', { p: [S.x1 + 0.01, y0 + y, cz] }));
+    out.push(part(box(S.x1 - S.x0 + 0.1, 0.85, S.z1 - S.z0 + 0.1), BLUE, { p: [cx, y0 + S.h - 0.3, cz] }), part(box(S.x1 - S.x0 + 0.16, 0.08, S.z1 - S.z0 + 0.16), '#0b5ea8', { p: [cx, y0 + S.h + 0.13, cz] }));
+    // The wordmark, suggested by white letter blocks on the band.
+    [0.32, 0.22, 0.12, 0.22, 0.3, 0.22, 0.22].forEach((w, i, a) => { const x = -3.4 + a.slice(0, i).reduce((s, v) => s + v + 0.08, 0); out.push(part(rbox(w, 0.42, 0.05, 0.05), K.white, { p: [x + w / 2, y0 + S.h - 0.3, S.z1 + 0.08] })); });
+    out.push(part(box(S.x1 - S.x0 - 0.3, 0.05, S.z1 - S.z0 - 0.3), '#c3c7cc', { p: [cx, y0 + S.h + 0.04, cz] }));
+    [[-3.2, -3.4], [-0.4, -3.9], [1.9, -3.2]].forEach(([x, z]) => out.push(part(rbox(0.9, 0.45, 0.7, 0.08), '#a7adb4', { p: [x, y0 + S.h + 0.27, z] }), part(cyl(0.24, 0.24, 0.06, 20), '#3a3f47', { p: [x, y0 + S.h + 0.52, z] })));
+    // Two entrance vestibules with glass doors and canopies.
+    [-2.9, 1.7].forEach((x) => {
+      out.push(part(box(1.5, 2.1, 0.8), '#efe8dc', { p: [x, y0 + 1.05, S.z1 + 0.4] }), part(box(1.56, 0.32, 0.86), BLUE, { p: [x, y0 + 2.2, S.z1 + 0.4] }),
+        part(box(1.0, 1.5, 0.04), '#22303e', { p: [x, y0 + 0.75, S.z1 + 0.82] }), part(box(0.03, 1.5, 0.06), '#9aa4b1', { p: [x, y0 + 0.75, S.z1 + 0.83] }),
+        part(rbox(1.9, 0.08, 0.9, 0.03), '#3a4656', { p: [x, y0 + 1.75, S.z1 + 1.2] }), [-0.85, 0.85].map((dx) => part(cyl(0.04, 0.04, 1.7, 10), '#9aa4b1', { p: [x + dx, y0 + 0.85, S.z1 + 1.55] })));
+    });
+    // Side dock for the trucks.
+    [-3.9, -2.6].forEach((z) => { out.push(part(box(0.06, 1.8, 1.0), '#3a3f47', { p: [S.x1 + 0.04, y0 + 0.9, z] })); for (let k = 0; k < 8; k++) out.push(part(box(0.05, 0.19, 0.88), k % 2 ? '#c6cbd1' : '#b3b9c0', { p: [S.x1 + 0.08, y0 + 0.12 + k * 0.21, z] })); });
+    // ---- the Walmart truck
+    const semi = merge(part(rbox(3.5, 1.7, 1.15, 0.08), '#f4f5f6', { p: [-0.9, 1.25, 0] }), part(box(3.3, 0.38, 0.02), BLUE, { p: [-0.9, 0.82, 0.58] }), part(box(3.3, 0.38, 0.02), BLUE, { p: [-0.9, 0.82, -0.58] }),
+      ring(6, (a) => part(new THREE.CapsuleGeometry(0.06, 0.16, 4, 10), YELLOW, { p: [0.3 + Math.cos(a) * 0.2, 1.5 + Math.sin(a) * 0.2, 0.59], r: [0, 0, a - Math.PI / 2] })),
+      part(rbox(1.2, 1.35, 1.1, 0.2), BLUE, { p: [1.55, 0.95, 0] }), part(box(0.05, 0.5, 0.9), '#22303e', { p: [2.15, 1.25, 0] }), part(rbox(0.5, 0.5, 1.12, 0.12), BLUE, { p: [2.0, 0.5, 0] }), part(cyl(0.06, 0.06, 1, 10), '#c9ced6', { p: [1.0, 1.9, 0.45] }),
+      [[-2.2, 0.48], [-1.75, 0.48], [-2.2, -0.48], [-1.75, -0.48], [1.7, 0.48], [1.7, -0.48], [0.9, 0.48], [0.9, -0.48]].flatMap(([x, z]) => [part(cyl(0.26, 0.26, 0.18, 18), '#1d1f24', { p: [x, 0.26, z], r: [Math.PI / 2, 0, 0] }), part(cyl(0.14, 0.14, 0.19, 14), '#c9ced6', { p: [x, 0.26, z], r: [Math.PI / 2, 0, 0] })]));
+    const spark = merge(ring(6, (a) => part(new THREE.CapsuleGeometry(0.3, 0.8, 8, 20), YELLOW, { p: [Math.cos(a) * 1.0, Math.sin(a) * 1.0, 0], r: [0, 0, a - Math.PI / 2] })));
+    const shopper = route([[-1.6, 2.35], [-2.9, 2.35], [-2.9, -0.3]], 8, 0.05, 0.75);
+    const associate = route([[0.5, 2.35], [1.7, 2.35], [1.7, -0.3]], 8, 0.3, 0.95);
+    const tag = merge(part(extrude([[-1.1, 0.7], [0.8, 0.7], [1.3, 0], [0.8, -0.7], [-1.1, -0.7]], 0.2), YELLOW), part(cyl(0.12, 0.12, 0.26, 12), '#2c3e55', { p: [0.85, 0, 0], r: [Math.PI / 2, 0, 0] }),
+      part(extrude([[-0.15, 0.4], [0.15, 0.4], [0.15, -0.05], [0.4, -0.05], [0, -0.5], [-0.4, -0.05], [-0.15, -0.05]], 0.24), '#e5533d', { p: [-0.25, 0, 0.02] })).translate(0, -0.9, 0);
     return {
       bare: true, move: () => ({}),
-      geo: merge(part(box(10, 0.16, 8), '#d6d9dd', { p: [0, 0.08, 0] }), ring(5, (a, i) => part(box(0.12, 0.02, 1.6), K.white, { p: [-3.4 + i * 1.6, 0.17, 2.9] })),
-        part(box(8.4, 4, 4.4), '#f2efe8', { p: [0, 2.16, -1.6] }), part(box(8.5, 1, 4.5), '#0071ce', { p: [0, 3.9, -1.6] }),
-        part(box(2.6, 2.4, 0.15), '#2c3e55', { p: [0, 1.36, 0.62] }), part(box(0.08, 2.4, 0.18), '#9aa4b1', { p: [0, 1.36, 0.64] }),
-        [-2.8, 2.8].map((x) => part(box(1.6, 1.4, 0.12), '#9dd0f2', { p: [x, 1.9, 0.62] })), part(box(9, 0.3, 1.4), '#0071ce', { p: [0, 3, 1.1] })),
+      geo: merge(out),
       moving: [
-        { geo: spark, pivot: [0, 6.3, -0.4], anim: (t) => ({ rz: t * 0.6, s: 1 + Math.max(0, Math.sin(t * 2.4)) * 0.08 }) },
-        ...[0, 1, 2].map((i) => ({ geo: cart, pivot: [0, 0.16, 0], anim: (t) => {
-          const k = cyc(t, 6, i / 3), p = lane(Math.min(1, k * 1.05));
-          return { x: p[0], z: p[2], ry: Math.atan2(1.6, 5.2) + Math.PI, s: k < 0.06 ? k / 0.06 : k > 0.9 ? 1 - (k - 0.9) / 0.1 : 1, y: Math.abs(Math.sin(t * 9 + i)) * 0.03 };
-        } })),
-        { geo: merge(part(extrude([[-1.1, 0.7], [0.8, 0.7], [1.3, 0], [0.8, -0.7], [-1.1, -0.7]], 0.2), '#ffc220'), part(cyl(0.12, 0.12, 0.26, 12), '#2c3e55', { p: [0.85, 0, 0], r: [Math.PI / 2, 0, 0] }),
-          part(extrude([[-0.15, 0.4], [0.15, 0.4], [0.15, -0.05], [0.4, -0.05], [0, -0.5], [-0.4, -0.05], [-0.15, -0.05]], 0.24), '#e5533d', { p: [-0.2, 0, 0.02] })).translate(0, -0.9, 0), pivot: [-3.2, 3.4, 0.6],
-          anim: (t) => { const f = cyc(t, 4), drop = f < 0.2 ? 1 - back(win(f, 0, 0.2)) : 0; return { y: drop * 2.2, rz: Math.sin(t * 2.4) * 0.12 + bump(f, 0.22, 0.05) * 0.25, s: f > 0.94 ? 1 - win(f, 0.94, 1) : 1 }; } },
+        { geo: spark, pivot: [-0.6, y0 + S.h + 1.0, S.z1 + 0.1], anim: (t) => ({ rz: t * 0.5, s: 0.72 + Math.max(0, Math.sin(t * 2.4)) * 0.05 }) },
+        { geo: tag, pivot: [2.6, y0 + S.h - 0.2, S.z1 + 0.25], anim: (t) => { const f = cyc(t, 4.5), drop = f < 0.2 ? 1 - back(win(f, 0, 0.2)) : 0; return { y: drop * 2.4, rz: Math.sin(t * 2.4) * 0.1 + bump(f, 0.22, 0.05) * 0.25, s: f > 0.94 ? 1 - win(f, 0.94, 1) : 0.8 }; } },
+        { geo: semi, pivot: [4.6, y0, 0], anim: (t) => { const f = cyc(t, 11), z = f < 0.35 ? 5.6 - 5.3 * easeOut(win(f, 0.03, 0.35)) : 0.3; return { z, ry: Math.PI / 2, s: f < 0.03 ? f / 0.03 : f > 0.92 ? Math.max(0.001, (1 - f) / 0.08) : 1, y: Math.abs(Math.sin(t * 10)) * 0.01 }; } },
+        ...walker(3, shopper, { shirt: '#e5533d', pants: '#2b3a55', carry: place(cartGeo(), { p: [0.95, 0, 0] }) }),
+        ...walker(8, associate, { shirt: BLUE, pants: '#5b4636', hair: '#1d1f24', skin: '#c58c66', carry: merge(place(cartGeo(), { p: [0.95, 0, 0] }), place(cartGeo(), { p: [1.3, 0.04, 0] }), place(cartGeo(), { p: [1.65, 0.08, 0] })) }),
       ],
     };
   } },
