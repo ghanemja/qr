@@ -2623,5 +2623,52 @@ export const HEROES = {
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, 12); return { x: 3.6, z: SZ - 0.3, ry: Math.PI / 2, still: true, s: f > 0.32 && f < 0.68 ? 1 : 0.001 }; }, { shirt: BLUE, pants: '#2b3a55', y: y0 }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Wells Fargo: since 1852, moving people's money safely. The red stagecoach and its galloping
+  // team run the dusty road from the frontier bank to today's branch, the strongbox up top; the
+  // town sign creaks in the wind.
+  wellsfargo: { finder: '#d71e28', build: () => {
+    const R = rand(71), out = [], y0 = 0.24, RED = '#d71e28', GOLD = '#ffcd41';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#d9b77e', { p: [0, 0.12, 0] }));
+    // ---- the road and the boardwalks
+    out.push(part(box(10.4, 0.02, 2.0), '#c49a68', { p: [0, y0 + 0.01, 0.6] }));
+    for (const z of [-0.8, 2.0]) out.push(part(box(10.0, 0.12, 0.7), '#8a5a3a', { p: [0, y0 + 0.06, z] }));
+    // ---- the old town: false-front buildings along the back, the frontier bank among them
+    const front = (x, z, w, h, c, trim, sign) => { out.push(part(rbox(w, h, 1.6, 0.03), c, { p: [x, y0 + h / 2, z - 0.8] }), part(box(w + 0.1, 0.5, 0.12), c, { p: [x, y0 + h + 0.2, z] }), part(box(w + 0.16, 0.08, 0.16), trim, { p: [x, y0 + h + 0.48, z] }));
+      out.push(part(box(0.4, 0.75, 0.04), '#3a2a20', { p: [x, y0 + 0.4, z + 0.01] }), part(box(0.35, 0.4, 0.04), '#2a3c50', { p: [x - w * 0.3, y0 + 0.7, z + 0.01] }), part(box(0.35, 0.4, 0.04), '#2a3c50', { p: [x + w * 0.3, y0 + 0.7, z + 0.01] }), part(box(w * 0.7, 0.24, 0.05), sign, { p: [x, y0 + h - 0.05, z + 0.02] }));
+      out.push(part(box(w, 0.06, 0.6), '#6b4f3a', { p: [x, y0 + 1.2, z + 0.3] }), part(cyl(0.03, 0.03, 1.1, 6), '#6b4f3a', { p: [x - w / 2 + 0.1, y0 + 0.6, z + 0.55] }), part(cyl(0.03, 0.03, 1.1, 6), '#6b4f3a', { p: [x + w / 2 - 0.1, y0 + 0.6, z + 0.55] })); };
+    front(-3.6, -1.2, 1.6, 1.6, '#b07a4a', '#6b4f3a', '#f4e3c0');
+    front(-1.4, -1.2, 2.0, 1.9, RED, GOLD, GOLD);
+    front(0.9, -1.2, 1.6, 1.5, '#c9a87a', '#6b4f3a', '#f4e3c0');
+    out.push(part(rbox(0.8, 0.5, 0.6, 0.04), '#5a3a2a', { p: [-1.4, y0 + 0.25, -2.6] }), part(cyl(0.22, 0.22, 0.06, 20), GOLD, { p: [-1.4, y0 + 0.3, -2.29], r: [Math.PI / 2, 0, 0] }));
+    // ---- today's branch at the far end
+    out.push(part(rbox(2.6, 1.6, 1.8, 0.05), '#f4f1ea', { p: [3.6, y0 + 0.8, -2.2] }), part(rbox(2.66, 0.36, 0.12, 0.03), RED, { p: [3.6, y0 + 1.45, -1.28] }), part(box(1.4, 0.16, 0.02), GOLD, { p: [3.6, y0 + 1.45, -1.21] }), part(rbox(1.6, 0.8, 0.05, 0.03), '#2a3c50', { p: [3.6, y0 + 0.55, -1.29] }));
+    // ---- the far side: water trough, barrels, cactus, a windmill
+    out.push(part(rbox(1.0, 0.35, 0.4, 0.04), '#7a5233', { p: [-2.4, y0 + 0.18, 2.6] }), part(box(0.9, 0.04, 0.3), 'W', { p: [-2.4, y0 + 0.33, 2.6] }));
+    [[0.4, 2.7], [0.8, 2.9]].forEach(([x, z]) => out.push(part(lathe([[0.18, 0], [0.22, 0.25], [0.18, 0.5], [0, 0.5]], 16), '#8a5a3a', { p: [x, y0, z] })));
+    const cactus = (x, z, h) => [part(capsule(0.14, h), '#5f8f4a', { p: [x, y0 + h / 2 + 0.14, z] }), part(capsule(0.09, h * 0.35), '#5f8f4a', { p: [x + 0.25, y0 + h * 0.65, z], r: [0, 0, 0] }), beam([x + 0.1, y0 + h * 0.45, z], [x + 0.25, y0 + h * 0.45, z], 0.07, '#5f8f4a')];
+    out.push(cactus(-1.0, 3.8, 1.0), cactus(3.9, 4.2, 0.8), cactus(1.9, 4.6, 0.6));
+    for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) out.push(beam([-3.6 + sx * 0.4, y0, 4.0 + sz * 0.4], [-3.6, y0 + 2.6, 4.0], 0.035, '#8a7a6a'));
+    // ---- moving parts
+    const moving = [];
+    // The windmill and the town sign.
+    moving.push({ geo: merge(ring(10, (a) => part(box(0.06, 0.6, 0.03), '#c9ced6', { p: [Math.cos(a) * 0.3, Math.sin(a) * 0.3, 0], r: [0, 0, a - Math.PI / 2] })), part(cyl(0.06, 0.06, 0.12, 10), '#8a7a6a', { r: [Math.PI / 2, 0, 0] })), pivot: [-3.6, y0 + 2.7, 4.25], anim: (t) => ({ rz: t * 2 }) });
+    // The coach and team, back and forth along the road with dust behind.
+    const P = 11, pos = (t) => { const f = cyc(t, P), k = f < 0.5 ? easeIO(f * 2) : 1 - easeIO((f - 0.5) * 2); return { x: -3.4 + k * 5.4, dir: f < 0.5 ? 1 : -1, moving: Math.min(f * 2 % 1, 1 - (f * 2 % 1)) > 0.08 }; };
+    const coach = moving.length;
+    moving.push({ geo: merge(part(rbox(1.5, 0.85, 0.9, 0.1), RED, { p: [0, 0.95, 0] }), part(rbox(1.56, 0.08, 0.96, 0.03), GOLD, { p: [0, 1.4, 0] }), part(box(0.9, 0.4, 0.02), '#2a3c50', { p: [0, 1.05, 0.46] }), part(box(1.3, 0.06, 0.02), GOLD, { p: [0, 0.7, 0.46] }),
+      part(rbox(0.5, 0.3, 0.4, 0.04), '#5a3a2a', { p: [-0.2, 1.6, 0] }), part(box(0.16, 0.06, 0.02), GOLD, { p: [-0.2, 1.62, 0.21] }), part(box(0.5, 0.06, 0.7), '#5a3a2a', { p: [0.95, 1.05, 0] }), part(box(0.6, 0.06, 0.06), '#5a3a2a', { p: [1.5, 0.5, 0] }),
+      [[-0.5, 0.48, 0.42], [0.55, 0.48, 0.32]].flatMap(([x, z, r]) => [-1, 1].flatMap((s) => [part(torus(r, 0.03, TAU, 24), '#3a2a20', { p: [x, r, s * z] }), ...ring(8, (a) => beam([x, r, s * z], [x + Math.cos(a) * r, r + Math.sin(a) * r, s * z], 0.015, '#3a2a20'))])),
+      part(capsule(0.13, 0.25), '#3a3f47', { p: [0.85, 1.4, 0.1] }), part(ball(0.12), '#e9b98f', { p: [0.85, 1.75, 0.1] }), part(cyl(0.18, 0.12, 0.12, 16), '#5a3a2a', { p: [0.85, 1.88, 0.1] })),
+      pivot: [0, y0 + 0.02, 0.6], anim: (t) => { const p = pos(t); return { x: p.x, ry: p.dir > 0 ? 0 : Math.PI, y: p.moving ? Math.abs(Math.sin(t * 9)) * 0.03 : 0, s: 1.3 }; } });
+    // Two pairs of horses, legs galloping.
+    const horse = (c) => merge(part(capsule(0.17, 0.5), c, { r: [0, 0, Math.PI / 2] }), part(capsule(0.08, 0.32), c, { p: [0.38, 0.22, 0], r: [0, 0, -0.7] }), part(rbox(0.3, 0.14, 0.14, 0.05), c, { p: [0.58, 0.36, 0], r: [0, 0, -0.3] }), part(box(0.2, 0.25, 0.04), '#2a1a10', { p: [0.3, 0.32, 0], r: [0, 0, -0.7] }), part(capsule(0.04, 0.3), '#2a1a10', { p: [-0.48, 0.0, 0], r: [0, 0, -1.0] }));
+    [[1.95, 0.25], [1.95, -0.25], [2.85, 0.25], [2.85, -0.25]].forEach(([x, z], i) => {
+      const h = moving.length;
+      moving.push({ geo: horse(i % 2 ? '#6b4f3a' : '#8a5a3a'), pivot: [x, 0.9, z], parent: coach, anim: (t) => (pos(t).moving ? { y: Math.abs(Math.sin(t * 9 + i)) * 0.08, rz: Math.sin(t * 9 + i) * 0.06 } : {}) });
+      [[0.22, 0.08], [0.22, -0.08], [-0.22, 0.08], [-0.22, -0.08]].forEach(([lx, lz], j) => moving.push({ geo: part(capsule(0.04, 0.45), i % 2 ? '#6b4f3a' : '#8a5a3a', { p: [0, -0.28, 0] }), pivot: [lx, -0.1, lz], parent: h, anim: (t) => (pos(t).moving ? { rz: Math.sin(t * 9 + i + j * 1.6 + (j > 1 ? Math.PI : 0)) * 0.6 } : {}) }));
+    });
+    for (let k = 0; k < 6; k++) moving.push({ geo: part(ball(0.18), '#e3cfa8'), pivot: [0, y0 + 0.2, 0.6], anim: (t) => { const p = pos(t), f = cyc(t, 0.9, k / 6); return p.moving ? { x: p.x - p.dir * (0.9 + f * 1.2), y: f * 0.4, z: (k % 2 ? 0.3 : -0.3) * f, s: (0.5 + f) * (1 - f) * 1.6 + 0.001 } : { s: 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

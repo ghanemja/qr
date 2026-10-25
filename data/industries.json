@@ -76,10 +76,10 @@
   "nike": "Just do it",
   "uber": "Rides in minutes",
   "mastercard": "Accepted everywhere",
-  "att": "Fibre to the door"
+  "att": "Fibre to the door",
+  "wellsfargo": "Since 1852"
  },
  "bank": [
-  "Wells Fargo",
   "Citigroup",
   "Goldman Sachs Group",
   "Morgan Stanley",
@@ -1612,5 +1612,8 @@
  ],
  "att": [
   "AT&T"
+ ],
+ "wellsfargo": [
+  "Wells Fargo"
  ]
 }
