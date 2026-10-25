@@ -780,7 +780,7 @@ function start() {
     for (let i = 0; tour.on && token === tour.token; i = (i + 1) % ORDER.length) {
       await openRegion(ORDER[i]);
       // The card's own loop turns the model into its QR code meanwhile.
-      await wait(6600);
+      await wait(8900);
     }
   }
   playBtn.addEventListener('click', () => (tour.on ? stopTour() : runTour()));

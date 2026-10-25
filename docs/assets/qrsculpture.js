@@ -13,7 +13,7 @@ const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) 
 const easeOutBack = (t) => 1 + 2.2 * Math.pow(t - 1, 3) + 1.2 * Math.pow(t - 1, 2);
 const PLAZA = '#ddd3c2';
 // Timings (ms): model growing in, each morph, the holds on either side of a loop, and the pause before it starts.
-const GROW_MS = 1500, MORPH_MS = 1700, HOLD_QR_MS = 1500, HOLD_MODEL_MS = 1200, START_MS = 200;
+const GROW_MS = 1500, MORPH_MS = 1700, HOLD_QR_MS = 1500, HOLD_MODEL_MS = 3000, START_MS = 2500;
 // A pixel's colour made vivid for the code: saturated, lightness kept mid-range, and darkened (same
 // hue) only as far as scanning needs (about 2.8:1 against the paving, like the leaves on the tree).
 function inkOf(color) {
