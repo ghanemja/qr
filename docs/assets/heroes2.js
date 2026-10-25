@@ -1432,4 +1432,34 @@ export const HEROES2 = {
     for (let k = 0; k < 3; k++) moving.push(rider(merge(part(rbox(0.4, 0.3, 0.3, 0.03), '#e21a2c'), part(box(0.3, 0.05, 0.2), INK, { p: [0, 0.16, 0] })), curve([[2.8, y0 + 0.9, 3.0], [3.4, y0 + 1.8, 0.6], [3.6, y0 + 1.0, -1.4]]), 12, -k * 0.04, 0.32, 0.5));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Chipotle: a fresh line that never stops. The bowl slides down the line collecting rice,
+  // beans, salsa, guac and cheese, is wrapped in foil, bagged, and handed out of the Chipotlane
+  // window to the car that ordered it on the app.
+  chipotle: { finder: '#a81612', build: () => {
+    const R = rand(142), out = [], RED = '#a81612', BROWN = '#451400';
+    out.push(ground('#8fc66f'), part(box(1.3, 0.03, 10.2), '#5b616b', { p: [3.9, y0 + 0.015, 0] }));
+    // ---- the restaurant, cut away: back and left walls, the counter
+    out.push(part(rbox(7.0, 0.08, 5.6, 0.03), '#d9c3a0', { p: [-1.6, y0 + 0.04, -1.6] }), part(rbox(7.0, 2.4, 0.2, 0.03), '#8a5a3a', { p: [-1.6, y0 + 1.2, -4.4] }), part(rbox(0.2, 2.4, 5.6, 0.03), '#7a4a2e', { p: [-5.0, y0 + 1.2, -1.6] }), part(rbox(0.2, 0.9, 5.6, 0.03), '#8a5a3a', { p: [1.9, y0 + 0.45, -1.6] }));
+    out.push(part(box(3.0, 0.5, 0.06), RED, { p: [-1.6, y0 + 2.0, -4.28] }), place(pixText('CHIPOTLE', 0.06, K.white, 0.03), { p: [-1.6, y0 + 2.0, -4.22] }));
+    const LZ = -2.6, wells = ['#f4f1ea', '#2b1d16', '#a33a2a', '#3f8f3f', '#e9c46a', '#f8f6f1'];
+    out.push(part(rbox(6.0, 0.9, 1.0, 0.04), '#b9bec6', { p: [-1.6, y0 + 0.45, LZ] }), part(box(6.0, 0.04, 0.4), '#d8dde3', { p: [-1.6, y0 + 0.92, LZ + 0.3] }), part(rbox(6.0, 0.06, 0.5, 0.03), '#e3eef5', { p: [-1.6, y0 + 1.5, LZ - 0.1] }));
+    wells.forEach((c, i) => out.push(part(box(0.6, 0.12, 0.5), '#9aa1a9', { p: [-4.0 + i * 0.85, y0 + 0.88, LZ - 0.2] }), part(box(0.5, 0.06, 0.4), c, { p: [-4.0 + i * 0.85, y0 + 0.96, LZ - 0.2] })));
+    for (let k = 0; k < 5; k++) out.push(place(fan(BROWN), { p: [-4.0 + k * 0.85, y0, LZ - 0.9], s: 1.3 }));
+    // Tables in the dining room.
+    [[-3.6, 0.2], [-1.6, 0.4], [0.2, -0.4]].forEach(([x, z]) => out.push(part(cyl(0.45, 0.45, 0.05, 20), '#c9a36b', { p: [x, y0 + 0.75, z] }), part(cyl(0.05, 0.05, 0.72, 8), '#3a3f47', { p: [x, y0 + 0.37, z] })));
+    // ---- the Chipotlane window on the right wall
+    out.push(part(box(0.06, 0.6, 0.8), '#2a3c50', { p: [2.0, y0 + 1.0, -0.6] }), part(rbox(0.6, 0.06, 1.0, 0.02), RED, { p: [2.25, y0 + 1.5, -0.6] }));
+    out.push(trees(R, [[-4.6, 4.6], [-1.6, 4.4], [1.4, 3.8], [-4.4, 2.0]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 9;
+    // The bowl down the line, filling: each topping appears as it passes its well.
+    const bowlPos = (f) => -4.0 + easeIO(win(f, 0, 0.55)) * 4.25;
+    const bi = moving.length;
+    moving.push({ geo: merge(part(lathe([[0, 0], [0.25, 0], [0.32, 0.18], [0.3, 0.18], [0.22, 0.03], [0, 0.03]], 20), '#e9e2d4')), pivot: [0, y0 + 0.98, LZ + 0.3], anim: (t) => { const f = cyc(t, P); return f > 0.6 ? { s: 0.001 } : { x: bowlPos(f), s: Math.min(1, f / 0.03) + 0.001 }; } });
+    wells.slice(0, 5).forEach((c, i) => moving.push({ geo: part(new THREE.SphereGeometry(0.2, 12, 8, 0, TAU, 0, Math.PI / 2), c, { s: [1, 0.5, 1] }), pivot: [(i % 2 ? 0.05 : -0.05), 0.04 + i * 0.03, (i % 3 - 1) * 0.05], parent: bi, anim: (t) => { const f = cyc(t, P), x = bowlPos(f); return x > -4.0 + i * 0.85 - 0.1 ? { s: 1 - i * 0.12 } : { s: 0.001 }; } }));
+    // The foil burrito, bagged and handed out of the window to the car.
+    moving.push({ geo: merge(part(rbox(0.4, 0.5, 0.25, 0.04), '#8a5a3a'), part(box(0.3, 0.1, 0.26), RED, { p: [0, 0.1, 0] })), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P); if (f < 0.58 || f > 0.8) return { s: 0.001 }; const u = easeIO(win(f, 0.6, 0.75)), p = new V(0.3, y0 + 1.1, LZ + 0.3).lerp(new V(2.6, y0 + 1.0, -0.6), u); return { x: p.x, y: p.y + hop(u) * 0.8, z: p.z }; } });
+    moving.push({ geo: place(sedan('#3d7be0'), { r: [0, Math.PI / 2, 0] }), pivot: [3.9, y0, 0], anim: (t) => { const f = cyc(t, P), z = f < 0.5 ? -6 + 0 : f < 0.62 ? -5.4 + easeOut(win(f, 0.5, 0.62)) * 4.8 : f < 0.8 ? -0.6 : -0.6 + easeIn(win(f, 0.8, 1)) * 6; return { z, s: clamp01((5.2 - Math.abs(z)) / 0.6) + 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

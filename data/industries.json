@@ -129,7 +129,8 @@
   "mondelez": "The snacks the world reaches for: twist, lick, dunk",
   "hershey": "America's chocolate town: every Kiss wrapped in silver",
   "keurigdrpepper": "The brewer in the kitchen and the pods that keep coming",
-  "monster": "A brand riders wear, carried by Coca-Cola's trucks"
+  "monster": "A brand riders wear, carried by Coca-Cola's trucks",
+  "chipotle": "A fresh line that never stops, straight out to the Chipotlane"
  },
  "bank": [
   "PNC Financial Services",
@@ -1751,5 +1752,8 @@
  ],
  "monster": [
   "Monster Beverage"
+ ],
+ "chipotle": [
+  "Chipotle Mexican Grill"
  ]
 }
