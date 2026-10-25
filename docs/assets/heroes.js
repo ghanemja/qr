@@ -252,30 +252,80 @@ export const HEROES = {
     };
   } },
 
-  // SpaceX: reusable rockets. A first stage comes down on its landing burn, unfolds its legs and
-  // touches down on the droneship at sea, then lifts off again.
+  // SpaceX: reusable rockets. A Falcon 9 first stage comes home on its landing burn, unfolds its
+  // legs and touches down on the droneship at sea in a burst of smoke, then lights up and flies
+  // again; the support boat circles and gulls wheel overhead.
   spacex: { finder: '#9aa4b1', build: () => {
-    const alt = (t) => { const f = cyc(t, 8); return f < 0.42 ? 9 * (1 - easeOut(f / 0.42)) : f < 0.7 ? 0 : 9 * easeIn(win(f, 0.7, 1)); };
-    const burn = (t) => { const f = cyc(t, 8); return (f > 0.18 && f < 0.43) || f > 0.72; };
-    const booster = merge(
-      part(lathe([[0, 0], [0.62, 0], [0.62, 7.2], [0.6, 7.5], [0, 7.6]]), '#f4f5f6'), part(cyl(0.64, 0.64, 0.5, 32), '#2b2f36', { p: [0, 6.2, 0] }), part(cyl(0.64, 0.64, 0.25, 32), '#d9dde2', { p: [0, 0.8, 0] }),
-      part(box(0.1, 1.6, 0.5), '#2b2f36', { p: [0.66, 4.2, 0] }), ring(4, (a) => part(box(0.08, 0.7, 0.7), '#7d8792', { p: [Math.cos(a) * 0.75, 7.1, Math.sin(a) * 0.75], r: [0, -a, 0] })),
-      part(cone(0.5, 0.5, 24), '#3a3f47', { p: [0, -0.2, 0], r: [Math.PI, 0, 0] }));
-    return {
-      bare: true, move: () => ({}),
-      geo: merge(part(cyl(5.2, 5.4, 0.6, 48), 'W', { p: [0, 0.3, 0] }),
-        part(box(6.6, 0.7, 4.2), '#3a3f47', { p: [0, 0.75, 0] }), part(box(6.4, 0.08, 4), '#5b6470', { p: [0, 1.12, 0] }),
-        part(box(3.6, 0.04, 0.4), K.yellow, { p: [0, 1.17, 0], r: [0, 0.6, 0] }), part(box(3.6, 0.04, 0.4), K.yellow, { p: [0, 1.17, 0], r: [0, -0.6, 0] }), part(cyl(1.5, 1.5, 0.03, 40), K.yellow, { p: [0, 1.16, 0] }), part(cyl(1.3, 1.3, 0.04, 40), '#5b6470', { p: [0, 1.17, 0] }),
-        [-1, 1].map((s) => part(box(6.6, 0.6, 0.2), '#3a3f47', { p: [0, 1.4, s * 2] }))),
-      moving: [
-        { geo: booster, pivot: [0, 1.75, 0], anim: (t) => ({ y: alt(t), rz: Math.sin(t * 1.6) * 0.03 * Math.min(1, alt(t)) }) },
-        ...ring(4, (a, i) => ({ geo: part(box(0.14, 2, 0.14), '#2b2f36', { p: [0, -1, 0] }), pivot: [Math.cos(a + 0.785) * 0.55, 1.1, Math.sin(a + 0.785) * 0.55], parent: 0, anim: (t) => {
-          const out = Math.min(1, Math.max(0, 1 - (alt(t) - 0.2) / 2.5)); return { rx: Math.sin(a + 0.785) * 0.55 * out, rz: -Math.cos(a + 0.785) * 0.55 * out, s: alt(t) < 6 ? 1 : 0.001 };
-        } })),
-        { geo: flameGeo(), pivot: [0, -0.4, 0], parent: 0, anim: (t) => (burn(t) ? { sy: 1 + Math.sin(t * 31) * 0.2 } : { s: 0 }) },
-        ...ring(6, (a) => ({ geo: puff(0.9), pivot: [Math.cos(a) * 1.4, 1.6, Math.sin(a) * 1.4], anim: (t) => { const f = cyc(t, 8), k = Math.max(win(f, 0.36, 0.46) * (1 - win(f, 0.5, 0.62)), win(f, 0.7, 0.76) * (1 - win(f, 0.8, 0.9))); return { s: k * 1.4, x: Math.cos(a) * k * 1.6, z: Math.sin(a) * k * 1.6 }; } })),
-      ],
-    };
+    const R = rand(31), out = [], SEA = 1.6, deckY = SEA + 0.75;
+    // ---- the sea, as a block: live water on top, deepening blue strata down the sides
+    out.push(part(rbox(10.4, 0.2, 10.4, 0.06), '#0d3b5c', { p: [0, 0.1, 0] }));
+    [[0, 5.2, 0], [5.2, 0, Math.PI / 2]].forEach(([x, z, ry]) => {
+      const wall = new THREE.PlaneGeometry(10.4, SEA, hi() ? 24 : 4, hi() ? 16 : 3).translate(0, SEA / 2, 0);
+      out.push(part(wall, (X, Y) => shade('#1f6f9e', 0.55 + (Y / SEA) * 0.55 + 0.05 * Math.sin(X * 2 + Y * 5)), { p: [x, 0, z], r: [0, ry, 0] }));
+    });
+    out.push(part(new THREE.PlaneGeometry(10.4, 10.4, 1, 1).rotateX(-Math.PI / 2), 'W', { p: [0, SEA, 0] }));
+    // ---- the droneship
+    const L = 7, Wd = 4.4;
+    out.push(part(rbox(L, 0.95, Wd, 0.12), '#3a3f47', { p: [0, SEA + 0.25, 0] }), part(box(L - 0.1, 0.06, Wd - 0.1), '#5b616b', { p: [0, deckY - 0.02, 0] }));
+    for (let x = -L / 2 + 0.7; x < L / 2; x += 0.7) out.push(part(box(0.02, 0.012, Wd - 0.5), '#4b5059', { p: [x, deckY + 0.012, 0] }));
+    for (let z = -Wd / 2 + 0.55; z < Wd / 2; z += 0.55) out.push(part(box(L - 0.5, 0.012, 0.02), '#4b5059', { p: [0, deckY + 0.012, z] }));
+    out.push(part(cyl(1.75, 1.75, 0.012, 48), '#e9e6df', { p: [0, deckY + 0.018, 0] }), part(cyl(1.55, 1.55, 0.014, 48), '#5b616b', { p: [0, deckY + 0.02, 0] }),
+      part(torus(1.65, 0.07, TAU, 64), '#f2c94c', { p: [0, deckY + 0.03, 0], r: [Math.PI / 2, 0, 0], s: [1, 1, 0.2] }),
+      part(box(2.4, 0.016, 0.32), '#f2c94c', { p: [0, deckY + 0.028, 0], r: [0, 0.785, 0] }), part(box(2.4, 0.016, 0.32), '#f2c94c', { p: [0, deckY + 0.028, 0], r: [0, -0.785, 0] }));
+    [-1, 1].forEach((s) => { out.push(part(box(L, 0.75, 0.16), '#2f343c', { p: [0, deckY + 0.35, s * (Wd / 2 - 0.08)] })); for (let x = -L / 2 + 0.3; x < L / 2; x += 0.45) out.push(part(box(0.05, 0.75, 0.04), '#262a31', { p: [x, deckY + 0.35, s * (Wd / 2 + 0.01)] })); });
+    // Deck gear: containers, an antenna mast, and thruster pods under the corners.
+    [[-2.9, -1.45], [-2.9, 1.45], [2.9, -1.45]].forEach(([x, z]) => { out.push(part(rbox(0.9, 0.5, 0.55, 0.04), '#c9a227', { p: [x, deckY + 0.25, z] })); for (let k = 0; k < 7; k++) out.push(part(box(0.02, 0.44, 0.57), '#b08d1e', { p: [x - 0.36 + k * 0.12, deckY + 0.25, z] })); });
+    out.push(part(cyl(0.05, 0.07, 1.6, 10), '#c9ced6', { p: [3.0, deckY + 0.8, 1.5] }), part(new THREE.SphereGeometry(0.26, 18, 8, 0, TAU, 0, Math.PI / 2), '#e9e6df', { p: [3.0, deckY + 1.55, 1.5], r: [-1.2, 0, 0] }));
+    [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([sx, sz]) => out.push(part(cyl(0.35, 0.4, 0.5, 20), '#262a31', { p: [sx * (L / 2 - 0.5), SEA - 0.12, sz * (Wd / 2 - 0.5)] })));
+    // ---- the Falcon 9 first stage, sooty from re-entry
+    const angle = (x, z) => Math.atan2(z, x);
+    const body = part(lathe([[0, 0.25], [0.62, 0.25], [0.62, 6.1], [0.62, 7.1], [0.55, 7.2], [0, 7.2]], hi() ? 48 : 16), (x, y, z) => {
+      if (y > 6.1) return '#1d1f24';
+      const soot = Math.max(0, 1 - y / 4.4) * (0.65 + 0.35 * Math.sin(angle(x, z) * 9 + y * 1.5) ** 2);
+      return shade('#f4f5f6', 1 - soot * 0.75);
+    });
+    const octaweb = merge(part(cyl(0.62, 0.55, 0.3, 32), '#3a3f47', { p: [0, 0.12, 0] }), [[0, 0], ...ring(8, (a) => [Math.cos(a) * 0.38, Math.sin(a) * 0.38])].map(([x, z]) => part(lathe([[0.04, 0], [0.13, -0.08], [0.16, -0.3], [0.15, -0.31], [0.11, -0.08], [0.03, 0]], 18), '#2b2f36', { p: [x, 0, z] })));
+    const finGeo = merge(part(box(0.62, 0.05, 0.05), '#3a3f47', { p: [0.31, 0.3, 0] }), part(box(0.62, 0.05, 0.05), '#3a3f47', { p: [0.31, -0.3, 0] }), part(box(0.05, 0.62, 0.05), '#3a3f47', { p: [0.62, 0, 0] }),
+      [0.12, 0.24, 0.36, 0.48].map((x) => part(box(0.02, 0.6, 0.04), '#5b616b', { p: [x, 0, 0] })), [-0.18, -0.06, 0.06, 0.18].map((y) => part(box(0.6, 0.02, 0.04), '#5b616b', { p: [0.31, y, 0] })));
+    const legGeo = merge(part(taper([[0, 0, 0], [0, -1.4, 0.05], [0, -2.6, 0.1]], 0.1, 0.07, 8), '#1d1f24'), part(cyl(0.18, 0.2, 0.06, 16), '#2b2f36', { p: [0, -2.62, 0.1] }), beam([0, -1.0, 0.04], [0, -0.1, -0.35], 0.05, '#3a3f47'));
+    const flame = merge(part(lathe([[0, 0], [0.45, -0.25], [0.55, -0.9], [0.32, -2.2], [0, -3.2]], 24), '#ff8a2a'), part(lathe([[0, 0], [0.26, -0.2], [0.3, -0.8], [0.14, -1.9], [0, -2.4]], 20), '#ffd36b', { p: [0, -0.05, 0] }),
+      [-0.7, -1.3, -1.9].map((y, i) => part(ball(0.12 - i * 0.025), '#fff6d8', { p: [0, y, 0], s: [1, 1.6, 1] })));
+    // Timeline (10 s): descent, legs out, landing burn, touchdown, rest, relight and lift-off.
+    const alt = (f) => (f < 0.42 ? 4.2 * (1 - easeOut(f / 0.42)) : f < 0.72 ? 0 : 4.2 * easeIn(win(f, 0.72, 1)));
+    // It arrives from above the frame and leaves through it, so it fades in and out up there.
+    const seen = (f) => Math.min(1, f / 0.05, (1 - f) / 0.05);
+    const burning = (f) => (f > 0.2 && f < 0.43) || f > 0.72;
+    const legsOut = (f) => (f < 0.28 ? 0 : f < 0.38 ? easeOut(win(f, 0.28, 0.38)) : f < 0.9 ? 1 : 1 - win(f, 0.9, 0.97));
+    const boat = merge(part(extrude([[-1.1, 0], [0.8, 0], [1.25, 0.35], [0.9, 0.55], [-1.1, 0.55]], 0.62).rotateX(Math.PI / 2).rotateX(-Math.PI / 2), '#e9e6df'),
+      part(box(2.05, 0.08, 0.64), '#2f6fb0', { p: [0.05, 0.1, 0] }), part(rbox(0.7, 0.45, 0.5, 0.06), K.white, { p: [0.3, 0.8, 0] }), part(box(0.72, 0.12, 0.52), '#22303e', { p: [0.3, 0.9, 0] }),
+      beam([-0.5, 0.6, 0], [-0.9, 1.4, 0], 0.06, '#f2c94c'), part(cyl(0.03, 0.03, 0.6, 8), '#c9ced6', { p: [0.3, 1.3, 0] }));
+    const gull = (side) => part(extrude([[0, 0], [0.5 * side, 0.06], [0.75 * side, -0.05], [0.3 * side, -0.14]], 0.03), K.white, { r: [Math.PI / 2, 0, 0] });
+    const moving = [
+      { geo: merge(body, octaweb), pivot: [0, deckY + 0.42, 0], anim: (t) => { const f = cyc(t, 10), a = alt(f); return { y: a, rz: Math.sin(t * 1.5) * 0.035 * Math.min(1, a / 2), rx: Math.cos(t * 1.2) * 0.025 * Math.min(1, a / 2), s: Math.max(0.001, seen(f)), sy: Math.max(0.001, seen(f)) * (1 - bump(f, 0.425, 0.012) * 0.02) }; } },
+      ...ring(4, (a) => ({ geo: legGeo, pivot: [Math.cos(a + 0.785) * 0.6, 1.9, Math.sin(a + 0.785) * 0.6], parent: 0, anim: (t) => {
+        const k = legsOut(cyc(t, 10)), ax = new V(-Math.sin(a + 0.785), 0, Math.cos(a + 0.785));
+        return { q: new THREE.Quaternion().setFromAxisAngle(ax, -(Math.PI - 0.08) * (1 - k) - 0.62 * k) };
+      } })),
+      ...ring(4, (a) => ({ geo: finGeo, pivot: [Math.cos(a) * 0.6, 6.8, Math.sin(a) * 0.6], parent: 0, anim: (t) => ({ ry: -a, rx: Math.sin(t * 2 + a) * 0.15 * (alt(cyc(t, 10)) > 0.5 ? 1 : 0) }) })),
+      { geo: flame, pivot: [0, -0.25, 0], parent: 0, anim: (t) => { const f = cyc(t, 10); return burning(f) ? { sy: 0.85 + Math.sin(t * 37) * 0.12 + (alt(f) > 1 ? 0.35 : 0), sx: 1 + Math.sin(t * 29) * 0.06, sz: 1 + Math.cos(t * 31) * 0.06 } : { s: 0 }; } },
+      // Smoke billows across the deck at touchdown and lift-off.
+      ...Array.from({ length: hi() ? 10 : 5 }, (_, i) => { const a = (i / (hi() ? 10 : 5)) * TAU + R() * 0.4; return { geo: part(ball(0.7), '#efece6'), pivot: [0, deckY + 0.4, 0], anim: (t) => {
+        const f = cyc(t, 10), k = Math.max(win(f, 0.36, 0.5) * (1 - win(f, 0.55, 0.7)), win(f, 0.72, 0.8) * (1 - win(f, 0.84, 0.95)));
+        return { x: Math.cos(a) * (0.7 + k * 2.9), z: Math.sin(a) * (0.5 + k * 1.8), y: k * 0.35, s: k * (0.6 + (i % 3) * 0.2) };
+      } }; }),
+      // The support boat circling, with its wake.
+      { geo: null, pivot: [0, SEA, 0], anim: (t) => ({ ry: -t * 0.22 }) },
+      { geo: boat, pivot: [0, 0.02, 4.5], parent: 4 + 4 + 1 + 1 + (hi() ? 10 : 5), anim: (t) => ({ ry: Math.PI, y: Math.sin(t * 1.6) * 0.05, rx: Math.sin(t * 1.1) * 0.04 }) },
+      ...[0, 1, 2].map((i) => ({ geo: part(new THREE.CircleGeometry(0.3, 16).rotateX(-Math.PI / 2), '#f4f8fb'), pivot: [0, 0.03, 4.5], parent: 4 + 4 + 1 + 1 + (hi() ? 10 : 5), anim: (t) => { const g = cyc(t, 1.5, i / 3); return { x: -1.1 - g * 1.4, s: 0.6 + g * 1.4, sz: 0.5 + g * 0.6, sx: 1.5 + g * 2 }; } })),
+    ];
+    // Gulls wheeling overhead, wings flapping.
+    const gullBase = moving.length;
+    [0, 1, 2].forEach((i) => {
+      const me = moving.length;
+      moving.push({ geo: part(new THREE.CapsuleGeometry(0.07, 0.3, 4, 8), K.white, { r: [0, 0, Math.PI / 2] }), pivot: [0, 0, 0], anim: (t) => { const a = t * 0.5 + i * 2.1; return { x: Math.cos(a) * (3 + i * 0.6), y: 8.5 + i * 0.6 + Math.sin(t + i) * 0.3, z: Math.sin(a) * (2.6 + i * 0.5), ry: -a - Math.PI / 2 }; } });
+      [1, -1].forEach((side) => moving.push({ geo: gull(side), pivot: [0, 0, 0], parent: me, anim: (t) => ({ rx: side * Math.sin(t * 7 + i) * 0.6 }) }));
+    });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 
   // Coca-Cola: the contour bottle, the most famous package in the world, pouring into a glass of ice.
