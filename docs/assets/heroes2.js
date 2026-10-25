@@ -1288,4 +1288,34 @@ export const HEROES2 = {
     for (let k = 0; k < (hi() ? 12 : 4); k++) moving.push({ geo: part(torus(0.08, 0.035, TAU, 12), '#e9b949'), pivot: [BX - 0.2 + (k % 3) * 0.12, y0 + 2.6, BZ + 0.2 + (k % 4) * 0.08], anim: (t) => { const f = cyc(t, P); if (f < 0.25 || f > 0.75) return { s: 0.001 }; const u = cyc(t, 0.8, k / 12); return { y: -u * 1.1, rx: u * 8 + k, rz: u * 5, s: 1 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Mondelez International: the snacks the world reaches for. Off the line roll the Oreos; the
+  // giant one twists open and dunks in the glass of milk, while the purple Cadbury bars go out
+  // to the world.
+  mondelez: { finder: '#4f2170', build: () => {
+    const R = rand(138), out = [], PURP = '#4f2170', OREO = '#2b1d16';
+    out.push(ground('#8fc66f'), part(rbox(7.6, 0.08, 6.0, 0.03), '#ece6f2', { p: [-0.4, y0 + 0.04, -0.8] }));
+    // ---- the factory line along the back
+    out.push(part(rbox(7.6, 2.4, 0.2, 0.03), '#e2dbea', { p: [-0.4, y0 + 1.2, -4.4] }), part(box(7.62, 0.3, 0.22), PURP, { p: [-0.4, y0 + 2.2, -4.4] }), place(pixText('MONDELEZ', 0.065, K.white, 0.03), { p: [-0.4, y0 + 2.2, -4.28] }));
+    out.push(part(rbox(7.0, 0.5, 0.9, 0.05), '#5b616b', { p: [-0.4, y0 + 0.25, -3.4] }), part(box(6.9, 0.03, 0.8), '#e9e6df', { p: [-0.4, y0 + 0.52, -3.4] }), part(rbox(1.2, 1.2, 1.2, 0.05), '#c9ced6', { p: [-3.4, y0 + 0.9, -3.4] }));
+    // The Cadbury stacks on the right.
+    for (let k = 0; k < 4; k++) for (let j = 0; j < 3; j++) out.push(part(rbox(0.9, 0.12, 0.45, 0.03), PURP, { p: [3.4, y0 + 0.08 + (k * 3 + j) * 0.13, -1.0 + j * 0.0], r: [0, (k + j) * 0.3, 0] }));
+    // ---- the glass of milk, the centrepiece
+    const GX = 0.2, GZ = 0.6;
+    out.push(part(new THREE.CylinderGeometry(0.95, 0.85, 2.4, hi() ? 40 : 14, 1, true), '#e3eef5', { p: [GX, y0 + 1.2, GZ] }), part(cyl(0.9, 0.82, 1.9, 40), '#fbfbf8', { p: [GX, y0 + 0.97, GZ] }), part(torus(0.95, 0.04, TAU, 40), '#d5e3ec', { p: [GX, y0 + 2.4, GZ], r: [Math.PI / 2, 0, 0] }));
+    out.push(trees(R, [[4.6, 4.6], [-4.6, 4.6], [4.6, 2.0], [-4.6, 1.6], [1.6, 4.6]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 8;
+    const half = (top) => merge(part(cyl(0.7, 0.7, 0.18, 40), OREO), hi() ? Array.from({ length: 16 }, (_, k) => part(box(0.05, 0.03, 0.1), '#3d2b22', { p: [Math.cos(k * TAU / 16) * 0.5, top ? 0.1 : -0.1, Math.sin(k * TAU / 16) * 0.5], r: [0, -k * TAU / 16, 0] })) : []);
+    // Oreos rolling along the line.
+    const small = merge(part(cyl(0.22, 0.22, 0.06, 20), OREO, { p: [0, 0.07, 0] }), part(cyl(0.2, 0.2, 0.05, 20), K.white), part(cyl(0.22, 0.22, 0.06, 20), OREO, { p: [0, -0.07, 0] }));
+    for (let k = 0; k < 8; k++) moving.push({ geo: small, pivot: [0, y0 + 0.65, -3.4], anim: (t) => { const u = cyc(t, 6, k / 8); return { x: -2.6 + u * 5.6, s: Math.min(1, u / 0.05, (1 - u) / 0.05) + 0.001 }; } });
+    // The giant Oreo: twist, lift the top, dunk the cream half, put it back together.
+    const OX = GX - 2.4, OZ = GZ + 0.4, f0 = (t) => cyc(t, P);
+    const bot = moving.length;
+    moving.push({ geo: merge(half(false), part(cyl(0.64, 0.64, 0.14, 40), K.white, { p: [0, 0.16, 0] })), pivot: [OX, y0 + 1.2, OZ], anim: (t) => { const f = f0(t), d = easeIO(win(f, 0.35, 0.5)) - easeIO(win(f, 0.62, 0.77)), dip = bump(f, 0.56, 0.04); return { rx: Math.PI / 2 * 0.9, ry: Math.PI / 4, x: d * (GX - OX), z: d * (GZ - OZ - 0.0), y: d * 1.4 - dip * 1.0 }; } });
+    moving.push({ geo: half(true), pivot: [OX, y0 + 1.2, OZ], anim: (t) => { const f = f0(t), tw = easeIO(win(f, 0.05, 0.25)) - easeIO(win(f, 0.82, 0.95)), lift = easeIO(win(f, 0.2, 0.32)) - easeIO(win(f, 0.8, 0.9)); return { rx: Math.PI / 2 * 0.9, ry: Math.PI / 4, q: undefined, x: -lift * 0.6, z: lift * 0.6, rz: tw * 1.5 }; } });
+    // Bars heading out to the world.
+    for (let k = 0; k < 3; k++) moving.push(rider(part(rbox(0.6, 0.08, 0.3, 0.03), PURP), curve([[3.4, y0 + 1.8, -1.0], [4.0, y0 + 3.0, 1.0], [4.6, y0 + 2.0, 3.6]]), 4, k / 3, 0, 1, (t, u) => ({ rx: u * 4 })));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
