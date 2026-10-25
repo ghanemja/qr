@@ -3312,4 +3312,65 @@ export const SCENES = {
     moving.push({ geo: merge(part(rbox(0.8, 0.5, 0.6, 0.06), '#f2c94c', { p: [0, 0.4, 0] }), part(rbox(0.4, 0.4, 0.5, 0.06), '#9fcdea', { p: [-0.1, 0.8, 0] }), part(cyl(0.22, 0.22, 0.7, 14), K.steelDk, { p: [0.45, 0.22, 0], r: [Math.PI / 2, 0, 0] }), part(cyl(0.22, 0.22, 0.7, 14), K.steelDk, { p: [-0.45, 0.22, 0], r: [Math.PI / 2, 0, 0] })), pivot: [-2.6, y0 + 0.85, -2.6], anim: (t) => { const k = Math.sin(t * 0.5); return { x: k * 1.0, y: -Math.abs(k) * 0.35, ry: Math.cos(t * 0.5) > 0 ? 0 : Math.PI }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.4, y0, -0.6], topAt: [MX - 0.8, y0 + 1.8, MZ] };
   },
+
+  // Delivery van (freight rail, forwarders, home-goods retail, distributors): from the ship to the
+  // sofa in your living room. The port crane lifts a container off the ship onto the waiting train;
+  // the train hauls it to the warehouse; the van carries a sofa out to a home, and two movers walk
+  // it in through the front door.
+  'parcel:1': () => {
+    const R = rand(5001), out = [], moving = [], QX = 2.9, SEA = 0.14;
+    out.push(part(rbox(QX + 5.2, 0.24, 10.4, 0.08), '#b9c09e', { p: [(QX - 5.2) / 2, 0.12, 0] }), part(rbox(5.2 - QX, 0.1, 10.4, 0.05), '#2b4a7a', { p: [(QX + 5.2) / 2, 0.05, 0] }));
+    out.push(part(new THREE.PlaneGeometry(5.2 - QX, 10.4).rotateX(-Math.PI / 2), 'W', { p: [(QX + 5.2) / 2, SEA, 0] }), part(box(0.2, 0.3, 10.4), '#9aa1a9', { p: [QX + 0.1, 0.15, 0] }));
+    const ctr = (c, l = 1.4) => merge(part(rbox(l, 0.6, 0.6, 0.03), c, { p: [0, 0.3, 0] }), hi() ? Array.from({ length: Math.round(l * 6) }, (_, i) => part(box(0.03, 0.56, 0.61), shade(typeof c === 'string' && c[0] === '#' ? c : '#888888', 0.85), { p: [-l / 2 + 0.08 + i * (l - 0.16) / (Math.round(l * 6) - 1), 0.3, 0] })) : []);
+    // ---- the container ship at the quay (back right), stacked high
+    const SX = 4.0, SZ = -2.4;
+    const ship = [part(extrude([[-2.4, 0], [1.9, 0], [2.5, 0.45], [2.4, 0.75], [-2.4, 0.75]], 1.6), '#2b2f36', { r: [0, Math.PI / 2, 0] }), part(extrude([[-2.4, 0.55], [2.4, 0.55], [2.46, 0.75], [-2.4, 0.75]], 1.62), 'A', { r: [0, Math.PI / 2, 0] }), part(rbox(1.4, 1.0, 0.7, 0.05), K.white, { p: [0, 1.25, 1.9] })];
+    const cc = ['#e5533d', '#3d7be0', '#f2c94c', '#5fae5b', '#8a6cf0', '#f29a3a'];
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 2; c++) for (let l = 0; l < (r === 0 ? 1 : 2); l++) ship.push(place(ctr(cc[(r * 3 + c + l) % 6], 1.0), { p: [c * 0.65 - 0.33, 0.78 + l * 0.62, -1.8 + r * 1.05], r: [0, Math.PI / 2, 0] }));
+    out.push(place(merge(ship), { p: [SX, SEA - 0.3, SZ] }));
+    // ---- the gantry crane on the quay
+    const GX = 2.4, GZ = -2.6, GH = 4.0;
+    [[-0.9, -0.7], [-0.9, 0.7], [0.9, -0.7], [0.9, 0.7]].forEach(([dx, dz]) => out.push(part(box(0.18, GH, 0.18), K.orange, { p: [GX + dx, y0 + GH / 2, GZ + dz] })));
+    out.push(part(box(0.25, 0.25, 1.6), K.orange, { p: [GX - 0.9, y0 + GH, GZ] }), part(box(0.25, 0.25, 1.6), K.orange, { p: [GX + 0.9, y0 + GH, GZ] }), part(box(3.9, 0.3, 0.3), K.orange, { p: [GX + 0.55, y0 + GH + 0.2, GZ] }), part(rbox(0.8, 0.6, 0.8, 0.05), K.white, { p: [GX - 1.1, y0 + GH + 0.5, GZ] }));
+    // ---- the railway from the quay to the warehouse (along x at z = -0.6)
+    const RZ = -0.4;
+    out.push(part(box(9.0, 0.06, 0.9), '#9a8f7c', { p: [-0.6, y0 + 0.03, RZ] }));
+    if (hi()) for (let x = -5.0; x <= 3.8; x += 0.4) out.push(part(box(0.12, 0.05, 0.8), K.woodDk, { p: [x, y0 + 0.08, RZ] }));
+    [-0.27, 0.27].forEach((dz) => out.push(part(box(9.0, 0.05, 0.05), K.steel, { p: [-0.6, y0 + 0.12, RZ + dz] })));
+    // ---- the warehouse (back left) and the home (front left)
+    const WX = -3.0, WZ = -3.0;
+    out.push(part(rbox(3.6, 1.8, 2.2, 0.06), '#e3e0da', { p: [WX, y0 + 0.9, WZ] }), part(box(3.62, 0.25, 2.22), 'B', { p: [WX, y0 + 1.6, WZ] }));
+    [-1.0, 0.2, 1.2].forEach((dx) => out.push(part(rbox(0.8, 1.0, 0.06, 0.03), '#3a3f47', { p: [WX + dx, y0 + 0.5, WZ + 1.11] })));
+    const HX = -2.4, HZ = 3.2;
+    out.push(place(house2('#f3ead8', 'Ad', 'B'), { p: [HX, y0, HZ], r: [0, Math.PI / 2, 0] }));
+    out.push(part(box(1.0, 0.03, 5.6), '#6b7078', { p: [-0.2, y0 + 0.015, 2.0] }), part(box(4.0, 0.03, 1.0), '#6b7078', { p: [-2.6, y0 + 0.015, 0.9] }));
+    [[0.8, 4.5], [1.6, 1.4], [-4.6, 0.4], [0.6, -2.4]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.5 + R() * 0.15)));
+    // ---- moving parts (one 16 s cycle)
+    const P = 16, F = (t) => cyc(t, P);
+    // The crane's trolley and spreader: pick a box off the ship, set it on the flatcar.
+    const pick = new V(SX - 0.3, y0 + 1.7, GZ), drop = new V(GX - 0.6, y0 + 0.75, GZ);
+    const tr = (f) => (f < 0.05 ? pick.x : f < 0.18 ? pick.x + (drop.x - pick.x) * easeIO(win(f, 0.05, 0.18)) : f < 0.9 ? drop.x : drop.x + (pick.x - drop.x) * easeIO(win(f, 0.9, 1)));
+    const hy = (f) => (f < 0.03 ? GH - 1.4 - win(f, 0, 0.03) * 0.2 : f < 0.05 ? GH - 1.6 + win(f, 0.03, 0.05) * 0.8 : f < 0.18 ? GH - 0.8 : f < 0.23 ? GH - 0.8 - win(f, 0.18, 0.23) * (GH - 0.8 - (drop.y - y0) - 0.6) : f < 0.27 ? (drop.y - y0) + 0.6 : GH - 0.8);
+    moving.push({ geo: merge(part(rbox(0.6, 0.3, 0.8, 0.04), K.dark), part(cyl(0.02, 0.02, 1, 6), K.ink, { p: [0, -0.5, 0] })), pivot: [0, y0 + GH, GZ], anim: (t) => { const f = F(t); return { x: tr(f) }; } });
+    moving.push({ geo: part(box(1.5, 0.1, 0.65), '#f2c94c'), pivot: [0, y0, GZ], anim: (t) => { const f = F(t); return { x: tr(f), y: hy(f) + 0.62 }; } });
+    // The train: waits under the crane, takes the box, hauls it to the warehouse.
+    const trainX = (f) => (f < 0.3 ? GX - 0.6 : f < 0.55 ? GX - 0.6 + (WX + 0.6 - GX + 0.6) * easeIO(win(f, 0.3, 0.55)) : f < 0.85 ? WX + 0.6 : WX + 0.6 + (GX - 0.6 - WX - 0.6) * easeIO(win(f, 0.85, 1)));
+    const loco = merge(part(rbox(1.4, 0.8, 0.75, 0.08), 'A', { p: [1.6, 0.65, 0] }), part(rbox(0.5, 0.35, 0.77, 0.05), '#26323f', { p: [2.0, 0.9, 0] }), part(box(1.5, 0.12, 0.8), K.dark, { p: [0, 0.3, 0] }), part(box(1.4, 0.12, 0.8), K.dark, { p: [1.6, 0.3, 0] }), [-0.5, 0.5, 1.1, 2.1].map((x) => part(new THREE.CylinderGeometry(0.15, 0.15, 0.85, 12), '#1d1f24', { p: [x, 0.2, 0], r: [Math.PI / 2, 0, 0] })));
+    loco.rotateY(Math.PI);
+    moving.push({ geo: loco, pivot: [0, y0 + 0.08, 0], anim: (t) => { const x = trainX(F(t)); return { x: x - 0.6 * 0, z: RZ }; } });
+    // The container: on the ship, in the crane's grip, on the flatcar, into the warehouse.
+    moving.push({ geo: ctr('#e5533d', 1.4), pivot: [0, 0, 0], anim: (t) => { const f = F(t); if (f < 0.27) return { x: tr(f), y: Math.max(f < 0.05 ? pick.y - y0 - 0.95 + y0 : 0, hy(f) + y0 + 0.02) - (f < 0.03 ? 0 : 0), z: GZ, s: f < 0.02 ? Math.max(0.001, f / 0.02) : 1 }; const x = trainX(f); return { x, y: y0 + 0.38, z: f < 0.3 ? GZ + (RZ - GZ) * win(f, 0.27, 0.3) : RZ, s: f > 0.58 ? Math.max(0.001, 1 - win(f, 0.58, 0.62)) : 1 }; } });
+    // The van: out of the warehouse with a sofa, down to the home and back.
+    const route = curve([[WX + 0.2, 0, WZ + 1.8], [-1.0, 0, 0.9], [-0.2, 0, 1.6], [-0.2, 0, 3.0], [-0.7, 0, 3.6]]);
+    const vu = (f) => (f < 0.55 ? 0 : f < 0.7 ? easeIO(win(f, 0.55, 0.7)) : f < 0.86 ? 1 : 1 - easeIO(win(f, 0.86, 1)));
+    moving.push({ geo: van(K.white, 'B'), pivot: [0, y0, 0], anim: (t) => { const f = F(t), { p, ry } = along(route, Math.min(0.999, Math.max(0.001, vu(f)))); return { x: p.x, z: p.z, ry: ry + (f > 0.86 ? Math.PI : 0), s: 0.85 }; } });
+    // Two movers carry the sofa from the van to the front door.
+    const sofa = merge(part(rbox(1.2, 0.3, 0.5, 0.08), 'Ad', { p: [0, 0.15, 0] }), part(rbox(1.2, 0.35, 0.15, 0.06), 'Ad', { p: [0, 0.45, -0.18] }), [-0.55, 0.55].map((x) => part(rbox(0.12, 0.3, 0.5, 0.05), 'Ad', { p: [x, 0.35, 0] })));
+    const S0 = new V(-0.9, 0, 3.4), S1 = new V(HX + 1.0, 0, HZ - 0.6);
+    const sp = (f) => S0.clone().lerp(S1, easeIO(win(f, 0.72, 0.85)));
+    moving.push({ geo: sofa, pivot: [0, y0 + 0.9, 0], anim: (t) => { const f = F(t), p = sp(f); return { x: p.x, z: p.z, ry: Math.PI / 2, s: f > 0.71 && f < 0.88 ? 1 : 0.001 }; } });
+    [-0.75, 0.75].forEach((d) => moving.push(...walker(moving.length, (t) => { const f = F(t), p = sp(f); return { x: p.x + d * 0.1, z: p.z + d, ry: Math.atan2(-(S1.z - S0.z), S1.x - S0.x), s: f > 0.71 && f < 0.88 ? 1 : 0.001, still: f < 0.72 || f > 0.85, push: true }; }, { shirt: K.orange, pants: '#2b3a55', y: y0 })));
+    moving.push({ geo: tickGeo(0.26), pivot: [HX + 0.8, y0 + 2.4, HZ - 0.6], anim: (t) => { const f = F(t); return { y: easeOut(win(f, 0.85, 0.89)) * 0.3, ry: Math.PI / 4, s: life(f, 0.85, 0.88, 0.94, 0.97) }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [2.0, y0, 3.0], topAt: [WX - 1.0, y0 + 1.8, WZ] };
+  },
 };
