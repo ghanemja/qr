@@ -56,12 +56,13 @@ const hi = () => DETAIL === 'high';
 const faceted = (g) => { g = g.index ? g.toNonIndexed() : g; g.deleteAttribute('normal'); g.computeVertexNormals(); return g; };
 const box = (w, h, d) => {
   const m = Math.min(w, h, d);
-  if (m < 0.16) return new THREE.BoxGeometry(w, h, d);
+  if (m < 0.16 || !hi()) return new THREE.BoxGeometry(w, h, d); // bevels can't be seen at map size
   return new RoundedBoxGeometry(w, h, d, hi() ? 3 : 1, Math.min(0.32, m * 0.2));
 };
 // A lathe-turned cylinder (or frustum) with rounded rims; few-sided ones stay crisp prisms.
 const cyl = (rt, rb, h, seg = 14) => {
   if (seg <= 8) return faceted(new THREE.CylinderGeometry(rt, rb, h, seg));
+  if (!hi()) return new THREE.CylinderGeometry(rt, rb, h, Math.max(10, Math.round(seg * 0.7)));
   const f = Math.min(0.28, h * 0.3, Math.max(rt, rb) * 0.3), n = hi() ? 4 : 1, pts = [new THREE.Vector2(0, -h / 2)];
   const arc = (cx, cy, a0, a1) => { for (let i = 0; i <= n; i++) { const a = a0 + ((a1 - a0) * i) / n; pts.push(new THREE.Vector2(cx + Math.cos(a) * f, cy + Math.sin(a) * f)); } };
   if (rb > f) arc(rb - f, -h / 2 + f, -Math.PI / 2, 0); else pts.push(new THREE.Vector2(rb, -h / 2));
