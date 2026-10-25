@@ -3,7 +3,7 @@
 // signature model, one scene serves many companies, so it is painted partly in brand slots
 // ('A'/'B' and darker 'Ad'/'Bd') and still takes each company's companion prop (at propAt, a
 // free spot on the slab, at most 3.7 from the middle since a prop can be 1.5 wide) and topper
-// (at topAt). Keyed `kind:variant` (see models.js).
+// (at topAt, no higher than 4.7 since a topper can be 2 tall). Keyed `kind:variant` (see models.js).
 // Same conventions as the heroes: slab top y0 = 0.24, keep within ±5.2, rest height ≤ 6.8, the
 // camera looks from +x, +z.
 import { THREE, V, part, windy, rand, taper, shade, tuft, bladeShape, merge, place, box, cyl, lathe, tube, ball, capsule, cone, torus, extrude, prism, star, beam, ring, hi, TAU, clamp01, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, K } from './kit.js';
@@ -439,4 +439,106 @@ export const SCENES = {
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [3.7, y0, -3.7], topAt: [HX + 1.8, y0 + HH + 0.75, HZ] };
   },
 
+  // Steelworks (steel, aluminium, mining, metals service): a mini-mill turns scrap into steel. A
+  // magnet crane drops scrap into the arc furnace, its electrodes sparking; the overhead crane
+  // carries the glowing ladle to the caster and pours; a red-hot strand rolls out, a torch cuts it
+  // into slabs that cool from orange to grey; a flatcar of coils rolls along the front.
+  'metal:0': () => {
+    const R = rand(505), out = [], moving = [], HOT = '#ff8a2a', HOTTER = '#ffc04a', MOLTEN = '#ffdd73';
+    out.push(slab('#9d9a94'));
+    // ---- the scrap pile at the back left
+    const SX = -3.5, SZ = -3.3, rust = ['#8a5a3a', '#a0673f', '#6f6a64', '#8e959e', '#7a4a32', '#5b616b'];
+    out.push(part(lathe([[1.7, 0], [1.4, 0.4], [0.9, 0.9], [0.3, 1.25], [0, 1.3]], 24), '#6f5a48', { p: [SX, y0, SZ] }));
+    const junk = () => { const k = R(), c = rust[Math.floor(R() * rust.length)]; return k < 0.4 ? part(box(0.3 + R() * 0.5, 0.08 + R() * 0.15, 0.2 + R() * 0.3), c) : k < 0.7 ? part(cyl(0.08 + R() * 0.1, 0.08 + R() * 0.1, 0.4 + R() * 0.6, 8), c) : beam([0, 0, 0], [0.6 + R() * 0.6, 0, 0], 0.07, c); };
+    for (let i = 0, n = hi() ? 70 : 18; i < n; i++) { const a = R() * TAU, d = Math.sqrt(R()) * 1.5, h = (1 - d / 1.7) * 1.25; out.push(place(junk(), { p: [SX + Math.cos(a) * d, y0 + h, SZ + Math.sin(a) * d], r: [R() * 3, R() * 3, R() * 3] })); }
+    // ---- the melt shop: an open steel shed over the furnace and caster
+    const X0 = -1.8, X1 = 4.7, Z0 = -4.8, Z1 = -1.5, SH = 4.0;
+    [[X0, Z0], [X1, Z0], [X0, Z1], [X1, Z1], [(X0 + X1) / 2, Z0], [(X0 + X1) / 2, Z1]].forEach(([x, z]) => out.push(part(rbox(0.25, SH, 0.25, 0.04), '#7d8792', { p: [x, y0 + SH / 2, z] })));
+    [Z0, Z1].forEach((z) => out.push(part(box(X1 - X0 + 0.3, 0.3, 0.3), '#6d7681', { p: [(X0 + X1) / 2, y0 + SH - 0.15, z] })));
+    // Roof trusses only, so the furnace and ladle show; the front girder carries the brand.
+    for (let x = X0; x <= X1 + 1e-3; x += (X1 - X0) / 4) out.push(beam([x, y0 + SH, Z0], [x, y0 + SH + 0.7, (Z0 + Z1) / 2], 0.1, '#6d7681'), beam([x, y0 + SH + 0.7, (Z0 + Z1) / 2], [x, y0 + SH, Z1], 0.1, '#6d7681'));
+    out.push(part(box(X1 - X0 + 0.3, 0.12, 0.12), '#6d7681', { p: [(X0 + X1) / 2, y0 + SH + 0.7, (Z0 + Z1) / 2] }), part(box(X1 - X0 + 0.32, 0.34, 0.08), 'A', { p: [(X0 + X1) / 2, y0 + SH - 0.15, Z1 + 0.17] }));
+    out.push(part(box(X1 - X0 - 0.2, 1.6, 0.1), '#b9bec5', { p: [(X0 + X1) / 2, y0 + 0.8, Z0] }));
+    // Crane rails along the shed, under its roof.
+    [Z0 + 0.15, Z1 - 0.15].forEach((z) => out.push(part(box(X1 - X0, 0.14, 0.14), K.steelDk, { p: [(X0 + X1) / 2, y0 + SH - 0.5, z] })));
+    // Stacks behind the shed.
+    [[0.4, -4.75], [1.4, -4.75]].forEach(([x, z]) => out.push(part(cyl(0.25, 0.32, 5.4, 18), '#c9ced6', { p: [x, y0 + 2.7, z] }), part(cyl(0.27, 0.27, 0.3, 18), 'A', { p: [x, y0 + 4.9, z] })));
+    // ---- the arc furnace: a squat vessel, its roof, three electrodes
+    const FX = -0.5, FZ = -3.2;
+    out.push(part(cyl(1.2, 1.2, 0.3, 28), '#3a3f47', { p: [FX, y0 + 0.15, FZ] }), part(lathe([[0.8, 0], [1.0, 0.15], [1.05, 0.9], [1.0, 1.0], [0, 1.0]], 32), 'A', { p: [FX, y0 + 0.3, FZ] }), part(lathe([[1.05, 0], [0.9, 0.3], [0.4, 0.5], [0, 0.52]], 32), '#7d8792', { p: [FX, y0 + 1.3, FZ] }));
+    out.push(part(rbox(0.5, 0.25, 0.6, 0.05), '#3a3f47', { p: [FX + 1.05, y0 + 0.9, FZ], r: [0, 0, -0.3] }));
+    ring(3, (a) => out.push(part(box(0.12, 0.12, 1.5), '#5b616b', { p: [FX - 0.9, y0 + 2.6, FZ + Math.sin(a) * 0.3], r: [0, Math.PI / 2 - a * 0.1, 0] })));
+    out.push(part(rbox(0.5, 2.6, 0.5, 0.05), '#5b616b', { p: [FX - 1.5, y0 + 1.3, FZ] }));
+    // ---- the caster: tundish, mould, the curved strand and the run-out table
+    const CX = 2.8, CZ = -2.9, TY = y0 + 1.9;
+    out.push(part(rbox(1.1, 0.5, 0.8, 0.06), '#5b616b', { p: [CX, TY, CZ] }), part(box(0.9, 0.05, 0.6), MOLTEN, { p: [CX, TY + 0.25, CZ] }), part(rbox(1.5, 0.15, 1.2, 0.04), '#3a3f47', { p: [CX, TY - 0.32, CZ] }));
+    [[-0.6, -0.5], [0.6, -0.5], [-0.6, 0.5], [0.6, 0.5]].forEach(([x, z]) => out.push(part(box(0.14, TY - 0.4 - y0, 0.14), '#7d8792', { p: [CX + x, y0 + (TY - 0.4 - y0) / 2, CZ + z] })));
+    const strand = curve([[CX, TY - 0.3, CZ], [CX, TY - 1.0, CZ + 0.15], [CX, y0 + 0.75, CZ + 0.9], [CX, y0 + 0.62, CZ + 1.6]]);
+    out.push(part(new THREE.TubeGeometry(strand, hi() ? 40 : 10, 0.16, hi() ? 4 : 4, false), (x, y) => (y > TY - 0.9 ? HOTTER : HOT)));
+    const RZ0 = CZ + 1.6, RZ1 = 3.0;
+    for (let z = RZ0; z <= RZ1; z += 0.3) out.push(part(new THREE.CylinderGeometry(0.08, 0.08, 0.9, hi() ? 12 : 6), K.steelDk, { p: [CX, y0 + 0.5, z], r: [0, 0, Math.PI / 2] }));
+    [-0.5, 0.5].forEach((x) => out.push(part(new THREE.BoxGeometry(0.08, 0.5, RZ1 - RZ0 + 0.3), '#5b616b', { p: [CX + x, y0 + 0.3, (RZ0 + RZ1) / 2] })));
+    // The strand is continuous up to the torch.
+    const CUT = 0.3;
+    out.push(part(new THREE.BoxGeometry(0.7, 0.14, CUT - RZ0), HOT, { p: [CX, y0 + 0.65, (RZ0 + CUT) / 2] }));
+    out.push(part(rbox(1.2, 0.5, 0.3, 0.05), '#f2c94c', { p: [CX, y0 + 1.25, CUT] }), [-0.6, 0.6].map((x) => part(box(0.1, 1.0, 0.1), '#f2c94c', { p: [CX + x, y0 + 0.75, CUT] })));
+    // Finished slabs stacked, coils and beams waiting at the front left.
+    for (let i = 0; i < 5; i++) out.push(part(rbox(0.75, 0.14, 1.1, 0.03), i % 2 ? '#8e959e' : '#7d8792', { p: [CX + 1.4, y0 + 0.07 + i * 0.15, 2.6 + (i % 2) * 0.04] }));
+    const coil = (c = '#a9b1bb', face = c === 'B' ? 'Bd' : shade(c, 0.85)) => merge(part(new THREE.CylinderGeometry(0.5, 0.5, 0.6, hi() ? 32 : 12, 1, true), c, { r: [Math.PI / 2, 0, 0] }), part(new THREE.CylinderGeometry(0.22, 0.22, 0.6, hi() ? 24 : 8, 1, true), '#6d7681', { r: [Math.PI / 2, 0, 0] }), part(new THREE.RingGeometry(0.22, 0.5, hi() ? 32 : 12), face, { p: [0, 0, 0.3] }), part(new THREE.RingGeometry(0.22, 0.5, hi() ? 32 : 12), face, { p: [0, 0, -0.3], r: [0, Math.PI, 0] }));
+    [[-3.9, 1.0], [-2.8, 1.0], [-3.35, 1.0]].forEach(([x, z], i) => out.push(place(coil(i % 2 ? '#b5bcc6' : 'B'), { p: [x, y0 + (i === 2 ? 1.25 : 0.5), z] })));
+    const ibeam = (L) => merge(part(box(L, 0.05, 0.3), '#7d8792', { p: [0, 0.025, 0] }), part(box(L, 0.05, 0.3), '#7d8792', { p: [0, 0.375, 0] }), part(box(L, 0.3, 0.05), '#6d7681', { p: [0, 0.2, 0] }));
+    for (let i = 0; i < 6; i++) out.push(place(ibeam(2.6), { p: [-1.0, y0 + Math.floor(i / 3) * 0.4, 1.2 + (i % 3) * 0.4 + Math.floor(i / 3) * 0.2] }));
+    // The rail along the front edge.
+    out.push(part(box(10.4, 0.06, 1.3), '#7a6a5a', { p: [0, y0 + 0.03, 4.3] }));
+    if (hi()) for (let x = -5.0; x <= 5.0; x += 0.4) out.push(part(box(0.14, 0.05, 1.2), '#6b4a32', { p: [x, y0 + 0.08, 4.3] }));
+    [3.85, 4.75].forEach((z) => out.push(part(new THREE.BoxGeometry(10.4, 0.08, 0.07), K.steel, { p: [0, y0 + 0.14, z] })));
+    // ---- moving parts
+    const P = 10, F = (t) => cyc(t, P);
+    // The magnet crane: a crawler with a lattice boom, swinging scrap from the pile to the furnace.
+    const MX = -2.1, MZ = -1.2, REACH = 2.35, BOOM = 3.4;
+    const pickYaw = Math.atan2(-(SZ + 0.2 - MZ), SX + 0.3 - MX), dropYaw = Math.atan2(-(FZ - MZ), FX - MX);
+    const myaw = (f) => pickYaw + (dropYaw - pickYaw) * (easeIO(win(f, 0.18, 0.38)) - easeIO(win(f, 0.55, 0.75)));
+    out.push(part(rbox(1.6, 0.35, 1.3, 0.08), '#2b2f36', { p: [MX, y0 + 0.2, MZ] }), [-0.55, 0.55].map((z) => part(rbox(1.8, 0.3, 0.3, 0.12), '#1d1f24', { p: [MX, y0 + 0.17, MZ + z] })));
+    const tipOf = (f) => { const a = myaw(f); return new V(MX + Math.cos(a) * REACH, y0 + 0.4 + BOOM, MZ - Math.sin(a) * REACH); };
+    const lattice = merge(beam([0, 0.6, 0], [REACH, BOOM, 0], 0.16, K.yellow), beam([0.1, 0.5, 0.18], [REACH, BOOM, 0], 0.06, '#e0b33a'), beam([0.1, 0.5, -0.18], [REACH, BOOM, 0], 0.06, '#e0b33a'), hi() ? ring(6, (a, i) => beam([0.15 + i * 0.35, 0.65 + i * 0.47, 0.12], [0.33 + i * 0.35, 0.9 + i * 0.47, -0.12], 0.03, '#e0b33a')) : []);
+    moving.push({ geo: merge(part(rbox(1.1, 0.75, 0.95, 0.08), K.yellow, { p: [-0.2, 0.45, 0] }), part(rbox(0.5, 0.45, 0.6, 0.06), '#9fcdea', { p: [0.3, 0.75, 0.25] }), part(rbox(0.5, 0.55, 0.9, 0.06), '#3a3f47', { p: [-0.75, 0.4, 0] }), lattice).rotateY(pickYaw),
+      pivot: [MX, y0 + 0.4, MZ], anim: (t) => ({ ry: myaw(F(t)) - pickYaw }) });
+    const hang = (f) => 1.0 + 1.6 * hop(win(f, 0.03, 0.17)) + 0.9 * hop(win(f, 0.42, 0.5));
+    moving.push({ geo: part(new THREE.CylinderGeometry(0.02, 0.02, 1, 6), K.ink, { p: [0, -0.5, 0] }), pivot: [0, 0, 0], anim: (t) => { const f = F(t), p = tipOf(f); return { x: p.x, y: p.y, z: p.z, sy: hang(f) }; } });
+    moving.push({ geo: merge(part(cyl(0.42, 0.42, 0.18, 24), '#3a3f47'), part(cyl(0.12, 0.12, 0.2, 10), K.ink, { p: [0, 0.18, 0] })), pivot: [0, 0, 0], anim: (t) => { const f = F(t), p = tipOf(f); return { x: p.x, y: p.y - hang(f) - 0.1, z: p.z }; } });
+    const clump = merge(Array.from({ length: hi() ? 8 : 3 }, () => place(junk(), { p: [(R() - 0.5) * 0.5, -0.1 - R() * 0.2, (R() - 0.5) * 0.5], r: [R() * 3, R() * 3, R() * 3] })));
+    moving.push({ geo: clump, pivot: [0, 0, 0], anim: (t) => {
+      const f = F(t), p = tipOf(Math.min(f, 0.5)), held = f > 0.1 && f < 0.48, fall = win(f, 0.48, 0.56);
+      return { x: p.x, y: p.y - hang(Math.min(f, 0.48)) - 0.2 - easeIn(fall) * 1.2, z: p.z, s: f < 0.1 ? 0.001 : f > 0.56 ? 0.001 : held || fall < 1 ? 1 : 0.001 };
+    } });
+    // Electrodes bob and arc; sparks spit from the roof.
+    ring(3, (a, i) => moving.push({ geo: merge(part(cyl(0.11, 0.11, 1.6, 12), '#3a3f47'), part(cyl(0.12, 0.12, 0.08, 12), HOTTER, { p: [0, -0.8, 0] })), pivot: [FX + Math.cos(a) * 0.3, y0 + 2.1, FZ + Math.sin(a) * 0.3], anim: (t) => ({ y: Math.sin(t * 9 + i * 2) * 0.03 }) }));
+    for (let k = 0; k < 8; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.04, 5, 3), k % 2 ? HOTTER : '#fff2b0'), pivot: [FX, y0 + 1.75, FZ], anim: (t) => { const u = cyc(t, 0.5, k / 8), a = k * 0.79; return { x: Math.cos(a) * u * 0.9, y: hop(u) * 0.7, z: Math.sin(a) * u * 0.9, s: 1 - u }; } });
+    // The overhead crane's bridge and trolley carry the ladle from the furnace's spout to the tundish.
+    const lx = (f) => FX + 1.5 + (CX - FX - 1.5) * (easeIO(win(f, 0.25, 0.45)) - easeIO(win(f, 0.72, 0.92)));
+    const lift = (f) => 0.6 * (easeIO(win(f, 0.2, 0.26)) - easeIO(win(f, 0.45, 0.5))) + 0.6 * (easeIO(win(f, 0.7, 0.74)) - easeIO(win(f, 0.92, 0.98)));
+    const bridge = moving.length;
+    moving.push({ geo: merge(part(box(0.3, 0.3, Z1 - Z0 - 0.1), '#f2c94c', { p: [0, 0, 0] }), [Z0 + 0.15, Z1 - 0.15].map((z) => part(box(0.5, 0.2, 0.25), '#e0b33a', { p: [0, -0.1, z - (Z0 + Z1) / 2] }))), pivot: [0, y0 + SH - 0.35, (Z0 + Z1) / 2], anim: (t) => ({ x: lx(F(t)) }) });
+    moving.push({ geo: merge(part(rbox(0.6, 0.3, 0.6, 0.05), '#3a3f47'), part(new THREE.CylinderGeometry(0.02, 0.02, 1.0, 6), K.ink, { p: [-0.15, -0.6, 0] }), part(new THREE.CylinderGeometry(0.02, 0.02, 1.0, 6), K.ink, { p: [0.15, -0.6, 0] })), pivot: [0, -0.2, CZ - (Z0 + Z1) / 2 + 0.1], parent: bridge, anim: () => ({}) });
+    const ladle = merge(part(lathe([[0.4, 0], [0.55, 0.1], [0.62, 0.8], [0.66, 0.85], [0, 0.86]], 28), '#5b616b'), part(cyl(0.58, 0.58, 0.04, 24), MOLTEN, { p: [0, 0.84, 0] }), part(torus(0.62, 0.05, TAU, 28), HOT, { p: [0, 0.85, 0], r: [Math.PI / 2, 0, 0] }), [-1, 1].map((sx) => part(rbox(0.1, 0.5, 0.1, 0.03), '#3a3f47', { p: [sx * 0.66, 0.8, 0] })), part(box(1.4, 0.08, 0.1), '#3a3f47', { p: [0, 1.05, 0] }));
+    moving.push({ geo: ladle, pivot: [0, -2.8, CZ - (Z0 + Z1) / 2 + 0.1], parent: bridge, anim: (t) => { const f = F(t); return { y: lift(f), rz: -0.9 * easeIO(win(f, 0.47, 0.53)) * (1 - easeIO(win(f, 0.64, 0.7))) }; } });
+    // Tapping: a stream from the furnace into the ladle; pouring: from the ladle into the tundish.
+    moving.push({ geo: part(cyl(0.07, 0.05, 1, 10), HOTTER, { p: [0, -0.5, 0] }), pivot: [FX + 1.35, y0 + 0.95, FZ + 0.25], anim: (t) => { const f = F(t); return { sy: 0.6, s: f > 0.04 && f < 0.2 ? 1 : 0.001 }; } });
+    moving.push({ geo: part(cyl(0.07, 0.05, 1, 10), HOTTER, { p: [0, -0.5, 0] }), pivot: [CX - 0.6, TY + 0.95, CZ], anim: (t) => { const f = F(t); return { sy: 0.7, s: f > 0.52 && f < 0.66 ? 1 : 0.001 }; } });
+    // The torch cuts the strand; slabs ride the table, cooling, onto the stack.
+    for (let k = 0; k < 6; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.035, 5, 3), k % 2 ? '#ffe9a8' : HOTTER), pivot: [CX, y0 + 0.75, CUT], anim: (t) => { const u = cyc(t, 0.3, k / 6), a = k * 1.05; return { x: Math.cos(a) * u * 0.5, y: hop(u) * 0.35 - u * 0.2, z: Math.sin(a) * u * 0.3, s: 1 - u }; } });
+    const SL = 0.85, hotSlab = part(box(0.7, 0.14, SL), HOT), coldSlab = part(box(0.7, 0.14, SL), '#8e959e'), warmSlab = part(box(0.7, 0.14, SL), '#c0643a');
+    for (let k = 0; k < 3; k++) {
+      const z = (t) => CUT + SL / 2 + cyc(t, 6, k / 3) * (RZ1 - CUT);
+      const temp = (t) => (z(t) - CUT) / (RZ1 - CUT);
+      [[hotSlab, 0, 0.4], [warmSlab, 0.4, 0.75], [coldSlab, 0.75, 1.01]].forEach(([g, a, b]) => moving.push({ geo: g, pivot: [CX, y0 + 0.65, 0], anim: (t) => { const k2 = temp(t); return { z: z(t), s: k2 >= a && k2 < b ? (k2 > 0.94 ? 1 - win(k2, 0.94, 1) : 1) : 0.001 }; } }));
+    }
+    // Smoke from the stacks.
+    [[0.4, -4.75], [1.4, -4.75]].forEach(([x, z], i) => { for (let k = 0; k < 3; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.32, 10, 7), '#e6e3de'), pivot: [x, y0 + 5.3, z], anim: (t) => { const u = cyc(t, 3, k / 3 + i * 0.17); return { y: u * 1.0, x: u * 0.6, s: (0.6 + u) * (1 - u) * 1.6 + 0.001 }; } }); });
+    // A flatcar of coils rolls along the front.
+    moving.push({ geo: merge(part(rbox(3.0, 0.2, 1.0, 0.04), '#3a3f47', { p: [0, 0.55, 0] }), part(box(3.02, 0.12, 1.02), 'A', { p: [0, 0.4, 0] }), [-1.1, -0.8, 0.8, 1.1].flatMap((x) => [-0.45, 0.45].map((z) => part(new THREE.CylinderGeometry(0.18, 0.18, 0.1, 14), '#1d1f24', { p: [x, 0.25, z], r: [Math.PI / 2, 0, 0] }))),
+      [-0.8, 0.0, 0.8].map((x, i) => place(coil(i === 1 ? 'B' : '#b5bcc6'), { p: [x, 1.15, 0] }))),
+      pivot: [0, y0, 4.3], anim: (t) => { const f = cyc(t, 14), x = -6.4 + 12.8 * f; return { x, s: clamp01((5.0 - Math.abs(x)) / 1.6) * 0.999 + 0.001 }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.6, y0, 2.6], topAt: [CX + 1.4, y0 + 0.82, 2.62] };
+  },
 };

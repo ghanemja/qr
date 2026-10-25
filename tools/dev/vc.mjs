@@ -6,6 +6,6 @@ for (const d of ['high', 'low']) { const c = m.centerpiece(id, +vi, 0, d); let v
   const { THREE } = await import(new URL('../../src/kit.js', import.meta.url).href);
   const c = m.centerpiece(id, +vi, 0, 'high'), bb = new THREE.Box3().setFromBufferAttribute(c.geo.attributes.position), rest = m.restMatrices(c);
   c.moving.forEach((mv, i) => mv.geo && bb.union(new THREE.Box3().setFromBufferAttribute(mv.geo.attributes.position).applyMatrix4(rest[i])));
-  const f = (v) => v.toArray().map((x) => x.toFixed(2)).join(', ');
+  const f = (v) => v.toArray().map((x) => x.toFixed(3)).join(', ');
   console.log('bounds', f(bb.min), '→', f(bb.max), c.propAt ? `prop at ${c.propAt}` : '', c.topAt ? `top at ${c.topAt.map((x) => x.toFixed(2))}` : '');
 }
