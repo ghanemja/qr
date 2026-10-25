@@ -51,7 +51,8 @@
   "spacex": "Land and fly again",
   "jpmorgan": "The fortress",
   "unitedhealth": "Coverage and care",
-  "cvs": "The pharmacy next door"
+  "cvs": "The pharmacy next door",
+  "boeing": "Built to fly"
  },
  "bank": [
   "Bank of America",
@@ -383,7 +384,6 @@
   "Bolt"
  ],
  "plane": [
-  "Boeing",
   "American Airlines Group",
   "Delta Air Lines",
   "United Continental Holdings",
@@ -1547,5 +1547,8 @@
  ],
  "cvs": [
   "CVS Health"
+ ],
+ "boeing": [
+  "Boeing"
  ]
 }
