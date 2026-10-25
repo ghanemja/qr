@@ -144,7 +144,8 @@
   "goodyear": "The tyre maker the whole world can see",
   "paccar": "The premium trucks drivers ask for, and the parts that keep them running",
   "northrop": "The planes and telescopes no one else can build",
-  "internationalpaper": "The boxes the online world ships in, from the managed forest"
+  "internationalpaper": "The boxes the online world ships in, from the managed forest",
+  "newmont": "The world's biggest gold miner, decades of ore in the ground"
  },
  "bank": [
   "PNC Financial Services",
@@ -188,7 +189,6 @@
   "Western Union",
   "Alliance Data Systems",
   "A-Mark Precious Metals",
-  "Newmont Goldcorp",
   "Brex",
   "Ramp",
   "Plaid",
@@ -1438,7 +1438,6 @@
   "First Data": 5,
   "Western Union": 5,
   "A-Mark Precious Metals": 6,
-  "Newmont Goldcorp": 6,
   "Kellogg": 3,
   "Post Holdings": 3,
   "TreeHouse Foods": 3,
@@ -1797,5 +1796,8 @@
  ],
  "internationalpaper": [
   "International Paper"
+ ],
+ "newmont": [
+  "Newmont Goldcorp"
  ]
 }

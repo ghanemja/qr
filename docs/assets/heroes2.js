@@ -1877,4 +1877,35 @@ export const HEROES2 = {
     moving.push({ geo: van(K.white, BLUE), pivot: [0, y0, 3.8], anim: (t) => { const x = 5.6 - cyc(t, 7) * 11.2; return { x, ry: Math.PI, s: clamp01((5.0 - Math.abs(x)) / 0.5) * 0.8 + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Newmont: the world's biggest gold miner, decades of ore in the ground. Haul trucks climb the
+  // terraced pit with ore for the mill, and at the end of the line the gold is poured into bars.
+  newmont: { finder: '#c49a2c', build: () => {
+    const R = rand(157), out = [], GOLD = '#c49a2c';
+    out.push(ground('#c8a77a'));
+    // ---- the open pit: stepped terraces down into the ground (rings on the slab), centre left
+    const PX = -1.4, PZ = -0.6;
+    const prof = [[3.6, 0], [3.3, 1.0], [2.8, 1.0], [2.8, 0.8]], cols = ['#b8956a', '#a8845c', '#987552', '#88674a', '#755a42'];
+    for (let k = 0; k < 4; k++) { const r = 2.8 - k * 0.55, y = 0.8 - k * 0.2; prof.push([r - 0.55, y], [r - 0.55, y - 0.2]); }
+    prof.push([0, 0.0]);
+    out.push(part(lathe(prof, 64), (x, y) => cols[Math.max(0, Math.min(4, Math.round((1.0 - (y - y0)) / 0.2)))], { p: [PX, y0, PZ], s: [1, 1, 0.8] }));
+    out.push(part(cyl(0.5, 0.5, 0.04, 24), '#5e7f8f', { p: [PX, y0 + 0.02, PZ], s: [1, 1, 0.8] }));
+    // ---- the mill, back right, and the refinery hut
+    out.push(part(rbox(2.6, 1.8, 1.8, 0.05), '#d8dde3', { p: [3.2, y0 + 0.9, -3.4] }), part(box(2.62, 0.3, 1.82), GOLD, { p: [3.2, y0 + 1.65, -3.4] }), place(pixText('NEWMONT', 0.06, K.white, 0.03), { p: [3.2, y0 + 1.65, -2.48] }), part(cyl(0.6, 0.6, 2.4, 20), '#c9ced6', { p: [4.2, y0 + 1.2, -1.6] }), beam([2.2, y0 + 0.4, -2.4], [3.0, y0 + 1.6, -2.4], 0.2, '#7b828c'));
+    out.push(part(rbox(1.6, 1.0, 1.2, 0.05), '#9aa1a9', { p: [3.6, y0 + 0.5, 1.4] }), part(box(0.8, 0.5, 0.04), '#3a1f0a', { p: [3.4, y0 + 0.4, 2.02] }));
+    // The stack of poured bars in front of the refinery.
+    for (let r = 0; r < 3; r++) for (let k = 0; k < 4 - r; k++) out.push(part(extrude([[-0.22, 0], [0.22, 0], [0.17, 0.14], [-0.17, 0.14]], 0.22), '#f2c94c', { p: [2.9 + k * 0.48 + r * 0.24, y0 + r * 0.15, 3.0] }));
+    out.push(trees(R, [[-4.6, 4.6], [4.6, -0.4], [0.6, 4.6]], 0.5));
+    // ---- moving parts
+    const moving = [], P = 10;
+    // Haul trucks climbing the spiral ramp out of the pit and on to the mill.
+    const haul = merge(part(rbox(1.0, 0.4, 0.8, 0.06), '#f2c94c', { p: [0, 0.5, 0] }), part(box(1.0, 0.25, 0.8), '#e0b23a', { p: [-0.1, 0.8, 0], r: [0, 0, -0.15] }), part(rbox(0.3, 0.35, 0.6, 0.05), '#f2c94c', { p: [0.55, 0.75, 0.0] }), part(new THREE.SphereGeometry(0.25, 10, 8), '#8a6a4a', { p: [-0.15, 0.95, 0], s: [1.6, 0.6, 1.1] }), [[-0.35, 0.42], [0.35, 0.42], [-0.35, -0.42], [0.35, -0.42]].map(([x, z]) => part(new THREE.CylinderGeometry(0.25, 0.25, 0.18, 12), '#1d1f24', { p: [x, 0.25, z], r: [Math.PI / 2, 0, 0] })));
+    const spiral = curve([...Array.from({ length: 9 }, (_, i) => { const u = i / 8, a = u * TAU * 1.1, r = 0.7 + u * 2.4; return [PX + Math.cos(a) * r, y0 + 0.04 + Math.max(0, r - 0.55) / 2.55 * 0.98, PZ + Math.sin(a) * r * 0.8]; }), [1.4, y0, -2.6], [2.2, y0, -2.6]]);
+    [0, 0.5].forEach((o) => moving.push({ geo: place(haul, { s: 0.7 }), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, P, o), a = along(spiral, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry, s: Math.min(1, u / 0.05, (1 - u) / 0.05) + 0.001 }; } }));
+    // The excavator at the bottom of the pit, digging.
+    moving.push({ geo: merge(part(rbox(0.6, 0.35, 0.5, 0.05), '#f2c94c', { p: [0, 0.3, 0] }), part(box(0.7, 0.15, 0.6), '#3a3f47', { p: [0, 0.08, 0] }), beam([0.2, 0.4, 0], [0.8, 0.9, 0], 0.08, '#f2c94c'), beam([0.8, 0.9, 0], [1.1, 0.3, 0], 0.07, '#f2c94c')), pivot: [PX - 0.2, y0 + 0.12, PZ], anim: (t) => ({ ry: Math.sin(t * 0.8) * 0.8 }) });
+    // The pour: a glowing stream into a mould, the new bar sliding onto the stack.
+    moving.push({ geo: part(cyl(0.05, 0.08, 0.6, 10), '#ffb02e', { p: [0, -0.3, 0] }), pivot: [3.4, y0 + 0.9, 2.4], anim: (t) => { const f = cyc(t, 4); return f < 0.5 ? { sy: 1 + Math.sin(t * 30) * 0.05 } : { s: 0.001 }; } });
+    moving.push({ geo: part(extrude([[-0.22, 0], [0.22, 0], [0.17, 0.14], [-0.17, 0.14]], 0.22), '#ffcf3f'), pivot: [3.4, y0 + 0.02, 2.4], anim: (t) => { const f = cyc(t, 4), u = easeIO(win(f, 0.5, 0.9)); return { x: u * -0.5, z: u * 0.6, s: f < 0.1 ? f / 0.1 + 0.001 : f > 0.92 ? 0.001 : 1 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
