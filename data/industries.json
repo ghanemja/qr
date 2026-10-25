@@ -149,7 +149,8 @@
   "databricks": "The lakehouse: every kind of data in one lake, turned into answers",
   "perplexity": "An answer engine that shows its sources",
   "neuralink": "Thought into action, placed with a robot's precision",
-  "scaleai": "The labelled data behind the models"
+  "scaleai": "The labelled data behind the models",
+  "huggingface": "Where the AI community shares its models"
  },
  "bank": [
   "PNC Financial Services",
@@ -662,7 +663,6 @@
   "Sierra",
   "Mercor",
   "Safe Superintelligence",
-  "Hugging Face",
   "Runway",
   "Mistral AI",
   "Cohere",
@@ -1409,7 +1409,6 @@
   "Runway": 3,
   "Synthesia": 3,
   "Harvey": 4,
-  "Hugging Face": 4,
   "Thinking Machines Lab": 5,
   "Safe Superintelligence": 5,
   "Lila Sciences": 5,
@@ -1807,5 +1806,8 @@
  ],
  "scaleai": [
   "Scale AI"
+ ],
+ "huggingface": [
+  "Hugging Face"
  ]
 }

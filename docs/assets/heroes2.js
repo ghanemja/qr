@@ -2030,4 +2030,31 @@ export const HEROES2 = {
     moving.push({ geo: part(new THREE.IcosahedronGeometry(0.7, hi() ? 2 : 1), (x, y, z) => (Math.floor((x + y + z) * 6) % 2 ? '#a58bff' : PURP)), pivot: [MX, y0 + 1.4, MZ], anim: (t) => { const f = cyc(t, T * 6); return { ry: t * 0.6, rx: t * 0.3, s: 0.7 + f * 0.45 + bump(cyc(t, T), 0.75, 0.05) * 0.06 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Hugging Face: where the AI community shares its models. Builders upload model boxes onto the
+  // Hub's shelves around the smiling face; others take them down and build on them.
+  huggingface: { finder: '#ffd21e', build: () => {
+    const R = rand(162), out = [], YEL = '#ffd21e', OR = '#ff9d00';
+    out.push(ground('#8fc66f'), part(cyl(2.6, 2.6, 0.06, 56), '#fff3c4', { p: [0, y0 + 0.03, 0] }));
+    // ---- the shelves of the Hub in an arc at the back
+    const shelf = (a) => { const x = Math.cos(a) * 3.8, z = Math.sin(a) * 3.8; out.push(part(rbox(1.6, 2.2, 0.5, 0.04), '#e6dcc6', { p: [x, y0 + 1.1, z], r: [0, -a - Math.PI / 2, 0] })); for (let r = 0; r < 3; r++) for (let k = 0; k < 3; k++) { const v = new V(-0.5 + k * 0.5, 0.45 + r * 0.65, 0.05).applyAxisAngle(new V(0, 1, 0), -a - Math.PI / 2); out.push(part(rbox(0.36, 0.36, 0.36, 0.06), ['#ff9d00', '#3d7be0', '#e5533d', '#2f9e6e', '#8a6cf0', '#3fb8a8'][(r * 3 + k + Math.round(a * 3)) % 6], { p: [x + v.x, y0 + v.y, z + v.z] })); } };
+    [-2.3, -1.85, -1.4, -0.95, -2.75].forEach(shelf);
+    // ---- the face: a big yellow sphere with eyes, a smile and two hugging hands
+    const FX = 0, FZ = 0, FR = 1.2, FQ = Math.PI / 4;
+    out.push(part(cyl(0.6, 0.7, 0.3, 32), '#e6dcc6', { p: [FX, y0 + 0.15, FZ] }));
+    const face = merge(part(ball(FR), YEL), [-1, 1].map((s) => part(new THREE.SphereGeometry(0.14, 14, 10), '#3a2a20', { p: [s * 0.38, 0.3, FR * 0.9], s: [1, 1.2, 0.5] })), [-1, 1].map((s) => part(new THREE.SphereGeometry(0.16, 14, 10), '#ffb3a7', { p: [s * 0.7, 0.0, FR * 0.75], s: [1, 0.8, 0.5] })), part(new THREE.TorusGeometry(0.4, 0.07, 10, 24, Math.PI), '#3a2a20', { p: [0, -0.1, FR * 0.92], r: [0, 0, Math.PI] }), part(new THREE.SphereGeometry(0.2, 12, 8), '#e5533d', { p: [0, -0.4, FR * 0.9], s: [1, 0.6, 0.5] }));
+    out.push(place(face, { p: [FX, y0 + 1.6, FZ], r: [0, FQ, 0] }));
+    // ---- the community: builders at laptops round the front
+    const users = [[-2.4, 2.8], [0.2, 3.8], [2.8, 2.6], [3.8, -0.4], [-3.6, 0.6]];
+    users.forEach(([x, z], i) => out.push(place(fan(['#3d7be0', '#e5533d', '#2f9e6e', '#8a6cf0', '#d6336c'][i]), { p: [x, y0, z], s: 1.4 }), part(rbox(0.5, 0.04, 0.35, 0.02), '#3a3f47', { p: [x - Math.sign(x || 1) * 0.0, y0 + 0.7, z - 0.4] }), part(cyl(0.04, 0.04, 0.7, 6), '#9aa1a9', { p: [x, y0 + 0.35, z - 0.4] })));
+    out.push(trees(R, [[4.6, 4.6], [-4.6, 4.6], [4.6, -4.6]], 0.5));
+    // ---- moving parts
+    const moving = [], P = 8;
+    // The hands waving a hug.
+    [-1, 1].forEach((s) => moving.push({ geo: part(new THREE.SphereGeometry(0.35, 14, 10), OR, { s: [1, 0.8, 0.6] }), pivot: [FX + Math.cos(FQ) * s * 0.9 + 0.25, y0 + 0.9, FZ - Math.sin(FQ) * s * 0.9 + 0.25], anim: (t) => ({ ry: FQ, rz: s * Math.sin(t * 2) * 0.2, y: Math.abs(Math.sin(t * 2)) * 0.1 }) }));
+    // Models uploaded to a shelf, and downloaded to someone else.
+    const box2 = (c) => merge(part(rbox(0.36, 0.36, 0.36, 0.06), c), part(box(0.38, 0.06, 0.1), K.white, { p: [0, 0.12, 0] }));
+    users.forEach(([x, z], i) => { const a = [-2.3, -1.85, -1.4, -0.95, -2.75][i], sx = Math.cos(a) * 3.6, sz = Math.sin(a) * 3.6, up = curve([[x, y0 + 1.0, z - 0.4], [(x + sx) / 2, y0 + 3.2, (z + sz) / 2], [sx, y0 + 1.6, sz]]), [x2, z2] = users[(i + 2) % 5], down = curve([[sx, y0 + 1.6, sz], [(x2 + sx) / 2, y0 + 3.6, (z2 + sz) / 2], [x2, y0 + 1.0, z2 - 0.4]]); const c = ['#ff9d00', '#3d7be0', '#e5533d', '#2f9e6e', '#8a6cf0'][i];
+      moving.push(rider(box2(c), up, P, i / 5, 0, 0.4, (t) => ({ ry: t * 2 }))); moving.push(rider(box2(c), down, P, i / 5, 0.5, 0.9, (t) => ({ ry: t * 2 }))); });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
