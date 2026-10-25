@@ -100,7 +100,8 @@
   "nasdaq": "Where the next big company lists, beside the giants already there",
   "ice": "The exchange behind the exchanges: stocks, oil and mortgages in one data cube",
   "paypal": "Both sides of the checkout: friends pay friends, and the same accounts pay every shop",
-  "block": "Square on the counter, Cash App in the pocket: the money goes round inside Block"
+  "block": "Square on the counter, Cash App in the pocket: the money goes round inside Block",
+  "dell": "Built to order and shipped direct, straight from the line to your door"
  },
  "bank": [
   "PNC Financial Services",
@@ -459,7 +460,6 @@
   "Cerebras"
  ],
  "computer": [
-  "Dell Technologies",
   "HP",
   "Hewlett Packard Enterprise",
   "Xerox",
@@ -1682,5 +1682,8 @@
  ],
  "block": [
   "Block"
+ ],
+ "dell": [
+  "Dell Technologies"
  ]
 }

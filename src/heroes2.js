@@ -413,4 +413,49 @@ export const HEROES2 = {
     });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Dell: built to order, shipped direct. An order leaves the customer's laptop for the line; a
+  // bare chassis gets its board from the robot arm, is boxed under the gantry and rolls into the
+  // van that drives it straight to the customer's door.
+  dell: { finder: '#007db8', build: () => {
+    const R = rand(113), out = [], BLUE = '#007db8';
+    out.push(ground('#8fc66f'), part(box(10.2, 0.03, 1.3), '#5b616b', { p: [0, y0 + 0.015, 2.1] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(0.6, 0.01, 0.06), '#f2c94c', { p: [-4.6 + i * 1.3, y0 + 0.035, 2.1] }));
+    // ---- the factory floor, back: a slab, back wall with the logo, and the line
+    out.push(part(rbox(9.2, 0.1, 4.0, 0.03), '#d8dde3', { p: [-0.2, y0 + 0.05, -2.6] }), part(rbox(9.2, 2.6, 0.2, 0.04), '#eef0f2', { p: [-0.2, y0 + 1.3, -4.6] }), part(box(9.22, 0.25, 0.22), BLUE, { p: [-0.2, y0 + 2.45, -4.6] }));
+    out.push(part(torus(0.62, 0.07, TAU, 40), BLUE, { p: [-3.4, y0 + 1.45, -4.45] }), place(pixText('DELL', 0.07, BLUE, 0.04), { p: [-3.4, y0 + 1.45, -4.45] }));
+    const LZ = -2.2, slots = [-3.0, -1.0, 1.0, 3.0], T = 2.2;
+    out.push(part(rbox(8.0, 0.55, 1.0, 0.05), '#5b616b', { p: [0, y0 + 0.28, LZ] }), part(box(7.9, 0.04, 0.9), '#2b2f36', { p: [0, y0 + 0.57, LZ] }));
+    if (hi()) for (let x = -3.8; x <= 3.8; x += 0.3) out.push(part(new THREE.CylinderGeometry(0.04, 0.04, 0.92, 8), '#9aa1a9', { p: [x, y0 + 0.55, LZ], r: [Math.PI / 2, 0, 0] }));
+    // The robot arm's base at slot 1, the boxing gantry over slot 2, and parts bins.
+    out.push(part(cyl(0.35, 0.4, 0.4, 20), '#e9ecef', { p: [-1.0, y0 + 0.2, LZ - 1.1] }), part(rbox(1.0, 0.5, 0.6, 0.04), '#9aa1a9', { p: [-2.2, y0 + 0.25, LZ - 1.2] }));
+    for (let k = 0; k < 6; k++) out.push(part(box(0.14, 0.04, 0.4), '#2f9e6e', { p: [-2.55 + k * 0.14, y0 + 0.52, LZ - 1.2] }));
+    [-0.6, 0.6].forEach((dz) => out.push(part(rbox(0.2, 2.4, 0.2, 0.04), BLUE, { p: [0.4, y0 + 1.2, LZ + dz] }), part(rbox(0.2, 2.4, 0.2, 0.04), BLUE, { p: [1.6, y0 + 1.2, LZ + dz] })));
+    out.push(part(rbox(1.5, 0.2, 1.5, 0.04), BLUE, { p: [1.0, y0 + 2.4, LZ] }), part(rbox(0.9, 0.6, 0.6, 0.04), '#c99a62', { p: [1.0, y0 + 0.3, LZ - 1.3] }));
+    // The loading dock and its door.
+    out.push(part(rbox(1.2, 1.6, 0.1, 0.03), '#7b828c', { p: [3.6, y0 + 0.8, -4.45] }));
+    // ---- the customer's home office, front left, across the road
+    out.push(place(house2('#fbf3e3', '#5b6b7d', BLUE), { p: [-2.6, y0, 3.6], s: 0.75 }), place(desk(K.wood, '#2b2f36'), { p: [0.8, y0, 3.7], r: [0, Math.PI / 4, 0] }), place(fan('#d6336c'), { p: [1.2, y0, 4.2], s: 1.3 }));
+    out.push(part(rbox(0.7, 0.45, 0.04, 0.02), '#1d1f24', { p: [0.7, y0 + 1.05, 3.6], r: [0, Math.PI / 4, 0] }), part(box(0.6, 0.36, 0.01), BLUE, { p: [0.72, y0 + 1.05, 3.63], r: [0, Math.PI / 4, 0] }));
+    out.push(trees(R, [[4.6, 4.6], [-4.6, 4.6], [3.2, 3.6], [-4.6, 1.0]]));
+    // ---- moving parts
+    const moving = [];
+    const st = (t, i) => { const s = t / T + i, n = ((Math.floor(s) % 4) + 4) % 4, u = s - Math.floor(s); return { n, u, x: slots[0] + 2.0 * (n + easeIO(clamp01(u / 0.4))) }; };
+    for (let i = 0; i < 4; i++) {
+      const it = moving.length;
+      moving.push({ geo: merge(part(rbox(1.1, 0.3, 0.75, 0.04), '#3a3f47', { p: [0, 0.15, 0] }), part(box(0.9, 0.02, 0.6), '#4a4f57', { p: [0, 0.31, 0] })), pivot: [0, y0 + 0.6, LZ], anim: (t) => { const s = st(t, i); return { x: s.x, s: s.n === 3 ? Math.max(0.001, 1 - win(s.u, 0.0, 0.4)) : s.n === 0 ? Math.min(1, win(s.u, 0.45, 0.7)) + 0.001 : 1 }; } });
+      moving.push({ geo: merge(part(box(0.7, 0.04, 0.45), '#2f9e6e'), part(rbox(0.3, 0.08, 0.3, 0.02), '#1d1f24', { p: [0.1, 0.05, 0] }), part(box(0.1, 0.06, 0.4), '#76b900', { p: [-0.25, 0.04, 0] })), pivot: [0, 0.34, 0], parent: it, anim: (t) => { const s = st(t, i); return s.n >= 2 || (s.n === 1 && s.u > 0.7) ? {} : { s: 0.001 }; } });
+      moving.push({ geo: merge(part(box(1.2, 0.55, 0.85), '#c99a62', { p: [0, 0.28, 0] }), part(box(0.26, 0.56, 0.86), '#e8d3ad', { p: [0, 0.28, 0] }), place(pixText('DELL', 0.03, BLUE, 0.02), { p: [0.3, 0.3, 0.43] })), pivot: [0, 0, 0], parent: it, anim: (t) => { const s = st(t, i); return s.n === 3 || (s.n === 2 && s.u > 0.62) ? { y: s.n === 2 ? (1 - easeOut(win(s.u, 0.62, 0.8))) * 1.4 : 0 } : { s: 0.001 }; } });
+    }
+    // The robot arm swinging a board from the bin onto the chassis.
+    const arm = moving.length;
+    moving.push({ geo: merge(part(cyl(0.12, 0.12, 0.3, 14), '#f29a3a', { p: [0, 0.15, 0] }), part(capsule(0.09, 0.9), '#f29a3a', { p: [0, 0.75, 0] })), pivot: [-1.0, y0 + 0.4, LZ - 1.1], anim: (t) => { const u = cyc(t, T); return { ry: Math.PI / 2 + Math.sin(win(u, 0.4, 1) * Math.PI) * 0.9 - 0.9 * (u < 0.4 ? 1 - u / 0.4 : 0) * 0 , rx: 0.5 * bump(u, 0.72, 0.1) }; } });
+    moving.push({ geo: merge(part(capsule(0.07, 0.8), '#f29a3a', { p: [0, 0.4, 0], r: [0, 0, 0] }), part(box(0.2, 0.06, 0.2), '#3a3f47', { p: [0, 0.85, 0] })), pivot: [0, 1.25, 0], parent: arm, anim: (t) => { const u = cyc(t, T); return { rx: 1.7 - 0.25 * bump(u, 0.72, 0.1) }; } });
+    // The order: from the laptop to the start of the line.
+    const order = curve([[0.7, y0 + 1.4, 3.6], [-1.0, y0 + 3.4, 0.8], [slots[0], y0 + 1.4, LZ]]);
+    moving.push(rider(merge(part(rbox(0.4, 0.3, 0.04, 0.04), K.white), part(box(0.3, 0.04, 0.05), BLUE, { p: [0, 0.06, 0] }), part(box(0.2, 0.04, 0.05), '#9aa1a9', { p: [-0.05, -0.04, 0] })), order, T * 4, 0, 0.05, 0.3, () => ({ ry: Math.PI / 4 })));
+    // The van: loaded at the dock, out along the road to the customer's door.
+    const route = curve([[3.6, y0, -3.4], [3.6, y0, -0.2], [2.6, y0, 1.95], [0, y0, 2.0], [-2.0, y0, 2.0], [-2.6, y0, 2.4]]);
+    moving.push({ geo: van(K.white, BLUE), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, T * 4, 0.25), u = f < 0.35 ? 0 : easeIO(win(f, 0.35, 0.85)), a = along(route, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry, s: (f > 0.95 ? 1 - win(f, 0.95, 1) : Math.min(1, f / 0.05)) * 0.8 + 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
