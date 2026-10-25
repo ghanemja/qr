@@ -118,7 +118,8 @@
   "ulta": "Every price point under one roof, and the points that bring members back",
   "dollargeneral": "The store close to everyone in rural America",
   "dollartree": "One low price on everything, from candy to party balloons",
-  "autozone": "The right part today, and help fitting it in the lot"
+  "autozone": "The right part today, and help fitting it in the lot",
+  "oreilly": "The pros' parts store: from the warehouse to the repair bay within the hour"
  },
  "bank": [
   "PNC Financial Services",
@@ -346,7 +347,6 @@
   "Ascena Retail Group",
   "Dillard's",
   "Williams-Sonoma",
-  "O'Reilly Automotive",
   "Advance Auto Parts",
   "Qurate Retail",
   "Casey's General Stores",
@@ -1196,7 +1196,6 @@
   "Tractor Supply": 6,
   "Foot Locker": 8,
   "Dick's Sporting Goods": 8,
-  "O'Reilly Automotive": 10,
   "Advance Auto Parts": 10,
   "GameStop": 12,
   "Williams-Sonoma": 2,
@@ -1726,5 +1725,8 @@
  ],
  "autozone": [
   "AutoZone"
+ ],
+ "oreilly": [
+  "O'Reilly Automotive"
  ]
 }

@@ -1079,4 +1079,35 @@ export const HEROES2 = {
     moving.push({ geo: place(van(K.white, RED), { s: 0.85 }), pivot: [0, y0, -0.9], anim: (t) => { const f = cyc(t, P), x = -2.6 + Math.sin(Math.min(1, f / 0.7) * Math.PI) * 4.6; return { x, ry: f < 0.35 ? 0 : Math.PI, s: f > 0.75 ? 0.001 : 1 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // O'Reilly Auto Parts: the pros' parts store. From the big distribution centre the parts reach
+  // every store, and from the store a pickup runs them to the repair garages within the hour;
+  // the car on the lift comes down fixed.
+  oreilly: { finder: '#00843d', build: () => {
+    const R = rand(131), out = [], GREEN = '#00843d';
+    out.push(ground('#8fc66f'), part(box(10.2, 0.03, 1.2), '#5b616b', { p: [0, y0 + 0.015, 0.3] }), part(box(1.2, 0.03, 4.6), '#5b616b', { p: [0.0, y0 + 0.015, 2.9] }));
+    // ---- the distribution centre, back left
+    out.push(part(rbox(3.6, 2.0, 2.6, 0.05), '#e6e9ed', { p: [-3.0, y0 + 1.0, -3.3] }), part(box(3.62, 0.3, 2.62), GREEN, { p: [-3.0, y0 + 1.85, -3.3] }), [0, 1, 2].map((k) => part(box(0.7, 1.0, 0.04), '#7b828c', { p: [-4.2 + k * 1.2, y0 + 0.5, -1.98] })));
+    // ---- the store, back right
+    out.push(part(rbox(3.2, 1.6, 2.0, 0.05), '#f4f5f6', { p: [2.6, y0 + 0.8, -3.2] }), part(box(3.22, 0.4, 2.02), GREEN, { p: [2.6, y0 + 1.4, -3.2] }), place(pixText("O'REILLY", 0.06, K.white, 0.03), { p: [2.6, y0 + 1.4, -2.18] }), part(box(1.2, 0.8, 0.04), '#2a3c50', { p: [2.0, y0 + 0.45, -2.18] }));
+    // ---- the two repair garages, front: bays with lifts
+    const garages = [[-3.0, 2.8], [3.2, 2.8]];
+    garages.forEach(([x, z]) => {
+      out.push(part(rbox(2.6, 0.1, 2.2, 0.03), '#b9bec6', { p: [x, y0 + 0.05, z] }), part(rbox(2.6, 2.0, 0.15, 0.03), '#d8dde3', { p: [x, y0 + 1.0, z - 1.05] }), part(rbox(0.15, 2.0, 2.2, 0.03), '#d0d5db', { p: [x - 1.25, y0 + 1.0, z] }), part(box(2.62, 0.3, 0.17), '#3a3f47', { p: [x, y0 + 1.85, z - 1.05] }));
+      [-0.6, 0.6].forEach((dz) => out.push(part(box(0.12, 1.6, 0.12), '#c0392b', { p: [x - 0.9, y0 + 0.8, z + dz] })));
+    });
+    out.push(trees(R, [[4.6, 0.0], [-4.6, 0.6], [1.6, 4.6], [-1.6, 4.6], [0.4, -4.6]], 0.6));
+    // ---- moving parts
+    const moving = [], P = 10;
+    // The cars on the lifts: up while the part comes, down fixed.
+    garages.forEach(([x, z], i) => { const lift = (t) => { const f = cyc(t, P, i * 0.5); return 0.9 * (easeIO(win(f, 0.0, 0.1)) - easeIO(win(f, 0.75, 0.88))); };
+      moving.push({ geo: merge(sedan(['#e5533d', '#3d7be0'][i]), part(box(2.0, 0.06, 1.3), '#c0392b', { p: [0, 0.0, 0] })), pivot: [x + 0.1, y0 + 0.1, z], anim: (t) => ({ y: lift(t) }) });
+      moving.push(...walker(moving.length, () => ({ x: x + 0.3, z: z + 1.0, ry: Math.PI / 2, still: true }), { shirt: '#3a5a8a', pants: '#2b3a55', y: y0 }));
+    });
+    // DC → store: a box truck along the back.
+    moving.push({ geo: place(semi(GREEN, K.white, GREEN), { s: 0.5 }), pivot: [0, y0, -1.1], anim: (t) => { const f = cyc(t, P), x = -1.4 + Math.sin(f * Math.PI) * 2.6; return { x, ry: f < 0.5 ? 0 : Math.PI }; } });
+    // Store → garages: the parts pickup, out to each garage in turn.
+    garages.forEach(([x, z], i) => { const route = curve([[2.0, y0, -2.0], [1.6, y0, 0.3], [x * 0.5, y0, 0.3], [x * 0.85, y0, 1.4]]); moving.push({ geo: place(van(K.white, GREEN), { s: 0.7 }), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P, i * 0.5), u = easeIO(win(f, 0.12, 0.4)) - easeIO(win(f, 0.55, 0.75)); if (f < 0.12 || f > 0.75) return { s: 0.001 }; const a = along(route, clamp01(u)); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: f < 0.48 ? a.ry : a.ry + Math.PI }; } });
+      moving.push(rider(merge(part(rbox(0.4, 0.3, 0.3, 0.03), '#c99a62'), part(box(0.42, 0.06, 0.1), GREEN)), curve([[x * 0.85, y0 + 1.0, 1.4], [x * 0.9, y0 + 1.6, 2.0], [x + 0.1, y0 + 1.4, z]]), P, i * 0.5, 0.4, 0.5)); });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
