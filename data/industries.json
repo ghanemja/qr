@@ -122,7 +122,8 @@
   "oreilly": "The pros' parts store: from the warehouse to the repair bay within the hour",
   "publix": "Owned by the people who work there: every order walked out to your car",
   "albertsons": "One grocer behind the local names, one fleet stocking them all",
-  "sysco": "The truck behind the menu: restaurants, schools, hospitals, stadiums"
+  "sysco": "The truck behind the menu: restaurants, schools, hospitals, stadiums",
+  "tyson": "From the egg to the supermarket, all in one company"
  },
  "bank": [
   "PNC Financial Services",
@@ -536,7 +537,6 @@
   "Darden Restaurants",
   "US Foods Holding",
   "Performance Food Group",
-  "Tyson Foods",
   "Kraft Heinz",
   "Mondelez International",
   "General Mills",
@@ -1448,7 +1448,6 @@
   "Conagra Brands": 6,
   "J.M. Smucker": 6,
   "Hormel Foods": 6,
-  "Tyson Foods": 7,
   "Yum Brands": 7,
   "Yum China Holdings": 1,
   "Darden Restaurants": 1,
@@ -1734,5 +1733,8 @@
  ],
  "sysco": [
   "Sysco"
+ ],
+ "tyson": [
+  "Tyson Foods"
  ]
 }

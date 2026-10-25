@@ -1190,4 +1190,32 @@ export const HEROES2 = {
     });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Tyson Foods: from the egg to the supermarket, all in one company. Chicks hatch, grow up in
+  // the farm's barns, go to the plant, and come out as packs of nuggets and chicken on the truck.
+  tyson: { finder: '#002d72', build: () => {
+    const R = rand(135), out = [], RED = '#e31837', NAVY = '#002d72';
+    out.push(ground('#8fc66f'));
+    // ---- the hatchery (left), the barns (back), the plant (right)
+    out.push(part(rbox(2.0, 1.2, 1.6, 0.05), '#f4efe6', { p: [-3.6, y0 + 0.6, 1.6] }), part(prism(2.2, 0.6, 1.8), NAVY, { p: [-3.6, y0 + 1.2, 1.6] }), [0, 1, 2].map((k) => part(new THREE.SphereGeometry(0.14, 12, 8), '#f6e7c9', { p: [-3.0 + k * 0.3, y0 + 0.14, 2.7], s: [1, 1.3, 1] })));
+    [-3.4, -1.4].forEach((x) => out.push(part(rbox(1.6, 0.9, 3.0, 0.05), '#e8e4da', { p: [x, y0 + 0.45, -3.2] }), part(prism(1.8, 0.5, 3.2), '#8a8f96', { p: [x, y0 + 0.9, -3.2] }), part(box(1.62, 0.12, 2.8), '#c9ced6', { p: [x, y0 + 0.5, -3.2] })));
+    out.push(place(bin(0.4, 1.4, '#9aa1a9'), { p: [-0.2, y0, -4.2] }));
+    out.push(part(rbox(3.0, 1.8, 2.4, 0.05), '#eef0f2', { p: [3.2, y0 + 0.9, -2.6] }), part(box(3.02, 0.35, 2.42), RED, { p: [3.2, y0 + 1.6, -2.6] }), place(pixText('TYSON', 0.07, K.white, 0.03), { p: [3.2, y0 + 1.6, -1.38] }), part(cyl(0.15, 0.18, 1.2, 12), '#c9ced6', { p: [4.2, y0 + 2.2, -3.2] }));
+    // The plant's out-conveyor and the truck bay.
+    out.push(part(rbox(0.6, 0.5, 3.0, 0.04), '#5b616b', { p: [3.2, y0 + 0.25, 0.4] }), part(box(0.5, 0.03, 2.9), '#2b2f36', { p: [3.2, y0 + 0.51, 0.4] }));
+    out.push(part(box(10.2, 0.03, 1.2), '#5b616b', { p: [0, y0 + 0.015, 3.6] }));
+    out.push(trees(R, [[0.4, 1.6], [-0.6, 4.6], [4.6, 4.6], [-4.6, -1.0], [0.8, -2.0]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 12;
+    const chick = (s = 1) => place(merge(part(new THREE.SphereGeometry(0.16, 12, 8), '#ffe27a', { s: [1.2, 1, 1] }), part(new THREE.SphereGeometry(0.1, 10, 7), '#ffe27a', { p: [0.14, 0.13, 0] }), part(cone(0.03, 0.08, 6), '#f29a3a', { p: [0.25, 0.13, 0], r: [0, 0, -Math.PI / 2] })), { s });
+    const hen = merge(part(new THREE.SphereGeometry(0.22, 14, 10), K.white, { s: [1.3, 1, 1] }), part(new THREE.SphereGeometry(0.13, 12, 8), K.white, { p: [0.25, 0.2, 0] }), part(box(0.05, 0.08, 0.1), '#e5533d', { p: [0.27, 0.35, 0] }), part(cone(0.04, 0.1, 6), '#f29a3a', { p: [0.39, 0.2, 0], r: [0, 0, -Math.PI / 2] }), part(cone(0.12, 0.2, 8), K.white, { p: [-0.3, 0.12, 0], r: [0, 0, 0.9] }));
+    // Chicks walking from the hatchery to the barns.
+    for (let k = 0; k < 4; k++) moving.push(rider(chick(), curve([[-3.0, y0 + 0.15, 2.4], [-2.6, y0 + 0.15, 0.4], [-2.4, y0 + 0.15, -1.6]]), P / 2, k / 4, 0, 0.9, (t) => ({ y: Math.abs(Math.sin(t * 10)) * 0.05 })));
+    // Hens pecking in the yard by the barns.
+    [[-2.4, -1.2], [-1.8, -1.5], [-3.0, -1.4], [-0.6, -1.3]].forEach(([x, z], i) => moving.push({ geo: hen, pivot: [x, y0 + 0.2, z], anim: (t) => ({ ry: i + Math.sin(t * 0.7 + i) * 0.8, rz: -Math.max(0, Math.sin(t * 3 + i * 2)) * 0.4 }) }));
+    // Packs out of the plant down the conveyor to the truck.
+    const pack = merge(part(rbox(0.42, 0.12, 0.3, 0.03), RED), part(box(0.3, 0.13, 0.18), '#f4d8b8'), part(box(0.15, 0.14, 0.06), K.white, { p: [0.1, 0, -0.1] }));
+    for (let k = 0; k < 5; k++) moving.push({ geo: pack, pivot: [3.2, y0 + 0.6, 0], anim: (t) => { const u = cyc(t, 4, k / 5); return { z: -1.0 + u * 2.8, s: Math.min(1, u / 0.06, (1 - u) / 0.06) + 0.001 }; } });
+    moving.push({ geo: place(semi(RED, K.white, NAVY), { s: 0.55 }), pivot: [0, y0, 3.6], anim: (t) => { const f = cyc(t, P), x = f < 0.5 ? 3.0 : 3.0 - easeIn(win(f, 0.5, 0.95)) * 9; return { x, ry: Math.PI, s: clamp01((5.6 - Math.abs(x)) / 0.6) + 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
