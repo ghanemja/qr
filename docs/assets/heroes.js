@@ -683,29 +683,57 @@ export const HEROES = {
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 
-  // Nvidia: the engine of the AI boom. A GPU spins its fans while streams of light run up out of
-  // the chip into the neural network it trains.
+  // Nvidia: the engine every AI is trained on. A silicon city: the GPU die laid out like a town
+  // of tiny blocks, ringed by memory towers, on a board of gold traces; light races along the
+  // traces into the chip and rises into the neural network training above it.
   nvidia: { finder: '#76b900', build: () => {
-    const fan = merge(part(cyl(0.35, 0.35, 0.3, 20), '#1a1a1a'), ring(9, (a) => part(extrude([[0, 0], [1.25, -0.15], [1.4, 0.25], [0.2, 0.3]], 0.06), '#2b2f36', { r: [Math.PI / 2, 0, a], p: [0, 0.05, 0] })));
-    const layers = [[-3, 3], [0, 4], [3, 3]], nodes = [];
-    layers.forEach(([x, n], li) => { for (let k = 0; k < n; k++) nodes.push({ li, p: [x, 7.6 + (k - (n - 1) / 2) * 1.3, -0.6] }); });
-    const L = [0, 1, 2].map((li) => nodes.filter((n) => n.li === li));
-    const links = []; nodes.forEach((a) => nodes.forEach((b) => b.li === a.li + 1 && links.push(beam(a.p, b.p, 0.06, '#5b6470'))));
-    const paths = Array.from({ length: 6 }, (_, i) => [[(i - 2.5) * 0.7, 3.3, 0.4], L[0][i % 3].p, L[1][(i * 3 + 1) % 4].p, L[2][i % 3].p]);
-    const at = (pts, f) => { const seg = Math.min(pts.length - 2, Math.floor(f * (pts.length - 1))), k = f * (pts.length - 1) - seg; return pts[seg].map((v, j) => v + (pts[seg + 1][j] - v) * easeIO(k)); };
-    return {
-      bare: true, move: () => ({}),
-      geo: merge(part(rbox(9, 0.3, 4.4, 0.1), '#14532d', { p: [0, 1.6, 0] }), part(box(4, 0.15, 0.3), K.gold, { p: [0.8, 1.42, 2.2] }),
-        part(rbox(9.2, 1.6, 4.2, 0.3), '#1a1a1a', { p: [0, 2.6, 0] }), part(box(9.25, 0.12, 0.3), '#76b900', { p: [0, 2.3, 2.1] }), part(box(0.3, 0.12, 4.25), '#76b900', { p: [0, 3.41, 0] }),
-        [-2.2, 2.2].map((x) => part(torus(1.65, 0.12, TAU, 48), '#3a3f47', { p: [x, 3.42, 0], r: [Math.PI / 2, 0, 0] })), part(box(0.4, 2.8, 4.4), K.steel, { p: [-4.7, 2, 0] }),
-        ring(14, (a, i) => part(box(8.6, 0.04, 0.5), '#3a3f47', { p: [0, 1.85 + 0.0, -2.05] })).slice(0, 1), part(rbox(2.4, 0.6, 2.4, 0.15), '#76b900', { p: [0, 3.65, 0] }), part(box(1.4, 0.05, 1.4), '#c7f464', { p: [0, 3.97, 0] }),
-        links, nodes.map((n) => part(ball(0.4), n.li === 1 ? '#76b900' : '#e8f5d0', { p: n.p }))),
-      moving: [
-        ...[-2.2, 2.2].map((x) => ({ geo: fan, pivot: [x, 3.4, 0], anim: (t) => ({ ry: -t * 7 }) })),
-        ...paths.map((pts, i) => ({ geo: part(ball(0.2), '#c7f464'), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 2.2, i / 6), p = at(pts, f); return { x: p[0], y: p[1], z: p[2], s: 0.8 + bump(f, 1 / 3, 0.05) + bump(f, 2 / 3, 0.05) }; } })),
-        { geo: part(rbox(1.5, 0.08, 1.5, 0.04), '#e9ffc7'), pivot: [0, 4.02, 0], anim: (t) => ({ s: 0.9 + Math.max(0, Math.sin(t * 5)) * 0.15 }) },
-      ],
-    };
+    const R = rand(61), out = [], GREEN = '#76b900', y0 = 0.5;
+    // ---- the board
+    out.push(part(rbox(10.2, 0.5, 8.6, 0.1), '#14532d', { p: [0, 0.25, 0] }), part(box(10.0, 0.02, 8.4), '#1a6b3a', { p: [0, y0 + 0.01, 0] }));
+    for (let i = 0; i < 18; i++) out.push(part(box(0.32, 0.03, 0.7), K.gold, { p: [-4.25 + i * 0.5, y0 + 0.02, 4.2] }));
+    // Gold traces running to the chip, in bundles.
+    const traces = [];
+    for (let i = 0; i < (hi() ? 26 : 10); i++) {
+      const side = i % 4, k = (Math.floor(i / 4) - 3) * 0.28, path = side === 0 ? [[-4.8, k - 0.8], [-3.2, k - 0.8], [-2.4, k * 0.6]] : side === 1 ? [[4.8, k + 0.6], [3.4, k + 0.6], [2.4, k * 0.6]] : side === 2 ? [[k - 0.6, -4.1], [k - 0.6, -2.9], [k * 0.6, -2.0]] : [[k + 0.5, 3.9], [k + 0.5, 3.0], [k * 0.6, 2.0]];
+      traces.push(path);
+      path.slice(1).forEach(([x, z], j) => { const [px, pz] = path[j], len = Math.hypot(x - px, z - pz); out.push(part(box(len, 0.012, 0.05), '#c9a227', { p: [(x + px) / 2, y0 + 0.025, (z + pz) / 2], r: [0, -Math.atan2(z - pz, x - px), 0] })); });
+    }
+    // Capacitors and power chokes around the edge.
+    for (let i = 0; i < (hi() ? 30 : 10); i++) { const a = R() * TAU, d = 3.2 + R() * 0.9; const x = Math.cos(a) * d * 1.15, z = Math.sin(a) * d * 0.85; if (Math.abs(x) < 4.6 && Math.abs(z) < 3.8) out.push(part(cyl(0.12, 0.12, 0.35, 16), '#5b616b', { p: [x, y0 + 0.18, z] }), part(cyl(0.12, 0.12, 0.02, 16), '#c9ced6', { p: [x, y0 + 0.36, z] })); }
+    for (let i = 0; i < 6; i++) out.push(part(rbox(0.5, 0.35, 0.5, 0.05), '#3a3f47', { p: [-3.9 + i * 0.6, y0 + 0.18, -3.3] }), part(box(0.3, 0.02, 0.3), '#9aa1a9', { p: [-3.9 + i * 0.6, y0 + 0.36, -3.3] }));
+    // ---- the package, the die city and the memory towers
+    out.push(part(rbox(4.6, 0.25, 4.0, 0.06), '#2b2f36', { p: [0, y0 + 0.13, 0] }), part(rbox(3.0, 0.12, 2.6, 0.04), '#5b616b', { p: [0, y0 + 0.31, 0] }));
+    const dieY = y0 + 0.37;
+    for (let gx = 0; gx < (hi() ? 13 : 6); gx++) for (let gz = 0; gz < (hi() ? 11 : 5); gz++) {
+      const n = hi() ? [13, 11] : [6, 5], cw = 2.8 / n[0], cd = 2.4 / n[1], x = -1.4 + (gx + 0.5) * cw, z = -1.2 + (gz + 0.5) * cd;
+      if (R() < 0.12) continue;
+      const h = 0.04 + R() * R() * 0.32, core = (gx + gz) % 5 === 0;
+      out.push(part(box(cw * 0.78, h, cd * 0.78), core ? '#4d7a12' : shade('#8d939a', 0.8 + R() * 0.3), { p: [x, dieY + h / 2, z] }));
+    }
+    const hbm = [[-2.0, -1.0], [-2.0, 0], [-2.0, 1.0], [2.0, -1.0], [2.0, 0], [2.0, 1.0]];
+    hbm.forEach(([x, z]) => { for (let l = 0; l < 8; l++) out.push(part(box(0.62, 0.11, 0.72), l % 2 ? '#3a3f47' : '#4b5059', { p: [x, y0 + 0.31 + l * 0.12, z] })); out.push(part(box(0.62, 0.03, 0.72), '#9aa1a9', { p: [x, y0 + 0.31 + 8 * 0.12, z] })); });
+    // ---- the heatsink and fan at one side
+    for (let i = 0; i < (hi() ? 22 : 8); i++) out.push(part(box(0.04, 1.2, 2.4), '#c9ced6', { p: [3.3 + i * (hi() ? 0.07 : 0.19), y0 + 0.6, -2.4] }));
+    out.push(part(rbox(1.8, 0.22, 2.6, 0.08), '#1d1f24', { p: [4.05, y0 + 1.31, -2.4] }), part(torus(0.95, 0.07, TAU, 40), GREEN, { p: [4.05, y0 + 1.43, -2.4], r: [Math.PI / 2, 0, 0] }));
+    // ---- the neural network above, being trained
+    const layers = [[-3, 4], [-1, 6], [1, 6], [3, 3]], nodes = [];
+    layers.forEach(([x, n], li) => { for (let k = 0; k < n; k++) nodes.push({ li, p: [x * 1.05, 6.4 + (k - (n - 1) / 2) * 0.85, -0.4 + Math.sin(k * 1.7 + li) * 0.35] }); });
+    const L = [0, 1, 2, 3].map((li) => nodes.filter((n) => n.li === li));
+    nodes.forEach((a) => nodes.forEach((b) => { if (b.li === a.li + 1) out.push(beam(a.p, b.p, 0.025, '#5b7a3a')); }));
+    out.push(nodes.map((n) => part(ball(0.2), '#2f3a2a', { p: n.p })));
+    // Rings of light stacked from the die up into the network.
+    [0, 1, 2, 3, 4].forEach((k) => out.push(part(torus(0.5 + k * 0.16, 0.025, TAU, 40), '#c7f464', { p: [0, dieY + 0.9 + k * 0.85, 0], r: [Math.PI / 2, 0, 0] })));
+    const at = (pts, f) => { const seg = Math.min(pts.length - 2, Math.floor(f * (pts.length - 1))), k = f * (pts.length - 1) - seg; return pts[seg].map((v, j) => v + (pts[seg + 1][j] - v) * k); };
+    const moving = [
+      { geo: merge(part(cyl(0.18, 0.18, 0.1, 16), '#1d1f24'), ring(9, (a) => part(extrude([[0, 0], [0.85, -0.12], [0.92, 0.18], [0.12, 0.2]], 0.04), '#3a3f47', { r: [Math.PI / 2, 0, a] }))), pivot: [4.05, y0 + 1.48, -2.4], anim: (t) => ({ ry: -t * 8 }) },
+      // Pulses along the traces into the chip.
+      ...traces.map((path, i) => ({ geo: part(ball(0.07), '#c7f464', { s: [2.2, 1, 1] }), pivot: [0, y0 + 0.07, 0], anim: (t) => { const f = cyc(t, 1.8, (i * 0.37) % 1), p = at(path.map(([x, z]) => [x, 0, z]), f); return { x: p[0], z: p[2], s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; } })),
+      // Signals rising from the die and running forward through the network.
+      ...Array.from({ length: hi() ? 8 : 4 }, (_, i) => { const path = [[0, dieY + 0.3, 0], L[0][i % 4].p, L[1][(i * 2 + 1) % 6].p, L[2][(i * 5 + 2) % 6].p, L[3][i % 3].p]; return { geo: part(ball(0.13), '#e9ffc7'), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 2.6, i / (hi() ? 8 : 4)), p = at(path, easeIO(f)); return { x: p[0], y: p[1], z: p[2], s: 1 + bump(f, 0.25, 0.04) + bump(f, 0.5, 0.04) + bump(f, 0.75, 0.04) }; } }; }),
+      // Nodes light up as training passes through them.
+      ...nodes.map((n, i) => ({ geo: part(ball(0.22), GREEN), pivot: n.p, anim: (t) => { const f = cyc(t, 2.6, -n.li * 0.18 + i * 0.01); return { s: 0.6 + bump(f, 0.5, 0.12) * 0.9 }; } })),
+    ];
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 
   // Costco: the membership warehouse. A forklift stacks pallets on towering racks, the
