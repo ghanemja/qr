@@ -1462,4 +1462,33 @@ export const HEROES2 = {
     moving.push({ geo: place(sedan('#3d7be0'), { r: [0, Math.PI / 2, 0] }), pivot: [3.9, y0, 0], anim: (t) => { const f = cyc(t, P), z = f < 0.5 ? -6 + 0 : f < 0.62 ? -5.4 + easeOut(win(f, 0.5, 0.62)) * 4.8 : f < 0.8 ? -0.6 : -0.6 + easeIn(win(f, 0.8, 1)) * 6; return { z, s: clamp01((5.2 - Math.abs(z)) / 0.6) + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // DoorDash: the most dashers on the most streets. Orders ping from the homes, and red-bagged
+  // dashers on scooters and in cars run from the restaurants to the doors, many at once.
+  doordash: { finder: '#ff3008', build: () => {
+    const R = rand(143), out = [], RED = '#ff3008';
+    out.push(ground('#8fc66f'));
+    // ---- the street grid
+    [-1.6, 1.6].forEach((v) => out.push(part(box(10.2, 0.03, 0.9), '#5b616b', { p: [0, y0 + 0.015, v] }), part(box(0.9, 0.03, 10.2), '#5b616b', { p: [v, y0 + 0.016, 0] })));
+    // ---- restaurants (left and back) and homes (front and right)
+    const rest = [[-3.4, -3.4, '#e5533d', 'PIZZA'], [0, -3.6, '#2f9e6e', 'TACO'], [-3.4, 0, '#f2c94c', 'BURGER']];
+    rest.forEach(([x, z, c, name]) => out.push(part(rbox(1.8, 1.2, 1.4, 0.05), '#f4efe6', { p: [x, y0 + 0.6, z] }), part(box(1.82, 0.3, 1.42), c, { p: [x, y0 + 1.1, z] }), place(pixText(name, 0.05, K.white, 0.02), { p: [x, y0 + 1.1, z + 0.72] }), part(box(1.0, 0.5, 0.03), '#9cc3e0', { p: [x, y0 + 0.45, z + 0.71] })));
+    const homes = [[3.4, 0, 0], [3.4, 3.4, 0], [0, 3.4, 0], [-3.4, 3.4, 0], [3.4, -3.4, 0]];
+    homes.forEach(([x, z], i) => out.push(place(home(['#fbf3e3', '#e8eef4', '#f6e7e1', '#eef3e6', '#f1e2c6'][i], ['#8a5a36', '#5b6b7d', '#a35a3c', '#3f6f8f', '#6f4a2c'][i], 1.5, 1.3, 1.0), { p: [x, y0, z] })));
+    out.push(part(rbox(1.4, 0.08, 1.4, 0.03), '#c9ced6', { p: [0, y0 + 0.04, 0] }), part(rbox(0.5, 0.9, 0.08, 0.06), '#1d1f24', { p: [0, y0 + 0.6, 0], r: [0, Math.PI / 4, 0] }), part(rbox(0.42, 0.78, 0.02, 0.05), RED, { p: [0.04, y0 + 0.6, 0.04], r: [0, Math.PI / 4, 0] }));
+    out.push(trees(R, [[-4.6, -1.8], [1.8, -4.6], [4.6, -1.8], [-1.8, 4.6], [4.6, 4.6]], 0.5));
+    // ---- moving parts
+    const moving = [], P = 8;
+    const scooter = merge(part(rbox(0.7, 0.12, 0.2, 0.05), '#3a3f47', { p: [0, 0.2, 0] }), part(new THREE.TorusGeometry(0.15, 0.05, 8, 14), '#1d1f24', { p: [-0.3, 0.15, 0] }), part(new THREE.TorusGeometry(0.15, 0.05, 8, 14), '#1d1f24', { p: [0.3, 0.15, 0] }), part(capsule(0.12, 0.3), '#2b3a55', { p: [-0.05, 0.6, 0] }), part(ball(0.12), '#e9b98f', { p: [-0.02, 0.95, 0] }), part(ball(0.13), RED, { p: [-0.02, 1.0, 0], s: [1, 0.7, 1] }), part(rbox(0.35, 0.35, 0.35, 0.05), RED, { p: [-0.4, 0.55, 0] }));
+    const car = merge(place(sedan('#f4f5f6'), { s: 0.55 }), part(rbox(0.2, 0.2, 0.3, 0.03), RED, { p: [0, 0.72, 0] }));
+    // Each run: a restaurant's pickup point to a home's door, through the streets.
+    const runs = [[0, 0], [1, 1], [2, 2], [0, 3], [1, 4], [2, 1]];
+    runs.forEach(([ri, hi_], k) => {
+      const [rx, rz] = rest[ri], [hx, hz] = homes[hi_], a = [rx, y0, rz + 1.0], b = [hx, y0, hz + 1.0];
+      const route = curve([a, [rx, y0, Math.abs(rz + 1.6) < 1.5 ? -1.6 : 1.6], [ (rx + hx) / 2, y0, (Math.abs(rz + 1.6) < 1.5 ? -1.6 : 1.6)], [hx < 0 ? -1.6 : 1.6, y0, (rz + hz) / 2], [hx < 0 ? -1.6 : 1.6, y0, hz + 1.0], b]);
+      moving.push({ geo: k % 3 === 2 ? car : scooter, pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P, k / runs.length), a2 = along(route, easeIO(win(f, 0.1, 0.8))); return { x: a2.p.x, y: a2.p.y, z: a2.p.z, ry: a2.ry, s: Math.min(1, f / 0.08, (1 - f) / 0.08) + 0.001 }; } });
+      moving.push(pulse(hx, y0 + 0.05, hz + 1.0, RED, P, k / runs.length * -1 + 0.8, 0.5));
+      moving.push({ geo: merge(part(rbox(0.36, 0.36, 0.06, 0.08), RED), part(new THREE.SphereGeometry(0.06, 8, 6), K.white, { p: [0, 0, 0.04] })), pivot: [hx, y0 + 2.3, hz], anim: (t) => { const f = cyc(t, P, k / runs.length); return f < 0.12 ? { ry: Math.PI / 4, s: back(win(f, 0, 0.06)) * Math.min(1, (0.12 - f) / 0.03) + 0.001, y: Math.sin(t * 6) * 0.05 } : { s: 0.001 }; } });
+    });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
