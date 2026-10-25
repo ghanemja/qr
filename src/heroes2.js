@@ -1999,4 +1999,35 @@ export const HEROES2 = {
     moving.push({ geo: part(cone(0.06, 0.14, 3), K.white, { r: [0, 0, 0.6] }), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 6) * 4, i = Math.floor(f), u = easeIO(Math.min(1, (f - i) / 0.6)), a = tgt[(i + 3) % 4], b = tgt[i], x = a[0] + (b[0] - a[0]) * u, y = a[1] + (b[1] - a[1]) * u, p = sc(x, y); return { x: p[0], y: y0 + 1.35 + y, z: p[2], q: SQ }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Scale AI: the data behind the models. Pictures roll down the belt past the labellers, who
+  // box every car, sign and person; the labelled data feeds the model, which grows brighter.
+  scaleai: { finder: '#6c47ff', build: () => {
+    const R = rand(161), out = [], PURP = '#6c47ff';
+    out.push(ground('#8fc66f'), part(rbox(8.0, 0.08, 6.4, 0.03), '#eceaf6', { p: [-0.6, y0 + 0.04, -0.8] }));
+    // ---- the belt along x, the labellers' desks behind it
+    const LZ = 0.2;
+    out.push(part(rbox(7.4, 0.5, 1.0, 0.05), '#5b616b', { p: [-0.9, y0 + 0.25, LZ] }), part(box(7.3, 0.03, 0.9), '#2b2f36', { p: [-0.9, y0 + 0.52, LZ] }));
+    [-3.6, -1.8, 0.0].forEach((x, i) => out.push(place(desk(K.white, '#2b2f36'), { p: [x, y0, LZ - 1.4] }), place(fan(['#3d7be0', '#e5533d', '#2f9e6e'][i]), { p: [x, y0, LZ - 2.0], s: 1.3 })));
+    out.push(part(rbox(8.0, 2.4, 0.2, 0.03), '#e6e2f6', { p: [-0.6, y0 + 1.2, -4.0] }), place(pixText('SCALE', 0.1, PURP, 0.03), { p: [-2.6, y0 + 1.6, -3.88] }));
+    // ---- the model: a glowing core on a plinth at the end of the line, front right
+    const MX = 3.4, MZ = 2.4;
+    out.push(part(cyl(0.9, 1.0, 0.5, 32), '#2b2f36', { p: [MX, y0 + 0.25, MZ] }), part(torus(0.95, 0.06, TAU, 40), PURP, { p: [MX, y0 + 0.5, MZ], r: [Math.PI / 2, 0, 0] }));
+    out.push(trees(R, [[-4.6, 4.6], [-1.6, 4.6], [4.6, -1.6], [4.6, -4.6]], 0.55));
+    // ---- moving parts
+    const moving = [], T = 2.0;
+    // Picture tiles stepping along the belt: plain until they pass a desk, then boxed.
+    const pic = (k) => merge(part(rbox(0.8, 0.04, 0.6, 0.02), K.white), part(box(0.7, 0.045, 0.5), ['#9fd0ff', '#bfe6b0', '#ffe0a8'][k % 3]), k % 3 === 0 ? part(rbox(0.3, 0.06, 0.16, 0.03), '#e5533d', { p: [0.05, 0, 0.05] }) : k % 3 === 1 ? part(cyl(0.1, 0.1, 0.06, 8), '#e5533d', { p: [0, 0, 0] }) : part(capsule(0.06, 0.12), '#3d7be0', { p: [0, 0.02, 0], r: [Math.PI / 2, 0, 0] }));
+    const frameG = merge([[0, 0.12, 0.42, 0.03], [0, -0.12, 0.42, 0.03], [0.2, 0, 0.03, 0.27], [-0.2, 0, 0.03, 0.27]].map(([x, z, w, d]) => part(box(w, 0.06, d), '#62d35f', { p: [x, 0.04, z] })));
+    for (let k = 0; k < 6; k++) {
+      const st = (t) => { const s = t / T + k, n = ((Math.floor(s) % 6) + 6) % 6, u = s - Math.floor(s); return { n, u, x: -4.2 + 1.3 * (n + easeIO(clamp01(u / 0.4))) }; };
+      const it = moving.length;
+      moving.push({ geo: pic(k), pivot: [0, y0 + 0.56, LZ], anim: (t) => { const s = st(t); return { x: s.x, s: s.n === 5 ? Math.max(0.001, 1 - win(s.u, 0, 0.4)) : s.n === 0 ? Math.min(1, win(s.u, 0.4, 0.7)) + 0.001 : 1 }; } });
+      moving.push({ geo: frameG, pivot: [0, 0, 0], parent: it, anim: (t) => { const s = st(t); return s.n >= 2 ? {} : { s: 0.001 }; } });
+    }
+    // Labelled data hopping into the model; the core brightens and grows with it.
+    const toModel = curve([[3.0, y0 + 0.7, LZ], [3.6, y0 + 2.0, 1.2], [MX, y0 + 1.4, MZ]]);
+    moving.push(rider(part(new THREE.BoxGeometry(0.2, 0.2, 0.2), PURP), toModel, T, 0.45, 0, 0.6, (t) => ({ rx: t * 3, ry: t * 2 })));
+    moving.push({ geo: part(new THREE.IcosahedronGeometry(0.7, hi() ? 2 : 1), (x, y, z) => (Math.floor((x + y + z) * 6) % 2 ? '#a58bff' : PURP)), pivot: [MX, y0 + 1.4, MZ], anim: (t) => { const f = cyc(t, T * 6); return { ry: t * 0.6, rx: t * 0.3, s: 0.7 + f * 0.45 + bump(cyc(t, T), 0.75, 0.05) * 0.06 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

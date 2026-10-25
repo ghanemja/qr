@@ -148,7 +148,8 @@
   "newmont": "The world's biggest gold miner, decades of ore in the ground",
   "databricks": "The lakehouse: every kind of data in one lake, turned into answers",
   "perplexity": "An answer engine that shows its sources",
-  "neuralink": "Thought into action, placed with a robot's precision"
+  "neuralink": "Thought into action, placed with a robot's precision",
+  "scaleai": "The labelled data behind the models"
  },
  "bank": [
   "PNC Financial Services",
@@ -656,7 +657,6 @@
   "Realogy Holdings"
  ],
  "ai": [
-  "Scale AI",
   "Thinking Machines Lab",
   "Harvey",
   "Sierra",
@@ -1418,7 +1418,6 @@
   "Sierra": 6,
   "Sakana AI": 1,
   "DeepSeek": 1,
-  "Scale AI": 2,
   "Mercor": 2,
   "Cohere": 2,
   "Mistral AI": 2,
@@ -1805,5 +1804,8 @@
  ],
  "neuralink": [
   "Neuralink"
+ ],
+ "scaleai": [
+  "Scale AI"
  ]
 }
