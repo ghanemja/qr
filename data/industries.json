@@ -63,7 +63,8 @@
   "gm": "One platform, every vehicle",
   "verizon": "Can you hear me now?",
   "bofa": "The deposit reservoir",
-  "target": "Expect more, pay less"
+  "target": "Expect more, pay less",
+  "ups": "Hub to doorstep"
  },
  "bank": [
   "Wells Fargo",
@@ -333,7 +334,6 @@
   "Simon Property Group"
  ],
  "parcel": [
-  "United Parcel Service",
   "FedEx",
   "XPO Logistics",
   "C.H. Robinson Worldwide",
@@ -1577,5 +1577,8 @@
  ],
  "target": [
   "Target"
+ ],
+ "ups": [
+  "United Parcel Service"
  ]
 }

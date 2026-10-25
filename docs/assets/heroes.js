@@ -2048,5 +2048,48 @@ export const HEROES = {
     moving.push({ geo: dog, pivot: [0, y0 + 0.37, SZ + D / 2 + 1.35], anim: (t) => { const f = cyc(t, 12), x = -3.6 + (f < 0.5 ? f * 2 : 2 - f * 2) * 6.6; return { x: SX + x, y: Math.abs(Math.sin(t * 9)) * 0.05, ry: f < 0.5 ? 0 : Math.PI, rz: Math.sin(t * 9) * 0.04 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // UPS: one integrated network from the air hub to the doorstep. At Worldport packages race
+  // across the sorting belts; the freighter's containers roll out; brown package cars loop the
+  // neighbourhood on right turns only, and the driver runs a box up to the door.
+  ups: { finder: '#351c15', build: () => {
+    const R = rand(67), out = [], y0 = 0.24, BROWN = '#5a3a22', GOLD = '#ffb500';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#86c766', { p: [0, 0.12, 0] }));
+    const shield = (s = 1) => merge(part(extrude([[-0.3, 0.32], [0.3, 0.32], [0.3, -0.05], [0, -0.35], [-0.3, -0.05]], 0.04), GOLD, { s }), part(extrude([[-0.24, 0.27], [0.24, 0.27], [0.24, -0.03], [0, -0.28], [-0.24, -0.03]], 0.045), '#351c15', { s }), part(box(0.3, 0.06, 0.05), GOLD, { p: [0, 0.08 * s, 0.01], s }));
+    // ---- the hub: walls, a partly open roof and the sorting belts inside
+    const HX = -2.4, HZ = -2.6, W = 4.6, D = 3.4, H = 1.4;
+    out.push(part(box(W, 0.06, D), '#9aa1a9', { p: [HX, y0 + 0.03, HZ] }));
+    out.push(part(rbox(W, H, 0.14, 0.03), '#d6d0c4', { p: [HX, y0 + H / 2, HZ - D / 2] }), part(rbox(0.14, H, D, 0.03), '#d6d0c4', { p: [HX - W / 2, y0 + H / 2, HZ] }), part(rbox(W, 0.5, 0.14, 0.03), '#d6d0c4', { p: [HX, y0 + 0.25, HZ + D / 2] }), part(rbox(0.14, 0.5, D, 0.03), '#d6d0c4', { p: [HX + W / 2, y0 + 0.25, HZ] }));
+    out.push(part(rbox(W + 0.1, 0.12, D * 0.45, 0.03), '#b9b2a2', { p: [HX, y0 + H, HZ - D * 0.28] }), part(rbox(1.2, 0.5, 0.06, 0.03), BROWN, { p: [HX + 0.4, y0 + H - 0.4, HZ - D / 2 + 0.08] }), place(shield(0.8), { p: [HX + 0.4, y0 + H - 0.4, HZ - D / 2 + 0.12] }));
+    const belts = [curve([[HX - 2.0, y0 + 0.55, HZ + 0.9], [HX, y0 + 0.75, HZ + 0.9], [HX + 2.0, y0 + 0.55, HZ + 0.9]]), curve([[HX - 2.0, y0 + 0.9, HZ - 0.9], [HX - 0.2, y0 + 1.05, HZ + 0.2], [HX + 2.0, y0 + 0.9, HZ - 0.3]]), curve([[HX + 1.6, y0 + 0.5, HZ - 1.4], [HX + 0.4, y0 + 0.65, HZ - 0.2], [HX - 1.2, y0 + 0.5, HZ + 1.5]])];
+    belts.forEach((c) => { out.push(part(tubeOn(c, 0.12, hi() ? 40 : 10), '#3a3f47', { s: [1, 1, 1] })); for (let i = 0; i <= 6; i++) { const p = c.getPointAt(i / 6); out.push(part(box(0.06, p.y - y0, 0.06), '#7b828c', { p: [p.x, (p.y + y0) / 2, p.z] })); } });
+    // ---- the freighter at the apron
+    const PX = 2.6, PZ = -3.0;
+    out.push(part(box(4.4, 0.02, 3.0), '#9aa1a9', { p: [PX, y0 + 0.01, PZ + 0.2] }));
+    const plane = merge(part(lathe([[0, 0], [0.24, 0.12], [0.4, 0.45], [0.45, 0.9], [0.45, 2.9], [0.3, 3.6], [0, 3.9]], 32), '#f4f5f6', { r: [0, 0, Math.PI / 2], p: [1.95, 0, 0] }), part(extrude([[0.5, 0], [-0.2, 0], [-0.9, 1.9], [-0.65, 1.95]], 0.06), '#dfe3e8', { p: [0.1, -0.12, 0], r: [Math.PI / 2 - 0.06, 0, 0] }), part(extrude([[0.5, 0], [-0.2, 0], [-0.9, 1.9], [-0.65, 1.95]], 0.06), '#dfe3e8', { p: [0.1, -0.12, 0], r: [-Math.PI / 2 + 0.06, 0, 0] }),
+      part(extrude([[0, 0], [-0.55, 0], [-0.9, 0.95], [-0.6, 0.95]], 0.05), BROWN, { p: [-1.5, 0.35, 0] }), place(shield(0.6), { p: [-1.75, 0.8, 0.04] }), [-0.8, 0.8].map((z) => part(cyl(0.16, 0.16, 0.6, 20), '#c9ced6', { p: [0.4, -0.3, z], r: [0, 0, Math.PI / 2] })), part(box(0.6, 0.06, 0.02), BROWN, { p: [0.6, 0.15, 0.45] }));
+    out.push(place(plane, { p: [PX, y0 + 0.62, PZ], r: [0, Math.PI, 0] }));
+    for (const [x, z] of [[PX - 1.4, PZ], [PX + 1.0, PZ + 0.6], [PX + 1.0, PZ - 0.6]]) out.push(part(cyl(0.04, 0.04, 0.35, 8), '#3a3f47', { p: [x, y0 + 0.2, z] }), part(new THREE.CylinderGeometry(0.1, 0.1, 0.08, 12), '#1d1f24', { p: [x, y0 + 0.06, z], r: [Math.PI / 2, 0, 0] }));
+    // ---- the neighbourhood block with its loop road
+    const loop = curve([[-3.6, 0, 1.0], [3.6, 0, 1.0], [4.2, 0, 1.6], [4.2, 0, 4.0], [3.6, 0, 4.6], [-3.6, 0, 4.6], [-4.2, 0, 4.0], [-4.2, 0, 1.6]].map(([x, , z]) => [x, y0 + 0.012, z]), true);
+    loop.curveType = 'centripetal';
+    out.push(part(tubeOn(loop, 0.42, hi() ? 120 : 30), '#5c6068', { s: [1, 0.05, 1], p: [0, y0 * 0.95, 0] }));
+    const house = (x, z, c, roof) => [part(rbox(0.9, 0.7, 0.8, 0.04), c, { p: [x, y0 + 0.35, z] }), part(prism(1.0, 0.45, 0.9), roof, { p: [x, y0 + 0.7, z], r: [0, Math.PI / 2, 0] }), part(box(0.2, 0.36, 0.04), '#6b4f3a', { p: [x, y0 + 0.18, z - 0.41] }), part(box(0.5, 0.04, 0.4), '#c9c4b8', { p: [x, y0 + 0.02, z - 0.65] })];
+    [[-2.6, 2.4, '#f6e7c8', '#b8452f'], [-1.0, 2.4, '#d9e7f2', '#4a5d74'], [0.6, 2.4, '#f2d0c9', '#6b4f3a'], [2.2, 2.4, '#e7f2d9', '#5a3a2a']].forEach(([x, z, c, r]) => out.push(house(x, z, c, r)));
+    [[-2.0, 3.5], [1.4, 3.5], [3.0, 3.4], [-3.2, 3.4]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.55)));
+    [[-4.6, -0.4], [0.6, -0.6], [4.6, -0.8], [4.7, -4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.75 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // Packages racing along the belts.
+    const box1 = (c) => merge(part(rbox(0.3, 0.2, 0.24, 0.03), c), part(box(0.31, 0.04, 0.08), '#e8d3ad', { p: [0, 0.1, 0] }));
+    belts.forEach((c, i) => { for (let k = 0; k < 5; k++) moving.push({ geo: box1(['#c99a62', '#b88a52', '#d4a86f'][k % 3]), pivot: [0, 0.2, 0], anim: (t) => { const u = cyc(t, 3 + i * 0.6, k / 5), a = along(c, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry }; } }); });
+    // Containers rolling down from the freighter's nose to the dolly.
+    for (let k = 0; k < 2; k++) moving.push({ geo: merge(part(extrude([[-0.35, 0], [0.35, 0], [0.35, 0.45], [0.15, 0.62], [-0.35, 0.62]], 0.55), '#c9ced6'), part(box(0.5, 0.3, 0.02), BROWN, { p: [0, 0.3, 0.28] })), pivot: [PX - 2.1, y0 + 0.62, PZ], anim: (t) => { const f = cyc(t, 6, k * 0.5), x = -easeIO(win(f, 0.1, 0.6)) * 1.5; return f > 0.85 ? { s: 0.001 } : { x, y: -easeIO(win(f, 0.1, 0.4)) * 0.5, ry: Math.PI / 2 }; } });
+    // Package cars on the loop (right turns only), and the driver delivering.
+    const van = merge(part(rbox(1.7, 1.15, 0.95, 0.08), BROWN, { p: [-0.15, 0.78, 0] }), part(rbox(0.5, 0.8, 0.95, 0.16), BROWN, { p: [0.85, 0.6, 0] }), part(box(0.04, 0.36, 0.8), '#26323f', { p: [1.1, 0.9, 0] }), place(shield(0.45), { p: [-0.3, 0.95, 0.49] }),
+      [[-0.6, 0.45], [0.75, 0.45], [-0.6, -0.45], [0.75, -0.45]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.14, 16), '#1d1f24', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] })));
+    for (let k = 0; k < 2; k++) moving.push({ geo: van, pivot: [0, y0, 0], anim: (t) => { const a = along(loop, cyc(t, 14, k * 0.5)); return { x: a.p.x, z: a.p.z, ry: a.ry, s: 0.78 }; } });
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 5), A = [0.6, 1.25], B = [0.6, 1.75]; const k = f < 0.4 ? easeIO(f / 0.4) : f < 0.6 ? 1 : 1 - easeIO(win(f, 0.6, 1)); return { x: A[0], z: A[1] + (B[1] - A[1]) * k, ry: f < 0.5 ? -Math.PI / 2 : Math.PI / 2, still: f > 0.4 && f < 0.6 }; }, { shirt: BROWN, pants: BROWN, y: y0, carry: part(rbox(0.36, 0.26, 0.3, 0.03), '#c99a62', { p: [0.28, 1.1, 0] }) }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
