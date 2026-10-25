@@ -342,37 +342,35 @@ export const HEROES2 = {
     moving.push({ geo: merge(part(lathe([[0, -0.3], [0.2, -0.28], [0.18, -0.1], [0.1, 0], [0, 0.02]], 20), K.gold), part(cyl(0.02, 0.02, 0.2, 6), K.dark, { p: [0, 0.1, 0] })), pivot: [NX + 1.4, y0 + 3.5, NZ + 0.6], anim: (t) => ({ rz: Math.sin(t * 9) * 0.35 * bump(cyc(t, P), 0.1, 0.08) }) });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // PayPal: both sides of the checkout. Friends pay each other in a tap, and the same accounts
-  // pay hundreds of shops through the button in the middle; every new account makes the network
-  // more useful for everyone else.
+  // PayPal: both sides of the checkout. Friends pay each other with a tap (the blue Venmo hops),
+  // and the same accounts pay the shops through the giant P; every newcomer who joins makes the
+  // network more useful to everyone already on it.
   paypal: { finder: '#003087', build: () => {
-    const R = rand(111), out = [], NAVY = '#003087', SKY = '#009cde';
-    out.push(ground('#8fc66f'), part(cyl(2.0, 2.0, 0.04, 48), '#e8e3d8', { p: [0.2, y0 + 0.02, 0.0] }));
-    // ---- the P in the middle: an extruded letter on a plinth
+    const R = rand(235), out = [], NAVY = '#003087', SKY = '#009cde';
+    out.push(ground('#8fc66f'), part(cyl(2.2, 2.2, 0.05, 56), '#e8e3d8', { p: [-0.2, y0 + 0.025, -0.2] }));
+    // ---- the giant P on its plinth
     const pSh = [[0, 0], [0.5, 0], [0.5, 0.75], [0.95, 0.75], [1.25, 0.9], [1.4, 1.2], [1.4, 1.55], [1.25, 1.85], [0.95, 2.0], [0, 2.0]], pHole = [[0.5, 1.15], [0.85, 1.15], [0.95, 1.3], [0.95, 1.45], [0.85, 1.6], [0.5, 1.6]];
     const pGeo = (() => { const sh = new THREE.Shape(pSh.map(([x, y]) => new V(x - 0.7, y, 0))), h = new THREE.Path(pHole.map(([x, y]) => new V(x - 0.7, y, 0))); sh.holes.push(h); return new THREE.ExtrudeGeometry(sh, { depth: 0.3, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.05, bevelSegments: hi() ? 3 : 1 }).translate(0, 0, -0.15); })();
-    out.push(part(cyl(0.9, 1.0, 0.3, 32), '#2b3440', { p: [0.2, y0 + 0.15, 0.0] }));
-    // ---- the shops, back and right: storefront screens with a checkout button
-    const shops = [[-3.6, -3.4], [-1.0, -3.9], [1.6, -3.9], [3.8, -2.6], [3.9, 0.2]];
-    shops.forEach(([x, z], i) => {
-      const c = ['#e5533d', '#2f9e6e', '#f2c94c', '#8a6cf0', '#f29a3a'][i], ry = x > 3 ? Math.PI / 2 : 0;
-      out.push(place(merge(part(rbox(1.6, 1.4, 1.0, 0.05), '#f6efe2', { p: [0, 0.7, 0] }), part(rbox(1.66, 0.25, 1.06, 0.04), c, { p: [0, 1.35, 0] }), part(rbox(1.0, 0.7, 0.04, 0.03), '#1d1f24', { p: [0, 0.7, 0.51] }), part(box(0.9, 0.6, 0.01), K.white, { p: [0, 0.7, 0.535] }), part(rbox(0.5, 0.14, 0.02, 0.05), K.gold, { p: [0, 0.5, 0.545] }), part(box(0.4, 0.25, 0.015), c, { p: [0, 0.85, 0.545] })), { p: [x, y0, z], r: [0, ry, 0] }));
-    });
-    // ---- the people with their phones, front and left
-    const people = [[-3.6, -0.6, '#3d7be0'], [-3.8, 1.8, '#e5533d'], [-2.0, 3.6, '#2f9e6e'], [0.6, 3.9, '#d6336c'], [2.8, 3.4, '#f29a3a'], [-1.6, 1.6, '#8a6cf0'], [1.8, 1.9, '#3fb8a8']];
-    people.forEach(([x, z, c]) => out.push(place(fan(c), { p: [x, y0, z], s: 1.5 }), part(rbox(0.12, 0.2, 0.03, 0.02), '#1d1f24', { p: [x + 0.15, y0 + 0.85, z + 0.15], r: [0, Math.PI / 4, 0] })));
-    out.push(trees(R, [[4.6, 4.6], [-4.6, 4.6], [4.6, 2.2], [-4.6, -1.8]]));
+    out.push(part(cyl(1.0, 1.1, 0.35, 32), '#2b3440', { p: [-0.2, y0 + 0.18, -0.2] }));
+    // ---- the shops in a row along the back, each with a screen and the checkout button
+    const shops = [[-3.8, -3.6], [-1.4, -3.9], [1.0, -3.9], [3.4, -3.6], [3.9, -1.0]];
+    shops.forEach(([x, z], i) => { const c = ['#e5533d', '#2f9e6e', '#f2c94c', '#8a6cf0', '#f29a3a'][i];
+      out.push(place(merge(part(rbox(1.9, 1.7, 1.2, 0.05), '#f6efe2', { p: [0, 0.85, 0] }), part(rbox(1.96, 0.3, 1.26, 0.04), c, { p: [0, 1.65, 0] }), part(rbox(1.3, 0.85, 0.04, 0.03), '#1d1f24', { p: [0, 0.85, 0.61] }), part(box(1.2, 0.75, 0.01), K.white, { p: [0, 0.85, 0.635] }), part(rbox(0.7, 0.18, 0.02, 0.06), K.gold, { p: [0, 0.6, 0.645] }), part(box(0.5, 0.3, 0.015), c, { p: [0, 1.0, 0.645] })), { p: [x, y0, z], r: [0, x > 3.5 ? -Math.PI / 2 + Math.PI : 0, 0] })); });
+    // ---- the people, big, round the front, phones in hand
+    const people = [[-3.8, -0.6, '#3d7be0'], [-3.6, 2.0, '#e5533d'], [-1.6, 3.6, '#2f9e6e'], [1.0, 3.9, '#d6336c'], [3.4, 3.0, '#f29a3a'], [-1.4, 1.4, '#8a6cf0'], [1.8, 1.6, '#3fb8a8'], [3.6, 0.8, '#1d3557']];
+    people.forEach(([x, z, c]) => out.push(place(fan(c), { p: [x, y0, z], s: 2.0 }), part(rbox(0.18, 0.3, 0.04, 0.03), '#1d1f24', { p: [x + 0.18, y0 + 1.2, z + 0.18], r: [0, Math.PI / 4, 0] }), part(box(0.14, 0.24, 0.01), SKY, { p: [x + 0.2, y0 + 1.2, z + 0.2], r: [0, Math.PI / 4, 0] })));
+    out.push(trees(R, [[4.6, 4.6], [-4.6, 4.6], [-4.6, -2.2], [0.0, -2.2]], 0.5));
     // ---- moving parts
     const moving = [], P = 9;
-    moving.push({ geo: merge(part(pGeo, NAVY), part(pGeo.clone().scale(0.8, 0.8, 1.1), SKY, { p: [-0.32, 0.25, 0.0] })), pivot: [0.2, y0 + 0.3, 0.0], anim: (t) => ({ ry: Math.PI / 4 + Math.sin(t * 0.8) * 0.4, y: Math.sin(t * 1.6) * 0.05 }) });
-    const top = [0.2, y0 + 2.6, 0.0], bill = merge(part(rbox(0.36, 0.22, 0.04, 0.03), SKY), part(cyl(0.06, 0.06, 0.05, 12), K.white, { r: [Math.PI / 2, 0, 0] }));
-    // Friend to friend: hops between people in light blue.
-    people.forEach(([x, z], i) => { const [x2, z2] = people[(i + 3) % people.length], hopC = curve([[x, y0 + 1.1, z], [(x + x2) / 2, y0 + 2.0, (z + z2) / 2], [x2, y0 + 1.1, z2]]); moving.push(rider(bill, hopC, P / 2, i / 7, 0, 0.45)); });
-    // Customers to shops through the P.
-    shops.forEach(([x, z], i) => { const [px, pz] = people[i]; const pay = curve([[px, y0 + 1.1, pz], [(px + top[0]) / 2, y0 + 2.4, (pz + top[2]) / 2], top, [(x + top[0]) / 2, y0 + 2.6, (z + top[2]) / 2], [x, y0 + 1.6, z]]); moving.push(rider(place(coin(0.2, 0.07), { r: [Math.PI / 2, 0, 0] }), pay, P, i / 5, 0, 0.6, (t) => ({ ry: t * 4 }))); moving.push(pulse(x, y0 + 1.7, z, SKY, P, i / 5 + 0.6, 0.45)); });
+    moving.push({ geo: place(merge(part(pGeo, NAVY), part(pGeo.clone().scale(0.8, 0.8, 1.1), SKY, { p: [-0.32, 0.25, 0.0] })), { s: 1.4 }), pivot: [-0.2, y0 + 0.35, -0.2], anim: (t) => ({ ry: Math.PI / 4 + Math.sin(t * 0.8) * 0.4, y: Math.sin(t * 1.6) * 0.05 }) });
+    const top = [-0.2, y0 + 3.4, -0.2], venmo = merge(part(rbox(0.6, 0.36, 0.06, 0.1), SKY), pixText('$', 0.05, K.white, 0.08));
+    // Friend to friend: blue hops between people.
+    people.forEach(([x, z], i) => { const [x2, z2] = people[(i + 3) % people.length]; moving.push(rider(venmo, curve([[x, y0 + 1.6, z], [(x + x2) / 2, y0 + 2.8, (z + z2) / 2], [x2, y0 + 1.6, z2]]), P / 2, i / people.length, 0, 0.45, () => ({ ry: Math.PI / 4 }))); });
+    // Customers to shops through the P, each shop's button lighting up.
+    shops.forEach(([x, z], i) => { const [px, pz] = people[i]; moving.push(rider(place(coin(0.26, 0.08), { r: [Math.PI / 2, 0, 0] }), curve([[px, y0 + 1.6, pz], [(px + top[0]) / 2, y0 + 3.0, (pz + top[2]) / 2], top, [(x + top[0]) / 2, y0 + 3.2, (z + top[2]) / 2], [x, y0 + 2.0, z]]), P, i / 5, 0, 0.6, (t) => ({ ry: t * 4 }))); moving.push(pulse(x, y0 + 2.0, z, SKY, P, i / 5 + 0.6, 0.6)); });
     // A newcomer joining each cycle.
-    moving.push({ geo: merge(fan('#f2c94c'), part(rbox(0.12, 0.2, 0.03, 0.02), '#1d1f24', { p: [0.15, 0.85, 0.15] })), pivot: [3.6, y0, 1.9], anim: (t) => { const f = cyc(t, P); return { s: 1.5 * back(win(f, 0.05, 0.2)) + 0.001, ry: Math.PI / 4 }; } });
-    moving.push(pulse(3.6, y0 + 0.05, 1.9, SKY, P, 0.1, 0.5));
+    moving.push({ geo: merge(fan('#f2c94c'), part(rbox(0.09, 0.15, 0.02, 0.02), '#1d1f24', { p: [0.09, 0.6, 0.09] })), pivot: [0.2, y0, 3.0], anim: (t) => { const f = cyc(t, P); return { s: 2.0 * back(win(f, 0.05, 0.2)) + 0.001, ry: Math.PI / 4 }; } });
+    moving.push(pulse(0.2, y0 + 0.05, 3.0, SKY, P, 0.1, 0.7));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // Block: Square on the counter and Cash App in the pocket. At the market every stall takes a
