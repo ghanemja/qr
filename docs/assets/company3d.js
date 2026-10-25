@@ -82,9 +82,7 @@ if (!webglAvailable()) {
   const mount = (qr) => {
     if (world) world.dispose();
     label(false);
-    // The model keeps turning into its QR code and back until a tap or the button takes over.
     world = createQRWorld(stageEl, {
-      loop: true,
       onScan: label,
       slug: C.slug,
       model: C.model,
@@ -105,10 +103,11 @@ if (!webglAvailable()) {
   };
   mount(C.qr);
   for (const id of ['toggle']) $(id).addEventListener('click', () => setScan(!world.scanning));
-  // A new link rebuilds the model around its own QR; its loop turns it into the code to scan.
+  // A new link rebuilds the model around its own QR, then turns it into the code to scan.
   applyLink = () => {
     shownQR = qrOf(link);
-    mount(shownQR);
+    const w = mount(shownQR);
+    w.ready.then(() => w === world && setScan(true));
   };
   if (location.hash === '#scan') world.ready.then(() => setScan(true));
 }
