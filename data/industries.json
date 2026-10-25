@@ -114,7 +114,8 @@
   "tjx": "The treasure hunt: brand surplus, a new mix every day, at a fraction of the price",
   "macys": "The store on Herald Square that New York parades past",
   "gap": "One maker, four brands for every budget, and the denim to fill them",
-  "lululemon": "A brand built on a community: the free yoga class and the run club"
+  "lululemon": "A brand built on a community: the free yoga class and the run club",
+  "ulta": "Every price point under one roof, and the points that bring members back"
  },
  "bank": [
   "PNC Financial Services",
@@ -341,7 +342,6 @@
   "Foot Locker",
   "Tractor Supply",
   "Burlington Stores",
-  "Ulta Beauty",
   "Ascena Retail Group",
   "Dillard's",
   "Williams-Sonoma",
@@ -1196,7 +1196,6 @@
   "Tractor Supply": 6,
   "Foot Locker": 8,
   "Dick's Sporting Goods": 8,
-  "Ulta Beauty": 9,
   "AutoZone": 10,
   "O'Reilly Automotive": 10,
   "Advance Auto Parts": 10,
@@ -1718,5 +1717,8 @@
  ],
  "lululemon": [
   "Lululemon athletica"
+ ],
+ "ulta": [
+  "Ulta Beauty"
  ]
 }
