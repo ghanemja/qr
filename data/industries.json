@@ -59,7 +59,8 @@
   "visa": "The network",
   "chevron": "Barrels from the Permian",
   "anthropic": "Helpful, honest, harmless",
-  "openai": "Ask anything"
+  "openai": "Ask anything",
+  "gm": "One platform, every vehicle"
  },
  "bank": [
   "Bank of America",
@@ -356,7 +357,6 @@
   "HD Supply Holdings"
  ],
  "car": [
-  "General Motors",
   "AutoNation",
   "Penske Automotive Group",
   "Lear",
@@ -1567,5 +1567,8 @@
  ],
  "openai": [
   "OpenAI"
+ ],
+ "gm": [
+  "General Motors"
  ]
 }

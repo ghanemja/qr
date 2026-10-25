@@ -1848,5 +1848,57 @@ export const HEROES = {
       moving.push({ geo: merge(part(rbox(0.55, 0.34, 0.05, 0.1), GRN), [-0.12, 0, 0.12].map((dx) => part(ball(0.04), '#ffffff', { p: [dx, 0, 0.03] }))), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 4, i * 0.14); if (f < 0.5) return { s: 0.001 }; const p = c.getPointAt(1 - (f - 0.5) * 2); return { x: p.x, y: p.y, z: p.z, ry: Math.PI / 4, s: Math.min(1, (f - 0.5) / 0.05, (1 - f) / 0.06) + 0.001 }; } }); });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // General Motors: one platform under many vehicles, at enormous scale. On the turntable the Ultium
+  // battery skateboard takes a pickup body, then an SUV, then a sedan; a Corvette laps the test
+  // track; the Renaissance Center's towers stand over Detroit.
+  gm: { finder: '#0170ce', build: () => {
+    const R = rand(29), out = [], y0 = 0.24, BLUE = '#0170ce', GLASS = '#6f8fae';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#86c766', { p: [0, 0.12, 0] }));
+    // ---- the test track: a loop round the right and front
+    const track = curve([[-0.9, 0, 3.4], [0.6, 0, 4.3], [3.0, 0, 4.4], [4.45, 0, 3.0], [4.45, 0, -2.8], [3.2, 0, -4.4], [0.6, 0, -4.3], [-0.85, 0, -3.0], [-1.0, 0, 0.0]].map(([x, , z]) => [x, y0 + 0.012, z]), true);
+    track.curveType = 'centripetal';
+    const band = (w, c, y) => { const pts = track.getSpacedPoints(160), tri = []; for (let i = 0; i < 160; i++) { const a = pts[i], b = pts[i + 1], da = track.getTangentAt(i / 160), db = track.getTangentAt(((i + 1) % 160) / 160); const A0 = [a.x - da.z * w, y, a.z + da.x * w], A1 = [a.x + da.z * w, y, a.z - da.x * w], B0 = [b.x - db.z * w, y, b.z + db.x * w], B1 = [b.x + db.z * w, y, b.z - db.x * w]; tri.push(...A0, ...B0, ...A1, ...A1, ...B0, ...B1); } const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(tri, 3)); g.computeVertexNormals(); return part(g, c); };
+    out.push(band(0.62, '#e9e6df', y0 + 0.01), band(0.55, '#4f545c', y0 + 0.016));
+    if (hi()) for (let i = 0; i < 40; i++) { const p = track.getPointAt(i / 40), d = track.getTangentAt(i / 40); out.push(part(box(0.25, 0.006, 0.05), '#f4f4f0', { p: [p.x, y0 + 0.022, p.z], r: [0, Math.atan2(-d.z, d.x), 0] })); }
+    // ---- the Renaissance Center: a tall round tower ringed by four shorter ones
+    const RX = -3.1, RZ = -2.7;
+    out.push(part(rbox(3.4, 0.6, 3.4, 0.08), '#c9ced6', { p: [RX, y0 + 0.3, RZ] }));
+    const drum = (x, z, r, h) => { out.push(part(lathe([[0, 0], [r, 0], [r, h], [r * 0.92, h + 0.08], [0, h + 0.08]], 40), GLASS, { p: [x, y0 + 0.6, z] })); if (hi()) for (let j = 1; j < h / 0.4; j++) out.push(part(new THREE.TorusGeometry(r + 0.005, 0.014, 4, 40), '#c9d6e3', { p: [x, y0 + 0.6 + j * 0.4, z], r: [Math.PI / 2, 0, 0] })); };
+    drum(RX, RZ, 0.75, 4.6);
+    for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) drum(RX + sx * 1.05, RZ + sz * 1.05, 0.45, 2.9);
+    out.push(part(rbox(0.7, 0.7, 0.08, 0.14), BLUE, { p: [RX + 0.53, y0 + 4.6, RZ + 0.53], r: [0, Math.PI / 4, 0] }), part(box(0.42, 0.05, 0.02), '#ffffff', { p: [RX + 0.57, y0 + 4.42, RZ + 0.57], r: [0, Math.PI / 4, 0] }));
+    if (hi()) [[-0.12, 0.62], [0.12, 0.62]].forEach(([dx, y]) => out.push(part(new THREE.TorusGeometry(0.1, 0.03, 6, 20, Math.PI * 1.6), '#ffffff', { p: [RX + 0.57 + dx * 0.707, y0 + 4.0 + y, RZ + 0.57 - dx * 0.707], r: [0, Math.PI / 4, 0.4] })));
+    // ---- the platform stage: a turntable, the Ultium battery wall, and a gantry above
+    const TX = 1.6, TZ = 0.0;
+    out.push(part(cyl(1.7, 1.75, 0.16, 56), '#3a3f47', { p: [TX, y0 + 0.08, TZ] }), part(torus(1.72, 0.03, TAU, 56), BLUE, { p: [TX, y0 + 0.16, TZ], r: [Math.PI / 2, 0, 0] }));
+    for (const x of [-1.9, 1.9]) out.push(part(box(0.14, 3.2, 0.14), '#c9ced6', { p: [TX + x, y0 + 1.6, TZ] }));
+    out.push(part(box(4.0, 0.16, 0.18), '#c9ced6', { p: [TX, y0 + 3.2, TZ] }));
+    // Battery cells stacked like a wall behind.
+    for (let i = 0; i < 6; i++) for (let j = 0; j < 4; j++) out.push(part(rbox(0.36, 0.5, 0.08, 0.02), j % 2 ? '#2f9e6e' : '#28b5a0', { p: [0.4 + i * 0.4, y0 + 0.28 + j * 0.52, -2.2], r: [0, 0, 0] }), part(box(0.1, 0.06, 0.09), '#c9ced6', { p: [0.4 + i * 0.4, y0 + 0.55 + j * 0.52, -2.2] }));
+    [[-4.6, 0.6], [-4.6, 4.6], [-2.6, 4.4], [-3.0, 1.6], [2.0, -3.2], [3.4, 2.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.7 + R() * 0.25)));
+    // ---- moving parts
+    const moving = [];
+    const table = moving.length;
+    const skate = merge(part(rbox(2.3, 0.18, 1.0, 0.06), '#2b2f36', { p: [0, 0.32, 0] }), [...Array(12)].map((_, i) => part(box(0.32, 0.03, 0.18), '#28b5a0', { p: [-0.9 + (i % 6) * 0.36, 0.42, i < 6 ? -0.2 : 0.2] })),
+      [[-0.78, 0.5], [0.78, 0.5], [-0.78, -0.5], [0.78, -0.5]].flatMap(([x, z]) => [part(new THREE.CylinderGeometry(0.25, 0.25, 0.18, 20), '#1d1f24', { p: [x, 0.25, z], r: [Math.PI / 2, 0, 0] }), part(new THREE.CylinderGeometry(0.14, 0.14, 0.19, 16), '#c9ced6', { p: [x, 0.25, z], r: [Math.PI / 2, 0, 0] })]));
+    moving.push({ geo: merge(part(cyl(1.6, 1.6, 0.06, 56), '#5b616b', { p: [0, 0.03, 0] }), skate), pivot: [TX, y0 + 0.16, TZ], anim: (t) => ({ ry: t * 0.45 }) });
+    // The bodies, one after another, lowered onto the skateboard.
+    const prof = (pts, d, c) => part(new THREE.ExtrudeGeometry(new THREE.Shape(pts.map(([x, y]) => new THREE.Vector2(x, y))), { depth: d - 0.12, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.06, bevelSegments: hi() ? 3 : 1, curveSegments: 4 }).translate(0, 0, -d / 2 + 0.06), c);
+    const glassBand = (x0, x1, y, h, d) => part(box(x1 - x0, h, d + 0.02), '#26323f', { p: [(x0 + x1) / 2, y, 0] });
+    const bodies = [
+      merge(prof([[-1.15, 0.4], [1.15, 0.4], [1.18, 0.75], [0.8, 0.8], [0.55, 1.25], [-0.15, 1.27], [-0.2, 0.82], [-1.15, 0.82]], 1.0, '#2b2f36'), glassBand(0.0, 0.5, 1.05, 0.2, 1.0), part(box(0.9, 0.04, 0.9), '#1d1f24', { p: [-0.68, 0.8, 0] })),
+      merge(prof([[-1.15, 0.4], [1.15, 0.4], [1.18, 0.78], [0.75, 0.85], [0.5, 1.35], [-1.05, 1.38], [-1.17, 1.0]], 1.0, '#c0392b'), glassBand(-0.95, 0.45, 1.13, 0.22, 1.0)),
+      merge(prof([[-1.15, 0.4], [1.15, 0.4], [1.17, 0.68], [0.6, 0.75], [0.25, 1.12], [-0.45, 1.14], [-0.8, 0.78], [-1.16, 0.74]], 1.0, BLUE), glassBand(-0.55, 0.3, 0.95, 0.18, 0.98)),
+    ];
+    const P = 15;
+    bodies.forEach((g, i) => moving.push({ geo: g, pivot: [0, 0.02, 0], parent: table, anim: (t) => { const f = cyc(t, P) * 3 - i; if (f < 0 || f > 1) return { s: 0.001 }; return { y: (1 - easeOut(win(f, 0.05, 0.3))) * 2.6 + easeIn(win(f, 0.85, 1)) * 2.6, s: f > 0.95 ? 0.001 : 1 }; } }));
+    // The gantry hook that brings each body down.
+    moving.push({ geo: merge(part(rbox(0.5, 0.2, 0.3, 0.04), '#f2c94c'), part(cyl(0.015, 0.015, 1, 6), '#2b2f36', { p: [0, -0.5, 0] })), pivot: [TX, y0 + 3.05, TZ], anim: (t) => { const f = (cyc(t, P) * 3) % 1; return { sy: 1, y: 0 - (easeOut(win(f, 0.05, 0.3)) - easeIn(win(f, 0.85, 1))) * 0.0 }; } });
+    // The Corvette lapping the track.
+    const vette = merge(prof([[-1.1, 0.18], [1.15, 0.18], [1.2, 0.36], [0.4, 0.5], [0.0, 0.72], [-0.55, 0.7], [-1.1, 0.5]], 0.95, '#e5302a'), glassBand(-0.35, 0.25, 0.6, 0.12, 0.9),
+      [[-0.72, 0.46], [0.72, 0.46], [-0.72, -0.46], [0.72, -0.46]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.14, 18), '#1d1f24', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] })));
+    for (let k = 0; k < 2; k++) moving.push({ geo: k ? sedan('#f4f5f6') : vette, pivot: [0, y0 + 0.02, 0], anim: (t) => { const a = along(track, cyc(t, k ? 11 : 7, k * 0.5)); return { x: a.p.x, z: a.p.z, ry: a.ry }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
