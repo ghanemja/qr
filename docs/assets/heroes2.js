@@ -1115,33 +1115,44 @@ export const HEROES2 = {
       moving.push(rider(merge(part(rbox(0.4, 0.3, 0.3, 0.03), '#c99a62'), part(box(0.42, 0.06, 0.1), GREEN)), curve([[x * 0.85, y0 + 1.0, 1.4], [x * 0.9, y0 + 1.6, 2.0], [x + 0.1, y0 + 1.4, z]]), P, i * 0.5, 0.4, 0.5)); });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // Publix: owned by the people who work there, and it shows. The bagger in the green apron
-  // walks every order out to the customer's car; at the deli the famous Pub Sub is built.
+  // Publix: the supermarket its employees own. Inside the cut-away store the green-aproned staff
+  // stock the aisles, build the famous Pub Sub at the deli and bag at the till; every so often
+  // each of them gets a gold dividend coin, and the bagger walks the order out to the car.
   publix: { finder: '#3c8d2f', build: () => {
-    const R = rand(132), out = [], GREEN = '#3c8d2f';
+    const R = rand(224), out = [], GREEN = '#3c8d2f';
     out.push(ground('#5b616b'), part(box(10.2, 0.02, 10.2), '#6a7079', { p: [0, y0 + 0.01, 0] }));
-    for (let i = 0; i < 5; i++) out.push(part(box(0.06, 0.012, 1.8), '#e9e6df', { p: [-2.2 + i * 1.5, y0 + 0.025, 2.6] }));
-    // ---- the store, back: stucco, arched entrance, the green sign
-    const SX = -0.8, SZ = -3.0;
-    out.push(part(rbox(7.0, 2.2, 2.4, 0.05), '#f3ead8', { p: [SX, y0 + 1.1, SZ] }), part(box(7.04, 0.25, 2.44), GREEN, { p: [SX, y0 + 2.1, SZ] }), part(rbox(2.0, 2.9, 0.5, 0.06), '#f3ead8', { p: [SX + 1.0, y0 + 1.45, SZ + 1.2] }), part(torus(0.6, 0.12, Math.PI, 20), '#e6dcc6', { p: [SX + 1.0, y0 + 1.5, SZ + 1.46] }), part(box(1.2, 1.4, 0.04), '#2a3c50', { p: [SX + 1.0, y0 + 0.75, SZ + 1.46] }));
-    out.push(place(pixText('PUBLIX', 0.08, GREEN, 0.04), { p: [SX + 1.0, y0 + 2.45, SZ + 1.48] }));
-    for (let k = 0; k < 3; k++) out.push(part(box(0.9, 0.8, 0.04), '#9cc3e0', { p: [SX - 2.6 + k * 1.1, y0 + 0.7, SZ + 1.21] }));
-    // ---- the giant Pub Sub on a plinth, back left
-    const sub = merge(part(capsule(0.45, 2.2), '#d9a05b', { r: [0, 0, Math.PI / 2], s: [1, 1, 1] }).translate(0, 0.0, 0), part(box(2.4, 0.08, 0.8), '#5fae45', { p: [0, 0.12, 0] }), part(box(2.3, 0.1, 0.78), '#e5533d', { p: [0, 0.2, 0] }), part(box(2.3, 0.1, 0.78), '#f2c94c', { p: [0, 0.28, 0] }), part(capsule(0.42, 2.1), '#e2b37a', { r: [0, 0, Math.PI / 2], s: [1, 0.6, 1] }).translate(0, 0.55, 0));
-    out.push(part(rbox(1.6, 0.6, 1.0, 0.05), '#e6dcc6', { p: [-3.8, y0 + 0.3, 0.6] }), place(sub, { p: [-3.8, y0 + 1.05, 0.6], r: [0, Math.PI / 4, 0], s: 0.7 }));
-    // Parked cars.
-    out.push(place(sedan('#f4f5f6'), { p: [-1.45, y0, 2.6], r: [0, -Math.PI / 2, 0] }), place(sedan('#3d7be0'), { p: [1.55, y0, 2.6], r: [0, Math.PI / 2, 0] }));
-    out.push(trees(R, [[4.6, 4.6], [-4.6, 4.6], [4.6, -0.6], [-4.6, -1.4]], 0.6));
+    // ---- the store: floor, back and left walls with the green band and sign
+    out.push(part(rbox(7.0, 0.06, 6.0, 0.03), '#f3ead8', { p: [-1.1, y0 + 0.04, -1.8] }), part(rbox(7.0, 2.6, 0.2, 0.03), '#f3ead8', { p: [-1.1, y0 + 1.3, -4.7] }), part(rbox(0.2, 2.6, 6.0, 0.03), '#ece2cc', { p: [-4.6, y0 + 1.3, -1.8] }), part(box(7.02, 0.3, 0.22), GREEN, { p: [-1.1, y0 + 2.45, -4.7] }), part(box(0.22, 0.3, 6.0), GREEN, { p: [-4.6, y0 + 2.45, -1.8] }));
+    out.push(place(pixText('PUBLIX', 0.1, GREEN, 0.03), { p: [-2.6, y0 + 1.9, -4.58] }));
+    // Aisles of goods.
+    const goods = ['#e5533d', '#f2c94c', '#3d7be0', '#2f9e6e', '#d6336c', '#f29a3a', K.white];
+    [-3.4, -2.2, -1.0].forEach((x, a) => { out.push(part(rbox(0.6, 1.5, 2.6, 0.03), '#d8dde3', { p: [x, y0 + 0.78, -2.9] })); for (let r = 0; r < 3; r++) for (let k = 0; k < 6; k++) [-1, 1].forEach((s) => out.push(part(rbox(0.12, 0.3, 0.32, 0.03), goods[(a + r * 2 + k + (s > 0 ? 3 : 0)) % 7], { p: [x + s * 0.32, y0 + 0.35 + r * 0.45, -4.0 + k * 0.44] }))); });
+    // Produce bins along the front of the aisles.
+    [['#e5533d', -3.4], ['#f29a3a', -2.4], ['#8fc46a', -1.4]].forEach(([c, x]) => { out.push(part(rbox(0.9, 0.5, 0.7, 0.04), '#8a5a3a', { p: [x, y0 + 0.3, -0.8] })); if (hi()) for (let k = 0; k < 9; k++) out.push(part(new THREE.SphereGeometry(0.1, 10, 7), c, { p: [x - 0.25 + (k % 3) * 0.25, y0 + 0.62, -1.0 + Math.floor(k / 3) * 0.2] })); });
+    // The deli counter, back right, with the giant sub on it.
+    out.push(part(rbox(2.4, 1.0, 0.8, 0.04), '#cfe6f2', { p: [1.2, y0 + 0.5, -3.6] }), part(rbox(2.4, 0.06, 0.9, 0.03), K.white, { p: [1.2, y0 + 1.02, -3.6] }), part(box(2.2, 0.4, 0.02), GREEN, { p: [1.2, y0 + 2.0, -4.58] }), place(pixText('DELI', 0.06, K.white, 0.02), { p: [1.2, y0 + 2.0, -4.56] }));
+    // The till, front right of the store.
+    out.push(part(rbox(1.8, 0.85, 0.7, 0.04), '#5b616b', { p: [0.9, y0 + 0.43, -0.6] }), part(box(1.6, 0.04, 0.5), '#2b2f36', { p: [0.9, y0 + 0.87, -0.6] }), part(rbox(0.3, 0.3, 0.05, 0.03), '#1d1f24', { p: [1.5, y0 + 1.1, -0.8] }));
+    // The lot, front right: the customer's car.
+    const CX = 3.2, CZ = 3.0;
+    out.push(place(sedan('#c0392b'), { p: [CX, y0, CZ], r: [0, Math.PI / 2, 0] }), part(box(1.0, 0.05, 0.8), '#7a1f15', { p: [CX, y0 + 0.75, CZ - 1.2], r: [0.6, 0, 0] }));
+    for (let i = 0; i < 3; i++) out.push(part(box(0.06, 0.012, 2.0), '#e9e6df', { p: [2.4 + i * 1.2, y0 + 0.025, CZ] }));
+    out.push(trees(R, [[-4.6, 3.6], [-1.2, 4.4], [4.6, -1.4], [4.6, -4.6]], 0.55));
     // ---- moving parts
     const moving = [], P = 12;
-    // The bagger and the customer walk the cart out to the red car; bags go in the trunk.
-    const CX = 3.05, CZ = 2.6;
-    const walkOut = (f, dz) => { const u = easeIO(win(f, 0.05, 0.45)) - easeIO(win(f, 0.62, 0.95)); return { x: SX + 1.0 + (CX - 1.4 - SX - 1.0) * u, z: SZ + 2.0 + (CZ - 0.3 - SZ - 2.0) * u + dz, ry: f < 0.55 ? -Math.atan2(CZ - 0.3 - SZ - 2.0, CX - 1.4 - SX - 1.0) : Math.PI - Math.atan2(CZ - 0.3 - SZ - 2.0, CX - 1.4 - SX - 1.0), still: f > 0.45 && f < 0.62 }; };
-    moving.push(...walker(moving.length, (t) => ({ ...walkOut(cyc(t, P), 0), push: true }), { shirt: GREEN, pants: '#2b3a55', y: y0, carry: place(cartGeo(GREEN), { p: [0.95, 0, 0] }) }));
-    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P), p = walkOut(f, 0.7); return f > 0.62 ? { ...p, s: 1 - win(f, 0.62, 0.7) + 0.001 } : p; }, { shirt: '#d6336c', pants: '#3a3f47', y: y0 }));
-    // Bags lifted into the trunk.
-    for (let k = 0; k < 3; k++) moving.push(rider(part(rbox(0.3, 0.38, 0.2, 0.04), '#d8c6a5'), curve([[CX - 1.0, y0 + 0.9, CZ - 0.2], [CX - 0.8, y0 + 1.6, CZ - 0.5], [CX - 0.4, y0 + 0.9, CZ - 0.4]]), P, -k * 0.04, 0.45, 0.58));
-    moving.push({ geo: place(sedan('#c0392b'), { r: [0, Math.PI / 2, 0] }), pivot: [CX, y0, CZ], anim: (t) => { const f = cyc(t, P), u = easeIn(win(f, 0.66, 0.9)); return { z: u * 3.2, s: f > 0.86 ? Math.max(0.001, 1 - win(f, 0.86, 0.92)) : f < 0.03 ? win(f, 0, 0.03) + 0.001 : 1 }; } });
+    // The staff: a stocker, the deli associate, the cashier, the bagger. Each gets a dividend coin now and then.
+    const staff = [[-1.6, -2.0, Math.PI / 2], [1.2, -4.2, 0], [0.9, -1.2, 0]];
+    staff.forEach(([x, z, ry], i) => { moving.push(...walker(moving.length, (t) => ({ x, z, ry, still: true, push: Math.sin(t * 3 + i) > 0.3 }), { shirt: GREEN, pants: '#2b3a55', y: y0 + 0.06 }));
+      moving.push({ geo: place(coin(0.2, 0.06), { r: [Math.PI / 2, 0, 0] }), pivot: [x, y0 + 2.2, z], anim: (t) => { const f = cyc(t, P, -i * 0.05); return f > 0.85 && f < 0.98 ? { ry: t * 5, y: easeOut(win(f, 0.85, 0.9)) * 0.3, s: back(win(f, 0.85, 0.88)) } : { s: 0.001 }; } }); });
+    // The Pub Sub growing layer by layer on the deli counter.
+    const layers = [['#d9a05b', 0.2], ['#5fae45', 0.08], ['#e5533d', 0.08], ['#f2c94c', 0.08], ['#f4d8b8', 0.1], ['#e2b37a', 0.2]];
+    let yy = y0 + 1.06;
+    layers.forEach(([c, h], k) => { const y = yy; yy += h; moving.push({ geo: k === 0 || k === 5 ? part(capsule(h / 2 + 0.1, 1.6), c, { r: [0, 0, Math.PI / 2], s: [1, k === 5 ? 0.8 : 0.6, 1] }) : part(rbox(1.7, h, 0.36, 0.03), c), pivot: [1.2, y + h / 2, -3.6], anim: (t) => { const f = cyc(t, P), a = k * 0.1; return f > a && f < 0.97 ? { y: (1 - easeOut(win(f, a, a + 0.06))) * 0.6 } : { s: 0.001 }; } }); });
+    // The bagger walks the order out to the car and back.
+    const out1 = (f) => { const u = easeIO(win(f, 0.2, 0.45)) - easeIO(win(f, 0.6, 0.85)); return { x: 1.6 + (CX - 1.6) * u, z: -0.0 + (CZ - 1.6) * u, ry: f < 0.5 ? -Math.atan2(CZ - 1.6, CX - 1.6) : Math.PI - Math.atan2(CZ - 1.6, CX - 1.6), still: f < 0.2 || (f > 0.45 && f < 0.6) || f > 0.85 }; };
+    moving.push(...walker(moving.length, (t) => ({ ...out1(cyc(t, P)), push: true }), { shirt: GREEN, pants: '#2b3a55', y: y0, carry: place(cartGeo(GREEN), { p: [0.95, 0, 0] }) }));
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P), p = out1(f); return { ...p, z: p.z + 0.7, x: p.x - 0.3, s: f > 0.5 ? Math.max(0.001, 1 - win(f, 0.5, 0.55)) : 1 }; }, { shirt: '#d6336c', pants: '#3a3f47', y: y0 }));
+    for (let k = 0; k < 3; k++) moving.push(rider(part(rbox(0.3, 0.38, 0.2, 0.04), '#d8c6a5'), curve([[CX - 1.2, y0 + 0.9, CZ - 1.5], [CX - 0.6, y0 + 1.6, CZ - 1.6], [CX, y0 + 0.9, CZ - 1.3]]), P, -k * 0.03, 0.46, 0.58));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // Albertsons: one grocer behind the local names. Safeway, Vons, Jewel-Osco, Acme and Shaw's
