@@ -2752,4 +2752,63 @@ export const SCENES = {
     moving.push(...walker(moving.length, (t) => { const k = Math.sin(t * 0.35); return { x: k * 3.0 - 0.6, z: LZ + 1.3, ry: Math.cos(t * 0.35) > 0 ? 0 : Math.PI }; }, { shirt: K.white, pants: '#2b3a55', y: y0 }));
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.4, y0, -0.8], topAt: [2.6, y0 + 2.2, -3.6] };
   },
+
+  // Briefcase (custody banks, wealth managers and advisers): advice, and a safe pair of hands. A
+  // client walks up to the adviser's table and the plan pops up between them as a pie; the giant
+  // briefcase opens, their savings fly in and the stacks inside grow; it snaps shut, and in the
+  // custodian's vault next door the great door turns its wheel and holds it safe.
+  'bank:9': () => {
+    const R = rand(3901), out = [], moving = [];
+    out.push(slab('#d9cfba'));
+    out.push(part(box(10.4, 0.03, 1.2), '#6b7078', { p: [0, y0 + 0.015, 4.4] }), part(box(10.4, 0.05, 0.5), '#e6dcc8', { p: [0, y0 + 0.025, 3.55] }));
+    for (let i = 0; i < 9; i++) out.push(part(box(0.5, 0.012, 0.06), K.white, { p: [-4.4 + i * 1.1, y0 + 0.035, 4.4] }));
+    out.push(part(rbox(5.0, 0.04, 3.0, 0.03), '#a9d384', { p: [2.4, y0 + 0.02, 0.6] }));
+    // ---- the custodian (back left): a stone hall with the great round vault door in its face
+    const VX = -2.5, VZ = -3.2, VW = 4.2, VH = 3.0;
+    out.push(part(rbox(VW + 0.4, 0.3, 2.4, 0.04), K.stoneDk, { p: [VX, y0 + 0.15, VZ] }), part(rbox(VW, VH, 2.0, 0.05), K.stone, { p: [VX, y0 + 0.3 + VH / 2, VZ - 0.1] }), part(rbox(VW + 0.3, 0.4, 2.3, 0.05), 'Ad', { p: [VX, y0 + 0.3 + VH + 0.2, VZ - 0.1] }));
+    [-1.7, 1.7].forEach((dx) => out.push(part(cyl(0.17, 0.2, VH - 0.1, 16), K.white, { p: [VX + dx, y0 + 0.3 + (VH - 0.1) / 2, VZ + 1.0] })));
+    const DY = y0 + 0.3 + 1.35, DZ = VZ + 0.92;
+    out.push(part(torus(1.12, 0.12, TAU, 48), '#8e959e', { p: [VX, DY, DZ] }), part(cyl(1.0, 1.0, 0.05, 48), '#3a3f47', { p: [VX, DY, DZ - 0.02], r: [Math.PI / 2, 0, 0] }));
+    // ---- the giant briefcase (back right) lying on its plinth
+    const BX = 2.4, BZ = -2.4, BW = 3.2, BD = 2.0, BH = 0.6, BY = y0 + 0.4;
+    out.push(part(rbox(BW + 0.6, 0.4, BD + 0.6, 0.06), K.white, { p: [BX, y0 + 0.2, BZ] }), part(box(BW + 0.62, 0.06, BD + 0.62), 'B', { p: [BX, y0 + 0.36, BZ] }));
+    out.push(part(rbox(BW, 0.14, BD, 0.06), 'A', { p: [BX, BY + 0.07, BZ] }), part(box(BW - 0.24, 0.02, BD - 0.24), '#5a3a28', { p: [BX, BY + 0.15, BZ] }));
+    [[0, BD / 2 - 0.06, BW, 0.12], [0, -BD / 2 + 0.06, BW, 0.12]].forEach(([x, z, w, d]) => out.push(part(rbox(w, BH, d, 0.05), 'A', { p: [BX + x, BY + BH / 2, BZ + z] })));
+    [BW / 2 - 0.06, -BW / 2 + 0.06].forEach((x) => out.push(part(rbox(0.12, BH, BD, 0.05), 'A', { p: [BX + x, BY + BH / 2, BZ] })));
+    [-1, 1].forEach((s) => out.push(part(rbox(0.3, 0.2, 0.08, 0.03), K.gold, { p: [BX + s * 0.8, BY + BH - 0.05, BZ + BD / 2 + 0.03] })));
+    // ---- the adviser's office (front left) with its patio table
+    const OX = -3.4, OZ = 1.2;
+    out.push(part(rbox(2.6, 1.6, 1.8, 0.05), K.cream, { p: [OX, y0 + 0.8, OZ] }), part(rbox(2.2, 0.8, 0.05, 0.02), '#9fcdea', { p: [OX + 0.1, y0 + 0.75, OZ + 0.91] }), part(rbox(2.8, 0.14, 2.0, 0.04), 'A', { p: [OX, y0 + 1.66, OZ] }));
+    out.push(part(extrude([[0, 0], [0.8, -0.4], [0.8, -0.46], [0, -0.06]], 2.4), (x, y, z) => (Math.floor((z + 3) * 2.5) % 2 ? 'A' : K.white), { p: [OX, y0 + 1.35, OZ + 0.9], r: [0, -Math.PI / 2, 0] }));
+    const TX = -1.7, TZ = 2.5;
+    out.push(part(cyl(0.5, 0.5, 0.05, 24), K.white, { p: [TX, y0 + 0.72, TZ] }), part(cyl(0.05, 0.05, 0.7, 8), K.dark, { p: [TX, y0 + 0.36, TZ] }), part(cyl(0.3, 0.3, 0.03, 16), K.dark, { p: [TX, y0 + 0.02, TZ] }));
+    out.push(parasol('A', K.white, 0.9).translate(TX, y0 + 0.4, TZ));
+    [[TX - 0.7, TZ], [TX + 0.7, TZ]].forEach(([x, z]) => out.push(part(rbox(0.4, 0.06, 0.4, 0.02), K.wood, { p: [x, y0 + 0.44, z] }), part(box(0.05, 0.42, 0.05), K.dark, { p: [x, y0 + 0.21, z] })));
+    [[4.6, 0.6], [0.5, -0.4], [-4.6, -0.6], [1.0, 1.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.5 + R() * 0.15)));
+    out.push(lampPost(0.2, y0, 3.2, -Math.PI / 2));
+    // ---- moving parts (one 14 s cycle)
+    const P = 14, F = (t) => cyc(t, P);
+    // The client: up from the street to the table, sits through the meeting, heads home.
+    const cin = curve([[-0.4, 0, 5.0], [-0.4, 0, 3.4], [TX + 0.7, 0, TZ + 0.3]]);
+    moving.push(...walker(moving.length, (t) => { const f = F(t), a = win(f, 0, 0.16), b = win(f, 0.62, 0.78), { p, ry } = along(cin, Math.min(0.999, Math.max(0.001, a - b))); return { x: p.x, z: p.z, ry: ry + (b > 0 ? Math.PI : 0), s: f > 0.78 ? 0.001 : Math.min(1, f / 0.03) * 0.999 + 0.001, still: a >= 1 && b <= 0, push: f > 0.42 && f < 0.5 }; }, { shirt: '#e5533d', pants: '#2b3a55', y: y0 }));
+    // The adviser at the table.
+    moving.push(...walker(moving.length, (t) => ({ x: TX - 0.75, z: TZ, ry: 0, still: true, push: Math.sin(t * 2) > 0.3 }), { shirt: '#2b3a55', pants: '#2b2f36', y: y0 }));
+    // The plan: a pie that pops up over the table and turns.
+    const pie = merge([[0, 2.2, 'A'], [2.2, 1.6, 'B'], [3.8, 1.4, '#f2c94c'], [5.2, TAU - 5.2, '#9ad0f0']].map(([a0, len, c], i) => part(new THREE.CylinderGeometry(0.55, 0.55, 0.16, 32, 1, false, a0, len), c, { p: [Math.cos(a0 + len / 2) * (i ? 0 : 0.08), 0, Math.sin(a0 + len / 2) * (i ? 0 : 0.08)] })));
+    moving.push({ geo: pie, pivot: [TX, y0 + 2.2, TZ], anim: (t) => { const f = F(t); return { y: easeOut(win(f, 0.18, 0.24)) * 0.3, ry: t * 0.8, rx: 0.5, s: life(f, 0.18, 0.24, 0.42, 0.47) }; } });
+    // The briefcase lid opens, the savings fly in, the stacks grow, the lid snaps shut.
+    const open = (f) => easeIO(win(f, 0.34, 0.42)) * (1 - easeIO(win(f, 0.66, 0.72)));
+    const lid = merge(part(rbox(BW, 0.28, BD, 0.1), 'Ad', { p: [0, 0.14, BD / 2] }), part(torus(0.36, 0.07, Math.PI, 20), '#3a2a20', { p: [0, 0.1, BD + 0.05], r: [Math.PI / 2, 0, 0] }), [-0.8, 0.8].map((x) => part(rbox(0.3, 0.18, 0.08, 0.03), K.gold, { p: [x, 0.08, BD + 0.02] })));
+    moving.push({ geo: lid, pivot: [BX, BY + BH, BZ - BD / 2], anim: (t) => ({ rx: -open(F(t)) * 1.75 }) });
+    const stacks = [[-0.9, -0.4, '#7cbf7d', 0.4], [-0.3, -0.4, '#7cbf7d', 0.5], [0.4, -0.3, K.gold, 0.3], [0.95, -0.3, K.gold, 0.25], [-0.6, 0.45, '#f4f1e4', 0.3], [0.6, 0.45, '#7cbf7d', 0.45]];
+    stacks.forEach(([x, z, c, h], i) => moving.push({ geo: c === K.gold ? part(cyl(0.22, 0.24, 1, 6), c, { p: [0, 0.5, 0], r: [0, Math.PI / 6, 0], s: [1.4, 1, 0.8] }) : part(rbox(0.5, 1, 0.34, 0.03), c, { p: [0, 0.5, 0] }), pivot: [BX + x, BY + 0.16, BZ + z], anim: (t) => { const f = F(t), g = 1 + win(f, 0.44 + (i % 3) * 0.06, 0.5 + (i % 3) * 0.06) * 0.6 - win(f, 0.95, 1) * 0.6; return { sy: Math.min(h * g, BH - 0.2) * 0.999 + 0.001 }; } }));
+    for (let k = 0; k < 3; k++) moving.push({ geo: coin(0.3, 0.09).rotateX(Math.PI / 2), pivot: [0, 0, 0], anim: (t) => { const f = F(t), a = 0.42 + k * 0.06, u = easeIO(win(f, a, a + 0.1)), A = new V(TX, y0 + 1.3, TZ), B = new V(BX + (k - 1) * 0.6, BY + BH + 0.2, BZ), p = A.lerp(B, u); return { x: p.x, y: p.y + hop(u) * 2.4, z: p.z, ry: u * 10, s: f > a && f < a + 0.1 ? 1 : 0.001 }; } });
+    moving.push({ geo: part(star(0.35, 0.06), K.yellow), pivot: [BX, BY + BH + 0.6, BZ + BD / 2 + 0.2], anim: (t) => { const f = F(t); return { rz: t * 2, s: life(f, 0.72, 0.74, 0.77, 0.8) + 0.001 }; } });
+    // The vault door's wheel turns, and the door swings shut on the deposit.
+    const door = moving.length;
+    moving.push({ geo: merge(part(cyl(1.0, 1.0, 0.25, 48), '#b8bec6', { r: [Math.PI / 2, 0, 0], p: [1.0, 0, 0.13] }), part(torus(0.82, 0.04, TAU, 40), '#8e959e', { p: [1.0, 0, 0.27] }), ring(8, (a) => part(cyl(0.07, 0.07, 0.1, 10), '#8e959e', { p: [1.0 + Math.cos(a) * 0.82, Math.sin(a) * 0.82, 0.28], r: [Math.PI / 2, 0, 0] }))), pivot: [VX - 1.0, DY, DZ], anim: (t) => { const f = F(t), o = 1 - easeIO(win(f, 0.74, 0.84)) + easeIO(win(f, 0.95, 1)) * 0; return { ry: -(f < 0.74 ? 1 : o) * 1.2 * (f < 0.02 ? 0 : 1) + (f < 0.02 ? 0 : 0) }; } });
+    moving.push({ geo: merge(part(cyl(0.12, 0.12, 0.12, 14), K.gold, { r: [Math.PI / 2, 0, 0] }), ring(3, (a) => beam([0, 0, 0.06], [Math.cos(a) * 0.45, Math.sin(a) * 0.45, 0.06], 0.06, K.gold))), pivot: [1.0, 0, 0.32], parent: door, anim: (t) => { const f = F(t); return { rz: easeIO(win(f, 0.84, 0.92)) * TAU }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [3.0, y0, 2.5], topAt: [OX, y0 + 1.73, OZ] };
+  },
+
 };
