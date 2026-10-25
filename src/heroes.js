@@ -3013,38 +3013,49 @@ export const HEROES = {
       pivot: [PX, y0 + 1.3, PZ], anim: (t) => ({ ry: Math.PI / 4 + Math.sin(t * 0.6) * 0.15, y: Math.sin(t * 1.1) * 0.06 }) });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // Salesforce: the system of record for how companies sell. Leads drop from the cloud into the
-  // funnel and come out as closed deals that stack up the dashboard's bars; the tower stands over
-  // San Francisco.
+  // Salesforce: every customer conversation in one place. Around the plaza the store, the inbox,
+  // the website, the app and the call centre each stream what they learn up into the cloud; it
+  // sends back the next best move, and an AI agent at the help desk answers the customer at once.
   salesforce: { finder: '#00a1e0', build: () => {
     const R = rand(17), out = [], y0 = 0.24, BLUE = '#00a1e0', NAVY = '#032d60';
-    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#a9cf8a', { p: [0, 0.12, 0] }), part(box(10.2, 0.012, 3.0), '#d9d4ca', { p: [0, y0 + 0.006, 2.6] }));
-    // ---- the tower: a tall rounded shaft tapering to a lit crown
-    const TX = -3.2, TZ = -2.8;
-    out.push(part(lathe([[0, 0], [0.95, 0], [0.95, 0.5], [0.9, 3.4], [0.75, 4.8], [0.55, 5.6], [0.0, 5.8]], 40), (px, py) => (py > y0 + 5.0 ? '#e9f2f8' : '#b9c7d4'), { p: [TX, y0, TZ], s: [1, 1, 0.82] }));
-    if (hi()) for (let j = 1; j < 18; j++) { const y = j * 0.3, r = y < 3.4 ? 0.93 - y * 0.0147 : 0.9 - (y - 3.4) * 0.11; out.push(part(new THREE.TorusGeometry(Math.max(0.1, r), 0.012, 4, 40), '#e9f2f8', { p: [TX, y0 + y, TZ], r: [Math.PI / 2, 0, 0], s: [1, 0.82, 1] })); }
-    // ---- the cloud, the funnel under it, and the dashboard
-    const cloud = merge([[0, 0, 0, 0.9], [0.9, -0.15, 0.1, 0.7], [-0.85, -0.2, 0.05, 0.65], [0.35, 0.45, -0.1, 0.65], [-0.4, 0.35, 0.1, 0.55]].map(([x, y, z, r]) => part(new THREE.SphereGeometry(r, hi() ? 32 : 12, hi() ? 20 : 8), BLUE, { p: [x, y, z] })));
-    const FX = 0.6, FZ = -1.4;
-    out.push(part(lathe([[0.15, 0], [0.18, 0.4], [1.0, 1.4], [1.05, 1.45], [0.98, 1.45], [0.13, 0.42], [0.1, 0]], 40), '#e9ecef', { p: [FX, y0 + 1.0, FZ] }), part(cyl(0.08, 0.08, 1.0, 12), '#9aa1a9', { p: [FX, y0 + 0.5, FZ] }));
-    for (const s of [-1, 1]) out.push(part(box(0.06, 1.0, 0.06), '#9aa1a9', { p: [FX + s * 0.8, y0 + 1.2, FZ] }), beam([FX + s * 0.8, y0 + 1.7, FZ], [FX + s * 0.45, y0 + 1.95, FZ], 0.03, '#9aa1a9'));
-    out.push(part(rbox(3.4, 0.08, 0.5, 0.03), '#3a3f47', { p: [FX + 1.6, y0 + 0.4, FZ + 1.2], r: [0, -0.5, 0] }));
-    // The dashboard: a big screen on legs with bars.
-    const DX = 3.4, DZ = 0.6;
-    out.push(part(rbox(2.4, 1.6, 0.1, 0.05), NAVY, { p: [DX, y0 + 1.5, DZ], r: [0, Math.PI / 4, 0] }), ...[-0.8, 0.8].map((s) => part(box(0.08, 0.8, 0.08), '#3a3f47', { p: [DX + s * 0.57, y0 + 0.4, DZ - s * 0.57] })));
-    [[-4.6, 2.2], [-1.4, -4.6], [1.6, -4.6], [4.6, -3.0], [-4.6, 4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.7 + R() * 0.2)));
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#a9cf8a', { p: [0, 0.12, 0] }), part(cyl(3.0, 3.0, 0.03, 64), '#e8eef4', { p: [0.6, y0 + 0.015, 0.6] }), part(torus(3.0, 0.04, TAU, 64), BLUE, { p: [0.6, y0 + 0.03, 0.6], r: [Math.PI / 2, 0, 0] }));
+    // ---- the tower, back left
+    const TX = -3.4, TZ = -3.2;
+    out.push(part(lathe([[0, 0], [0.85, 0], [0.85, 0.5], [0.8, 3.4], [0.66, 4.8], [0.48, 5.6], [0.0, 5.8]], 40), (px, py) => (py > y0 + 5.0 ? '#e9f2f8' : '#b9c7d4'), { p: [TX, y0, TZ], s: [1, 1, 0.82] }));
+    if (hi()) for (let j = 1; j < 18; j++) { const y = j * 0.3, r = y < 3.4 ? 0.83 - y * 0.0147 : 0.8 - (y - 3.4) * 0.11; out.push(part(new THREE.TorusGeometry(Math.max(0.1, r), 0.012, 4, 40), '#e9f2f8', { p: [TX, y0 + y, TZ], r: [Math.PI / 2, 0, 0], s: [1, 0.82, 1] })); }
+    // ---- the five touchpoints round the plaza
+    const CX = 0.6, CZ = 0.6, RR = 2.6;
+    const spots = [0, 1, 2, 3, 4].map((i) => { const a = -Math.PI / 2 + (i / 5) * TAU + 0.3; return [CX + Math.cos(a) * RR, CZ + Math.sin(a) * RR, a]; });
+    const pedestal = (x, z) => part(rbox(0.8, 0.5, 0.8, 0.08), '#f4f5f6', { p: [x, y0 + 0.25, z] });
+    const icons = [
+      (x, z) => [part(rbox(0.5, 0.55, 0.3, 0.06), '#e5533d', { p: [x, y0 + 0.8, z] }), part(torus(0.12, 0.03, Math.PI, 12), '#e5533d', { p: [x, y0 + 1.1, z] })], // store bag
+      (x, z) => [part(rbox(0.6, 0.4, 0.06, 0.04), '#ffffff', { p: [x, y0 + 0.75, z], r: [0, Math.PI / 4, 0] }), part(prism(0.6, 0.18, 0.07), '#c9ced6', { p: [x, y0 + 0.77, z], r: [Math.PI, Math.PI / 4, 0] })], // email
+      (x, z) => [part(rbox(0.7, 0.45, 0.05, 0.03), NAVY, { p: [x, y0 + 0.85, z], r: [0, Math.PI / 4, 0] }), part(box(0.2, 0.2, 0.2), '#9aa1a9', { p: [x, y0 + 0.55, z] })], // website
+      (x, z) => [part(rbox(0.3, 0.55, 0.05, 0.06), '#1d1f24', { p: [x, y0 + 0.8, z], r: [0, Math.PI / 4, 0] }), part(rbox(0.24, 0.45, 0.02, 0.04), BLUE, { p: [x + 0.02, y0 + 0.8, z + 0.02], r: [0, Math.PI / 4, 0] })], // app
+      (x, z) => [part(torus(0.18, 0.04, Math.PI, 16), '#2b2f36', { p: [x, y0 + 0.8, z], r: [0, Math.PI / 4, 0] }), part(rbox(0.1, 0.16, 0.08, 0.03), '#2b2f36', { p: [x - 0.13, y0 + 0.72, z + 0.13] }), part(rbox(0.1, 0.16, 0.08, 0.03), '#2b2f36', { p: [x + 0.13, y0 + 0.72, z - 0.13] })], // call centre
+    ];
+    spots.forEach(([x, z], i) => out.push(pedestal(x, z), icons[i](x, z)));
+    // The help desk where the agent works.
+    const HX = CX + 0.2, HZ = CZ + 0.9;
+    out.push(part(rbox(1.4, 0.6, 0.5, 0.06), '#f4f5f6', { p: [HX, y0 + 0.3, HZ] }), part(box(1.4, 0.06, 0.06), BLUE, { p: [HX, y0 + 0.62, HZ + 0.25] }));
+    [[-4.6, 1.6], [-1.0, -4.6], [2.4, -4.6], [4.6, -2.6], [-4.6, 4.6], [4.6, 4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.7 + R() * 0.2)));
     // ---- moving parts
     const moving = [];
-    moving.push({ geo: cloud, pivot: [FX, y0 + 4.2, FZ], anim: (t) => ({ x: Math.sin(t * 0.5) * 0.2, y: Math.sin(t * 0.8) * 0.1, ry: Math.PI / 4 }) });
-    // Leads: little person icons falling from the cloud into the funnel.
-    const lead = merge(part(ball(0.08), '#ffffff', { p: [0, 0.2, 0] }), part(capsule(0.08, 0.1), '#ffffff', { p: [0, 0.03, 0] }));
-    for (let k = 0; k < 7; k++) { const a = k * 2.4, r = 0.3 + (k % 3) * 0.2; moving.push({ geo: lead, pivot: [FX, 0, FZ], anim: (t) => { const f = cyc(t, 3, k / 7); if (f < 0.55) return { x: Math.cos(a) * r, z: Math.sin(a) * r, y: y0 + 3.6 - f / 0.55 * 1.2 }; const k2 = win(f, 0.55, 1), a2 = a + k2 * 8, rr = r * (1 - k2) + 0.05; return { x: Math.cos(a2) * rr, z: Math.sin(a2) * rr, y: y0 + 2.4 - k2 * 1.3, s: 1 - k2 * 0.4 }; } }); }
-    // Deals: green coins coming out of the funnel along the belt to the dashboard.
-    for (let k = 0; k < 5; k++) moving.push({ geo: merge(part(cyl(0.16, 0.16, 0.06, 20), '#2fbf5b'), part(box(0.08, 0.02, 0.18), '#ffffff', { p: [0, 0.04, 0], r: [0, 0.6, 0] })), pivot: [FX, y0 + 0.5, FZ], anim: (t) => { const u = cyc(t, 3, k / 5); return { x: 0.1 + u * 2.9, z: 1.2 * Math.min(1, u * 4) + u * 1.4, ry: t * 2, s: Math.min(1, u / 0.06, (1 - u) / 0.06) + 0.001 }; } });
-    // The dashboard bars rising as deals close, then resetting.
-    for (let i = 0; i < 5; i++) moving.push({ geo: part(box(0.26, 1, 0.04), i === 4 ? '#2fbf5b' : BLUE, { p: [0, 0.5, 0] }), pivot: [DX + (-0.75 + i * 0.37) * 0.707 + 0.05, y0 + 0.8, DZ - (-0.75 + i * 0.37) * 0.707 + 0.05], anim: (t) => { const f = cyc(t, 10), h = (0.2 + i * 0.18) * Math.min(1, f * 1.4 + 0.2); return { ry: Math.PI / 4, sy: f > 0.95 ? 0.2 : h }; } });
-    // People heading in to work.
-    for (let k = 0; k < 2; k++) moving.push(...walker(moving.length, (t) => { const f = cyc(t, 11, k * 0.5), x = 4.6 - f * 7.6; return { x, z: 2.3 + k * 0.6, ry: Math.PI, s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: k ? BLUE : '#f4f5f6', pants: '#2b3a55', skin: k ? '#8d5a3b' : '#e9b98f', y: y0 }));
+    const cloud = merge([[0, 0, 0, 0.8], [0.8, -0.13, 0.1, 0.62], [-0.75, -0.18, 0.05, 0.58], [0.3, 0.4, -0.1, 0.58], [-0.35, 0.3, 0.1, 0.5]].map(([x, y, z, r]) => part(new THREE.SphereGeometry(r, hi() ? 32 : 12, hi() ? 20 : 8), BLUE, { p: [x, y, z] })));
+    const CY = y0 + 3.6;
+    moving.push({ geo: cloud, pivot: [CX, CY, CZ], anim: (t) => ({ y: Math.sin(t * 0.8) * 0.1, ry: Math.PI / 4 + Math.sin(t * 0.4) * 0.2 }) });
+    // Data streaming up from each touchpoint, insights coming back down.
+    const cols = ['#e5533d', '#f2c94c', NAVY, BLUE, '#2b2f36'];
+    spots.forEach(([x, z], i) => { const up = curve([[x, y0 + 1.1, z], [(x + CX) / 2, CY - 0.4, (z + CZ) / 2], [CX, CY - 0.4, CZ]]);
+      for (let k = 0; k < 3; k++) moving.push({ geo: part(rbox(0.14, 0.14, 0.14, 0.05), cols[i]), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 3, k / 3 + i * 0.07), p = up.getPointAt(u); return { x: p.x, y: p.y, z: p.z, ry: t * 2, s: Math.min(1, u / 0.1, (1 - u) / 0.1) + 0.001 }; } });
+      moving.push({ geo: part(star(0.1, 0.04), '#2fbf5b'), pivot: [0, 0, 0], anim: (t) => { const u = 1 - cyc(t, 3, 0.5 + i * 0.07), p = up.getPointAt(u); return { x: p.x, y: p.y + 0.15, z: p.z, ry: t * 3, s: Math.min(1, u / 0.1, (1 - u) / 0.1) * 1.3 + 0.001 }; } }); });
+    // The AI agent at the desk (a small robot with a cloud-blue head) and the customer it helps.
+    const agent = merge(part(capsule(0.16, 0.25), '#f4f5f6', { p: [0, 0.9, 0] }), part(ball(0.2), BLUE, { p: [0, 1.32, 0] }), part(box(0.2, 0.06, 0.02), '#ffffff', { p: [0.0, 1.34, 0.19] }), part(cyl(0.015, 0.015, 0.15, 6), '#c9ced6', { p: [0, 1.58, 0] }), part(ball(0.04), '#2fbf5b', { p: [0, 1.66, 0] }));
+    moving.push({ geo: agent, pivot: [HX, y0 + 0.0, HZ - 0.45], anim: (t) => ({ y: Math.sin(t * 2) * 0.03, ry: Math.sin(t * 0.7) * 0.3 }) });
+    moving.push(...walker(moving.length, () => ({ x: HX, z: HZ + 0.65, ry: Math.PI / 2, still: true }), { shirt: '#d6336c', pants: '#2b3a55', y: y0 }));
+    const bubble = (c, d) => merge(part(rbox(0.6, 0.34, 0.05, 0.12), c), [-0.14, 0, 0.14].map((x) => part(ball(0.035), d, { p: [x, 0, 0.03] })));
+    moving.push({ geo: bubble('#ffffff', NAVY), pivot: [HX + 0.3, y0 + 2.0, HZ + 0.65], anim: (t) => { const f = cyc(t, 4); return f < 0.45 ? { ry: Math.PI / 4, s: back(win(f, 0, 0.08)) + 0.001, y: f * 0.3 } : { s: 0.001 }; } });
+    moving.push({ geo: bubble(BLUE, '#ffffff'), pivot: [HX - 0.3, y0 + 1.95, HZ - 0.45], anim: (t) => { const f = cyc(t, 4); return f > 0.45 && f < 0.95 ? { ry: Math.PI / 4, s: back(win(f, 0.45, 0.53)) + 0.001, y: (f - 0.45) * 0.3 } : { s: 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // FedEx: overnight, anywhere, through one giant hub. Freighters land in a steady stream at
