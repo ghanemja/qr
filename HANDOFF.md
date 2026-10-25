@@ -15,7 +15,7 @@ Notes for the next session working on this repo. Live site: https://ghanemja.git
 1. **Bespoke models (done for now).** The user will post on LinkedIn next. More heroes are welcome if asked. Candidates: Citigroup, Adobe, Broadcom, Qualcomm, Dell, HP, Marriott, Micron, Databricks, Anduril, Figure AI, Zipline.
 2. **Upgrade the 137 shared shapes** to the same standard. Start with the shapes that cover the most companies, since they change the most of the map.
 3. **Advertisement video** of the coolest models, set to music "from Equalizer" (the user wants to advertise Equalizer too).
-   - Equalizer is the user's own music-making app: https://github.com/ghanemja/equalizer. Make the soundtrack with it (or use tracks from it) and credit/advertise it in the video.
+   - Equalizer is the user's own music-making app: https://github.com/ghanemja/equalizer (studio: https://ghanemja.github.io/equalizer/). Every sound is an equation; a song is `{ bpm, bars, tracks: [{ name, equation, params, pattern }] }`, and `examples/render.mjs` renders one headlessly to WAV (no samples, no dependencies). Ready-made tracks live in its `docs/audio/` (for example `hyperbolic-808.mp3`, `four-on-the-floor.mp3`). Plan: compose a custom ad track in Equalizer, render it, cut the video to its beat, and show an end card crediting "Soundtrack made in Equalizer" with its link.
    - **Requested finale:** stack all the models in a grid and do a camera pan, then a zoom-out over all of them.
    - **Possible approach:** a Playwright-driven headless page that renders heroes, captured frame by frame, then encoded with ffmpeg if it's available.
 4. **"Access 3D asset library" button** next to **About** in the header.
