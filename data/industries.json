@@ -73,7 +73,8 @@
   "deere": "Farms that steer themselves",
   "intel": "Designed and made in-house",
   "delta": "The hub that runs on time",
-  "nike": "Just do it"
+  "nike": "Just do it",
+  "uber": "Rides in minutes"
  },
  "bank": [
   "Wells Fargo",
@@ -1479,7 +1480,6 @@
   "Motorola Solutions": 4,
   "AT&T": 0,
   "Discord": 0,
-  "Uber Technologies": 0,
   "Carvana": 1
  },
  "amazon": [
@@ -1604,5 +1604,8 @@
  ],
  "nike": [
   "Nike"
+ ],
+ "uber": [
+  "Uber Technologies"
  ]
 }

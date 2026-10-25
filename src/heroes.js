@@ -2496,5 +2496,47 @@ export const HEROES = {
     moving.push({ geo: merge(part(ball(0.13), '#e07a2e'), part(torus(0.13, 0.008, TAU, 20), INK)), pivot: [KX + 0.2, y0, KZ + 0.6], anim: (t) => { const f = cyc(t, P); if (f < 0.35) { const d = Math.abs(Math.sin(f / 0.35 * Math.PI * 3)); return { x: 0.25, y: 0.15 + d * 0.65, rz: f * 20 }; } if (f < 0.8) { const k = win(f, 0.4, 0.75); return { x: 0, y: 1.9 + hop(k) * 0.9 - k * 0.2, z: -k * 1.85, rx: k * 8 }; } const k = win(f, 0.8, 1); return { x: 0, y: 1.7 - k * 1.55, z: -1.85 + k * 0.3 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Uber: riders and drivers matched in seconds, everywhere. In the city grid a car drives to the
+  // pulsing pickup pin, the rider gets in, and it heads for the drop-off; an Uber Eats courier
+  // bikes a bag across town; more cars circulate on the blocks.
+  uber: { finder: '#000000', build: () => {
+    const R = rand(19), out = [], y0 = 0.24, INK = '#111111', EATS = '#06c167';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#50555d', { p: [0, 0.12, 0] }));
+    // ---- blocks of buildings between a grid of streets at x, z = -2.4, 1.0, 4.4
+    const streets = [-2.6, 0.9, 4.4];
+    for (const v of streets) { out.push(part(box(10.2, 0.012, 0.03), '#f2c94c', { p: [0, y0 + 0.006, v] }), part(box(0.03, 0.012, 10.2), '#f2c94c', { p: [v, y0 + 0.006, 0] })); }
+    const blocks = [[-4.3, -4.3], [-0.85, -4.3], [2.65, -4.3], [-4.3, -0.85], [-0.85, -0.85], [2.65, -0.85], [-4.3, 2.65], [-0.85, 2.65], [2.65, 2.65]];
+    const tones = ['#d6d0c4', '#c4b59d', '#bfc6cf', '#e3d8c4', '#cfd8e3', '#d9cdb8'];
+    blocks.forEach(([bx, bz], i) => {
+      const w = i < 3 || i % 3 === 0 ? 1.7 : 2.4;
+      out.push(part(rbox(Math.min(2.6, w + 0.7), 0.1, Math.min(2.6, w + 0.7), 0.03), '#a9a59c', { p: [bx, y0 + 0.05, bz] }));
+      const n = i === 4 ? 1 : 2;
+      for (let k = 0; k < n; k++) { const h = 0.6 + R() * 1.5, ox = n > 1 ? (k ? 0.55 : -0.55) : 0, x = bx + ox, z = bz + (n > 1 ? (k ? -0.4 : 0.4) : 0), c = tones[(i + k) % tones.length], bw = n > 1 ? 0.9 : 1.8; out.push(part(rbox(bw, h, bw, 0.04), c, { p: [x, y0 + 0.1 + h / 2, z] })); if (hi()) for (let j = 0; j < Math.floor(h / 0.35); j++) out.push(part(box(bw * 0.8, 0.12, 0.02), '#2a3c50', { p: [x, y0 + 0.35 + j * 0.35, z + bw / 2 + 0.01] }), part(box(0.02, 0.12, bw * 0.8), '#2a3c50', { p: [x + bw / 2 + 0.01, y0 + 0.35 + j * 0.35, z] })); }
+    });
+    out.push(part(cyl(0.9, 0.9, 0.04, 40), '#7fbf5a', { p: [-0.85, y0 + 0.12, -0.85] }), miniTree(R, -1.1, y0 + 0.12, -0.6, 0.6), miniTree(R, -0.5, y0 + 0.12, -1.1, 0.5));
+    // ---- moving parts
+    const moving = [];
+    // The trip: a car drives from the corner to the pickup pin, waits, then to the drop-off pin.
+    const trip = curve([[-5.4, y0, 0.9], [-2.9, y0, 0.9], [0.9, y0, 0.9], [0.9, y0, 3.0], [0.9, y0, 4.4], [4.4, y0, 4.4], [4.4, y0, 1.2], [4.4, y0, -2.6], [5.6, y0, -2.6]]);
+    trip.curveType = 'chordal';
+    const P = 14, pickU = 0.22, dropU = 0.72;
+    const tripU = (t) => { const f = cyc(t, P); return f < 0.2 ? pickU * easeOut(f / 0.2) : f < 0.32 ? pickU : f < 0.62 ? pickU + (dropU - pickU) * easeIO(win(f, 0.32, 0.62)) : f < 0.74 ? dropU : dropU + (1 - dropU) * easeIn(win(f, 0.74, 1)); };
+    const pick = trip.getPointAt(pickU), drop = trip.getPointAt(dropU);
+    moving.push({ geo: merge(sedan(INK), part(rbox(0.3, 0.1, 0.18, 0.03), '#ffffff', { p: [0.0, 1.15, 0] })), pivot: [0, 0, 0], anim: (t) => { const u = tripU(t), a = along(trip, u); return { x: a.p.x, y: a.p.y, z: a.p.z - 0.3, ry: a.ry, s: Math.min(1, u / 0.04, (1 - u) / 0.04) * 0.8 + 0.001 }; } });
+    // The pins: pickup (black) pulses until the car arrives, drop-off (green) after.
+    const pin = (c) => merge(part(lathe([[0, 0], [0.12, 0.35], [0.22, 0.6], [0.2, 0.75], [0.0, 0.85]], 24), c), part(ball(0.08), '#ffffff', { p: [0, 0.62, 0] }));
+    moving.push({ geo: pin(INK), pivot: [pick.x, y0 + 1.6, pick.z - 0.9], anim: (t) => { const f = cyc(t, P); return f < 0.3 ? { y: Math.abs(Math.sin(t * 5)) * 0.2, s: 1.3 } : { s: 0.001 }; } });
+    moving.push({ geo: pin(EATS), pivot: [drop.x - 0.9, y0 + 1.6, drop.z], anim: (t) => { const f = cyc(t, P); return f > 0.3 && f < 0.74 ? { y: Math.abs(Math.sin(t * 5)) * 0.2, s: 1.3 } : { s: 0.001 }; } });
+    for (const [p, a, b] of [[pick, 0, 0.3], [drop, 0.3, 0.74]]) moving.push({ geo: part(new THREE.TorusGeometry(0.5, 0.03, 4, 32), '#ffffff'), pivot: [p.x - (b > 0.5 ? 0.9 : 0), y0 + 0.03, p.z - (b > 0.5 ? 0 : 0.9)], anim: (t) => { const f = cyc(t, P); return f > a && f < b ? { rx: Math.PI / 2, s: 0.3 + cyc(t, 1) * 1.2 } : { s: 0.001 }; } });
+    // The rider waiting at the pickup, stepping to the car, then gone.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P); return { x: pick.x - 0.2, z: pick.z - 0.9 + win(f, 0.2, 0.3) * 0.5, ry: -Math.PI / 2, still: f < 0.2, s: f > 0.31 && f < 0.97 ? 0.001 : 1 }; }, { shirt: '#3d7be0', pants: '#2b3a55', y: y0 + 0.1 }));
+    // The courier on a bike with the green bag.
+    const bike = merge(part(torus(0.18, 0.03, TAU, 20), INK, { p: [-0.32, 0.18, 0] }), part(torus(0.18, 0.03, TAU, 20), INK, { p: [0.32, 0.18, 0] }), beam([-0.32, 0.18, 0], [0.0, 0.45, 0], 0.025, EATS), beam([0.32, 0.18, 0], [0.05, 0.5, 0], 0.025, EATS), beam([0.0, 0.45, 0], [0.12, 0.5, 0], 0.025, EATS),
+      part(capsule(0.12, 0.25), '#2b2f36', { p: [-0.02, 0.75, 0] }), part(ball(0.1), '#c58c66', { p: [0.04, 1.02, 0] }), part(ball(0.11), EATS, { p: [0.04, 1.06, 0], s: [1, 0.7, 1] }), part(rbox(0.32, 0.32, 0.32, 0.05), EATS, { p: [-0.24, 0.95, 0] }));
+    moving.push({ geo: bike, pivot: [0, y0, -2.35], anim: (t) => { const f = cyc(t, 9), x = -5.4 + f * 10.8; return { x, s: clamp01((5.1 - Math.abs(x)) / 0.4) * 1.2 + 0.001, y: Math.abs(Math.sin(t * 8)) * 0.02 }; } });
+    // Other cars circulating.
+    [['#f4f5f6', 7, 0], ['#c0392b', 9, 0.4], ['#3d6ea8', 8, 0.7]].forEach(([c, Pc, o], i) => moving.push({ geo: sedan(c), pivot: [0, y0, 0], anim: (t) => { const f = cyc(t, Pc, o), along2 = i === 0 ? { x: -2.6 + 0.3, z: -5.4 + f * 10.8, ry: -Math.PI / 2 } : i === 1 ? { x: 5.4 - f * 10.8, z: -2.6 - 0.3, ry: Math.PI } : { x: 4.4 - 0.3, z: 5.4 - f * 10.8, ry: Math.PI / 2 }; const e = Math.max(Math.abs(along2.x), Math.abs(along2.z)); return { ...along2, s: clamp01((5.1 - e) / 0.4) * 0.8 + 0.001 }; } }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
