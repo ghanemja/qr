@@ -1139,4 +1139,28 @@ export const HEROES2 = {
     moving.push({ geo: place(sedan('#c0392b'), { r: [0, Math.PI / 2, 0] }), pivot: [CX, y0, CZ], anim: (t) => { const f = cyc(t, P), u = easeIn(win(f, 0.66, 0.9)); return { z: u * 3.2, s: f > 0.86 ? Math.max(0.001, 1 - win(f, 0.86, 0.92)) : f < 0.03 ? win(f, 0, 0.03) + 0.001 : 1 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Albertsons: one grocer behind the local names. Safeway, Vons, Jewel-Osco, Acme and Shaw's
+  // each keep their own sign and neighbourhood, while one warehouse and one fleet keep them all
+  // stocked, with the pharmacy counter in each.
+  albertsons: { finder: '#00539f', build: () => {
+    const R = rand(133), out = [], BLUE = '#00539f';
+    out.push(ground('#8fc66f'));
+    // ---- the shared warehouse in the middle
+    const WX = -0.4, WZ = -0.6;
+    out.push(part(rbox(3.0, 1.6, 2.2, 0.05), '#e6e9ed', { p: [WX, y0 + 0.8, WZ] }), part(box(3.02, 0.35, 2.22), BLUE, { p: [WX, y0 + 1.45, WZ] }), place(pixText('ALBERTSONS', 0.05, K.white, 0.02), { p: [WX, y0 + 1.45, WZ + 1.12] }), [0, 1, 2].map((k) => part(box(0.6, 0.9, 0.04), '#7b828c', { p: [WX - 0.9 + k * 0.9, y0 + 0.45, WZ + 1.11] })));
+    out.push(part(rbox(3.4, 0.06, 2.6, 0.03), '#9aa1a9', { p: [WX, y0 + 0.03, WZ] }));
+    // ---- the banners round it
+    const banners = [[-3.6, -3.6, '#e21a2c', 'SAFEWAY'], [2.8, -3.8, '#d6336c', 'VONS'], [3.8, 0.8, '#00539f', 'JEWEL'], [1.6, 3.8, '#e5533d', 'ACME'], [-3.4, 2.6, '#2f9e6e', "SHAW'S"]];
+    banners.forEach(([x, z, c, name]) => {
+      const face = Math.atan2(WX - x, WZ - z) * 0 + Math.PI / 4;
+      const g = merge(part(rbox(2.0, 1.2, 1.4, 0.05), '#f4efe6', { p: [0, 0.6, 0] }), part(box(2.02, 0.32, 1.42), c, { p: [0, 1.1, 0] }), pixText(name, 0.045, K.white, 0.02).translate(0, 1.1, 0.72), part(box(1.2, 0.6, 0.03), '#9cc3e0', { p: [-0.2, 0.4, 0.71] }), part(rbox(0.36, 0.24, 0.03, 0.03), K.white, { p: [0.68, 0.6, 0.71] }), part(box(0.08, 0.2, 0.035), '#e5533d', { p: [0.68, 0.6, 0.72] }), part(box(0.2, 0.08, 0.035), '#e5533d', { p: [0.68, 0.6, 0.72] }));
+      out.push(place(g, { p: [x, y0, z], r: [0, face, 0] }));
+    });
+    out.push(trees(R, [[0.0, -4.4], [4.6, -1.8], [4.6, 4.4], [-1.2, 4.4], [-4.6, -0.6]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 10;
+    // One fleet, every banner: a truck out to each store in turn.
+    banners.forEach(([x, z], i) => { const route = curve([[WX + 0.4, y0, WZ + 1.5], [(WX + x) / 2 + 0.4, y0, (WZ + z) / 2 + 0.4], [x + 0.6, y0, z + 1.2]]); moving.push({ geo: place(semi(BLUE, K.white, BLUE), { s: 0.4 }), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P, i / 5), u = easeIO(win(f, 0, 0.4)) - easeIO(win(f, 0.55, 0.95)), a = along(route, clamp01(u)); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: f < 0.5 ? a.ry : a.ry + Math.PI, s: f > 0.95 || f < 0.02 ? 0.001 : 1 }; } }); moving.push(pulse(x, y0 + 0.05, z, BLUE, P, i / 5 * -1 + 0.4, 1.1)); });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

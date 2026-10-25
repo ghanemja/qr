@@ -120,7 +120,8 @@
   "dollartree": "One low price on everything, from candy to party balloons",
   "autozone": "The right part today, and help fitting it in the lot",
   "oreilly": "The pros' parts store: from the warehouse to the repair bay within the hour",
-  "publix": "Owned by the people who work there: every order walked out to your car"
+  "publix": "Owned by the people who work there: every order walked out to your car",
+  "albertsons": "One grocer behind the local names, one fleet stocking them all"
  },
  "bank": [
   "PNC Financial Services",
@@ -330,7 +331,6 @@
   "Quanta Services"
  ],
  "retail": [
-  "Albertsons",
   "Kohl's",
   "Nordstrom",
   "Ross Stores",
@@ -1172,7 +1172,6 @@
   ]
  },
  "_heroes": {
-  "Albertsons": 3,
   "SpartanNash": 3,
   "Supervalu": 3,
   "United Natural Foods": 3,
@@ -1730,5 +1729,8 @@
  ],
  "publix": [
   "Publix Super Markets"
+ ],
+ "albertsons": [
+  "Albertsons"
  ]
 }
