@@ -315,6 +315,14 @@ const appBlock = (kind, c = 'A', w = 1.0, h = 0.6) => { const g = [part(rbox(w, 
 // A little red bug drone (a threat), facing +x.
 const bugGeo = () => merge(part(new THREE.SphereGeometry(0.22, 14, 10), '#d93a2b', { s: [1.2, 0.8, 1] }), part(new THREE.SphereGeometry(0.12, 12, 8), '#2b2f36', { p: [0.24, 0.02, 0] }), [-1, 1].flatMap((s) => [beam([0, 0, s * 0.15], [0.05, -0.18, s * 0.35], 0.03, '#2b2f36'), beam([-0.12, 0, s * 0.15], [-0.15, -0.18, s * 0.35], 0.03, '#2b2f36'), part(new THREE.SphereGeometry(0.03, 6, 4), K.yellow, { p: [0.32, 0.1, s * 0.06] })]));
 
+// A fighter jet facing +x, about 2.8 long, wheels on y = 0: grey fuselage, bubble canopy, delta
+// wings, twin canted tails in the brand colour.
+const fighter = (c = '#8f9aa6', trim = 'A', gear = true) => { const Y = gear ? 0.42 : 0, wing = (sz) => part(extrude([[0.3, 0], [-0.9, 0], [-1.05, 1.25 * sz], [-0.75, 1.3 * sz]], 0.05), c, { p: [0, Y - 0.02, 0], r: [Math.PI / 2, 0, 0] });
+  return merge(part(lathe([[0.16, 0], [0.26, 0.5], [0.27, 1.5], [0.16, 2.3], [0.001, 2.8]], 20), c, { p: [-1.4, Y, 0], r: [0, 0, -Math.PI / 2] }), part(new THREE.SphereGeometry(0.2, 16, 10), '#2a3c50', { p: [0.55, Y + 0.18, 0], s: [2.0, 0.8, 0.8] }),
+    wing(1), wing(-1), [-1, 1].map((sz) => part(extrude([[-0.75, 0], [-1.3, 0], [-1.42, 0.7], [-1.15, 0.72]], 0.05), trim, { p: [0, Y + 0.12, sz * 0.22], r: [sz * 0.3, 0, 0] })),
+    [-1, 1].map((sz) => part(extrude([[-0.95, 0], [-1.4, 0], [-1.45, 0.5 * sz], [-1.2, 0.5 * sz]], 0.04), c, { p: [0, Y - 0.04, 0], r: [Math.PI / 2, 0, 0] })), part(cyl(0.17, 0.2, 0.25, 14), K.dark, { p: [-1.45, Y, 0], r: [0, 0, Math.PI / 2] }), part(box(0.6, 0.04, 0.56), trim, { p: [0.0, Y + 0.24, 0] }),
+    gear ? [[0.7, 0], [-0.4, 0.3], [-0.4, -0.3]].flatMap(([x, z]) => [part(cyl(0.02, 0.02, Y - 0.12, 6), K.dark, { p: [x, Y / 2, z] }), part(new THREE.CylinderGeometry(0.08, 0.08, 0.06, 10), '#1d1f24', { p: [x, 0.08, z], r: [Math.PI / 2, 0, 0] })]) : []); };
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -2631,5 +2639,55 @@ export const SCENES = {
     // Teammates at their desks.
     [[2.4, 2.6], [3.8, 1.2]].forEach(([x, z], i) => moving.push(...walker(moving.length, () => ({ x, z: z - 0.55, ry: -Math.PI / 2, still: true, push: true }), { shirt: i ? '#8a6cf0' : '#3fb8a8', pants: '#2b3a55', y: y0 - 0.22 })));
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.2, y0, 2.9], topAt: [PX, y0 + 1.2, PZ - 0.1] };
+  },
+
+  // Fighter jet (defence primes, aircraft and autonomy makers): ready in every domain. On the
+  // coastal base a fighter rolls down the runway and climbs away while two more fly the circuit
+  // overhead; the utility helicopter hovers by its pad, the tank patrols the perimeter road with its
+  // turret swinging, the autonomous boats run their patterns offshore and the submarine surfaces.
+  'rocket:1': () => {
+    const R = rand(3701), out = [], moving = [], QX = 1.6, SEA = 0.14;
+    out.push(part(rbox(QX + 5.2, 0.24, 10.4, 0.08), '#b7b48e', { p: [(QX - 5.2) / 2, 0.12, 0] }), part(rbox(5.2 - QX, 0.1, 10.4, 0.05), '#2b4a7a', { p: [(QX + 5.2) / 2, 0.05, 0] }));
+    out.push(part(new THREE.PlaneGeometry(5.2 - QX, 10.4).rotateX(-Math.PI / 2), 'W', { p: [(QX + 5.2) / 2, SEA, 0] }), part(box(0.2, 0.3, 10.4), '#9aa1a9', { p: [QX + 0.1, 0.15, 0] }));
+    // ---- the runway along z, the apron and hangar (back left)
+    const RX = -1.3;
+    out.push(part(box(1.4, 0.03, 10.4), '#5b616b', { p: [RX, y0 + 0.015, 0] }));
+    for (let i = 0; i < 9; i++) out.push(part(box(0.08, 0.012, 0.6), K.white, { p: [RX, y0 + 0.035, -4.2 + i * 1.05] }));
+    out.push(part(rbox(3.2, 0.03, 3.6, 0.03), '#7d838b', { p: [-3.6, y0 + 0.015, -1.6] }));
+    const HX = -3.6, HZ = -3.6;
+    const arch = (r) => Array.from({ length: 17 }, (_, i) => { const a = (i / 16) * Math.PI; return [Math.cos(a) * r, Math.sin(a) * r]; });
+    out.push(part(extrude(arch(1.45), 2.8), (x, y) => (Math.floor((Math.atan2(y - y0, x - HX) + 4) * 5) % 2 ? '#8e959e' : '#9aa1a9'), { p: [HX, y0, HZ] }));
+    out.push(part(extrude(arch(1.2), 0.06), '#2b2f36', { p: [HX, y0, HZ + 1.42] }), part(tube(arch(1.45).map(([x, y]) => [x, y, 0]), 0.07), 'A', { p: [HX, y0, HZ + 1.42] }));
+    out.push(place(fighter('#9aa4ae', 'A'), { p: [-3.4, y0, -0.8], r: [0, Math.PI / 2 + 0.3, 0] }));
+    // ---- the helipad and tower (left middle), the perimeter road (front)
+    out.push(part(cyl(0.8, 0.8, 0.04, 28), '#5b616b', { p: [-3.6, y0 + 0.02, 2.0] }), part(torus(0.6, 0.03, TAU, 28), K.yellow, { p: [-3.6, y0 + 0.05, 2.0], r: [Math.PI / 2, 0, 0] }));
+    out.push(part(rbox(1.0, 1.6, 1.0, 0.05), '#e3e0da', { p: [-4.4, y0 + 0.8, 4.0] }), part(rbox(1.2, 0.5, 1.2, 0.05), '#4a7aa8', { p: [-4.4, y0 + 1.85, 4.0] }), part(box(1.22, 0.1, 1.22), 'A', { p: [-4.4, y0 + 2.14, 4.0] }));
+    const road = curve([[-4.6, 0, 3.0], [-2.8, 0, 3.2], [0.0, 0, 3.6], [0.8, 0, 1.0], [0.6, 0, -2.2], [-0.4, 0, -4.4]]);
+    for (let i = 0, n = hi() ? 44 : 14; i < n; i++) { const { p, ry } = along(road, i / n); out.push(part(box(0.5, 0.025, 0.8), '#a59c80', { p: [p.x, y0 + 0.012, p.z], r: [0, ry, 0] })); }
+    // A pier and the sub pen marker buoys.
+    out.push(part(rbox(1.6, 0.16, 0.7, 0.03), '#9aa1a9', { p: [QX + 0.8, y0 - 0.02, -3.4] }), [[QX + 0.3, -3.6], [QX + 1.4, -3.6], [QX + 0.3, -3.2], [QX + 1.4, -3.2]].map(([x, z]) => part(cyl(0.05, 0.05, 0.4, 8), '#6d7681', { p: [x, 0.1, z] })));
+    [[4.6, -1.0], [4.4, 3.0]].forEach(([x, z]) => out.push(part(cyl(0.12, 0.16, 0.3, 10), K.orange, { p: [x, SEA + 0.1, z] })));
+    [[-4.6, -1.6], [0.6, 4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.45 + R() * 0.15)));
+    // ---- moving parts (one 12 s cycle)
+    const P = 12, F = (t) => cyc(t, P);
+    // The take-off: a roll down the runway (toward the back), rotate, climb away.
+    moving.push({ geo: fighter('#8f9aa6', 'A'), pivot: [RX, y0, 0], anim: (t) => { const f = F(t), roll = easeIn(win(f, 0.05, 0.3)), climb = win(f, 0.24, 0.45); return { z: 4.2 - roll * 5.0 - easeIn(climb) * 4.0, y: easeIn(climb) * 3.4, ry: Math.PI / 2, rz: Math.min(0.35, climb * 1.4), s: f < 0.05 ? Math.max(0.001, f / 0.05) : f > 0.42 ? Math.max(0.001, 1 - win(f, 0.42, 0.46)) : 1 }; } });
+    // Two jets in formation flying the circuit overhead.
+    [0, 1].forEach((i) => moving.push({ geo: fighter('#7d8792', i ? 'B' : 'A', false).scale(0.75, 0.75, 0.75), pivot: [0.2, 4.6 + i * 0.25, 0.2], anim: (t) => { const a = t * 0.55 - i * 0.3; return { x: Math.cos(a) * (3.0 + i * 0.5), z: -Math.sin(a) * (3.0 + i * 0.5), ry: a + Math.PI / 2, rx: -0.45 }; } }));
+    // The helicopter lifts off its pad, hovers, sets down.
+    const hi0 = moving.length;
+    moving.push({ geo: heliGeo('#5b6650', 'A'), pivot: [-3.6, y0 + 0.05, 2.0], anim: (t) => { const f = cyc(t, P, 0.3), h = easeIO(win(f, 0.1, 0.3)) * (1 - easeIO(win(f, 0.7, 0.9))); return { y: h * 2.0 + Math.sin(t * 2) * 0.05 * h, ry: 0.6 + h * 0.4 + Math.sin(t * 0.7) * 0.1 * h }; } });
+    moving.push({ geo: rotorGeo(1.0), pivot: [0.1, 0.95, 0], parent: hi0, anim: (t) => ({ ry: t * 16 }) });
+    // The tank patrols the perimeter road, turret sweeping.
+    const tk = moving.length;
+    moving.push({ geo: merge(part(rbox(1.5, 0.4, 0.9, 0.06), '#6b7050', { p: [0, 0.4, 0] }), [-0.42, 0.42].map((z) => part(rbox(1.6, 0.32, 0.22, 0.12), '#2b2f36', { p: [0, 0.18, z] })), part(rbox(1.3, 0.08, 1.0, 0.03), '#5b6046', { p: [0, 0.62, 0] })), pivot: [0, y0, 0], anim: (t) => { const u = (Math.sin((t / 16) * TAU) + 1) / 2, { p, ry } = along(road, 0.02 + u * 0.96), back2 = Math.cos((t / 16) * TAU) < 0; return { x: p.x, z: p.z, ry: ry + (back2 ? Math.PI : 0) }; } });
+    moving.push({ geo: merge(part(rbox(0.7, 0.3, 0.6, 0.1), '#7a7f5c', { p: [0, 0.15, 0] }), beam([0.3, 0.18, 0], [1.2, 0.2, 0], 0.08, '#4a4e3a'), part(box(0.2, 0.06, 0.3), 'A', { p: [-0.2, 0.31, 0] })), pivot: [0, 0.66, 0], parent: tk, anim: (t) => ({ ry: Math.sin(t * 0.8) * 0.9 }) });
+    // The autonomous boats run their patterns offshore.
+    const boat = merge(part(extrude([[-0.5, 0], [0.4, 0], [0.62, 0.16], [-0.5, 0.18]], 0.34), '#4a4e56', { p: [0, 0, 0] }), part(rbox(0.3, 0.16, 0.24, 0.04), '#d8dde3', { p: [-0.05, 0.27, 0] }), part(cyl(0.02, 0.02, 0.3, 6), K.dark, { p: [-0.1, 0.45, 0] }), part(box(0.5, 0.03, 0.36), 'A', { p: [0, 0.18, 0] }));
+    [[3.4, 0.6, 0], [3.4, 2.6, 0.5]].forEach(([cx, cz, o]) => moving.push({ geo: boat, pivot: [cx, SEA - 0.04, cz], anim: (t) => { const a = (t / 7 + o) * TAU; return { x: Math.sin(a) * 1.1, z: Math.sin(2 * a) * 0.7, ry: Math.atan2(-Math.cos(2 * a) * 1.4 * 0.7, Math.cos(a) * 1.1), rz: Math.sin(t * 3 + o) * 0.04 }; } }));
+    for (let k = 0; k < 4; k++) moving.push({ geo: part(cyl(0.12, 0.12, 0.02, 12), '#e9f6fb'), pivot: [3.4, SEA + 0.01, 0.6], anim: (t) => { const a = (t / 7 - (k + 1) * 0.02) * TAU; return { x: Math.sin(a) * 1.1, z: Math.sin(2 * a) * 0.7, s: 1 - k * 0.2 }; } });
+    // The submarine surfaces, cruises, dives.
+    moving.push({ geo: merge(part(capsule(0.32, 2.2), '#2b2f36', { r: [0, 0, Math.PI / 2] }), part(rbox(0.5, 0.5, 0.2, 0.08), '#2b2f36', { p: [0.3, 0.45, 0] }), part(box(0.6, 0.05, 0.05), '#2b2f36', { p: [0.3, 0.55, 0] }), part(box(0.3, 0.06, 0.22), 'A', { p: [0.3, 0.68, 0] }), part(extrude([[-1.3, 0], [-1.6, 0.4], [-1.45, 0.4], [-1.2, 0]], 0.05), '#2b2f36')), pivot: [3.3, SEA - 0.12, -1.8], anim: (t) => { const f = cyc(t, P, 0.5), up = easeIO(win(f, 0.05, 0.25)) * (1 - easeIO(win(f, 0.75, 0.95))); return { y: -0.9 + up * 0.9, x: Math.sin(f * TAU) * 0.5, ry: Math.PI / 2 + 0.2, s: up > 0.02 ? 1 : 0.001 }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-2.2, y0, 4.3], topAt: [-4.4, y0 + 2.2, 4.0] };
   },
 };
