@@ -3067,5 +3067,36 @@ export const HEROES = {
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, 6), z = HZ + 1.3 + (f < 0.5 ? f * 2 : 2 - f * 2) * 1.4; return { x: HX + 1.2, z, ry: f < 0.5 ? -Math.PI / 2 : Math.PI / 2 }; }, { shirt: PURP, pants: '#2b2f36', y: y0, carry: part(rbox(0.36, 0.26, 0.3, 0.03), '#c99a62', { p: [0.28, 1.1, 0] }) }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Oracle: the database the world's records live in, now in its own cloud. The great stack of
+  // database discs turns, rows of data streaming into the cloud halls; out on the bay a racing
+  // yacht carves past.
+  oracle: { finder: '#c74634', build: () => {
+    const R = rand(57), out = [], y0 = 0.24, RED = '#c74634';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#a9cf8a', { p: [0, 0.12, 0] }));
+    // The bay across the front.
+    out.push(part(box(10.4, 0.05, 3.2), 'W', { p: [0, y0 + 0.02, 3.6] }), part(box(10.4, 0.18, 0.2), '#c9c4b8', { p: [0, y0 + 0.09, 1.95] }));
+    // ---- the database stack: a classic cylinder of stacked discs on a plinth
+    const DX = -2.4, DZ = -1.0;
+    out.push(part(cyl(1.4, 1.5, 0.3, 48), '#3a3f47', { p: [DX, y0 + 0.15, DZ] }), part(torus(1.45, 0.03, TAU, 48), RED, { p: [DX, y0 + 0.31, DZ], r: [Math.PI / 2, 0, 0] }));
+    // ---- the cloud halls with their cooling units
+    for (let i = 0; i < 2; i++) { const x = 2.0 + i * 1.6, z = -2.6; out.push(part(rbox(1.4, 1.0, 2.6, 0.05), '#e9ecef', { p: [x, y0 + 0.5, z] }), part(box(0.02, 0.6, 2.2), RED, { p: [x + 0.71, y0 + 0.5, z] })); for (let k = 0; k < 3; k++) out.push(part(cyl(0.22, 0.22, 0.12, 20), '#c9ced6', { p: [x, y0 + 1.06, z - 0.8 + k * 0.8] })); }
+    // The red O on a pole.
+    out.push(part(cyl(0.05, 0.05, 1.8, 10), '#9aa1a9', { p: [0.4, y0 + 0.9, -3.8] }), part(new THREE.TorusGeometry(0.42, 0.13, hi() ? 16 : 6, hi() ? 48 : 16), RED, { p: [0.4, y0 + 2.2, -3.8], r: [0, Math.PI / 4, 0], s: [1.35, 1, 1] }));
+    [[-4.6, -4.6], [-4.6, 1.2], [4.6, -0.4], [-1.2, -4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.7 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // The discs, each turning at its own pace, with a band of lit rows.
+    for (let i = 0; i < 4; i++) moving.push({ geo: merge(part(cyl(1.15, 1.15, 0.5, 48), i % 2 ? '#d6d9dd' : '#e9ecef'), part(cyl(1.17, 1.17, 0.08, 48), RED, { p: [0, 0.2, 0] }), hi() ? ring(16, (a) => part(box(0.12, 0.08, 0.02), '#7cf0ff', { p: [Math.cos(a) * 1.16, -0.05, Math.sin(a) * 1.16], r: [0, -a + Math.PI / 2, 0] })) : []), pivot: [DX, y0 + 0.6 + i * 0.56, DZ], anim: (t) => ({ ry: t * (0.4 + i * 0.15) * (i % 2 ? -1 : 1) }) });
+    // Rows of data streaming from the stack to the halls.
+    const feed = curve([[DX + 1.2, y0 + 1.8, DZ], [0.2, y0 + 2.6, -1.8], [2.0, y0 + 1.4, -2.6]]);
+    for (let k = 0; k < 8; k++) moving.push({ geo: part(rbox(0.24, 0.08, 0.08, 0.03), k % 3 ? '#7cf0ff' : RED), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 2.4, k / 8), a = along(feed, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry }; } });
+    // Fans spinning on the halls.
+    for (let i = 0; i < 2; i++) for (let k = 0; k < 3; k++) moving.push({ geo: merge(ring(4, (a) => part(box(0.18, 0.02, 0.06), '#5b616b', { p: [Math.cos(a) * 0.09, 0, Math.sin(a) * 0.09], r: [0.4, -a, 0] }))), pivot: [2.0 + i * 1.6, y0 + 1.14, -3.4 + k * 0.8], anim: (t) => ({ ry: t * (8 + k) }) });
+    // The racing yacht on the bay, heeling as it sails.
+    const yacht = merge(part(extrude([[-1.0, 0], [0.9, 0], [1.3, 0.25], [-1.0, 0.25]], 0.5), '#1d1f24'), part(box(1.8, 0.04, 0.42), '#c9ced6', { p: [0, 0.27, 0] }), part(cyl(0.03, 0.03, 2.6, 8), '#c9ced6', { p: [0.1, 1.55, 0] }), part(extrude([[0, 0], [1.0, 0], [0, 2.3]], 0.02), '#f4f5f6', { p: [0.12, 0.35, 0] }), part(extrude([[0, 0], [-0.9, 0], [0, 2.1]], 0.02), RED, { p: [0.08, 0.35, 0.02] }));
+    moving.push({ geo: yacht, pivot: [0, y0 + 0.05, 3.6], anim: (t) => { const f = cyc(t, 14), x = -5.6 + f * 11.2; return { x, z: Math.sin(f * TAU) * 0.6, rx: 0.18 + Math.sin(t * 1.5) * 0.04, ry: -Math.cos(f * TAU) * 0.12, y: Math.sin(t * 2) * 0.03, s: clamp01((5.4 - Math.abs(x)) / 0.6) * 0.9 + 0.001 }; } });
+    for (let k = 0; k < 4; k++) moving.push({ geo: part(ball(0.1), '#ffffff'), pivot: [0, y0 + 0.08, 3.6], anim: (t) => { const f = cyc(t, 14), x = -5.6 + f * 11.2, u = cyc(t, 0.8, k / 4); return { x: x - 1.0 - u * 0.8, z: Math.sin(f * TAU) * 0.6 + (k % 2 ? 0.2 : -0.2) * u, s: (1 - u) * clamp01((5.0 - Math.abs(x)) / 0.6) + 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

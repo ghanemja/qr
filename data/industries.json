@@ -87,7 +87,8 @@
   "waymo": "The car drives itself",
   "airbnb": "Belong anywhere",
   "salesforce": "Pipeline to closed-won",
-  "fedex": "Overnight, anywhere"
+  "fedex": "Overnight, anywhere",
+  "oracle": "Where the records live"
  },
  "bank": [
   "Citigroup",
@@ -469,7 +470,6 @@
   "NetApp"
  ],
  "software": [
-  "Oracle",
   "Adobe",
   "Intuit",
   "ADP",
@@ -1643,5 +1643,8 @@
  ],
  "fedex": [
   "FedEx"
+ ],
+ "oracle": [
+  "Oracle"
  ]
 }
