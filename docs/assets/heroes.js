@@ -2418,5 +2418,45 @@ export const HEROES = {
     moving.push({ geo: part(ball(0.08), '#c58cff'), pivot: [FX - 2.3, y0 + 1.2, FZ - D / 2 + 1.0], anim: (t) => ({ s: 0.6 + Math.max(0, Math.sin(t * 9)) * 1.2 }) });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Delta: the biggest hub in the world, run on time. Jets nose in at the concourse; one is pushed
+  // back by its tug and taxis away; another lifts off the runway; the baggage train snakes past;
+  // the red widget glows on every tail.
+  delta: { finder: '#c8102e', build: () => {
+    const R = rand(31), out = [], y0 = 0.24, RED = '#c8102e', NAVY = '#003366';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#86c766', { p: [0, 0.12, 0] }), part(box(10.2, 0.02, 6.0), '#9aa1a9', { p: [0, y0 + 0.01, -0.6] }));
+    // An airliner, nose along +x, about 3.2 long, belly at y = 0.
+    const plane = (s = 1) => merge(part(lathe([[0, 0], [0.18, 0.1], [0.28, 0.3], [0.3, 0.6], [0.3, 2.1], [0.2, 2.8], [0, 3.1]], 28), (px, py) => (py < -0.1 ? '#e9ecef' : py < 0.02 ? NAVY : '#fbfbfb'), { r: [0, 0, Math.PI / 2], p: [1.55, 0.45, 0] }),
+      [-1, 1].map((k) => part(extrude([[0.35, 0], [-0.1, 0], [-0.65, 1.45], [-0.48, 1.48]], 0.05), '#dfe3e8', { p: [0.1, 0.35, 0], r: [k * (Math.PI / 2 - 0.06), 0, 0] })), [-1, 1].map((k) => part(cyl(0.11, 0.11, 0.4, 16), '#c9ced6', { p: [0.3, 0.2, k * 0.55], r: [0, 0, Math.PI / 2] })),
+      [-1, 1].map((k) => part(extrude([[0, 0], [-0.3, 0], [-0.5, 0.5], [-0.35, 0.5]], 0.04), '#dfe3e8', { p: [-1.25, 0.55, 0], r: [k * Math.PI / 2, 0, 0] })), part(extrude([[0, 0], [-0.4, 0], [-0.7, 0.7], [-0.45, 0.7]], 0.05), NAVY, { p: [-1.15, 0.7, 0] }),
+      part(extrude([[0, 0], [0.2, 0], [0.1, 0.18]], 0.06), RED, { p: [-1.5, 0.95, 0] }), [[1.2, 0], [0.0, 0.25], [0.0, -0.25]].map(([x, z]) => part(new THREE.CylinderGeometry(0.06, 0.06, 0.05, 10), '#1d1f24', { p: [x, 0.06, z], r: [Math.PI / 2, 0, 0] })));
+    // ---- the concourse and its jet bridges
+    const CZ = -3.6;
+    out.push(part(rbox(8.6, 1.0, 1.2, 0.06), '#d6d9dd', { p: [0, y0 + 0.6, CZ] }), part(box(8.6, 0.4, 0.02), '#5d7fa3', { p: [0, y0 + 0.75, CZ + 0.61] }), part(rbox(8.7, 0.12, 1.3, 0.03), '#b9bec6', { p: [0, y0 + 1.12, CZ] }));
+    out.push(part(rbox(1.6, 0.5, 0.06, 0.03), RED, { p: [-3.4, y0 + 1.42, CZ + 0.3] }), part(extrude([[-0.18, -0.12], [0.18, -0.12], [0, 0.18]], 0.04), '#ffffff', { p: [-3.95, y0 + 1.42, CZ + 0.35] }));
+    const gates = [-2.6, 0.4, 3.4];
+    gates.forEach((x) => { out.push(part(rbox(0.35, 0.35, 1.3, 0.05), '#c9ced6', { p: [x, y0 + 0.85, CZ + 1.2] }), part(cyl(0.05, 0.05, 0.7, 8), '#7b828c', { p: [x, y0 + 0.35, CZ + 1.7] })); out.push(part(box(0.04, 0.012, 1.4), '#f2c94c', { p: [x, y0 + 0.025, CZ + 2.6] })); });
+    // Parked jets at two gates (the third pushes back).
+    out.push(place(plane(), { p: [gates[0], y0 + 0.02, CZ + 3.0], r: [0, Math.PI / 2, 0] }), place(plane(), { p: [gates[2], y0 + 0.02, CZ + 3.0], r: [0, Math.PI / 2, 0] }));
+    // ---- the runway across the front, and the tower
+    out.push(part(box(10.4, 0.02, 1.5), '#4a4f57', { p: [0, y0 + 0.02, 3.9] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(0.55, 0.01, 0.06), '#f4f4f0', { p: [-4.4 + i * 1.25, y0 + 0.032, 3.9] }));
+    out.push(part(cyl(0.22, 0.28, 2.6, 20), '#e9ecef', { p: [-4.5, y0 + 1.3, 2.2] }), part(lathe([[0.4, 0], [0.5, 0.4], [0.4, 0.45], [0, 0.45]], 24), '#3b5b7d', { p: [-4.5, y0 + 2.6, 2.2] }), part(cyl(0.45, 0.42, 0.06, 24), '#e9ecef', { p: [-4.5, y0 + 3.08, 2.2] }));
+    [[-4.6, 4.8], [4.6, 4.8], [-4.7, -4.7], [4.7, -4.7]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.6 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [], P = 14;
+    // The middle jet: pushed back by the tug, turns, and taxis off along the apron.
+    const gx = gates[1], gz = CZ + 3.0;
+    const pathOut = curve([[gx, 0, gz], [gx, 0, gz + 1.2], [gx + 0.8, 0, gz + 2.2], [gx + 3.0, 0, gz + 2.4], [6.0, 0, gz + 2.4]]);
+    const jetPose = (t) => { const f = cyc(t, P); if (f < 0.12) return { x: gx, z: gz, ry: Math.PI / 2 }; if (f < 0.4) { const k = easeIO(win(f, 0.12, 0.4)); return { x: gx + Math.sin(k * Math.PI / 2) * 0.8 * k, z: gz + k * 1.6, ry: Math.PI / 2 - k * Math.PI / 2 }; } const u = win(f, 0.45, 1), a = along(pathOut, 0.35 + u * 0.65); return { x: a.p.x, z: a.p.z, ry: a.ry }; };
+    moving.push({ geo: plane(), pivot: [0, y0 + 0.02, 0], anim: (t) => { const p = jetPose(t); return { ...p, s: clamp01((5.6 - p.x) / 0.6) + 0.001 }; } });
+    moving.push({ geo: merge(part(rbox(0.6, 0.25, 0.4, 0.06), '#f2c94c', { p: [0, 0.2, 0] }), part(rbox(0.25, 0.22, 0.36, 0.05), '#26323f', { p: [-0.12, 0.42, 0] }), [[-0.2, 0.2], [0.2, 0.2], [-0.2, -0.2], [0.2, -0.2]].map(([x, z]) => part(new THREE.CylinderGeometry(0.09, 0.09, 0.08, 10), '#1d1f24', { p: [x, 0.09, z], r: [Math.PI / 2, 0, 0] }))),
+      pivot: [0, y0 + 0.02, 0], anim: (t) => { const f = cyc(t, P), p = jetPose(t); if (f > 0.42) return { s: 0.001 }; const a = p.ry; return { x: p.x + Math.cos(a) * 1.9, z: p.z - Math.sin(a) * 1.9, ry: a + Math.PI }; } });
+    // A jet taking off from the runway.
+    moving.push({ geo: plane(), pivot: [0, y0 + 0.03, 3.9], anim: (t) => { const f = cyc(t, 9, 0.4), x = -5.6 + easeIn(win(f, 0, 0.7)) * 8.4 + easeIn(win(f, 0.7, 1)) * 4, y = easeIn(win(f, 0.45, 1)) * 2.8; return { x, y, rz: Math.min(0.2, win(f, 0.4, 0.55) * 0.2), s: clamp01((6 - x) / 0.7) * Math.min(1, f / 0.06) + 0.001 }; } });
+    // The baggage train weaving between the gates.
+    const bags = curve([[-4.4, y0, -1.6], [-1.1, y0, -1.2], [1.9, y0, -1.6], [4.6, y0, -1.2]]);
+    for (let k = 0; k < 4; k++) moving.push({ geo: k === 0 ? merge(part(rbox(0.5, 0.3, 0.35, 0.05), RED, { p: [0, 0.25, 0] }), part(rbox(0.2, 0.2, 0.3, 0.04), '#26323f', { p: [-0.1, 0.45, 0] })) : merge(part(box(0.5, 0.06, 0.35), '#7b828c', { p: [0, 0.15, 0] }), part(rbox(0.22, 0.2, 0.3, 0.04), '#c99a62', { p: [-0.1, 0.28, 0] }), part(rbox(0.2, 0.25, 0.28, 0.04), '#3d6ea8', { p: [0.13, 0.3, 0] })), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 10, -k * 0.035), a = along(bags, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry, s: Math.min(1, u / 0.04, (1 - u) / 0.04) + 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

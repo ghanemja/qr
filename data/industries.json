@@ -71,7 +71,8 @@
   "pepsico": "Snacks and sips",
   "lockheed": "Only a few can build it",
   "deere": "Farms that steer themselves",
-  "intel": "Designed and made in-house"
+  "intel": "Designed and made in-house",
+  "delta": "The hub that runs on time"
  },
  "bank": [
   "Wells Fargo",
@@ -396,7 +397,6 @@
  ],
  "plane": [
   "American Airlines Group",
-  "Delta Air Lines",
   "United Continental Holdings",
   "Southwest Airlines",
   "Alaska Air Group",
@@ -1599,5 +1599,8 @@
  ],
  "intel": [
   "Intel"
+ ],
+ "delta": [
+  "Delta Air Lines"
  ]
 }
