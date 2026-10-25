@@ -110,6 +110,13 @@ const stormCloud = (s = 1) => merge([[0, 0, 0, 0.9], [0.85, -0.1, 0.2, 0.7], [-0
 // A zigzag lightning bolt, about h tall, hanging down from the origin.
 const bolt = (h = 3) => part(extrude([[0, 0], [0.32, 0], [0.12, -h * 0.4], [0.36, -h * 0.4], [-0.05, -h], [0.02, -h * 0.52], [-0.24, -h * 0.52]], 0.08), '#fff3a3');
 
+// A heraldic shield, flat face toward +z, about 1.6 tall, its point at the origin.
+const shieldGeo = (face = 'A', rim = K.white, check = K.white) => {
+  const sh = (k) => { const pts = []; for (let i = 0; i <= 12; i++) { const u = i / 12; pts.push([-0.7 * k + 1.4 * k * u, (1.55 + Math.sin(u * Math.PI) * 0.08) * k]); } for (let i = 0; i <= 12; i++) { const u = i / 12; pts.push([0.7 * k * Math.cos(u * Math.PI / 2), (0.75 - 0.75 * Math.sin(u * Math.PI / 2)) * k + (1 - k) * 0.3]); } for (let i = 1; i < 12; i++) { const u = i / 12; pts.push([-0.7 * k * Math.sin(u * Math.PI / 2), (0.75 * Math.cos(u * Math.PI / 2)) * k + (1 - k) * 0.3]); } return pts; };
+  return merge(part(extrude(sh(1), 0.22), rim), part(extrude(sh(0.86).map(([x, y]) => [x, y + 0.08]), 0.26), face),
+    part(extrude([[-0.38, 0.85], [-0.22, 1.0], [-0.08, 0.82], [0.32, 1.25], [0.46, 1.1], [-0.08, 0.55]], 0.3), check));
+};
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -768,5 +775,69 @@ export const SCENES = {
       [[-0.45, 0.33], [0.5, 0.33], [-0.45, -0.33], [0.5, -0.33]].map(([x, z]) => part(new THREE.CylinderGeometry(0.14, 0.14, 0.08, 12), '#1d1f24', { p: [x, 0.14, z], r: [Math.PI / 2, 0, 0] }))),
       pivot: [0, y0, 0], anim: (t) => { const f = F(t), k = easeIO(win(f, 0.56, 0.72)) * (1 - easeIO(win(f, 0.88, 0.98))), { p, ry } = along(road, k * 0.999); return { x: p.x, z: p.z, ry: ry + (f > 0.86 ? Math.PI : 0), s: life(f, 0.55, 0.58, 0.95, 0.99) }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.6, y0, -1.4], topAt: [UX, CY + 1.38, UZ] };
+  },
+
+  // Shield (auto, property and business insurers): cover when it counts. At the crossroads under
+  // the insurer's shield, a car waiting at the red light is bumped from behind; a shield pops up
+  // over the pair, the claims van pulls alongside, the mechanic fixes the dent, and everyone
+  // drives on when the light turns green.
+  'insurance:1': () => {
+    const R = rand(909), out = [], moving = [];
+    out.push(slab('#9fcf7a'));
+    // ---- the crossroads
+    const XZ = 0.6, ZX = -0.6, RW = 1.7;
+    out.push(part(box(10.4, 0.03, RW), '#5b616b', { p: [0, y0 + 0.015, XZ] }), part(box(RW, 0.03, 10.4), '#5b616b', { p: [ZX, y0 + 0.016, 0] }));
+    for (let i = 0; i < 7; i++) { const d = -4.6 + i * 1.5; if (Math.abs(d - ZX) > 1.2) out.push(part(box(0.7, 0.012, 0.06), '#f2e9c9', { p: [d, y0 + 0.035, XZ] })); if (Math.abs(d - XZ) > 1.2) out.push(part(box(0.06, 0.012, 0.7), '#f2e9c9', { p: [ZX, y0 + 0.036, d] })); }
+    for (let i = 0; i < 5; i++) out.push(part(box(0.15, 0.012, RW - 0.2), K.white, { p: [ZX + RW / 2 + 0.3 + i * 0.25, y0 + 0.035, XZ] }));
+    out.push(part(box(0.1, 0.012, RW / 2 - 0.1), K.white, { p: [ZX + RW / 2 + 1.6, y0 + 0.036, XZ - RW / 4] }));
+    // Kerbs around the four blocks.
+    [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sz]) => { const x0 = sx < 0 ? -5.2 : ZX + RW / 2, x1 = sx < 0 ? ZX - RW / 2 : 5.2, z0 = sz < 0 ? -5.2 : XZ + RW / 2, z1 = sz < 0 ? XZ - RW / 2 : 5.2; out.push(part(rbox(x1 - x0 - 0.2, 0.08, z1 - z0 - 0.2, 0.04), '#d8d0c0', { p: [(x0 + x1) / 2, y0 + 0.04, (z0 + z1) / 2] }), part(box(x1 - x0 - 0.7, 0.05, z1 - z0 - 0.7), '#9fcf7a', { p: [(x0 + x1) / 2, y0 + 0.08, (z0 + z1) / 2] })); });
+    // ---- the insurer's office, with the shield on its roof
+    const OX = -3.0, OZ = -2.9;
+    out.push(part(rbox(2.6, 2.9, 2.2, 0.06), '#dfe6ec', { p: [OX, y0 + 1.55, OZ] }), part(box(2.62, 0.3, 2.22), 'A', { p: [OX, y0 + 2.85, OZ] }));
+    for (let f = 0; f < 3; f++) [[0, 1.11], [1.31, 0]].forEach(([dx, dz]) => out.push(part(box(dx ? 0.04 : 2.2, 0.55, dx ? 1.8 : 0.04), '#8fbfe0', { p: [OX + dx, y0 + 0.65 + f * 0.75, OZ + dz] })));
+    out.push(part(rbox(0.7, 0.8, 0.06, 0.03), '#2a3c50', { p: [OX + 0.6, y0 + 0.5, OZ + 1.12] }), part(rbox(1.0, 0.08, 0.5, 0.03), 'Ad', { p: [OX + 0.6, y0 + 0.95, OZ + 1.35] }));
+    out.push(place(shieldGeo(), { p: [OX, y0 + 3.05, OZ + 0.2], r: [0, Math.PI / 4, 0], s: 1.0 }));
+    // ---- the body shop across the road
+    const BX = 2.7, BZ = -2.9;
+    out.push(part(rbox(3.4, 1.7, 2.2, 0.05), '#eef0f2', { p: [BX, y0 + 0.85, BZ] }), part(extrude([[-1.8, 0], [1.8, 0], [1.4, 0.45], [-1.4, 0.45]], 2.3), '#9aa1a9', { p: [BX, y0 + 1.7, BZ] }), part(box(3.42, 0.25, 2.22), 'Bd', { p: [BX, y0 + 1.5, BZ] }));
+    [-0.8, 0.8].forEach((dx) => out.push(part(rbox(1.2, 1.15, 0.05, 0.03), '#c9ced6', { p: [BX + dx, y0 + 0.6, BZ + 1.11] })));
+    if (hi()) [-0.8, 0.8].forEach((dx) => { for (let i = 0; i < 6; i++) out.push(part(box(1.16, 0.02, 0.07), '#aab3bc', { p: [BX + dx, y0 + 0.12 + i * 0.19, BZ + 1.13] })); });
+    // ---- houses and a park in front
+    out.push(place(home(K.cream, '#a35a3c', 1.5, 1.4, 1.0), { p: [-3.5, y0 + 0.08, 3.6], r: [0, 0.3, 0] }));
+    // A car park on the front-right block.
+    out.push(part(box(3.6, 0.02, 2.6), '#7b818a', { p: [2.6, y0 + 0.1, 3.4] }));
+    for (let i = 0; i < 5; i++) out.push(part(box(0.05, 0.012, 1.1), K.white, { p: [1.1 + i * 0.75, y0 + 0.115, 3.0] }));
+    out.push(place(sedan('#e5533d'), { p: [1.47, y0 + 0.1, 3.0], r: [0, Math.PI / 2, 0], s: 0.8 }), place(sedan('#9aa1a9'), { p: [3.7, y0 + 0.1, 3.0], r: [0, -Math.PI / 2, 0], s: 0.8 }));
+    out.push(part(rbox(1.2, 0.1, 0.35, 0.03), K.wood, { p: [-3.0, y0 + 0.45, 2.6] }), [-0.5, 0.5].map((dx) => part(box(0.06, 0.35, 0.3), K.dark, { p: [-3.0 + dx, y0 + 0.25, 2.6] })));
+    [[-4.4, 2.2], [-1.8, 4.4], [-2.0, 2.4], [4.4, 4.5], [0.8, 4.5]].forEach(([x, z]) => out.push(miniTree(R, x, y0 + 0.08, z, 0.55 + R() * 0.2)));
+    // The traffic light on the corner, facing the waiting cars (they come from +x).
+    const LX = ZX + RW / 2 + 0.3, LZ = XZ - RW / 2 - 0.3;
+    out.push(part(cyl(0.06, 0.07, 2.2, 10), '#3a3f47', { p: [LX, y0 + 1.1, LZ] }), part(rbox(0.3, 0.8, 0.26, 0.06), '#2b2f36', { p: [LX, y0 + 2.4, LZ], r: [0, 0, 0] }));
+    // ---- moving parts (one 10 s cycle)
+    const P = 10, F = (t) => cyc(t, P), lane = XZ - 0.42, stop = -(ZX + RW / 2 + 1.75), green = (f) => f > 0.66;
+    const light = (c, dy, on) => moving.push({ geo: part(new THREE.SphereGeometry(0.09, 12, 8), c, { s: [1, 1, 0.5] }), pivot: [LX + 0.16, y0 + 2.4 + dy, LZ], anim: (t) => ({ s: on(F(t)) ? 1 : 0.001 }) });
+    light('#ff5a4a', 0.22, (f) => !green(f) && f > 0.08); light('#ffc93a', 0, (f) => f <= 0.08 && f > 0.02); light('#5be36a', -0.22, (f) => green(f) || f <= 0.02);
+    const fade = (x) => clamp01((5.0 - Math.abs(x)) / 0.6) * 0.85 + 0.001;
+    // The waiting car, then the one that bumps it; both pull away on green.
+    const car1x = (f) => f < 0.2 ? -5.8 + (stop + 5.8) * easeOut(f / 0.2) : f < 0.7 ? stop + bump(f, 0.305, 0.012) * 0.15 : stop + (11 - stop) * easeIn(win(f, 0.7, 0.98));
+    const car2x = (f) => f < 0.12 ? -6.5 : f < 0.3 ? -6.5 + (stop - 2.1 + 6.5) * easeOut(win(f, 0.12, 0.3)) : f < 0.74 ? stop - 2.1 : stop - 2.1 + (13 - stop) * easeIn(win(f, 0.74, 1));
+    moving.push({ geo: sedan(K.white), pivot: [0, y0, lane], anim: (t) => { const x = -car1x(F(t)); return { x, ry: Math.PI, s: fade(x) }; } });
+    moving.push({ geo: sedan('B'), pivot: [0, y0, lane], anim: (t) => { const f = F(t), x = -car2x(f); return { x, ry: Math.PI, rz: -bump(f, 0.3, 0.01) * 0.05, s: fade(x) }; } });
+    // The dent: a crumple at the bumpers, while the claim is open.
+    moving.push({ geo: merge(part(new THREE.IcosahedronGeometry(0.16, 0), '#3a3f47', { s: [0.6, 1, 1.2] }), part(new THREE.IcosahedronGeometry(0.12, 0), '#7d8792', { p: [0.05, 0.12, 0.3] })), pivot: [-(stop - 1.07), y0 + 0.4, lane], anim: (t) => { const f = F(t); return { s: f > 0.3 && f < 0.62 ? 1 : 0.001 }; } });
+    // The shield pops up over them.
+    moving.push({ geo: shieldGeo('A'), pivot: [-(stop - 1.05), y0 + 2.0, lane], anim: (t) => { const f = F(t); return { y: Math.sin(t * 2) * 0.06, ry: Math.PI / 4 + Math.sin(t) * 0.15, s: life(f, 0.32, 0.38, 0.66, 0.72) * 0.85 }; } });
+    // The claims van comes the other way and stops alongside.
+    const vanx = (f) => f < 0.36 ? 6.5 : f < 0.5 ? 6.5 + (stop - 1.0 - 6.5) * easeOut(win(f, 0.36, 0.5)) : f < 0.68 ? stop - 1.0 : stop - 1.0 - (12) * easeIn(win(f, 0.68, 0.95));
+    moving.push({ geo: merge(part(rbox(1.5, 0.95, 0.85, 0.1), K.white, { p: [-0.1, 0.65, 0] }), part(rbox(0.5, 0.65, 0.82, 0.12), K.white, { p: [0.8, 0.48, 0] }), part(box(0.04, 0.28, 0.7), '#26323f', { p: [1.04, 0.66, 0] }), part(box(1.2, 0.3, 0.02), 'A', { p: [-0.1, 0.72, 0.43] }), part(box(1.2, 0.3, 0.02), 'A', { p: [-0.1, 0.72, -0.43] }), place(shieldGeo(), { p: [-0.1, 1.12, 0], r: [0, Math.PI / 2, 0], s: 0.22 }),
+      [[-0.55, 0.4], [0.65, 0.4], [-0.55, -0.4], [0.65, -0.4]].map(([x, z]) => part(new THREE.CylinderGeometry(0.17, 0.17, 0.1, 14), '#1d1f24', { p: [x, 0.17, z], r: [Math.PI / 2, 0, 0] }))),
+      pivot: [0, y0, XZ + 0.42], anim: (t) => { const x = -vanx(F(t)); return { x, s: fade(x) * 1.15 }; } });
+    // The mechanic hops out, fixes the dent and gets back in.
+    moving.push(...walker(moving.length, (t) => { const f = F(t), k = win(f, 0.5, 0.54) - win(f, 0.62, 0.66); return { x: -(stop - 1.0), z: XZ + 0.1 - k * 0.4, ry: Math.PI / 2, still: f > 0.54 && f < 0.62, s: f > 0.5 && f < 0.66 ? 1 : 0.001 }; }, { shirt: 'A', pants: '#2b3a55', y: y0 }));
+    for (let k = 0; k < 5; k++) moving.push({ geo: star(0.12, 0.04).translate(0, 0, 0), pivot: [-(stop - 1.05), y0 + 0.8, lane], anim: (t) => { const f = F(t), u = cyc(t, 0.6, k / 5), a = k * 1.26; return { x: Math.cos(a) * u * 0.6, y: u * 0.6, z: Math.sin(a) * u * 0.6, ry: u * 4, s: f > 0.55 && f < 0.62 ? 1 - u : 0.001 }; } });
+    // Cross traffic while the light is red for the waiting cars.
+    for (let k = 0; k < 2; k++) moving.push({ geo: sedan(k ? '#3d7be0' : '#f29a3a'), pivot: [ZX + (k ? -0.42 : 0.42), y0, 0], anim: (t) => { const f = F(t), u = win(f, 0.08 + k * 0.22, 0.32 + k * 0.22), z = (k ? 1 : -1) * (5.8 - 11.6 * u); return { z, ry: k ? Math.PI / 2 : -Math.PI / 2, s: u > 0 && u < 1 ? fade(z) : 0.001 }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.4, y0 + 0.08, 1.9], topAt: [BX + 0.9, y0 + 2.15, BZ] };
   },
 };
