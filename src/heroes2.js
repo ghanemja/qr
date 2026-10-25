@@ -617,4 +617,45 @@ export const HEROES2 = {
     for (let k = 0; k < 4; k++) moving.push({ geo: part(box(0.22, 0.8, 0.03), QB, { p: [0, 0.4, 0] }), pivot: [3.9 - 0.42 * Math.cos(Math.PI / 4) + k * 0.28 * Math.cos(Math.PI / 4), y0 + 0.4, 0.4 + 0.42 * Math.sin(Math.PI / 4) - k * 0.28 * Math.sin(Math.PI / 4) + 0.06], anim: (t) => { const f = cyc(t, P); return { ry: -Math.PI / 4, sy: (0.2 + k * 0.2) * (0.4 + 0.6 * easeOut(win(f, 0.1 + k * 0.15, 0.3 + k * 0.15))) + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Workday: one system for a company's people and its money. The org chart stands in the
+  // middle; a new hire joins and is wired in, and on payday the pay flows down through the
+  // whole tree at once, under Workday's rising sun.
+  workday: { finder: '#0875e1', build: () => {
+    const R = rand(118), out = [], BLUE = '#0875e1', SUN = '#f38b00';
+    out.push(ground('#8fc66f'), part(cyl(3.0, 3.0, 0.05, 48), '#e8e3d8', { p: [0.8, y0 + 0.025, -0.6] }));
+    // ---- the sun arc behind it all, back left
+    out.push(part(torus(2.05, 0.2, Math.PI, 48), SUN, { p: [-2.3, y0 + 0.2, -2.6], r: [0, Math.PI / 4, 0] }), part(torus(1.5, 0.1, Math.PI, 48), '#ffc35a', { p: [-2.3, y0 + 0.2, -2.6], r: [0, Math.PI / 4, 0] }));
+    for (let k = 0; k < 7; k++) { const a = Math.PI * (k + 0.5) / 7, v = new V(Math.cos(a) * 2.6, Math.sin(a) * 2.6, 0).applyAxisAngle(new V(0, 1, 0), Math.PI / 4); out.push(part(rbox(0.16, 0.5, 0.12, 0.05), SUN, { p: [-2.3 + v.x, y0 + 0.2 + v.y, -2.6 + v.z], q: new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 4, a - Math.PI / 2, 'YXZ')) })); }
+    // ---- the org chart: three tiers of cards on posts, wired together
+    const Q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 4, 0)), at = (u, y) => { const v = new V(u, 0, 0).applyQuaternion(Q); return [0.6 + v.x, y0 + y, -0.2 + v.z]; };
+    const tiers = [[[0], 4.3], [[-2.0, 2.0], 2.9], [[-3.2, -1.6, 0, 1.6, 3.2], 1.5]];
+    const card = (c) => place(merge(part(rbox(0.9, 0.6, 0.08, 0.08), K.white), part(new THREE.SphereGeometry(0.12, 12, 8), c, { p: [-0.22, 0.08, 0.05], s: [1, 1, 0.4] }), part(new THREE.CircleGeometry(0.17, 16, 0, Math.PI), c, { p: [-0.22, -0.2, 0.05] }), part(box(0.3, 0.05, 0.02), '#c9ced6', { p: [0.15, 0.08, 0.05] }), part(box(0.24, 0.05, 0.02), '#c9ced6', { p: [0.12, -0.06, 0.05] })), { s: 1.45 });
+    const cols = ['#3d7be0', '#e5533d', '#2f9e6e', '#8a6cf0', '#f29a3a', '#d6336c', '#3fb8a8', '#f2c94c'];
+    let ci = 0;
+    tiers.forEach(([us, y]) => us.forEach((u) => out.push(place(card(cols[ci++ % 8]), { p: at(u, y), r: [0, Math.PI / 4, 0] }))));
+    const link = (a, b) => out.push(beam(a, [a[0], (a[1] + b[1]) / 2, a[2]], 0.04, '#7b828c'), beam([a[0], (a[1] + b[1]) / 2, a[2]], [b[0], (a[1] + b[1]) / 2, b[2]], 0.04, '#7b828c'), beam([b[0], (a[1] + b[1]) / 2, b[2]], b, 0.04, '#7b828c'));
+    const nodes = tiers.map(([us, y]) => us.map((u) => at(u, y)));
+    nodes[1].forEach((n) => link([nodes[0][0][0], nodes[0][0][1] - 0.3, nodes[0][0][2]], [n[0], n[1] + 0.3, n[2]]));
+    nodes[2].forEach((n, i) => { const p = nodes[1][i < 3 ? 0 : 1]; link([p[0], p[1] - 0.3, p[2]], [n[0], n[1] + 0.3, n[2]]); });
+    nodes[2].forEach((n) => out.push(beam([n[0], y0 + 0.05, n[2]], [n[0], n[1] - 0.44, n[2]], 0.05, '#c9ced6')));
+    // The new hire's empty spot, end of the bottom row.
+    const NEW = at(4.6, 1.5);
+    out.push(beam([NEW[0], y0 + 0.05, NEW[2]], [NEW[0], NEW[1] - 0.44, NEW[2]], 0.05, '#c9ced6'));
+    // ---- the office, right, with people
+    out.push(place(block(1.8, 2.4, 1.6, '#eef0f2', '#4a6a9a', 0.32), { p: [-3.6, y0, 2.8] }), part(box(1.84, 0.3, 1.64), BLUE, { p: [-3.6, y0 + 2.3, 2.8] }));
+    out.push(trees(R, [[4.6, 4.6], [-1.4, 4.4], [-4.6, 0.6], [1.6, 4.4], [4.6, 1.4], [-4.6, -4.6]]));
+    // ---- moving parts
+    const moving = [], P = 10;
+    // The new hire walks in and their card pops up and links in.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P), u = easeIO(win(f, 0, 0.25)); return { x: 3.4 + u * 0.4, z: 3.6 - u * 5.2, ry: Math.PI / 2, still: f > 0.25, s: f > 0.95 ? 1 - win(f, 0.95, 1) : Math.min(1, f / 0.03) }; }, { shirt: '#d6336c', pants: '#2b3a55', y: y0 }));
+    moving.push({ geo: card('#d6336c'), pivot: NEW, anim: (t) => { const f = cyc(t, P); return f < 0.25 || f > 0.97 ? { s: 0.001 } : { ry: Math.PI / 4, s: back(win(f, 0.25, 0.35)) }; } });
+    const nl = nodes[1][1], mid = (nl[1] + NEW[1]) / 2;
+    moving.push({ geo: merge(beam([0, 0, 0], [0, 1, 0], 0.04, '#7b828c')), pivot: [NEW[0], NEW[1] + 0.3, NEW[2]], anim: (t) => { const f = cyc(t, P); return f < 0.33 || f > 0.97 ? { s: 0.001 } : { sy: (mid - NEW[1] - 0.3) * easeOut(win(f, 0.33, 0.4)) + 0.001 }; } });
+    // Payday: coins drop down every branch at once.
+    const coinG = place(coin(0.14, 0.05), { r: [Math.PI / 2, 0, 0] }), top = nodes[0][0];
+    [...nodes[2], NEW].forEach((n, i) => { const p = nodes[1][i < 3 ? 0 : 1], path = curve([[top[0], top[1] + 0.5, top[2]], [p[0], p[1] + 0.6, p[2]], [n[0], n[1] + 0.5, n[2]]]); moving.push(rider(coinG, path, P, i === 5 ? 0 : 0, 0.5, 0.75, (t) => ({ ry: t * 5 }))); moving.push(pulse(n[0], n[1] - 0.34, n[2], SUN, P, 0.75, 0.3)); });
+    // The sun pulsing as it rises.
+    moving.push({ geo: part(new THREE.SphereGeometry(1.0, hi() ? 32 : 12, hi() ? 16 : 6, 0, TAU, 0, Math.PI / 2), '#ffd27a'), pivot: [-2.3, y0 + 0.2, -2.6], anim: (t) => ({ s: 0.95 + Math.sin(t * 1.5) * 0.05 }) });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

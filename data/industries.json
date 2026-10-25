@@ -105,7 +105,8 @@
   "hp": "The printer in every home, and the ink that keeps coming",
   "supermicro": "First to ship the newest AI servers: building blocks, liquid-cooled",
   "adobe": "The tools every creative works in: layers, PDFs and the red A",
-  "intuit": "The money software for households and small businesses: refunds and books"
+  "intuit": "The money software for households and small businesses: refunds and books",
+  "workday": "One system for a company's people and its pay"
  },
  "bank": [
   "PNC Financial Services",
@@ -1696,5 +1697,8 @@
  ],
  "intuit": [
   "Intuit"
+ ],
+ "workday": [
+  "Workday"
  ]
 }
