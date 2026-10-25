@@ -8,12 +8,12 @@ Notes for the next session working on this repo. Live site: https://ghanemja.git
   - **The first 16, rebuilt to the current quality bar:** amazon, walmart, apple, alphabet, berkshire, spacex, cocacola, exxon, microsoft, nvidia, costco, meta, ford, tesla, disney, mcdonalds.
   - **43 added in the latest session:** jpmorgan, unitedhealth, cvs, boeing, homedepot, netflix, starbucks, visa, chevron, anthropic, openai, gm, verizon, bofa, target, ups, ibm, lilly, caterpillar, pepsico, lockheed, deere, intel, delta, nike, uber, mastercard, att, wellsfargo, goldman, pfizer, comcast, amex, pg, jnj, waymo, airbnb, salesforce, fedex, oracle, cisco, stripe, kroger.
   - Stripe was rebuilt once (as the payments layer under a street of businesses), and Airbnb and Salesforce were strengthened after the user's feedback.
-- Every other company still uses one of the **137 shared industry shapes**. Most of those are at the old, simpler standard; only the generic tree has been rebuilt.
+- Every other company uses one of the **137 shared industry shapes**. **23 of them have been rebuilt as full scenes** (173 companies), and 34 more are queued; see **Shared-shape upgrades** below.
 
 ## The user's plan, in order
 
 1. **Bespoke models (done for now).** The user will post on LinkedIn next. More heroes are welcome if asked. Candidates: Citigroup, Adobe, Broadcom, Qualcomm, Dell, HP, Marriott, Micron, Databricks, Anduril, Figure AI, Zipline.
-2. **Upgrade the 137 shared shapes** to the same standard. Start with the shapes that cover the most companies, since they change the most of the map.
+2. **Upgrade the shared shapes** (in progress; see **Shared-shape upgrades** below for what's done, the agreed queue, and what's deliberately skipped).
 3. **Advertisement video** of the coolest models, set to music "from Equalizer" (the user wants to advertise Equalizer too).
    - Equalizer is the user's own music-making app: https://github.com/ghanemja/equalizer (studio: https://ghanemja.github.io/equalizer/). Every sound is an equation; a song is `{ bpm, bars, tracks: [{ name, equation, params, pattern }] }`, and `examples/render.mjs` renders one headlessly to WAV (no samples, no dependencies). Ready-made tracks live in its `docs/audio/` (for example `hyperbolic-808.mp3`, `four-on-the-floor.mp3`). Plan: compose a custom ad track in Equalizer, render it, cut the video to its beat, and show an end card crediting "Soundtrack made in Equalizer" with its link.
    - **Requested finale:** stack all the models in a grid and do a camera pan, then a zoom-out over all of them.
@@ -24,6 +24,99 @@ Notes for the next session working on this repo. Live site: https://ghanemja.git
 5. **Small fixes:** tidy the Apple Watch strap; tree shadows don't sway with the leaves.
 
 The Walmart "falling off the edge" fix (region-view lots kept fully on their piece, `tools/build.mjs`) has been merged to `main`.
+
+## Shared-shape upgrades
+
+### How they're built (conventions)
+
+- **`src/scenes.js`** holds the upgraded shapes as `SCENES['kind:variant'] = () => ({ ... })`. The key is the archetype id and the variant index into `[CENTER[kind], ...EXTRA[kind]]` in `models.js`, and `_variantLabels` in `data/industries.json` names each variant. `build()` in `models.js` uses a scene when one exists for that key, otherwise the old shape.
+- A scene returns **`{ slab: true, move: () => ({}), geo, moving, propAt, topAt }`**. `slab: true` means it brings its own 10.4 × 10.4 ground (`slab(color)`, top at `y0 = 0.24`), so no pedestal is added. Unlike a hero (`bare: true`), a scene still gets each company's **brand colours, companion prop and topper**, so one scene serves many companies:
+  - Paint brand parts `'A'`, `'B'`, `'Ad'`, `'Bd'`. Don't pass those to `shade()`: it only takes hex colours.
+  - **`propAt`**: a free spot on the slab within **±3.7** of the middle, since a prop can be about 1.5 wide.
+  - **`topAt`**: no higher than **y = 4.7**, since a topper can be 2 tall and the whole model must stay under 6.8.
+- **Rest bounds decide the framing.** Static geometry, plus every mover at its pivot with no animation applied, must stay within ±5.2 in x and z and ≤ 6.8 in height. If not, the model shrinks and big L-shaped QR corner squares show. Thin coloured strips at the slab's corners are normal; heroes show them too. Build an arm or boom in the pose it rests in, and pre-rotate it if its animation swings it away.
+- **Camera:** the company page **orbits**, and it looks down from the front right (+x, +z). Keep tall things (towers, clouds, stacks) at the back or left. Anything tall at the front right projects onto the middle and hides the action. Avoid opaque "light beam" cones: use pools of light on the ground instead.
+- **Reuse:** `heroes.js` exports its set dressing (`rbox`, `curve`, `tubeOn`, `along`, `miniTree`, `lampPost`, `sedan`, `cartGeo`, `walker`, `parcel`, `puff`, `flameGeo`). `scenes.js` adds more shared helpers at the top:
+  - Buildings: `home`, `house2`, `frame`/`truss`, `bin`, `labWalls`, `racking`, `pylon`.
+  - Vehicles and machines: `van`, `trawler`, `drone`, `humanoid`.
+  - Produce and parts: `wheat`, `tyre`, `gear`, `coin`, `bottle`, `bubbleGeo`, `tubeGeo`, `medBox`.
+  - People and props: `fan`, `bed`, `parasol`, `lifebuoy`.
+  - Symbols and weather: `heartGeo`, `shieldGeo`, `anchorGeo`, `jigsaw`, `stethoscope`, `cardGeo`, `tickGeo`, `stormCloud`, `bolt`.
+  - Mechanics: `reach2`, two-link arm inverse kinematics; see `industrial:0` or `robot:0` for a full arm.
+  - The user asked that smaller shapes **mix and match these pieces** rather than start from scratch.
+- **Dev tools additions:**
+  - `node tools/dev/vc.mjs kind:variant` prints vertex counts and the **rest bounds**, plus the prop and topper spots.
+  - `gal.cjs` takes `id:variant`, plus an optional 7th argument `prop.topper` (for example `3.2`) that draws a prop and topper.
+  - Check a real page with `still.cjs <slug>`; it's a different angle from the gallery.
+- **Workflow for a scene:** write it at the end of `SCENES`. Then run `npm run build`, `vc.mjs kind:variant` (fix the bounds), `gal.cjs` at a few times, and `still.cjs` on one of its companies. Look at the images, then `ship.sh`.
+
+### Done (23 scenes, 173 companies; all live on `main`)
+
+`bank:10` Coin tower · `house:0` Neighborhood · `farm:0` Harvest · `industrial:0` Machine shop · `metal:0` Steelworks · `oil:2` Storage tank · `car:6` Engine · `insurance:0` Rainy-day umbrella · `insurance:1` Shield · `media:0` Showtime · `robot:0` Robot lab · `care:0` Bubbles · `insurance:2` Lifebuoy · `insurance:3` Hourglass · `insurance:5` Anchor · `health:7` Microscope · `chem:0` Lab · `health:1` Heartbeat · `power:2` Light bulb · `software:6` Puzzle pieces · `industrial:3` Excavator · `health:4` Stethoscope · `health:9` Medical supplies
+
+### Agreed queue (34 shapes, 161 companies), in this order
+
+The user wants scenes only for shapes carrying companies people actually search for. These were chosen together; the named companies are why each shape is in.
+
+1. `oil:4` Refinery: Valero, Phillips 66, Marathon Petroleum, PBF
+2. `bank:11` Ticker board: Blackstone, S&P Global, StoneX, Jefferies, Icahn
+3. `rocket:0` Launch pad: RTX, Anduril, Shield AI, L3Harris
+4. `health:3` Hospital: HCA Healthcare (+ Tenet, UHS, DaVita, CHS)
+5. `health:5` Syringe: Merck, AbbVie, Bristol-Myers Squibb, Zoetis
+6. `insurance:4` Padlock: Nationwide, Travelers, Aflac, Guardian, W.R. Berkley, Oscar
+7. `chip:0` Silicon: Broadcom, AMD, Amphenol, Corning, Western Digital, Cerebras
+8. `software:3` Terminal: Cursor, Vercel, Replit, ServiceNow, CACI
+9. `computer:0` Laptop: HPE (+ TD Synnex, Avnet, Insight)
+10. `ai:5` Bright idea: Safe Superintelligence, Thinking Machines Lab, Liquid AI, Lila Sciences
+11. `plane:0` Control tower: United Airlines, Booking Holdings, JetBlue, Alaska Air
+12. `plane:1` Airliner: American Airlines, Expedia, Hilton, Howmet
+13. `software:2` App blocks: Notion, Palo Alto Networks, Glean, Amentum
+14. `rocket:1` Fighter jet: General Dynamics, Textron (+ Saronic, Relativity Space)
+15. `chip:1` Graphics card: Qualcomm, Jabil, Lam Research, KLA, Marvell
+16. `bank:9` Briefcase: BNY, Edward Jones (+ State Street, Northern Trust)
+17. `power:0` Wind turbine: GE Vernova, Vistra (+ Sempra, PSEG, WEC)
+18. `chip:2` Memory: Micron, Texas Instruments, Applied Materials, Analog Devices, Sanmina
+19. `parcel:0` Parcels on the move: eBay, Zipline, Coupang, Grainger, GXO, Norfolk Southern
+20. `power:5` Plug and socket: Duke Energy, PG&E (+ Southern, Con Edison, CMS)
+21. `power:1` Power lines: American Electric Power (+ Quanta, Xcel, FirstEnergy, PPL)
+22. `bank:8` Rising chart: Charles Schwab, BlackRock, Ameriprise, Raymond James, Voya
+23. `power:3` Solar farm: Vertiv (+ NextEra, Edison, AES, Ameren)
+24. `oil:5` Tanker: HF Sinclair (+ Cheniere, Expand Energy, Ovintiv)
+25. `payments:3` Crypto coin: Ripple, BitGo, Brex, Chainalysis
+26. `industrial:5` Garbage truck: Waste Management (+ Republic, Xylem, Ingersoll Rand)
+27. `parcel:1` Delivery van: Wayfair, Union Pacific, CSX, Expeditors, Flexport, Graybar
+28. `industrial:4` Paint: Sherwin-Williams, PPG, Comfort Systems, Sonoco, Masco
+29. `parcel:2` Parcel with wings: J.B. Hunt (+ WESCO, C.H. Robinson, Ryder, Prologis, XPO)
+30. `industrial:1` Tower crane: Otis, Carrier, Wabtec, APi Group, Primoris
+31. `software:4` Dashboard: ADP (+ Roper, Clay, Podium, Outreach)
+32. `industrial:2` Hard hat: Whirlpool, Builders FirstSource, Owens Corning, Mohawk
+33. `industrial:6` Packaging line: Stanley Black & Decker, Ball, Avery Dennison (+ Crown, Packaging Corp., Graphic Packaging)
+34. `software:5` Email: Calendly (+ Gusto, Concentrix, KBR)
+
+### Deliberately NOT upgraded (they keep their current models)
+
+- **5 shapes in the 4–6-company tier (24 companies):**
+  - `health:6` DNA: Amgen, Gilead, Regeneron, Biogen, Solventum
+  - `oil:0` Oil derrick: Halliburton, Baker Hughes, Venture Global, APA, NOV
+  - `oil:1` Pumpjack: ConocoPhillips, Occidental, EOG, Devon, Continental
+  - `oil:3` Gas pump: World Kinect, Murphy USA, Diamondback, Delek, Coterra
+  - `power:4` Cooling towers: NRG, Exelon, Dominion, Entergy
+  - The user may still add Amgen, Gilead, Regeneron, Halliburton or ConocoPhillips; ask before doing so.
+- **Every shape used by only 1–3 companies.** Instead, well-known companies on those shapes are **candidates for their own bespoke hero** (don't build them until the user picks):
+  - Banks and finance: Citigroup, Morgan Stanley, Capital One, U.S. Bancorp, KKR, Apollo, Fiserv, Moody's, Nasdaq, Intercontinental Exchange.
+  - Payments: PayPal, Block.
+  - Tech and hardware: Dell, HP, Super Micro, Adobe, Intuit, Workday, Motorola Solutions, Charter.
+  - Retail: Lowe's, Best Buy, TJX, Macy's, Gap, Lululemon, Ulta, Dollar General, Dollar Tree, AutoZone, O'Reilly.
+  - Groceries and food service: Publix, Albertsons, Sysco.
+  - Food, drink and restaurants: Tyson, Kraft Heinz, General Mills, Mondelēz, Hershey, Keurig Dr Pepper, Monster, Chipotle, DoorDash.
+  - Health: Abbott.
+  - Travel and casinos: Marriott, Southwest, Las Vegas Sands, MGM, Caesars.
+  - Cars and vehicles: Carvana, CarMax, Hertz, Goodyear, Paccar.
+  - Defence and space: Northrop Grumman.
+  - Materials and mining: International Paper, Newmont.
+  - Startups: Databricks, Perplexity, Neuralink, Scale AI, Hugging Face, Runway, Discord, Plaid, Ramp, Nuro.
+
+After the queue: give the user a short status (what's done, how many companies have upgraded scenes, the hero-candidate list). Then move on to plan item 4 (the "Access 3D asset library" button) and item 3 (the ad video).
 
 ## How the models work
 
@@ -52,9 +145,9 @@ The software renderer in a cloud container is slow (about 1.5 fps), so timed fra
 | Command | What it does |
 |---|---|
 | `tools/dev/serve.sh &` | Serves `docs/` at `http://localhost:8123/qr/` and the gallery at `/gallery/`. Run `npm run build` first. |
-| `node tools/dev/vc.mjs <id>` | Prints vertex counts at high and low detail. |
+| `node tools/dev/vc.mjs <id or kind:variant>` | Prints vertex counts at high and low detail, and the rest bounds (keep x/z within ±5.2, height ≤ 6.8). |
 | `node tools/dev/still.cjs <slug> <out> 1300 1100` | Screenshots a company page to `/tmp/qr-dev/<out>.png`. |
-| `node tools/dev/gal.cjs "<id,id>" <out> <cols> "<t1,t2>" 500` | Renders a hero at the given animation times. |
+| `node tools/dev/gal.cjs "<id,id:variant>" <out> <cols> "<t1,t2>" 500` | Renders a hero or a shape variant at the given animation times. An optional 7th argument `prop.topper` (e.g. `3.2`) also draws a prop and topper. |
 | `node tools/dev/smoke.cjs` | Loads 5 pages and reports errors and 404s. |
 | `python3 tools/dev/addhero.py <id> "<label>" "<Company key>"` | Assigns a company to a new hero (removes it from its old group). |
 | `tools/dev/ship.sh "<message>"` | Smoke test, commit, rebase onto `origin/main`, rebuild `docs`, push. |
