@@ -77,11 +77,11 @@
   "uber": "Rides in minutes",
   "mastercard": "Accepted everywhere",
   "att": "Fibre to the door",
-  "wellsfargo": "Since 1852"
+  "wellsfargo": "Since 1852",
+  "goldman": "Ring the bell"
  },
  "bank": [
   "Citigroup",
-  "Goldman Sachs Group",
   "Morgan Stanley",
   "U.S. Bancorp",
   "PNC Financial Services",
@@ -1615,5 +1615,8 @@
  ],
  "wellsfargo": [
   "Wells Fargo"
+ ],
+ "goldman": [
+  "Goldman Sachs Group"
  ]
 }

@@ -2670,5 +2670,43 @@ export const HEROES = {
     for (let k = 0; k < 6; k++) moving.push({ geo: part(ball(0.18), '#e3cfa8'), pivot: [0, y0 + 0.2, 0.6], anim: (t) => { const p = pos(t), f = cyc(t, 0.9, k / 6); return p.moving ? { x: p.x - p.dir * (0.9 + f * 1.2), y: f * 0.4, z: (k % 2 ? 0.3 : -0.3) * f, s: (0.5 + f) * (1 - f) * 1.6 + 0.001 } : { s: 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Goldman Sachs: where companies come to go public. On the balcony the opening bell rings and
+  // confetti falls over the trading floor; the ticker runs round the hall; deal tombstones stack
+  // up by the tower on West Street.
+  goldman: { finder: '#7399c6', build: () => {
+    const R = rand(61), out = [], y0 = 0.24, BLUE = '#7399c6', NAVY = '#1b2a4a';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#c9c6bf', { p: [0, 0.12, 0] }));
+    // ---- the trading hall: floor, back wall with a balcony, pillars, a ring of screens
+    const HX = -0.8, HZ = 0.2;
+    out.push(part(box(6.4, 0.04, 5.0), '#5a4636', { p: [HX, y0 + 0.02, HZ] }));
+    if (hi()) for (let i = 0; i < 16; i++) out.push(part(box(0.02, 0.005, 5.0), '#4a3828', { p: [HX - 3.1 + i * 0.4, y0 + 0.043, HZ] }));
+    out.push(part(rbox(6.4, 3.0, 0.3, 0.04), '#e9e4da', { p: [HX, y0 + 1.5, HZ - 2.6] }), part(rbox(0.3, 3.0, 5.0, 0.04), '#e9e4da', { p: [HX - 3.25, y0 + 1.5, HZ] }));
+    for (const x of [-2.6, -1.3, 0, 1.3, 2.6]) out.push(part(cyl(0.12, 0.14, 2.6, 16), '#f4f1ea', { p: [HX + x, y0 + 1.3, HZ - 2.3] }));
+    out.push(part(rbox(2.4, 0.1, 0.8, 0.03), '#c9b48e', { p: [HX + 0.6, y0 + 1.9, HZ - 2.05] }), part(box(2.4, 0.4, 0.04), '#8a6a4a', { p: [HX + 0.6, y0 + 2.15, HZ - 1.65] }), part(rbox(1.4, 0.4, 0.06, 0.03), NAVY, { p: [HX + 0.6, y0 + 2.15, HZ - 1.62] }));
+    // Trading posts with their screens.
+    for (const [x, z] of [[-1.9, 0.0], [0.4, 0.4], [2.2, -0.2], [-0.8, 1.6]]) { out.push(part(cyl(0.55, 0.6, 0.9, 8), '#3a3f47', { p: [HX + x, y0 + 0.45, HZ + z] })); for (let k = 0; k < 6; k++) { const a = (k / 6) * TAU; out.push(part(box(0.38, 0.26, 0.04), '#1d2a3a', { p: [HX + x + Math.cos(a) * 0.48, y0 + 1.15, HZ + z + Math.sin(a) * 0.48], r: [0, -a + Math.PI / 2, 0] }), part(box(0.32, 0.04, 0.01), k % 2 ? '#2fbf5b' : '#e5533d', { p: [HX + x + Math.cos(a) * 0.5, y0 + 1.15, HZ + z + Math.sin(a) * 0.5], r: [0, -a + Math.PI / 2, 0] })); } }
+    // ---- the tower on West Street
+    const TX = 3.6, TZ = -2.8;
+    out.push(part(rbox(1.9, 5.4, 1.5, 0.05), '#a9b8c8', { p: [TX, y0 + 2.7, TZ] }));
+    if (hi()) for (let j = 1; j < 18; j++) out.push(part(box(1.92, 0.02, 1.52), '#dfe6ee', { p: [TX, y0 + j * 0.3, TZ] }));
+    out.push(part(rbox(1.6, 0.08, 1.2, 0.02), '#dfe6ee', { p: [TX, y0 + 5.42, TZ] }));
+    // A pedestal for the deal tombstones.
+    out.push(part(rbox(1.6, 0.4, 1.2, 0.04), NAVY, { p: [3.4, y0 + 0.2, 2.6] }));
+    [[-4.6, 4.6], [1.6, 4.6], [4.6, 0.6], [-4.6, -4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.7 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [], P = 8;
+    // The bell rocking, the gavel hand striking.
+    moving.push({ geo: merge(part(lathe([[0, 0.3], [0.08, 0.28], [0.16, 0.12], [0.24, 0.0], [0.24, -0.02], [0, -0.02]], 24), '#d4a640'), part(ball(0.05), '#8a6a4a', { p: [0, -0.06, 0] })), pivot: [HX + 0.6, y0 + 2.75, HZ - 2.15], anim: (t) => { const f = cyc(t, P); return { rz: f < 0.4 ? Math.sin(t * 18) * 0.35 * (1 - f / 0.4) : 0 }; } });
+    // Confetti falling over the floor after the bell.
+    for (let k = 0; k < (hi() ? 40 : 14); k++) { const x = HX + (R() - 0.5) * 5.6, z = HZ + (R() - 0.5) * 4.0, c = [BLUE, '#f2c94c', '#e5533d', '#2fbf5b', '#ffffff'][k % 5], off = R(); moving.push({ geo: part(box(0.08, 0.005, 0.05), c), pivot: [x, y0 + 3.2, z], anim: (t) => { const f = cyc(t, P); if (f < 0.1 || f > 0.9) return { s: 0.001 }; const k2 = win(f, 0.1 + off * 0.1, 0.9); return { y: -k2 * 3.1, x: Math.sin(t * 3 + off * 9) * 0.15, rx: t * 5 + off * 9, rz: t * 4 }; } }); }
+    // The ticker: a band of green and red blocks running round the hall.
+    const tick = curve([[HX - 3.05, y0 + 2.6, HZ + 2.4], [HX - 3.05, y0 + 2.6, HZ - 2.4], [HX + 3.15, y0 + 2.6, HZ - 2.4]]);
+    for (let k = 0; k < 14; k++) moving.push({ geo: part(box(0.28, 0.12, 0.04), k % 3 ? '#2fbf5b' : '#e5533d'), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 10, k / 14), a = along(tick, u), p = a.p; return { x: p.x + (u < 0.43 ? 0.12 : 0), y: p.y, z: p.z + (u >= 0.43 ? 0.12 : 0), ry: a.ry }; } });
+    // Tombstones stacking up on the pedestal, one per deal.
+    for (let k = 0; k < 6; k++) moving.push({ geo: merge(part(rbox(0.36, 0.36, 0.36, 0.04), '#cfe3f2'), part(box(0.2, 0.2, 0.2), k % 2 ? BLUE : '#d4a640')), pivot: [3.4 - 0.45 + (k % 3) * 0.45, y0 + 0.58 + Math.floor(k / 3) * 0.38, 2.6], anim: (t) => { const f = cyc(t, 18), at = 0.08 + k * 0.12; return f < at ? { s: 0.001 } : f > 0.92 ? { s: 0.001 } : { y: (1 - easeOut(win(f, at, at + 0.06))) * 1.5, ry: Math.PI / 4 }; } });
+    // Traders on the floor.
+    [[-2.6, 1.2], [1.4, 1.4], [-0.4, -0.8]].forEach(([x, z], i) => moving.push(...walker(moving.length, (t) => { const f = cyc(t, 7, i * 0.3); return { x: HX + x + Math.sin(f * TAU) * 0.6, z: HZ + z + Math.cos(f * TAU) * 0.4, ry: -f * TAU, push: Math.sin(t * 4 + i) > 0.6 }; }, { shirt: ['#ffffff', '#cfe3f2', '#f4f1ea'][i], pants: NAVY, skin: ['#e9b98f', '#c58c66', '#8d5a3b'][i], y: y0 + 0.04 })));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
