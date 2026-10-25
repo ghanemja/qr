@@ -874,4 +874,41 @@ export const HEROES2 = {
       moving.push({ geo: part(new THREE.BoxGeometry(0.1, 0.02, 0.06), c), pivot: [x0, y0 + 3.0, z0], anim: (t) => { const u = cyc(t, 3, k / 22); return { y: -u * 2.8, x: Math.sin(u * 7 + k) * 0.2, rx: u * 12 + k, rz: u * 6, s: u > 0.95 ? 0.001 : 1 }; } }); }
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Gap Inc.: one maker, four brands for every budget. Cotton from the field becomes denim on
+  // the loom; the folded jeans stack up, and pairs fly to Old Navy, Gap, Banana Republic and
+  // Athleta along the street.
+  gap: { finder: '#002e5f', build: () => {
+    const R = rand(125), out = [], NAVY = '#002e5f', DEN = '#3b5f8f';
+    out.push(ground('#8fc66f'), part(box(1.2, 0.03, 10.2), '#d9d4c8', { p: [2.4, y0 + 0.015, 0] }));
+    // ---- the four stores along the back and right
+    const stores = [[-3.4, -3.6, 0, '#00559f', 'OLD NAVY'], [-0.6, -3.6, 0, NAVY, 'GAP'], [3.8, -2.2, 1, '#1d1f24', 'BANANA'], [3.8, 1.0, 1, '#5b2a86', 'ATHLETA']];
+    stores.forEach(([x, z, side, c, name]) => {
+      const g = merge(part(rbox(2.4, 1.8, 1.6, 0.05), '#f4efe6', { p: [0, 0.9, 0] }), part(box(2.44, 0.45, 1.64), c, { p: [0, 1.6, 0] }), pixText(name, 0.055, K.white, 0.03).translate(0, 1.6, 0.83), part(box(1.6, 0.9, 0.04), '#9cc3e0', { p: [0, 0.6, 0.81] }), [0, 1].map((k) => part(rbox(0.35, 0.7, 0.2, 0.04), DEN, { p: [-0.4 + k * 0.8, 0.6, 0.65] })));
+      out.push(place(g, { p: [x, y0, z], r: [0, side ? Math.PI / 2 : 0, 0] }));
+    });
+    // ---- the cotton field and the loom, front left
+    const FX = -3.2, FZ = 2.8;
+    out.push(part(box(2.6, 0.12, 2.4), '#8a6a45', { p: [FX, y0 + 0.06, FZ] }));
+    if (hi()) for (let i = 0; i < 7; i++) for (let j = 0; j < 6; j++) { const x = FX - 1.1 + i * 0.37, z = FZ - 1.0 + j * 0.4; out.push(part(cyl(0.015, 0.015, 0.3, 6), '#4f7a3a', { p: [x, y0 + 0.27, z] }), part(new THREE.SphereGeometry(0.08, 8, 6), K.white, { p: [x, y0 + 0.45, z] })); }
+    out.push(part(rbox(0.6, 0.5, 0.6, 0.06), '#f4f1ea', { p: [FX + 1.8, y0 + 0.25, FZ - 1.4] }));
+    const LX = -1.0, LZ = 0.8;
+    out.push(part(rbox(1.6, 1.0, 1.2, 0.05), '#8a6a45', { p: [LX, y0 + 0.5, LZ] }), part(cyl(0.2, 0.2, 1.3, 16), DEN, { p: [LX, y0 + 1.15, LZ + 0.4], r: [0, 0, Math.PI / 2] }), part(cyl(0.12, 0.12, 1.3, 12), '#f4f1ea', { p: [LX, y0 + 1.15, LZ - 0.4], r: [0, 0, Math.PI / 2] }), part(box(1.3, 0.02, 0.8), DEN, { p: [LX, y0 + 1.1, LZ], r: [0.15, 0, 0] }));
+    // ---- the stack plinth
+    const SX = 0.9, SZ = -0.9;
+    out.push(part(rbox(1.8, 0.2, 1.4, 0.05), '#c9ced6', { p: [SX, y0 + 0.1, SZ] }));
+    out.push(trees(R, [[4.6, 4.6], [-0.4, 4.6], [1.4, 3.4], [-4.6, -1.0], [1.4, -4.6]]));
+    // ---- moving parts
+    const moving = [], P = 10;
+    const jeans = (s = 1) => place(merge(part(rbox(1.5, 0.16, 1.0, 0.05), DEN), part(box(1.52, 0.02, 0.04), '#d9a441', { p: [0, 0.06, 0.4] }), part(box(0.3, 0.17, 0.2), '#2f4a70', { p: [0.55, 0, -0.3] }), part(cyl(0.04, 0.04, 0.17, 8), '#c9a227', { p: [-0.5, 0.0, 0.3] })), { s });
+    // The stack growing.
+    for (let k = 0; k < 8; k++) moving.push({ geo: jeans(), pivot: [SX, y0 + 0.28 + k * 0.17, SZ], anim: (t) => { const f = cyc(t, P), a = k * 0.1; return f < a || f > 0.97 ? { s: 0.001 } : { ry: (k % 2 ? 0.1 : -0.08), y: (1 - easeOut(win(f, a, a + 0.06))) * 0.8 }; } });
+    // Cotton to the loom; denim out of it to the stack.
+    const toLoom = curve([[FX + 1.8, y0 + 0.6, FZ - 1.4], [(FX + LX) / 2 + 0.6, y0 + 1.8, (FZ + LZ) / 2], [LX, y0 + 1.4, LZ]]);
+    for (let k = 0; k < 3; k++) moving.push(rider(part(new THREE.SphereGeometry(0.16, 10, 8), K.white), toLoom, P / 3, k / 3, 0, 0.5));
+    const toStack = curve([[LX + 0.7, y0 + 1.1, LZ], [(LX + SX) / 2, y0 + 2.0, (LZ + SZ) / 2], [SX, y0 + 1.8, SZ]]);
+    moving.push(rider(jeans(0.6), toStack, P / 3, 0.5, 0, 0.5));
+    // Pairs flying from the stack to each store.
+    stores.forEach(([x, z], i) => { const path = curve([[SX, y0 + 1.8, SZ], [(x + SX) / 2, y0 + 3.0, (z + SZ) / 2], [x, y0 + 2.2, z]]); moving.push(rider(jeans(0.45), path, P / 2, i / 4, 0.1, 0.6, (t, u) => ({ rz: u * 3 }))); });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

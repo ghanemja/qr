@@ -112,7 +112,8 @@
   "lowes": "Everything for the job, from the store's lumber yard to the deck in your backyard",
   "bestbuy": "Try it in the store, and the Geek Squad sets it up at home",
   "tjx": "The treasure hunt: brand surplus, a new mix every day, at a fraction of the price",
-  "macys": "The store on Herald Square that New York parades past"
+  "macys": "The store on Herald Square that New York parades past",
+  "gap": "One maker, four brands for every budget, and the denim to fill them"
  },
  "bank": [
   "PNC Financial Services",
@@ -327,7 +328,6 @@
   "Dollar General",
   "Dollar Tree",
   "Kohl's",
-  "Gap",
   "Nordstrom",
   "Ross Stores",
   "L Brands",
@@ -1182,7 +1182,6 @@
   "Dillard's": 4,
   "Ross Stores": 13,
   "Burlington Stores": 13,
-  "Gap": 14,
   "L Brands": 16,
   "Ascena Retail Group": 13,
   "PVH": 14,
@@ -1712,5 +1711,8 @@
  ],
  "macys": [
   "Macy's"
+ ],
+ "gap": [
+  "Gap"
  ]
 }
