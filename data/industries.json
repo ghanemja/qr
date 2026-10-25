@@ -61,10 +61,10 @@
   "anthropic": "Helpful, honest, harmless",
   "openai": "Ask anything",
   "gm": "One platform, every vehicle",
-  "verizon": "Can you hear me now?"
+  "verizon": "Can you hear me now?",
+  "bofa": "The deposit reservoir"
  },
  "bank": [
-  "Bank of America",
   "Wells Fargo",
   "Citigroup",
   "Goldman Sachs Group",
@@ -1572,5 +1572,8 @@
  ],
  "verizon": [
   "Verizon Communications"
+ ],
+ "bofa": [
+  "Bank of America"
  ]
 }

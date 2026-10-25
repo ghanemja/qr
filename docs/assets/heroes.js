@@ -1947,5 +1947,57 @@ export const HEROES = {
     moving.push({ geo: sedan('#3d6ea8'), pivot: [0, y0, 2.0], anim: (t) => { const f = cyc(t, 9), x = 5.6 - f * 11.2; return { x, ry: Math.PI, s: clamp01((5.2 - Math.abs(x)) / 0.5) + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Bank of America: a deep, cheap pool of deposits. Coins from its branches slide down chutes
+  // into the reservoir; from there the money flows out as mortgages and new houses go up; a
+  // customer asks Erica on their phone; the Charlotte tower with its crown stands over it all.
+  bofa: { finder: '#012169', build: () => {
+    const R = rand(47), out = [], y0 = 0.24, NAVY = '#012169', RED = '#e31837', GOLD = '#f2c14e';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#a9cf8a', { p: [0, 0.12, 0] }));
+    // The flag: three stripes swept across a white tile.
+    const flag = () => merge(part(rbox(1, 0.62, 0.05, 0.05), '#ffffff'), [[NAVY, 0.17], [RED, 0], [NAVY, -0.17]].map(([c, y], i) => part(box(0.78, 0.09, 0.02), c, { p: [0.04 * (i - 1), y, 0.035], r: [0, 0, 0.18] })));
+    // ---- the reservoir of deposits
+    const PX = 0.4, PZ = 0.2, PR = 1.7;
+    out.push(part(lathe([[PR - 0.05, 0], [PR + 0.25, 0], [PR + 0.25, 0.4], [PR + 0.05, 0.42], [PR - 0.05, 0.3]], 64), '#cfc6b4', { p: [PX, y0, PZ] }), part(cyl(PR, PR, 0.04, 64), '#9a8a6a', { p: [PX, y0 + 0.02, PZ] }));
+    out.push(part(cyl(PR - 0.02, PR - 0.02, 0.06, 64), 'W', { p: [PX, y0 + 0.3, PZ] }));
+    for (let i = 0; i < (hi() ? 40 : 10); i++) { const a = R() * TAU, r = Math.sqrt(R()) * (PR - 0.3); out.push(part(cyl(0.12, 0.12, 0.03, 16), GOLD, { p: [PX + Math.cos(a) * r, y0 + 0.06 + R() * 0.15, PZ + Math.sin(a) * r], r: [R() * 0.4, 0, R() * 0.4] })); }
+    // ---- the tower in Charlotte, with its crown of fins
+    const TX = -3.1, TZ = -3.0, TH = 4.4;
+    out.push(part(rbox(2.0, 0.4, 2.0, 0.05), '#d6d0c4', { p: [TX, y0 + 0.2, TZ] }), part(rbox(1.5, TH, 1.5, 0.05), '#6d8aa6', { p: [TX, y0 + 0.4 + TH / 2, TZ] }));
+    if (hi()) for (let j = 1; j < TH / 0.3; j++) out.push(part(box(1.52, 0.02, 1.52), '#b9c7d6', { p: [TX, y0 + 0.4 + j * 0.3, TZ] }));
+    for (let i = 0; i < 7; i++) { const o = -0.6 + i * 0.2, h = 0.9 - Math.abs(o) * 0.9; out.push(part(box(0.08, h, 0.08), '#d6dde5', { p: [TX + o, y0 + 0.4 + TH + h / 2, TZ + 0.72] }), part(box(0.08, h, 0.08), '#d6dde5', { p: [TX + 0.72, y0 + 0.4 + TH + h / 2, TZ + o] })); }
+    out.push(place(flag(), { p: [TX + 0.53, y0 + 0.4 + TH - 0.5, TZ + 0.53], r: [0, Math.PI / 4, 0], s: 0.7 }));
+    // ---- branches with their chutes to the reservoir
+    const branches = [[-3.0, 1.6], [3.4, -2.6], [-0.6, -3.4]];
+    const chutes = branches.map(([x, z]) => { const d = Math.hypot(PX - x, PZ - z), ux = (PX - x) / d, uz = (PZ - z) / d; return curve([[x + ux * 0.6, y0 + 1.05, z + uz * 0.6], [(x + PX) / 2, y0 + 0.95, (z + PZ) / 2], [PX - ux * (PR - 0.3), y0 + 0.5, PZ - uz * (PR - 0.3)]]); });
+    branches.forEach(([x, z], i) => {
+      const a = Math.atan2(PX - x, PZ - z);
+      out.push(part(rbox(1.3, 1.1, 1.1, 0.05), '#f2eee6', { p: [x, y0 + 0.55, z], r: [0, a, 0] }), part(rbox(1.36, 0.14, 1.16, 0.03), NAVY, { p: [x, y0 + 1.12, z], r: [0, a, 0] }));
+      out.push(place(flag(), { p: [x + Math.sin(a) * 0.58, y0 + 0.75, z + Math.cos(a) * 0.58], r: [0, a, 0], s: 0.5 }));
+      out.push(part(tubeOn(chutes[i], 0.1, hi() ? 32 : 10), '#c9ced6'));
+    });
+    // ---- the new neighbourhood the loans build, front right
+    const lots = [[2.6, 3.0], [3.9, 2.2], [4.0, 4.1], [1.5, 4.3]];
+    const houseGeo = (c, roof) => merge(part(rbox(0.9, 0.7, 0.8, 0.04), c, { p: [0, 0.35, 0] }), part(prism(1.0, 0.45, 0.9), roof, { p: [0, 0.7, 0], r: [0, Math.PI / 2, 0] }), part(box(0.2, 0.36, 0.04), '#6b4f3a', { p: [0, 0.18, 0.41] }), part(box(0.22, 0.2, 0.04), '#9dc3e6', { p: [0.27, 0.42, 0.41] }));
+    lots.forEach(([x, z]) => out.push(part(rbox(1.2, 0.04, 1.1, 0.02), '#c9b48e', { p: [x, y0 + 0.02, z] })));
+    const loan = curve([[PX + 1.2, y0 + 0.45, PZ + 1.2], [2.0, y0 + 0.9, 2.0], [3.0, y0 + 1.6, 3.0]]);
+    out.push(part(tubeOn(loan, 0.06, hi() ? 24 : 8), '#9fb7ff'));
+    [[-4.6, -0.6], [-4.6, 4.6], [-1.6, 4.6], [4.6, 0.2], [1.6, -4.6], [4.6, -4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.75 + R() * 0.2)));
+    out.push(lampPost(-1.6, y0, 1.8, 0), lampPost(2.4, y0, -1.6, Math.PI));
+    // ---- moving parts
+    const moving = [];
+    // Coins sliding down each chute and splashing into the pool.
+    chutes.forEach((c, i) => { for (let k = 0; k < 4; k++) moving.push({ geo: merge(part(cyl(0.17, 0.17, 0.05, 20), GOLD), part(cyl(0.11, 0.11, 0.055, 16), '#e0a93a')), pivot: [0, 0.1, 0], anim: (t) => { const u = cyc(t, 2.2, k / 4 + i * 0.13), a = along(c, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry, rx: Math.PI / 2, rz: u * 12 }; } }); });
+    // Ripples where they land.
+    chutes.forEach((c, i) => { const e = c.getPointAt(1); moving.push({ geo: part(new THREE.TorusGeometry(0.3, 0.02, 4, 24), '#e8f6ff'), pivot: [e.x, y0 + 0.34, e.z], anim: (t) => { const f = cyc(t, 0.55, i * 0.3); return { rx: Math.PI / 2, s: 0.3 + f * 1.4, sz: 0.3 + f * 1.4 }; } }); });
+    // Money flowing out as a loan, and houses going up one after another.
+    for (let k = 0; k < 4; k++) moving.push({ geo: part(rbox(0.22, 0.14, 0.12, 0.04), '#2fbf5b'), pivot: [0, 0.07, 0], anim: (t) => { const p = loan.getPointAt(cyc(t, 2, k / 4)); return { x: p.x, y: p.y, z: p.z, ry: t }; } });
+    const colours = [['#f6e7c8', '#b8452f'], ['#d9e7f2', '#4a5d74'], ['#f2d0c9', '#6b4f3a'], ['#e7f2d9', '#5a3a2a']];
+    lots.forEach(([x, z], i) => moving.push({ geo: houseGeo(...colours[i]), pivot: [x, y0 + 0.04, z], anim: (t) => { const f = cyc(t, 16), a = 0.08 + i * 0.18; return f < a ? { s: 0.001 } : f > 0.94 ? { s: Math.max(0.001, 1 - win(f, 0.94, 1)) } : { sy: back(win(f, a, a + 0.06)) + 0.001, s: 1 }; } }));
+    // A customer chatting with Erica.
+    const cust = moving.length;
+    moving.push(...walker(cust, () => ({ x: -1.4, z: 2.8, ry: Math.PI / 4, still: true }), { shirt: '#3d7be0', pants: '#2b3a55', y: y0, carry: part(rbox(0.08, 0.16, 0.02, 0.02), '#1d1f24', { p: [0.25, 1.35, 0.1], r: [0, 0, -0.3] }) }));
+    moving.push({ geo: merge(part(rbox(0.7, 0.36, 0.05, 0.12), '#6b48ff'), part(cone(0.07, 0.14, 3), '#6b48ff', { p: [-0.2, -0.22, 0], r: [0, 0, Math.PI] }), [-0.16, 0, 0.16].map((x) => part(ball(0.04), '#ffffff', { p: [x, 0, 0.03] }))), pivot: [0.2, 2.2, 0], parent: cust, anim: (t) => { const f = cyc(t, 3); return { s: back(win(f, 0, 0.1)) * (f > 0.85 ? 1 - win(f, 0.85, 1) : 1) + 0.001, y: f * 0.2 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
