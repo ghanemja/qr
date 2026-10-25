@@ -98,7 +98,8 @@
   "usbancorp": "Main Street deposits in, loans back out to build homes",
   "moodys": "No bond sells without a grade: every issue passes under Moody's stamp",
   "nasdaq": "Where the next big company lists, beside the giants already there",
-  "ice": "The exchange behind the exchanges: stocks, oil and mortgages in one data cube"
+  "ice": "The exchange behind the exchanges: stocks, oil and mortgages in one data cube",
+  "paypal": "Both sides of the checkout: friends pay friends, and the same accounts pay every shop"
  },
  "bank": [
   "PNC Financial Services",
@@ -136,7 +137,6 @@
   "Principal Financial"
  ],
  "payments": [
-  "PayPal Holdings",
   "First Data",
   "Fiserv",
   "Fidelity National Information Services",
@@ -1675,5 +1675,8 @@
  ],
  "ice": [
   "Intercontinental Exchange"
+ ],
+ "paypal": [
+  "PayPal Holdings"
  ]
 }
