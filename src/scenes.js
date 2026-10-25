@@ -270,6 +270,14 @@ const padBody = (w = 2.4, c = 'A', d = 1.0) => merge(part(rbox(w, w * 0.82, d, w
   part(cyl(w * 0.1, w * 0.1, 0.06, 20), K.dark, { p: [0, w * 0.42, d / 2 + 0.01], r: [Math.PI / 2, 0, 0] }), part(box(w * 0.07, w * 0.16, 0.06), K.dark, { p: [0, w * 0.32, d / 2 + 0.01] }), part(torus(w * 0.14, 0.04, TAU, 24), K.gold, { p: [0, w * 0.42, d / 2 + 0.02] }));
 const padShackle = (w = 2.4, c = K.steel) => { const r = w * 0.3, t = w * 0.075; return merge(part(torus(r, t, Math.PI, 20), c, { p: [r, w * 0.32, 0] }), part(cyl(t, t, w * 0.36, 16), c, { p: [0, w * 0.14, 0] }), part(cyl(t, t, w * 0.36, 16), c, { p: [r * 2, w * 0.14, 0] })); };
 
+// A silicon wafer lying flat (radius r) centred on the origin; with dies, a grid of brand squares.
+const wafer = (r = 0.5, dies = false) => { const g = [part(cyl(r, r, 0.04, hi() ? 40 : 14), '#c3c8d4'), part(box(r * 0.5, 0.045, 0.06), '#9aa1b0', { p: [0, 0, r * 0.97] })];
+  if (dies) { const n = 6, d = (r * 1.4) / n; for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) { const x = -r * 0.7 + (i + 0.5) * d, z = -r * 0.7 + (j + 0.5) * d; if (Math.hypot(x, z) < r * 0.88) g.push(part(box(d * 0.82, 0.05, d * 0.82), (i + j) % 3 ? 'A' : 'Ad', { p: [x, 0.01, z] })); } }
+  return merge(g); };
+// A chip package: dark square with a brand die and gold pins, on y = 0, about w wide.
+const chipGeo = (w = 0.5) => merge(part(rbox(w, w * 0.16, w, w * 0.06), '#24272d', { p: [0, w * 0.08, 0] }), part(rbox(w * 0.5, w * 0.05, w * 0.5, w * 0.03), 'A', { p: [0, w * 0.18, 0] }),
+  hi() ? ring(4, (a) => [-0.3, -0.1, 0.1, 0.3].map((k) => part(box(w * 0.06, w * 0.04, w * 0.14), K.gold, { p: [Math.cos(a) * w * 0.55 - Math.sin(a) * k * w, w * 0.03, Math.sin(a) * w * 0.55 + Math.cos(a) * k * w], r: [0, -a + Math.PI / 2, 0] }))) : []);
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -2164,5 +2172,89 @@ export const SCENES = {
     moving.push(...walker(moving.length, (t) => { const f = F(t), on = f > 0.66 && f < 0.8; return { x: SX + 1.3, z: SZ + 0.6 - Math.sin(t * 1.2) * 0.4, ry: Math.PI / 2 + 0.6, s: on ? 1 : 0.001, still: true, push: on && Math.sin(t * 6) > 0 }; }, { shirt: K.orange, pants: '#2b3a55', y: y0, carry: part(new THREE.SphereGeometry(0.19, 12, 8, 0, TAU, 0, Math.PI / 2), '#ffd23f', { p: [0, 1.62, 0] }) }));
     moving.push({ geo: tickGeo(0.3), pivot: [SX, y0 + SH + 1.0, SZ + 0.3], anim: (t) => { const f = F(t); return { y: easeOut(win(f, 0.76, 0.8)) * 0.3, ry: Math.PI / 4, s: life(f, 0.76, 0.79, 0.86, 0.9) }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.0, y0, 2.4], topAt: [OX, y0 + 2.4, OZ] };
+  },
+
+  // Silicon (chip designers, components, glass and storage makers): sand in, the modern world out.
+  // Sand rides the belt into the crystal puller, where the ingot grows from the glowing melt,
+  // turning; the saw slices it into wafers that slide to the lithography tool and come out
+  // patterned with dies; the dies hop onto the board, current races along its gold traces, and the
+  // phone on the board lights up.
+  'chip:0': () => {
+    const R = rand(3001), out = [], moving = [];
+    out.push(slab('#d7dce2'));
+    out.push(part(rbox(10.0, 0.03, 6.6, 0.03), '#eef1f4', { p: [0.2, y0 + 0.015, -1.6] }));
+    if (hi()) for (let x = -4.6; x < 5; x += 0.8) out.push(part(box(0.02, 0.012, 6.4), '#dde2e8', { p: [x, y0 + 0.03, -1.6] }));
+    // ---- the sand pile and its belt (front left)
+    const SX = -3.8, SZ = 2.4;
+    out.push(part(lathe([[1.3, 0], [1.0, 0.35], [0.5, 0.75], [0, 0.95]], 28), '#e2c68e', { p: [SX, y0, SZ] }), part(lathe([[1.0, 0], [0.6, 0.4], [0, 0.6]], 20), '#d6b97d', { p: [SX + 0.9, y0, SZ + 0.6] }));
+    const belt = curve([[SX + 0.6, y0 + 0.5, SZ - 0.6], [SX + 0.6, y0 + 1.4, -0.8], [-3.0, y0 + 1.9, -2.2]]);
+    out.push(part(tubeOn(belt, 0.12), '#5b616b'), ...[0.3, 0.65].map((u) => { const p = belt.getPointAt(u); return part(box(0.08, p.y - y0, 0.08), K.steelDk, { p: [p.x, (p.y + y0) / 2, p.z] }); }));
+    // ---- the crystal puller (back left): a cut-open chamber over the crucible
+    const PX = -3.3, PZ = -3.3, PR = 1.05, PB = y0 + 0.6, PH = 3.4, open0 = Math.PI / 4 + 0.95;
+    out.push(part(rbox(2.6, 0.6, 2.6, 0.06), '#c9ced6', { p: [PX, y0 + 0.3, PZ] }), part(box(2.62, 0.1, 2.62), 'A', { p: [PX, y0 + 0.5, PZ] }));
+    out.push(part(new THREE.CylinderGeometry(PR, PR, PH, hi() ? 40 : 14, 1, true, open0, TAU - 1.9), '#eef0f2', { p: [PX, PB + PH / 2, PZ] }), part(new THREE.CylinderGeometry(PR * 0.97, PR * 0.97, PH, hi() ? 40 : 14, 1, true, open0, TAU - 1.9), '#9aa1a9', { p: [PX, PB + PH / 2, PZ], s: [-1, 1, 1], r: [0, Math.PI / 2, 0] }));
+    out.push(part(new THREE.SphereGeometry(PR, hi() ? 32 : 12, hi() ? 10 : 4, 0, TAU, 0, Math.PI / 2), '#e3e6ea', { p: [PX, PB + PH, PZ] }), part(cyl(0.2, 0.2, 0.6, 14), '#c9ced6', { p: [PX, PB + PH + PR + 0.1, PZ] }), part(cyl(0.24, 0.24, 0.1, 14), 'A', { p: [PX, PB + PH + PR + 0.4, PZ] }));
+    out.push(part(lathe([[0.001, 0], [0.6, 0.02], [0.75, 0.2], [0.78, 0.6]], 28), '#8e959e', { p: [PX, PB, PZ] }), part(cyl(0.72, 0.72, 0.04, 28), '#ff8a3a', { p: [PX, PB + 0.55, PZ] }));
+    // ---- the saw (back middle): a finished ingot on its bed, wafers coming off
+    const WX = -0.6, WZ = -3.3, WY = y0 + 0.75;
+    out.push(part(rbox(2.4, 0.75, 1.2, 0.05), '#c9ced6', { p: [WX, y0 + 0.375, WZ] }), part(cyl(0.38, 0.38, 1.4, 28), '#aab2bf', { p: [WX - 0.4, WY + 0.4, WZ], r: [0, 0, Math.PI / 2] }), part(cone(0.38, 0.3, 28), '#aab2bf', { p: [WX - 1.25, WY + 0.4, WZ], r: [0, 0, Math.PI / 2] }));
+    out.push(part(rbox(0.3, 1.5, 1.1, 0.05), 'A', { p: [WX + 0.55, y0 + 0.9, WZ] }));
+    // ---- the lithography tool (right of middle): its turntable and a pool of light
+    const LX = 1.9, LZ = -1.0, LY = y0 + 0.9;
+    out.push(part(rbox(1.6, 0.9, 1.6, 0.06), '#e3e6ea', { p: [LX, y0 + 0.45, LZ] }), part(rbox(1.0, 1.6, 1.6, 0.06), '#eef0f2', { p: [LX - 1.15, y0 + 0.8, LZ] }), part(rbox(1.7, 0.5, 0.9, 0.06), '#eef0f2', { p: [LX - 0.4, y0 + 1.85, LZ] }), part(box(1.72, 0.12, 0.92), 'A', { p: [LX - 0.4, y0 + 2.0, LZ] }));
+    out.push(part(cyl(0.35, 0.25, 0.3, 20), '#5b616b', { p: [LX, y0 + 1.5, LZ] }), part(cyl(0.62, 0.62, 0.03, 32), '#ffe9a0', { p: [LX, LY + 0.01, LZ] }));
+    // A track from the saw to the tool.
+    const track = curve([[WX + 0.8, WY, WZ + 0.2], [0.7, WY + 0.05, -2.8], [LX - 0.2, LY, -2.2], [LX, LY + 0.05, LZ]]);
+    out.push(part(tubeOn(track, 0.05), K.steelDk));
+    // ---- the board (front right): gold traces, sockets, and the phone it powers
+    const BX = 2.4, BZ = 2.5, BW = 3.4, BD = 2.4, BY = y0 + 0.2;
+    out.push(part(rbox(BW, 0.2, BD, 0.04), '#1f6f4a', { p: [BX, y0 + 0.1, BZ] }), [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([a, b]) => part(cyl(0.08, 0.08, 0.06, 10), K.gold, { p: [BX + a * (BW / 2 - 0.2), BY + 0.02, BZ + b * (BD / 2 - 0.2)] })));
+    const sockets = [[-1.1, -0.5], [-0.1, -0.5], [-0.6, 0.5]].map(([x, z]) => new V(BX + x, BY, BZ + z));
+    sockets.forEach((p) => out.push(part(box(0.62, 0.03, 0.62), '#174f36', { p: [p.x, BY + 0.01, p.z] })));
+    const PH2 = new V(BX + 1.15, BY, BZ + 0.1);
+    const traces = sockets.map((p, i) => curve([[p.x + 0.3, BY + 0.03, p.z], [p.x + 0.6 + i * 0.1, BY + 0.03, p.z + (i === 2 ? -0.3 : 0.3)], [PH2.x - 0.4, BY + 0.03, PH2.z + (i - 1) * 0.25]]));
+    traces.forEach((c) => out.push(part(tubeOn(c, 0.03), K.gold)));
+    if (hi()) for (let i = 0; i < 7; i++) out.push(part(box(BW * 0.25, 0.012, 0.03), K.gold, { p: [BX - BW * 0.32, BY + 0.01, BZ + BD / 2 - 0.15 - i * 0.07] }));
+    out.push(part(rbox(0.7, 1.3, 0.1, 0.08), '#24272d', { p: [PH2.x, BY + 0.7, PH2.z], r: [-0.2, Math.PI / 4, 0] }), part(rbox(0.4, 0.1, 0.4, 0.03), K.steelDk, { p: [PH2.x - 0.1, BY + 0.05, PH2.z - 0.1] }));
+    // A connector and a fibre line off the board's back edge.
+    out.push(part(rbox(0.6, 0.3, 0.4, 0.04), '#2b2f36', { p: [BX + 1.2, BY + 0.15, BZ - BD / 2 + 0.25] }), part(tube([[BX + 1.2, BY + 0.2, BZ - BD / 2 + 0.05], [BX + 1.4, BY + 0.2, 0.3], [4.0, BY + 0.3, 0.2], [3.9, y0 + 0.5, -1.2]], 0.05), '#f29a3a'));
+    // The storage rack the fibre feeds: drive sleds and their lights.
+    const KX = 4.0, KZ = -2.2;
+    out.push(part(rbox(1.2, 2.4, 1.0, 0.05), '#2b2f36', { p: [KX, y0 + 1.2, KZ] }), part(box(1.22, 0.14, 1.02), 'A', { p: [KX, y0 + 2.35, KZ] }));
+    for (let i = 0; i < 6; i++) out.push(part(rbox(1.0, 0.26, 0.05, 0.02), '#3a3f47', { p: [KX, y0 + 0.4 + i * 0.32, KZ + 0.51] }), part(box(0.05, 0.26, 0.9), '#3a3f47', { p: [KX - 0.61, y0 + 0.4 + i * 0.32, KZ] }));
+    [[-4.6, -0.6], [0.4, 4.5], [-1.4, 4.4]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.45 + R() * 0.15)));
+    // ---- moving parts (one 12 s cycle)
+    const P = 12, F = (t) => cyc(t, P);
+    // Sand rides the belt.
+    for (let k = 0; k < 4; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.1, 8, 6), '#e2c68e', { s: [1, 0.7, 1] }), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 4, k / 4), p = belt.getPointAt(u); return { x: p.x, y: p.y + 0.14, z: p.z, s: Math.min(1, u / 0.06, (1 - u) / 0.06) }; } });
+    // The ingot grows up out of the melt, turning; its seed cable reels in.
+    const grow = (f) => 0.15 + 0.85 * easeIO(win(f, 0, 0.9));
+    const ingot = merge(part(cone(0.45, 0.3, 28), '#b7bdc9', { p: [0, 0.15, 0], r: [Math.PI, 0, 0] }), part(cyl(0.45, 0.45, 2.0, 28), (x, y) => (Math.floor(y * 6) % 2 ? '#b7bdc9' : '#a9b0bd'), { p: [0, 1.3, 0] }), part(cone(0.45, 0.4, 28), '#b7bdc9', { p: [0, 2.5, 0] }));
+    moving.push({ geo: ingot, pivot: [PX, PB + 0.56, PZ], anim: (t) => { const f = F(t); return { ry: t * 0.8, sy: grow(f), s: f > 0.95 ? Math.max(0.001, 1 - win(f, 0.95, 1)) : 1 }; } });
+    moving.push({ geo: part(cyl(0.025, 0.025, 1, 6), K.dark, { p: [0, -0.5, 0] }), pivot: [PX, PB + PH + 0.1, PZ], anim: (t) => ({ sy: PH - 0.4 - grow(F(t)) * 2.7 }) });
+    moving.push({ geo: part(cyl(0.74, 0.74, 0.02, 28), '#ffd23f'), pivot: [PX, PB + 0.575, PZ], anim: (t) => ({ s: 0.7 + Math.sin(t * 6) * 0.08, sy: 1 }) });
+    // The saw blade spins.
+    moving.push({ geo: merge(part(cyl(0.55, 0.55, 0.04, 32), '#d8dde3', { r: [0, 0, Math.PI / 2] }), part(cyl(0.12, 0.12, 0.08, 12), K.dark, { r: [0, 0, Math.PI / 2] })), pivot: [WX + 0.4, WY + 0.5, WZ], anim: (t) => ({ rx: t * 10 }) });
+    // Wafers slide down the track to the tool, get patterned under the light, then the dies hop off.
+    for (let k = 0; k < 3; k++) {
+      const wf = (t) => cyc(t, P, k / 3);
+      moving.push({ geo: wafer(0.42, false), pivot: [0, 0, 0], anim: (t) => { const f = wf(t), u = easeIO(win(f, 0, 0.3)), p = track.getPointAt(u * 0.999); return { x: p.x, y: p.y + 0.05, z: p.z, ry: u * 3, s: f < 0.4 ? Math.min(1, f / 0.03) : 0.001 }; } });
+      moving.push({ geo: wafer(0.42, true), pivot: [LX, LY + 0.05, LZ], anim: (t) => { const f = wf(t); return { ry: t * 0.6, s: f > 0.36 && f < 0.62 ? Math.min(1, win(f, 0.36, 0.42) * 0.999 + 0.001) : 0.001 }; } });
+      const sk = sockets[k];
+      moving.push({ geo: chipGeo(0.55), pivot: [0, 0, 0], anim: (t) => { const f = wf(t), u = easeIO(win(f, 0.6, 0.75)), A = new V(LX, LY + 0.1, LZ), p = A.lerp(sk, u); return { x: p.x, y: p.y + hop(u) * 1.6, z: p.z, ry: u * Math.PI, s: f > 0.6 && f < 0.97 ? 1 : 0.001 }; } });
+    }
+    // The light pool pulses as each wafer is exposed.
+    moving.push({ geo: part(cyl(0.6, 0.6, 0.02, 32), '#fff3b0'), pivot: [LX, LY + 0.1, LZ], anim: (t) => { const f = cyc(t, P / 3, 0); return { s: f > 0.0 && f < 0.12 * 3 ? 0.8 + Math.sin(t * 18) * 0.15 : 0.001, sy: 1 }; } });
+    // Current along the traces into the phone, whose screen lights.
+    traces.forEach((c, i) => { for (let k = 0; k < 2; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.07, 8, 6), '#fff3b0'), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 1.6, k / 2 + i * 0.17), p = c.getPointAt(u); return { x: p.x, y: p.y + 0.03, z: p.z, s: Math.min(1, u / 0.1, (1 - u) / 0.1) }; } }); });
+    const screen = merge(part(rbox(0.56, 1.08, 0.02, 0.06), 'A'), [0, 1, 2, 3, 4, 5].map((i) => part(rbox(0.12, 0.12, 0.03, 0.03), K.white, { p: [-0.14 + (i % 3) * 0.14, 0.3 - Math.floor(i / 3) * 0.18, 0.01] })));
+    moving.push({ geo: screen, pivot: [PH2.x + 0.04, BY + 0.71, PH2.z + 0.04], anim: (t) => ({ q: new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.2, Math.PI / 4, 0)), s: 0.95 + Math.sin(t * 4) * 0.02 }) });
+    // Light down the fibre.
+    const fib = curve([[BX + 1.2, BY + 0.2, BZ - BD / 2 + 0.05], [BX + 1.4, BY + 0.2, 0.3], [4.0, BY + 0.3, 0.2], [3.9, y0 + 0.5, -1.2]]);
+    for (let i = 0; i < 6; i++) moving.push({ geo: merge(part(box(0.08, 0.06, 0.03), '#62d35f', { p: [0.3, 0, 0] }), part(box(0.08, 0.06, 0.03), '#3d7be0', { p: [0.1, 0, 0] })), pivot: [KX, y0 + 0.4 + i * 0.32, KZ + 0.54], anim: (t) => ({ s: Math.sin(t * (5 + i) + i * 2) > -0.2 ? 1 : 0.001 }) });
+    for (let k = 0; k < 3; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.08, 8, 6), '#fff3b0'), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 1.4, k / 3), p = fib.getPointAt(u); return { x: p.x, y: p.y, z: p.z }; } });
+    // A tech in a bunny suit by the puller.
+    moving.push(...walker(moving.length, (t) => { const k = Math.sin(t * 0.4); return { x: -1.4 + k * 1.3, z: -1.2, ry: Math.cos(t * 0.4) > 0 ? 0 : Math.PI }; }, { shirt: K.white, pants: K.white, skin: '#e9b98f', hair: '#c3d3e6', y: y0 }));
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-1.4, y0, 2.0], topAt: [SX, y0 + 0.9, SZ] };
   },
 };
