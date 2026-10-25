@@ -147,6 +147,17 @@ const lifebuoy = (r = 0.32) => part(torus(r, r * 0.32, TAU, 32), (x, y, z) => (M
 // A beach umbrella (striped canopy on a pole), on y = 0.
 const parasol = (a = 'A', b = K.white, r = 0.8) => merge(part(cyl(0.025, 0.025, 1.4, 8), K.white, { p: [0, 0.7, 0] }), part(cone(r, 0.35, 16), (x, y, z) => (Math.floor((Math.atan2(z, x) + TAU) / (TAU / 8)) % 2 ? a : b), { p: [0, 1.45, 0] }));
 
+// An anchor standing upright on y = 0 (crown at the bottom), about h tall, flat face toward +z.
+const anchorGeo = (h = 2, c = 'A') => merge(
+  part(rbox(h * 0.1, h * 0.8, h * 0.1, h * 0.03), c, { p: [0, h * 0.5, 0] }), part(rbox(h * 0.55, h * 0.08, h * 0.1, h * 0.03), c, { p: [0, h * 0.78, 0] }),
+  part(torus(h * 0.1, h * 0.035, TAU, 20), c, { p: [0, h * 0.97, 0] }),
+  part(torus(h * 0.36, h * 0.045, Math.PI * 0.85, 28), c, { p: [0, h * 0.4, 0], r: [0, 0, Math.PI * 1.075] }),
+  [-1, 1].map((sx) => part(cone(h * 0.09, h * 0.22, 4), c, { p: [sx * h * 0.33, h * 0.32, 0], r: [0, 0, sx * 0.5] })));
+// A small trawler, bow toward +x, sitting on y = 0 at its waterline.
+const trawler = (hull = 'A') => merge(
+  part(extrude([[-1.1, -0.2], [0.9, -0.2], [1.35, 0.35], [-1.1, 0.35]], 0.9), hull, { r: [0, 0, 0] }), part(extrude([[-1.1, 0.25], [1.32, 0.25], [1.36, 0.36], [-1.1, 0.36]], 0.92), K.white),
+  part(rbox(0.7, 0.55, 0.65, 0.05), K.white, { p: [-0.35, 0.65, 0] }), part(box(0.72, 0.15, 0.67), '#2a3c50', { p: [-0.35, 0.78, 0] }), part(cyl(0.04, 0.04, 1.1, 8), K.white, { p: [0.4, 0.9, 0] }), beam([0.4, 1.4, 0], [-1.0, 0.45, 0], 0.025, K.steelDk));
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -1190,5 +1201,52 @@ export const SCENES = {
     moving.push({ geo: merge([-0.25, 0.25].map((z) => part(cyl(0.01, 0.01, 1.4, 4), K.ink, { p: [0, -0.7, z] })), part(rbox(0.3, 0.05, 0.6, 0.02), K.wood, { p: [0, -1.4, 0] })), pivot: [SX, y0 + 1.78, SZ], anim: (t) => ({ rz: Math.sin(t * 2.2) * 0.6, ry: Math.PI / 2 }) });
     moving.push({ geo: merge(part(capsule(0.12, 0.2), '#f2c94c', { p: [0, 0.2, 0] }), part(new THREE.SphereGeometry(0.12, 10, 8), '#e9b98f', { p: [0, 0.5, 0] }), part(capsule(0.05, 0.25), '#3d7be0', { p: [0.15, 0.0, 0], r: [0, 0, Math.PI / 2] })), pivot: [0, -1.38, 0], parent: sw, anim: () => ({ ry: -Math.PI / 2 }) });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.6, y0, -1.2], topAt: [OX + 0.2, y0 + 1.95, OZ - 0.6] };
+  },
+
+  // Anchor (mutual life insurers, commercial and specialty insurers): steady in any storm. On the
+  // rock a lighthouse sweeps its beam; out at sea a storm rages and a trawler pitches hard in the
+  // swell but its anchor chain holds; behind the breakwater, under the big anchor, the harbour's
+  // boats bob calmly.
+  'insurance:5': () => {
+    const R = rand(1501), out = [], moving = [];
+    out.push(part(rbox(10.4, 0.2, 10.4, 0.06), '#1f4f7a', { p: [0, 0.1, 0] }), part(new THREE.PlaneGeometry(10.2, 10.2).rotateX(-Math.PI / 2), 'W', { p: [0, y0 - 0.02, 0] }));
+    // ---- the rock and its lighthouse, at the back left
+    const RX = -2.8, RZ = -2.8;
+    const rock = (x, z, r, h, c) => out.push(part(new THREE.DodecahedronGeometry(1, hi() ? 1 : 0), c, { p: [x, y0 - 0.2 + h * 0.4, z], s: [r, h, r * 0.9], r: [0, R() * 3, 0] }));
+    rock(RX, RZ, 2.0, 1.5, '#8a8f96'); rock(RX + 1.2, RZ + 0.6, 1.2, 1.0, '#7a8088'); rock(RX - 0.9, RZ + 1.2, 1.0, 0.8, '#9aa0a8'); rock(RX + 0.6, RZ - 1.3, 1.1, 1.1, '#858a91');
+    out.push(part(cyl(0.95, 1.0, 0.25, 24), '#c9ced6', { p: [RX, y0 + 1.25, RZ] }));
+    const LH = 3.1, ly = y0 + 1.35;
+    for (let i = 0; i < 5; i++) { const r0 = 0.62 - (0.12 * i) / 5, r1 = 0.62 - (0.12 * (i + 1)) / 5; out.push(part(new THREE.CylinderGeometry(r1, r0, LH / 5, hi() ? 32 : 12), i % 2 ? K.white : 'A', { p: [RX, ly + (i + 0.5) * (LH / 5), RZ] })); }
+    out.push(part(cyl(0.65, 0.65, 0.1, 24), K.dark, { p: [RX, ly + LH + 0.05, RZ] }), part(cyl(0.42, 0.42, 0.55, 16), '#fff1b0', { p: [RX, ly + LH + 0.38, RZ] }), part(cone(0.5, 0.45, 16), 'Ad', { p: [RX, ly + LH + 0.88, RZ] }));
+    for (let i = 0; i < 8; i++) { const a = (i / 8) * TAU; out.push(part(cyl(0.02, 0.02, 0.55, 6), K.dark, { p: [RX + Math.cos(a) * 0.43, ly + LH + 0.38, RZ + Math.sin(a) * 0.43] })); }
+    out.push(part(rbox(0.3, 0.5, 0.05, 0.02), '#2a3c50', { p: [RX + 0.3, ly + 0.25, RZ + 0.55], r: [0, 0.5, 0] }));
+    // ---- the breakwater curving out from the rock, the anchor on its end, the harbour inside
+    const bw = curve([[RX + 1.6, 0, RZ + 1.0], [0.4, 0, -1.6], [1.6, 0, 0.6], [1.4, 0, 2.2]]);
+    for (let i = 0, n = hi() ? 60 : 16; i <= n; i++) { const { p, ry } = along(bw, i / n); out.push(part(rbox(0.65, 0.5, 0.7, 0.08), i % 2 ? '#b9b4aa' : '#a8a398', { p: [p.x, y0 + 0.15, p.z], r: [0, ry, 0] })); }
+    const end = bw.getPointAt(1);
+    out.push(part(cyl(0.6, 0.7, 0.4, 20), K.stone, { p: [end.x, y0 + 0.4, end.z] }), place(anchorGeo(2.4, 'A'), { p: [end.x, y0 + 0.6, end.z], r: [0, Math.PI / 4, 0] }));
+    // A jetty in the harbour.
+    out.push(part(box(2.4, 0.08, 0.5), '#b98a5a', { p: [-2.6, y0 + 0.15, 0.4] }));
+    for (let i = 0; i < 5; i++) out.push(part(cyl(0.05, 0.05, 0.5, 6), '#7a5233', { p: [-3.7 + i * 0.55, y0 + 0.05, 0.62] }));
+    // ---- moving parts
+    // The beam sweeps round: two flat blades of light from the lantern.
+    moving.push({ geo: merge([0, Math.PI].map((a) => part(extrude([[0, -0.1], [2.2, -0.4], [2.2, 0.4], [0, 0.1]], 0.02), '#fff6c8', { r: [Math.PI / 2, a, 0] }))), pivot: [RX, ly + LH + 0.38, RZ], anim: (t) => ({ ry: t * 0.9 }) });
+    // Harbour boats bob gently at the jetty.
+    const sail = (c) => merge(part(extrude([[-0.6, -0.1], [0.5, -0.1], [0.75, 0.15], [-0.6, 0.15]], 0.45), c), part(cyl(0.02, 0.02, 1.1, 6), K.white, { p: [0, 0.65, 0] }), part(extrude([[0, 0], [0.55, 0], [0, 0.95]], 0.02), K.white, { p: [0.03, 0.2, 0] }));
+    [[-3.3, 1.1, 'B'], [-2.2, 1.2, K.white], [-1.4, -0.4, '#e5533d']].forEach(([x, z, c], i) => moving.push({ geo: sail(c), pivot: [x, y0 - 0.02, z], anim: (t) => ({ y: Math.sin(t * 1.2 + i) * 0.03, rx: Math.sin(t * 1.0 + i) * 0.05, ry: 0.4 * i }) }));
+    // Out at sea: swell bands rolling, a storm cloud with rain and lightning.
+    for (let k = 0; k < 6; k++) { const x0 = 1.6 + (k % 3) * 1.1; moving.push({ geo: part(new THREE.CapsuleGeometry(0.07, 1.2, 3, 8), '#ffffff', { r: [0, 0, Math.PI / 2] }), pivot: [x0, y0, 0], anim: (t) => { const u = cyc(t, 3.2, k / 6); return { z: -3.8 + u * 8.4, x: Math.sin(u * 3 + k) * 0.3, ry: -0.3, s: Math.min(1, u * 5, (1 - u) * 5) }; } }); }
+    const CL = new V(3.4, y0 + 4.4, -2.6);
+    moving.push({ geo: stormCloud(0.9), pivot: CL.toArray(), anim: (t) => ({ x: Math.sin(t * 0.25) * 0.6, z: Math.cos(t * 0.2) * 0.4 }) });
+    for (let k = 0; k < 12; k++) { const ox = (R() - 0.5) * 1.8, oz = (R() - 0.5) * 1.2; moving.push({ geo: part(new THREE.SphereGeometry(0.05, 6, 4), '#9fd3f5', { s: [1, 3.5, 1] }), pivot: [CL.x + ox, CL.y - 0.6, CL.z + oz], anim: (t) => { const u = cyc(t, 0.6, k / 12); return { x: Math.sin(t * 0.25) * 0.6 - u * 0.6, z: Math.cos(t * 0.2) * 0.4, y: -u * (CL.y - 0.6 - y0), s: 1 - win(u, 0.9, 1) }; } }); }
+    moving.push({ geo: bolt(3.6), pivot: [CL.x + 0.6, CL.y - 0.5, CL.z + 0.5], anim: (t) => { const f = cyc(t, 5); return { s: (f > 0.5 && f < 0.52) || (f > 0.55 && f < 0.565) ? 1 : 0.001 }; } });
+    // The trawler: pitching and rolling in the swell, swinging on its chain, but held.
+    const AN = new V(3.6, y0, -2.2), boatAt = (t) => { const a = Math.sin(t * 0.35) * 0.5 + Math.PI * 0.75; return new V(AN.x + Math.cos(a) * 1.4, y0, AN.z - Math.sin(a) * 1.4); };
+    moving.push({ geo: trawler('A'), pivot: [0, 0, 0], anim: (t) => { const p = boatAt(t), d = AN.clone().sub(p); return { x: p.x, y: p.y + Math.sin(t * 2.0) * 0.12, z: p.z, q: new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.sin(t * 1.6) * 0.16, Math.atan2(-d.z, d.x), Math.sin(t * 2.0 + 0.6) * 0.22, 'YXZ')) }; } });
+    // Its chain, from the bow down to the anchor's buoy, taut and slack in turn.
+    const link = part(torus(0.07, 0.022, TAU, 10), K.steelDk);
+    for (let k = 0; k < 8; k++) moving.push({ geo: link, pivot: [0, 0, 0], anim: (t) => { const p = boatAt(t), d = AN.clone().sub(p).normalize(), bow = p.clone().addScaledVector(d, 1.25).add(new V(0, 0.3 + Math.sin(t * 2) * 0.12, 0)), u = (k + 0.5) / 8, q = bow.clone().lerp(AN, u); q.y = bow.y * (1 - u) + (y0 - 0.05) * u - Math.sin(u * Math.PI) * 0.15 * (0.5 + 0.5 * Math.sin(t * 2)); return { x: q.x, y: q.y, z: q.z, ry: Math.atan2(-d.z, d.x) + (k % 2) * Math.PI / 2 }; } });
+    moving.push({ geo: merge(part(new THREE.SphereGeometry(0.22, 14, 10), 'B'), part(cyl(0.03, 0.03, 0.4, 6), K.dark, { p: [0, 0.3, 0] })), pivot: AN.toArray(), anim: (t) => ({ y: Math.sin(t * 2.2) * 0.08, rz: Math.sin(t * 1.7) * 0.2 }) });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.4, y0, 3.2], topAt: [RX + 0.9, y0 + 1.6, RZ - 0.6] };
   },
 };
