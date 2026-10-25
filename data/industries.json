@@ -124,7 +124,8 @@
   "albertsons": "One grocer behind the local names, one fleet stocking them all",
   "sysco": "The truck behind the menu: restaurants, schools, hospitals, stadiums",
   "tyson": "From the egg to the supermarket, all in one company",
-  "kraftheinz": "The brands already in every pantry"
+  "kraftheinz": "The brands already in every pantry",
+  "generalmills": "From the mill by the river to the breakfast bowl"
  },
  "bank": [
   "PNC Financial Services",
@@ -539,7 +540,6 @@
   "US Foods Holding",
   "Performance Food Group",
   "Mondelez International",
-  "General Mills",
   "Kellogg",
   "Hershey",
   "Campbell Soup",
@@ -1436,7 +1436,6 @@
   "Western Union": 5,
   "A-Mark Precious Metals": 6,
   "Newmont Goldcorp": 6,
-  "General Mills": 3,
   "Kellogg": 3,
   "Post Holdings": 3,
   "TreeHouse Foods": 3,
@@ -1738,5 +1737,8 @@
  ],
  "kraftheinz": [
   "Kraft Heinz"
+ ],
+ "generalmills": [
+  "General Mills"
  ]
 }

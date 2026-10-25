@@ -1250,4 +1250,42 @@ export const HEROES2 = {
     for (let k = 0; k < 3; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.16, 10, 8), '#f4f1ea'), pivot: [BX + (k - 1) * 0.2, y0 + 0.6, BZ], anim: (t) => { const u = cyc(t, 2.4, k / 3); return { y: u * 1.4, x: Math.sin(u * 6 + k) * 0.1, s: Math.sin(u * Math.PI) * 1.2 + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // General Mills: from the mill to the breakfast table. Oats from the field go into the old
+  // flour mill by the river, out come the yellow boxes, and the giant box pours its O's into the
+  // bowl of milk.
+  generalmills: { finder: '#1a3d8f', build: () => {
+    const R = rand(137), out = [], BLUE = '#1a3d8f', YEL = '#f6c814';
+    out.push(ground('#8fc66f'), part(box(10.2, 0.05, 1.6), 'W', { p: [0, y0 + 0.02, -4.3] }));
+    // ---- the oat field, left
+    out.push(part(box(3.0, 0.3, 3.4), '#d9b45a', { p: [-3.4, y0 + 0.15, 0.6] }));
+    if (hi()) for (let k = 0; k < 140; k++) { const x = -4.8 + R() * 2.8, z = -1.0 + R() * 3.2, h = 0.4 + R() * 0.2; out.push(windy(part(cyl(0.012, 0.012, h, 4), '#c9a24a', { p: [x, y0 + 0.3 + h / 2, z] }), 0.4), windy(part(new THREE.SphereGeometry(0.035, 5, 3), '#e9c46a', { p: [x, y0 + 0.3 + h, z], s: [1, 2.4, 1] }), 0.5)); }
+    // ---- the mill by the river, back: brick, tall, with its sign and the water wheel
+    const MX = -2.4, MZ = -2.8;
+    out.push(part(rbox(3.0, 3.6, 1.8, 0.04), '#b9653f', { p: [MX, y0 + 1.8, MZ] }));
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) out.push(part(box(0.3, 0.42, 0.04), '#f3e7c9', { p: [MX - 1.1 + c * 0.55, y0 + 0.6 + r * 0.8, MZ + 0.91] }));
+    out.push(part(box(2.6, 0.4, 0.06), BLUE, { p: [MX, y0 + 3.3, MZ + 0.92] }), place(pixText('GENERAL MILLS', 0.045, K.white, 0.03), { p: [MX, y0 + 3.3, MZ + 0.96] }), part(cyl(0.25, 0.3, 1.6, 14), '#b9653f', { p: [MX + 1.1, y0 + 4.4, MZ - 0.4] }));
+    // ---- the box factory output, right: a shelf of yellow boxes
+    for (let k = 0; k < 5; k++) out.push(part(rbox(0.6, 0.9, 0.25, 0.03), YEL, { p: [2.0 + k * 0.65, y0 + 0.45, -2.8] }), part(cyl(0.12, 0.12, 0.02, 14), BLUE, { p: [2.0 + k * 0.65, y0 + 0.55, -2.67], r: [Math.PI / 2, 0, 0] }));
+    // ---- the table with the bowl
+    const BX = 1.4, BZ = 1.6;
+    out.push(part(rbox(3.2, 0.12, 2.4, 0.04), K.wood, { p: [BX, y0 + 0.9, BZ] }), [[-1.4, -1.0], [1.4, -1.0], [-1.4, 1.0], [1.4, 1.0]].map(([x, z]) => part(box(0.1, 0.84, 0.1), '#6f4a2c', { p: [BX + x, y0 + 0.42, BZ + z] })));
+    out.push(part(lathe([[0, 0], [0.5, 0], [0.9, 0.25], [1.05, 0.6], [1.0, 0.6], [0.85, 0.28], [0, 0.1]], 40), '#e5533d', { p: [BX - 0.3, y0 + 0.96, BZ + 0.2] }), part(cyl(0.95, 0.95, 0.04, 40), '#f8f6f1', { p: [BX - 0.3, y0 + 1.48, BZ + 0.2] }));
+    if (hi()) for (let k = 0; k < 24; k++) { const a = R() * TAU, d = R() * 0.75; out.push(part(torus(0.08, 0.035, TAU, 12), '#e9b949', { p: [BX - 0.3 + Math.cos(a) * d, y0 + 1.52, BZ + 0.2 + Math.sin(a) * d], r: [Math.PI / 2 + (R() - 0.5) * 0.5, 0, R() * TAU] })); }
+    out.push(part(rbox(0.12, 0.04, 0.6, 0.02), '#c9ced6', { p: [BX + 0.9, y0 + 0.98, BZ + 0.6] }));
+    out.push(trees(R, [[4.6, 4.6], [4.6, 0.0], [-1.0, 4.4], [-4.6, 4.4], [0.6, -1.2]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 8;
+    // The water wheel turning.
+    moving.push({ geo: merge(part(torus(0.8, 0.06, TAU, 32), '#6f4a2c'), Array.from({ length: 8 }, (_, k) => part(box(0.08, 0.4, 0.5), '#8a5a36', { p: [Math.cos(k * TAU / 8) * 0.8, Math.sin(k * TAU / 8) * 0.8, 0], r: [0, 0, k * TAU / 8] }))), pivot: [MX + 1.7, y0 + 0.6, MZ - 1.3], anim: (t) => ({ ry: Math.PI / 2, rx: 0, rz: -t * 0.8 }) });
+    // Oats from the field to the mill; boxes from the mill to the shelf.
+    for (let k = 0; k < 3; k++) moving.push(rider(part(new THREE.SphereGeometry(0.14, 8, 6), '#e9c46a', { s: [1, 1.6, 1] }), curve([[-3.4, y0 + 0.8, 0.4], [-3.0, y0 + 2.2, -1.2], [MX, y0 + 1.6, MZ + 1.0]]), P / 2, k / 3, 0, 0.7));
+    moving.push(rider(part(rbox(0.4, 0.6, 0.18, 0.03), YEL), curve([[MX + 1.6, y0 + 1.0, MZ + 0.4], [0.6, y0 + 2.0, -2.2], [2.0, y0 + 1.4, -2.6]]), P / 2, 0.4, 0, 0.7));
+    // The giant box, tipping to pour.
+    const gbox = merge(part(rbox(1.2, 1.7, 0.45, 0.05), YEL), part(cyl(0.3, 0.3, 0.02, 20), BLUE, { p: [0, 0.2, 0.235], r: [Math.PI / 2, 0, 0] }), part(torus(0.22, 0.06, TAU, 20), '#e9b949', { p: [0, 0.2, 0.25] }), place(pixText('O', 0.08, BLUE, 0.03), { p: [0, 0.55, 0.24] })).translate(0, -0.85, 0);
+    const tilt = (t) => { const f = cyc(t, P); return easeIO(win(f, 0.05, 0.25)) - easeIO(win(f, 0.75, 0.92)); };
+    moving.push({ geo: gbox, pivot: [BX + 1.0, y0 + 3.0, BZ + 0.2], anim: (t) => ({ ry: Math.PI / 4, rz: tilt(t) * 2.2, x: -tilt(t) * 0.4 }) });
+    // The O's falling into the bowl.
+    for (let k = 0; k < (hi() ? 12 : 4); k++) moving.push({ geo: part(torus(0.08, 0.035, TAU, 12), '#e9b949'), pivot: [BX - 0.2 + (k % 3) * 0.12, y0 + 2.6, BZ + 0.2 + (k % 4) * 0.08], anim: (t) => { const f = cyc(t, P); if (f < 0.25 || f > 0.75) return { s: 0.001 }; const u = cyc(t, 0.8, k / 12); return { y: -u * 1.1, rx: u * 8 + k, rz: u * 5, s: 1 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
