@@ -2874,5 +2874,53 @@ export const HEROES = {
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, 10), x = SX - 1.8 + (f < 0.5 ? f * 2 : 2 - f * 2) * 3.6; return { x, z: SZ + 0.85, ry: f < 0.5 ? 0 : Math.PI, push: Math.abs(f - 0.25) < 0.05 }; }, { shirt: '#d6336c', pants: '#2b3a55', y: y0 }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Johnson & Johnson: medicines and the tools surgeons trust. In the operating room a four-armed
+  // robot works over the patient while the surgeon steers from the console; in the research wing
+  // the DNA helix turns, for the drugs that come next.
+  jnj: { finder: '#eb1700', build: () => {
+    const R = rand(77), out = [], y0 = 0.24, RED = '#eb1700', TEAL = '#5fb3b3';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#c9ced6', { p: [0, 0.12, 0] }));
+    // ---- the operating room, cut away: floor, two walls, the big lamp
+    const OX = -1.0, OZ = -0.6, W = 6.0, D = 5.0;
+    out.push(part(box(W, 0.05, D), '#cfe3e0', { p: [OX, y0 + 0.025, OZ] }));
+    if (hi()) for (let i = 0; i < 12; i++) out.push(part(box(0.015, 0.003, D), '#b9d2cf', { p: [OX - W / 2 + i * 0.5, y0 + 0.052, OZ] }), part(box(W, 0.003, 0.015), '#b9d2cf', { p: [OX, y0 + 0.052, OZ - D / 2 + i * 0.42] }));
+    out.push(part(rbox(W, 2.4, 0.14, 0.03), '#e9f2f1', { p: [OX, y0 + 1.2, OZ - D / 2] }), part(rbox(0.14, 2.4, D, 0.03), '#e3eeed', { p: [OX - W / 2, y0 + 1.2, OZ] }));
+    out.push(part(rbox(1.6, 0.9, 0.05, 0.03), '#1d2a3a', { p: [OX + 0.4, y0 + 1.5, OZ - D / 2 + 0.08] }), part(box(1.4, 0.05, 0.01), '#2fbf5b', { p: [OX + 0.4, y0 + 1.5, OZ - D / 2 + 0.11] }));
+    // The table and the patient under drapes.
+    out.push(part(rbox(2.2, 0.12, 0.8, 0.04), '#9aa1a9', { p: [OX, y0 + 0.85, OZ] }), part(cyl(0.12, 0.2, 0.8, 16), '#7b828c', { p: [OX, y0 + 0.42, OZ] }), part(rbox(2.0, 0.22, 0.7, 0.1), TEAL, { p: [OX, y0 + 1.0, OZ] }), part(ball(0.16), '#e9b98f', { p: [OX - 1.0, y0 + 1.08, OZ] }), part(rbox(0.3, 0.1, 0.3, 0.05), '#cfe3e0', { p: [OX - 1.05, y0 + 1.15, OZ] }));
+    out.push(part(cyl(0.05, 0.05, 1.0, 8), '#c9ced6', { p: [OX, y0 + 2.4 - 0.2, OZ] }), part(lathe([[0, 0], [0.5, 0], [0.45, 0.12], [0, 0.18]], 32), '#e9ecef', { p: [OX, y0 + 1.75, OZ], r: [Math.PI, 0, 0] }), part(cyl(0.42, 0.42, 0.01, 32), '#fff6d8', { p: [OX, y0 + 1.74, OZ] }));
+    // The robot's base column.
+    out.push(part(rbox(0.8, 0.5, 0.8, 0.08), '#f4f5f6', { p: [OX + 0.2, y0 + 0.25, OZ + 1.2] }), part(cyl(0.18, 0.2, 1.3, 20), '#f4f5f6', { p: [OX + 0.2, y0 + 1.1, OZ + 1.2] }), part(box(0.5, 0.08, 0.02), RED, { p: [OX + 0.2, y0 + 0.3, OZ + 1.61] }));
+    // The surgeon's console.
+    out.push(part(rbox(0.9, 1.0, 0.7, 0.08), '#f4f5f6', { p: [OX + 2.2, y0 + 0.5, OZ + 1.4] }), part(rbox(0.6, 0.3, 0.5, 0.06), '#3a3f47', { p: [OX + 2.2, y0 + 1.15, OZ + 1.3], r: [-0.4, 0, 0] }));
+    // Instruments on a tray, a monitor on a stand.
+    out.push(part(rbox(0.7, 0.04, 0.45, 0.02), '#c9ced6', { p: [OX - 2.2, y0 + 0.85, OZ + 0.8] }), part(cyl(0.03, 0.03, 0.8, 8), '#9aa1a9', { p: [OX - 2.2, y0 + 0.43, OZ + 0.8] }));
+    out.push(part(cyl(0.03, 0.03, 1.5, 8), '#9aa1a9', { p: [OX - 1.8, y0 + 0.75, OZ - 1.4] }), part(rbox(0.6, 0.4, 0.05, 0.03), '#1d2a3a', { p: [OX - 1.8, y0 + 1.55, OZ - 1.4], r: [0, 0.5, 0] }));
+    // ---- the research wing: a lab with benches and the helix
+    const LX = 3.4, LZ = -2.6;
+    out.push(part(rbox(2.6, 0.06, 3.0, 0.02), '#eef0f2', { p: [LX, y0 + 0.03, LZ] }), part(rbox(1.8, 0.8, 0.6, 0.04), '#f4f5f6', { p: [LX, y0 + 0.4, LZ - 1.0] }), part(box(1.8, 0.04, 0.62), RED, { p: [LX, y0 + 0.82, LZ - 1.0] }));
+    // The red script sign on a monument by the path.
+    out.push(part(rbox(2.2, 0.8, 0.3, 0.06), '#f4f5f6', { p: [3.2, y0 + 0.4, 3.0], r: [0, -0.4, 0] }), part(tube([[-0.8, 0.0, 0], [-0.6, 0.2, 0], [-0.3, -0.05, 0], [0.0, 0.18, 0], [0.3, -0.04, 0], [0.6, 0.15, 0], [0.8, 0.0, 0]], 0.04), RED, { p: [3.2 + 0.07, y0 + 0.45, 3.0 + 0.16], r: [0, -0.4, 0] }));
+    [[-4.6, 4.6], [-1.6, 4.6], [4.7, 0.6], [4.7, 4.7]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.7 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // Four robot arms reaching over the patient from the column, each working in turn.
+    for (let k = 0; k < 4; k++) {
+      const a0 = -Math.PI / 2 + (k - 1.5) * 0.45, sh = moving.length;
+      moving.push({ geo: merge(part(box(0.9, 0.1, 0.12), '#f4f5f6', { p: [0.45, 0, 0] }), part(cyl(0.08, 0.08, 0.14, 16), '#d6d9dd', { r: [Math.PI / 2, 0, 0] })), pivot: [OX + 0.2, y0 + 1.75 + k * 0.06, OZ + 1.2], anim: (t) => ({ ry: -a0 + Math.sin(t * 0.8 + k) * 0.15 }) });
+      const el = moving.length;
+      moving.push({ geo: merge(part(box(0.1, 0.6, 0.1), '#f4f5f6', { p: [0, -0.3, 0] }), part(cyl(0.07, 0.07, 0.12, 16), '#d6d9dd', { r: [Math.PI / 2, 0, 0] })), pivot: [0.9, 0, 0], parent: sh, anim: (t) => ({ rz: 0.35 + Math.sin(t * 1.3 + k * 1.7) * 0.15 }) });
+      moving.push({ geo: merge(part(cyl(0.02, 0.02, 0.35, 8), '#9aa1a9', { p: [0, -0.17, 0] }), part(box(0.05, 0.06, 0.02), RED, { p: [0, -0.36, 0] })), pivot: [0, -0.6, 0], parent: el, anim: (t) => ({ y: -Math.max(0, Math.sin(t * 2 + k * 1.6)) * 0.08, ry: t * 2 }) });
+    }
+    // The surgeon at the console, and a nurse at the tray.
+    moving.push(...walker(moving.length, () => ({ x: OX + 2.2, z: OZ + 2.0, ry: Math.PI / 2, still: true, push: true }), { shirt: TEAL, pants: TEAL, hair: '#5fb3b3', y: y0 + 0.05 }));
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 8); return { x: OX - 2.2 + Math.sin(f * TAU) * 0.3, z: OZ + 1.4, ry: Math.PI / 2 + Math.sin(f * TAU) * 0.6, still: Math.cos(f * TAU) > 0.7 }; }, { shirt: TEAL, pants: TEAL, skin: '#8d5a3b', hair: '#5fb3b3', y: y0 + 0.05 }));
+    // Heart-rate trace on the monitor.
+    for (let k = 0; k < 6; k++) moving.push({ geo: part(box(0.06, 0.04, 0.01), '#2fbf5b'), pivot: [OX - 1.8 - 0.25, y0 + 1.55, OZ - 1.4 + 0.03], anim: (t) => { const u = cyc(t, 1.5, k / 6); return { x: u * 0.42, y: Math.abs(u - 0.5) < 0.05 ? 0.1 : 0, ry: 0.5 }; } });
+    // The DNA helix turning in the lab.
+    const helix = []; for (let i = 0; i < 14; i++) { const a = i * 0.5, y = i * 0.14; helix.push(part(ball(0.06), RED, { p: [Math.cos(a) * 0.3, y, Math.sin(a) * 0.3] }), part(ball(0.06), '#3d7be0', { p: [-Math.cos(a) * 0.3, y, -Math.sin(a) * 0.3] }), beam([Math.cos(a) * 0.3, y, Math.sin(a) * 0.3], [-Math.cos(a) * 0.3, y, -Math.sin(a) * 0.3], 0.015, '#c9ced6')); }
+    moving.push({ geo: merge(helix), pivot: [LX, y0 + 0.9, LZ + 0.3], anim: (t) => ({ ry: t * 0.9 }) });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

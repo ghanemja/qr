@@ -82,7 +82,8 @@
   "pfizer": "Made at global scale",
   "comcast": "The wire and the story",
   "amex": "Membership has its privileges",
-  "pg": "In every cupboard"
+  "pg": "In every cupboard",
+  "jnj": "Medicine and the surgeon's hand"
  },
  "bank": [
   "Citigroup",
@@ -198,7 +199,6 @@
   "Humana",
   "Cigna",
   "HCA Healthcare",
-  "Johnson & Johnson",
   "Merck",
   "AbbVie",
   "Abbott Laboratories",
@@ -1628,5 +1628,8 @@
  ],
  "pg": [
   "Procter & Gamble"
+ ],
+ "jnj": [
+  "Johnson & Johnson"
  ]
 }
