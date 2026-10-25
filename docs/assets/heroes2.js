@@ -458,47 +458,49 @@ export const HEROES2 = {
     moving.push({ geo: van(K.white, BLUE), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, T * 4, 0.25), u = f < 0.35 ? 0 : easeIO(win(f, 0.35, 0.85)), a = along(route, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry, s: (f > 0.95 ? 1 - win(f, 0.95, 1) : Math.min(1, f / 0.05)) * 0.8 + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // HP: the printer in every home, and the ink that keeps coming. Pages stream out of the giant
-  // printer and its ink gauges fall; before they run dry the Instant Ink van brings a fresh
-  // cartridge to the mailbox and it drops straight in.
+  // HP: the printer in every home, and the ink that never runs out. The giant printer in the
+  // middle of the neighbourhood prints page after page and its ink gauges fall; the Instant Ink
+  // van does its round of the homes, and when it reaches the printer, fresh cartridges drop in
+  // through the lid before it ever runs dry.
   hp: { finder: '#0096d6', build: () => {
-    const R = rand(114), out = [], BLUE = '#0096d6';
-    out.push(ground('#8fc66f'), part(rbox(7.0, 0.08, 6.2, 0.03), '#e3d5bd', { p: [-1.4, y0 + 0.04, -1.5] }));
-    // ---- the room: two walls with the logo, a rug, the desk with the laptop
-    out.push(part(rbox(7.0, 2.6, 0.2, 0.04), '#eef0f2', { p: [-1.4, y0 + 1.3, -4.6] }), part(rbox(0.2, 2.6, 6.2, 0.04), '#e6e9ed', { p: [-4.9, y0 + 1.3, -1.5] }), part(box(7.0, 0.2, 0.22), BLUE, { p: [-1.4, y0 + 2.5, -4.6] }), part(box(0.22, 0.2, 6.2), BLUE, { p: [-4.9, y0 + 2.5, -1.5] }));
-    out.push(part(cyl(0.6, 0.6, 0.06, 32), BLUE, { p: [-3.2, y0 + 1.5, -4.48], r: [Math.PI / 2, 0, 0] }), place(pixText('HP', 0.1, K.white, 0.04), { p: [-3.2, y0 + 1.5, -4.44] }));
-    out.push(part(rbox(1.6, 1.0, 0.04, 0.03), '#a8d4f0', { p: [0.4, y0 + 1.5, -4.48] }), part(rbox(0.04, 1.0, 1.4, 0.03), '#a8d4f0', { p: [-4.78, y0 + 1.5, 0.2] }));
-    out.push(part(cyl(1.6, 1.6, 0.02, 40), '#c97b5a', { p: [-1.4, y0 + 0.09, -1.2] }));
-    out.push(place(desk(K.wood, '#c9ced6'), { p: [-3.6, y0, -3.4], r: [0, Math.PI / 4, 0] }));
-    // ---- the printer's table
-    const PX = -1.2, PZ = -1.6;
-    out.push(part(rbox(3.2, 0.12, 1.8, 0.03), K.white, { p: [PX, y0 + 0.9, PZ] }), [[-1.45, -0.75], [1.45, -0.75], [-1.45, 0.75], [1.45, 0.75]].map(([x, z]) => part(box(0.1, 0.84, 0.1), K.dark, { p: [PX + x, y0 + 0.44, PZ + z] })));
-    // The printer itself: body, scanner lid, paper tray, the output tray.
-    out.push(part(rbox(2.6, 0.95, 1.5, 0.12), '#f4f5f6', { p: [PX, y0 + 1.45, PZ] }), part(rbox(2.5, 0.12, 1.4, 0.06), '#3a3f47', { p: [PX, y0 + 1.98, PZ] }), part(box(1.8, 0.04, 0.6), '#2b2f36', { p: [PX, y0 + 1.2, PZ + 0.95] }), part(box(1.6, 0.3, 0.05), '#2b2f36', { p: [PX, y0 + 1.42, PZ + 0.76] }), part(rbox(0.5, 0.18, 0.04, 0.03), '#1d1f24', { p: [PX + 0.8, y0 + 1.7, PZ + 0.76] }), part(cyl(0.12, 0.12, 0.04, 16), BLUE, { p: [PX - 0.95, y0 + 1.7, PZ + 0.77], r: [Math.PI / 2, 0, 0] }));
-    // The ink window on its side, with four gauges.
-    out.push(part(rbox(0.04, 0.6, 1.1, 0.03), '#1d1f24', { p: [PX + 1.31, y0 + 1.45, PZ] }));
-    // ---- the mailbox and the road, right
-    out.push(part(box(1.4, 0.03, 10.2), '#5b616b', { p: [4.3, y0 + 0.015, 0] }), part(cyl(0.05, 0.05, 1.0, 8), '#6f4a2c', { p: [3.2, y0 + 0.5, 1.6] }), part(rbox(0.5, 0.35, 0.3, 0.06), BLUE, { p: [3.2, y0 + 1.15, 1.6] }), part(box(0.04, 0.25, 0.08), '#e5533d', { p: [3.47, y0 + 1.25, 1.55] }));
-    // The family using it: a kid with homework at the low table, photos pinned up, stacks of prints.
-    out.push(part(rbox(1.4, 0.08, 0.8, 0.03), K.wood, { p: [-1.2, y0 + 0.5, 1.0] }), [[-0.6, -0.3], [0.6, -0.3], [-0.6, 0.3], [0.6, 0.3]].map(([x, z]) => part(box(0.06, 0.46, 0.06), K.dark, { p: [-1.2 + x, y0 + 0.25, 1.0 + z] })), place(fan('#e5533d'), { p: [-1.2, y0, 1.7], s: 1.1 }));
-    [0, 1, 2].forEach((k) => out.push(part(box(0.6, 0.04 + k * 0.03, 0.45), K.white, { p: [-1.5 + k * 0.5, y0 + 0.56 + k * 0.015, 0.95] })));
-    ['#e5533d', '#3d7be0', '#2f9e6e', '#f2c94c', '#8a6cf0'].forEach((c, k) => out.push(part(box(0.4, 0.3, 0.02), K.white, { p: [-3.4 + k * 0.6, y0 + 1.6 + (k % 2) * 0.2, -4.48] }), part(box(0.34, 0.24, 0.025), c, { p: [-3.4 + k * 0.6, y0 + 1.6 + (k % 2) * 0.2, -4.48] })));
-    out.push(part(rbox(0.5, 2.0, 1.6, 0.04), K.wood, { p: [-4.5, y0 + 1.0, -0.2] }), [0, 1, 2, 3].map((k) => part(box(0.44, 0.04, 1.5), '#8a5a36', { p: [-4.5, y0 + 0.3 + k * 0.5, -0.2] })), [0, 1, 2].flatMap((k) => [0, 1, 2, 3, 4].map((j) => part(box(0.3, 0.36, 0.12), ['#e5533d', BLUE, '#2f9e6e', '#f2c94c', '#8a6cf0'][(j + k) % 5], { p: [-4.4, y0 + 0.52 + k * 0.5, -0.8 + j * 0.28] }))));
-    out.push(trees(R, [[2.6, 4.4], [-4.4, 4.4], [2.4, -4.4], [0.8, 3.4]]));
+    const R = rand(214), out = [], BLUE = '#0096d6', INK = '#1d1f24';
+    out.push(ground('#8fc66f'));
+    // ---- the ring road round the middle, and the homes outside it
+    const RD = 3.05;
+    [[0, -RD, 6.9, 0.8], [0, RD, 6.9, 0.8], [-RD, 0, 0.8, 6.9], [RD, 0, 0.8, 6.9]].forEach(([x, z, w, d]) => out.push(part(box(w, 0.03, d), '#5b616b', { p: [x, y0 + 0.015, z] })));
+    for (let k = -2; k <= 2; k++) out.push(part(box(0.5, 0.01, 0.06), '#f2c94c', { p: [k * 1.3, y0 + 0.035, RD] }), part(box(0.06, 0.01, 0.5), '#f2c94c', { p: [RD, y0 + 0.035, k * 1.3] }));
+    const homes = [[-4.2, -1.6, Math.PI / 2], [-4.2, 1.8, Math.PI / 2], [-1.6, 4.25, 0], [1.8, 4.25, 0], [4.2, 1.8, -Math.PI / 2], [4.2, -1.6, -Math.PI / 2]];
+    homes.forEach(([x, z, ry], i) => out.push(place(home(['#fbf3e3', '#e8eef4', '#f6e7e1', '#eef3e6', '#f1e2c6', '#fbf3e3'][i], ['#8a5a36', '#5b6b7d', '#a35a3c', '#3f6f8f', '#6f4a2c', '#5b6b7d'][i], 1.3, 1.1, 0.9), { p: [x, y0, z], r: [0, ry, 0] }), part(cyl(0.03, 0.03, 0.7, 6), '#6f4a2c', { p: [x * 0.84, y0 + 0.35, z * 0.84 + (ry ? 0.6 : 0)] }), part(rbox(0.26, 0.2, 0.18, 0.04), BLUE, { p: [x * 0.84, y0 + 0.75, z * 0.84 + (ry ? 0.6 : 0)] })));
+    // ---- the giant printer, turned to face the camera
+    const PX = -0.4, PZ = -0.4, PQ = Math.PI / 4, PQq = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, PQ, 0));
+    const L = (x, y, z) => { const v = new V(x, y, z).applyQuaternion(PQq); return [PX + v.x, y0 + y, PZ + v.z]; };
+    const printer = merge(
+      part(rbox(4.0, 0.3, 2.8, 0.06), '#c9ced6', { p: [0, 0.15, 0] }),
+      part(rbox(3.8, 1.5, 2.5, 0.2), '#f4f5f6', { p: [0, 1.05, -0.1] }), part(rbox(3.7, 0.22, 2.4, 0.08), '#3a3f47', { p: [0, 1.9, -0.1] }),
+      part(box(3.0, 0.08, 0.06), INK, { p: [0, 1.25, 1.16] }), part(rbox(3.2, 0.06, 1.3, 0.03), '#d8dde3', { p: [0, 0.95, 1.7] }), part(rbox(0.7, 0.4, 0.06, 0.04), INK, { p: [1.3, 1.55, 1.16] }), part(box(0.6, 0.3, 0.02), '#4fc3f7', { p: [1.3, 1.55, 1.2] }),
+      part(cyl(0.42, 0.42, 0.06, 32), BLUE, { p: [-1.2, 1.4, 1.16], r: [Math.PI / 2, 0, 0] }), pixText('HP', 0.09, K.white, 0.08).translate(-1.2, 1.4, 1.18),
+      part(rbox(0.06, 1.0, 1.6, 0.04), INK, { p: [1.91, 1.05, -0.1] }));
+    out.push(place(printer, { p: [PX, y0, PZ], r: [0, PQ, 0] }));
+    out.push(trees(R, [[-4.6, -4.6], [4.6, -4.6], [-4.6, 4.6], [4.6, 4.6]], 0.5));
     // ---- moving parts
-    const moving = [], P = 12;
-    // The ink gauges: each falls through the cycle and fills back up when the cartridge lands.
-    const level = (t, k) => { const f = cyc(t, P); return f < 0.82 ? 1 - easeIn(win(f, 0, 0.82)) * (0.7 + k * 0.06) : 0.3 + 0.7 * easeOut(win(f, 0.88, 0.96)); };
-    ['#00b7eb', '#e5007e', '#ffe600', '#1d1f24'].forEach((c, k) => moving.push({ geo: part(box(0.03, 0.5, 0.2), c, { p: [0, 0.25, 0] }), pivot: [PX + 1.34, y0 + 1.2, PZ - 0.39 + k * 0.26], anim: (t) => ({ sy: level(t, k) + 0.001 }) }));
-    // Pages printing: each slides out and lands on the growing stack.
-    for (let k = 0; k < 5; k++) moving.push({ geo: merge(part(box(1.0, 0.012, 0.75), K.white), part(box(0.6, 0.014, 0.08), '#9aa1a9', { p: [-0.1, 0, -0.15] }), part(box(0.5, 0.014, 0.28), ['#e5533d', BLUE, '#2f9e6e', '#f29a3a', '#8a6cf0'][k], { p: [0.1, 0, 0.12] })), pivot: [PX, y0 + 1.26, PZ + 0.5], anim: (t) => { const f = cyc(t, 2.4, k / 5) , u = easeOut(win(f, 0, 0.5)); return { z: u * 0.55, y: -u * 0.02, s: f > 0.92 ? 1 - win(f, 0.92, 1) + 0.001 : 1 }; } });
-    // The Instant Ink van stops at the mailbox; the cartridge flies in.
-    moving.push({ geo: place(van(K.white, BLUE), { r: [0, -Math.PI / 2, 0] }), pivot: [4.3, y0, 0], anim: (t) => { const f = cyc(t, P), z = f < 0.6 ? 6 : f < 0.72 ? 5.6 - easeOut(win(f, 0.6, 0.72)) * 4.1 : f < 0.8 ? 1.5 : 1.5 - easeIn(win(f, 0.8, 0.95)) * 7.0; return { z, s: clamp01((5.2 - Math.abs(z)) / 0.5) * 0.85 + 0.001 }; } });
-    const cart = merge(part(rbox(0.36, 0.24, 0.2, 0.04), '#2b2f36'), part(box(0.37, 0.08, 0.21), BLUE, { p: [0, 0.06, 0] }), part(box(0.1, 0.05, 0.05), '#00b7eb', { p: [0, -0.13, 0] }));
-    const drop = curve([[3.2, y0 + 1.4, 1.6], [1.8, y0 + 3.6, 0.5], [PX + 0.3, y0 + 3.0, PZ], [PX + 0.3, y0 + 2.1, PZ]]);
-    moving.push(rider(cart, drop, P, 0, 0.72, 0.9, (t, u) => ({ rz: u * 2 })));
-    // The lid lifting to take it.
-    moving.push({ geo: part(rbox(2.5, 0.08, 1.4, 0.04), '#c9ced6', { p: [0, 0, 0.7] }), pivot: [PX, y0 + 2.06, PZ - 0.7], anim: (t) => ({ rx: -0.5 * bump(cyc(t, P), 0.86, 0.05) }) });
+    const moving = [], P = 16;
+    // The ink gauges on the printer's side: falling all cycle, refilled when the cartridges land.
+    const level = (t, k) => { const f = cyc(t, P); return f < 0.78 ? 1 - easeIn(win(f, 0, 0.78)) * (0.62 + k * 0.08) : 0.3 + 0.7 * easeOut(win(f, 0.84, 0.92)); };
+    ['#00b7eb', '#e5007e', '#ffe600', '#1d1f24'].forEach((c, k) => moving.push({ geo: part(box(0.04, 0.8, 0.28), c, { p: [0, 0.4, 0] }), pivot: L(1.95, 0.6, -0.65 + k * 0.36), anim: (t) => ({ ry: PQ, sy: level(t, k) + 0.001 }) }));
+    // Pages: each slides out of the slot onto the tray, showing its picture; the stack grows.
+    const page = (k) => merge(part(box(1.5, 0.015, 1.05), K.white), part(box(1.3, 0.02, 0.5), ['#9fd0ff', '#ffe0a8', '#bfe6b0', '#f8c4d4'][k % 4], { p: [0, 0, -0.15] }), part(new THREE.CylinderGeometry(0.12, 0.12, 0.022, 14), ['#ffcf3f', '#e5533d', '#3d7be0', '#2f9e6e'][k % 4], { p: [0.35, 0, -0.2] }), [0, 1].map((j) => part(box(1.1, 0.02, 0.06), '#9aa1a9', { p: [0, 0, 0.2 + j * 0.15] })));
+    for (let k = 0; k < 4; k++) moving.push({ geo: page(k), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 3, k / 4), u = easeOut(win(f, 0, 0.5)), p = L(0, 1.0 - u * 0.02, 0.9 + u * 0.8); return { x: p[0], y: p[1], z: p[2], ry: PQ, s: f > 0.9 ? 1 - win(f, 0.9, 1) + 0.001 : 1 }; } });
+    moving.push({ geo: part(box(1.5, 0.4, 1.05), K.white, { p: [0, 0.2, 0] }), pivot: L(0, 0.98, 1.75), anim: (t) => ({ ry: PQ, sy: 0.1 + 0.9 * cyc(t, P) }) });
+    // The lid lifting for the cartridges.
+    moving.push({ geo: part(rbox(3.7, 0.12, 2.4, 0.06), '#5b616b', { p: [0, 0, 1.2] }), pivot: L(0, 2.04, -1.3), anim: (t) => ({ ry: PQ, rx: -0.6 * (easeIO(win(cyc(t, P), 0.76, 0.8)) - easeIO(win(cyc(t, P), 0.9, 0.94))) }) });
+    // The Instant Ink van: round the ring road, stopping at each home and at the printer.
+    const loop = curve([[RD, y0, -RD], [RD, y0, RD], [-RD, y0, RD], [-RD, y0, -RD]], true);
+    const vanU = (f) => (f < 0.72 ? f / 0.72 : 1) % 1;
+    moving.push({ geo: place(van(K.white, BLUE), { s: 0.8 }), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P), u = f < 0.72 ? easeIO(win(f, 0, 0.72)) * 0.75 + 0.125 : 0.875, a = along(loop, u % 1); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry }; } });
+    // Parcels to each home as it passes, and the four cartridges to the printer at the end.
+    homes.forEach(([x, z], i) => moving.push(pulse(x * 0.84, y0 + 0.05, z * 0.84, BLUE, P, 0.12 + i * 0.1, 0.4)));
+    const vanStop = loop.getPointAt(0.875);
+    ['#00b7eb', '#e5007e', '#ffe600', '#1d1f24'].forEach((c, k) => moving.push(rider(merge(part(rbox(0.36, 0.5, 0.24, 0.04), '#2b2f36'), part(box(0.37, 0.14, 0.25), c, { p: [0, 0.12, 0] })), curve([[vanStop.x, y0 + 1.2, vanStop.z], [(vanStop.x + PX) / 2, y0 + 3.6, (vanStop.z + PZ) / 2], L(-0.9 + k * 0.6, 2.8, -0.2), L(-0.9 + k * 0.6, 1.95, -0.2)]), P, -k * 0.012, 0.74, 0.86, (t, u) => ({ ry: PQ + u * 3 }))));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // Super Micro: first to ship the newest AI servers. Building blocks fly off the shelf and slot
