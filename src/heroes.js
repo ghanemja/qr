@@ -328,27 +328,61 @@ export const HEROES = {
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 
-  // Coca-Cola: the contour bottle, the most famous package in the world, pouring into a glass of ice.
+  // Coca-Cola: a brand bottled and shipped everywhere. In the bottling hall, empty contour bottles
+  // ride the line: filled at the turning carousel, crowned at the capper, wrapped at the labeller,
+  // and crated; the red truck heads out with crates under the famous sign.
   cocacola: { finder: '#e61a27', build: () => {
-    const bottle = [[0, 0], [1.05, 0], [1.15, 0.3], [1.2, 0.9], [1.0, 1.7], [0.95, 2.3], [1.2, 3.1], [1.25, 3.8], [1.05, 4.6], [0.6, 5.6], [0.42, 6.4], [0.45, 6.6], [0.4, 6.7], [0, 6.75]];
-    const pour = (t) => { const f = cyc(t, 6); return easeIO(win(f, 0.08, 0.28)) * (1 - easeIO(win(f, 0.62, 0.8))); };
-    const level = (t) => { const f = cyc(t, 6); return f < 0.25 ? 0 : f < 0.62 ? win(f, 0.25, 0.62) : f < 0.9 ? 1 : 1 - win(f, 0.9, 1); };
-    return {
-      bare: true, move: () => ({}),
-      geo: merge(part(cyl(4.6, 4.7, 0.4, 48), '#f6f2ea', { p: [0, 0.2, 0] }), part(cyl(4.7, 4.8, 0.12, 48), '#e61a27', { p: [0, 0.06, 0] }),
-        // The glass, drawn as its rim, base and a few highlights so what's in it shows.
-        part(torus(1.42, 0.07, TAU, 40), '#e6f2f6', { p: [2.4, 3.8, 0.8], r: [Math.PI / 2, 0, 0] }), part(cyl(1.25, 1.25, 0.25, 40), '#dcecf2', { p: [2.4, 0.52, 0.8] }),
-        ring(6, (a) => beam([2.4 + Math.cos(a) * 1.24, 0.6, 0.8 + Math.sin(a) * 1.24], [2.4 + Math.cos(a) * 1.42, 3.8, 0.8 + Math.sin(a) * 1.42], 0.05, '#e6f2f6'))),
-      moving: [
-        { geo: merge(part(lathe(bottle), (x, y, z) => (y > 2.5 && y < 3.7 ? '#e61a27' : '#4a2a1a'), {}), part(lathe([[0, 0], [0.48, 0], [0.48, 0.3], [0, 0.32]]), '#d8d8d8', { p: [0, 6.65, 0] }),
-          part(tube([[-1.18, 2.9, 0.4], [-0.6, 3.3, 1.1], [0.4, 2.9, 1.15], [1.1, 3.3, 0.5]], 0.07), K.white), part(tube([[-1.18, 2.9, -0.4], [-0.6, 3.3, -1.1], [0.4, 2.9, -1.15], [1.1, 3.3, -0.5]], 0.07), K.white)),
-          pivot: [-1.3, 0.4, 0.4], anim: (t) => { const k = pour(t); return { x: -k * 2.7, y: k * 6.05, rz: -k * 1.85, z: k * 0.4 }; } },
-        { geo: part(cyl(0.11, 0.08, 1, 12), '#4a2a1a', { p: [0, -0.5, 0] }), pivot: [2.4, 4.55, 0.8], anim: (t) => { const k = pour(t), on = k > 0.95 && level(t) < 1; return on ? { sy: 3.9 - level(t) * 3, sx: 1 + Math.sin(t * 20) * 0.1 } : { s: 0 }; } },
-        { geo: part(lathe([[0, 0], [1.2, 0], [1.38, 3], [0, 3]]), '#4a2a1a'), pivot: [2.4, 0.62, 0.8], anim: (t) => ({ sy: Math.max(0.001, level(t)) }) },
-        ...[0, 1, 2].map((i) => ({ geo: part(box(0.7, 0.7, 0.7), '#e8f6ff'), pivot: [2.4 + (i - 1) * 0.5, 0.9, 0.8 + (i % 2) * 0.4], anim: (t) => ({ y: level(t) * 2.4 + Math.sin(t * 2 + i) * 0.08, ry: i + t * 0.3 * (i % 2 ? 1 : -1), s: level(t) > 0.15 ? 1 : 0 }) })),
-        ...[0, 1, 2, 3, 4].map((i) => ({ geo: part(ball(0.09), K.white), pivot: [2.4 + Math.cos(i * 2.4) * 0.7, 0.9, 0.8 + Math.sin(i * 2.4) * 0.7], anim: (t) => { const f = cyc(t, 1.4, i / 5), lv = level(t); return lv > 0.2 ? { y: f * lv * 2.8, s: 1 } : { s: 0 }; } })),
-      ],
-    };
+    const RED = '#e61a27', out = [], y0 = 0.24, beltY = y0 + 1.05;
+    const contour = [[0, 0], [1.05, 0], [1.15, 0.3], [1.2, 0.9], [1.0, 1.7], [0.95, 2.3], [1.2, 3.1], [1.25, 3.8], [1.05, 4.6], [0.6, 5.6], [0.42, 6.4], [0.45, 6.6], [0.4, 6.7], [0, 6.75]];
+    const bottleOf = (s, color) => part(lathe(contour.map(([r, y]) => [r * s, y * s]), hi() ? 32 : 10), color);
+    const bs = 0.17, bh = 6.75 * bs;
+    // ---- the hall: tiled floor with safety lines, back wall with the sign
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#d6d9dd', { p: [0, 0.12, 0] }));
+    for (let i = -4; i <= 4; i++) out.push(part(box(0.02, 0.01, 10), '#c3c7cc', { p: [i * 1.15, y0 + 0.005, 0] }), part(box(10, 0.01, 0.02), '#c3c7cc', { p: [0, y0 + 0.005, i * 1.15] }));
+    out.push(part(box(9.4, 0.012, 0.1), K.yellow, { p: [0, y0 + 0.01, 1.5] }), part(box(9.4, 0.012, 0.1), K.yellow, { p: [0, y0 + 0.01, -1.5] }));
+    out.push(part(box(10.4, 4.2, 0.3), '#f1ece4', { p: [0, y0 + 2.1, -5.05] }), part(box(10.4, 0.5, 0.32), '#c9c1b4', { p: [0, y0 + 0.25, -5.05] }));
+    for (let x = -4.6; x < 5; x += 1.15) out.push(part(box(0.06, 4.2, 0.05), '#e2dbd0', { p: [x, y0 + 2.1, -4.88] }));
+    // The red disc sign with its white ribbon.
+    out.push(part(cyl(1.35, 1.35, 0.16, 48), RED, { p: [-1.2, y0 + 2.6, -4.82], r: [Math.PI / 2, 0, 0] }), part(torus(1.35, 0.06, TAU, 48), '#f4f5f6', { p: [-1.2, y0 + 2.6, -4.73] }),
+      part(tube([[-2.3, y0 + 2.45, -4.72], [-1.6, y0 + 2.85, -4.7], [-0.9, y0 + 2.4, -4.7], [-0.1, y0 + 2.75, -4.72]], 0.07), '#f4f5f6'));
+    // A giant contour bottle on a plinth.
+    out.push(part(cyl(1.0, 1.1, 0.5, 32), '#3a3f47', { p: [3.6, y0 + 0.25, -3.6] }), place(bottleOf(0.62, '#4a2a1a'), { p: [3.6, y0 + 0.5, -3.6] }),
+      part(cyl(0.79, 0.79, 0.8, 32), RED, { p: [3.6, y0 + 0.5 + 2.6 * 0.62 + 0.4, -3.6] }), part(tube(Array.from({ length: 9 }, (_, i) => { const a = -0.6 + i * 0.15; return [3.6 + Math.cos(a) * 0.81, y0 + 0.5 + 2.6 * 0.62 + 0.4 + Math.sin(i * 0.9) * 0.18, -3.6 + Math.sin(a) * 0.81]; }), 0.05), '#f4f5f6'),
+      part(lathe([[0, 0], [0.3, 0], [0.3, 0.2], [0, 0.22]].map(([r, y]) => [r, y]), 24), '#d8d8d8', { p: [3.6, y0 + 0.5 + 6.65 * 0.62, -3.6] }));
+    // ---- the line: a roller conveyor on legs
+    const X0 = -4.4, X1 = 3.4;
+    out.push(part(rbox(X1 - X0 + 0.4, 0.18, 0.9, 0.05), '#5b616b', { p: [(X0 + X1) / 2, beltY - 0.12, 0] }), [-0.48, 0.48].map((z) => part(box(X1 - X0 + 0.4, 0.12, 0.06), '#aab3bc', { p: [(X0 + X1) / 2, beltY + 0.08, z] })));
+    for (let x = X0; x <= X1; x += 0.22) out.push(part(cyl(0.05, 0.05, 0.86, 10), '#c9ced6', { p: [x, beltY, 0], r: [Math.PI / 2, 0, 0] }));
+    for (let x = X0 + 0.2; x <= X1; x += 1.3) [-0.38, 0.38].forEach((z) => out.push(part(cyl(0.05, 0.05, beltY - y0 - 0.1, 8), '#3a3f47', { p: [x, (beltY + y0) / 2 - 0.05, z] })));
+    // Stations: filler carousel, capper, labeller.
+    const XF = -2.3, XC = -0.3, XL = 1.5;
+    out.push(part(cyl(0.2, 0.25, 2.2, 16), '#aab3bc', { p: [XF, beltY + 1.6, -1.0] }), beam([XF, beltY + 2.6, -1.0], [XF, beltY + 2.6, 0], 0.14, '#aab3bc'), part(cyl(0.65, 0.7, 0.45, 32), '#c9ced6', { p: [XF, beltY + 2.5, 0] }), part(cyl(0.5, 0.5, 0.3, 24), '#4a2a1a', { p: [XF, beltY + 2.85, 0] }));
+    [-0.6, 0.6].forEach((z) => out.push(part(box(0.12, 2.3, 0.12), '#3a3f47', { p: [XC, beltY + 1.15, z] }))); out.push(part(rbox(0.6, 0.35, 1.4, 0.05), RED, { p: [XC, beltY + 2.3, 0] }));
+    out.push(part(rbox(0.7, 1.2, 0.5, 0.06), '#aab3bc', { p: [XL, beltY + 0.6, -0.8] }));
+    // ---- crates, and the truck
+    const crate = merge(part(rbox(1.1, 0.5, 0.8, 0.05), RED), [-0.2, 0.2].map((z) => part(box(1.0, 0.04, 0.03), '#b8151f', { p: [0, 0.26, z] })), [-0.27, 0, 0.27].map((x) => part(box(0.03, 0.04, 0.72), '#b8151f', { p: [x, 0.26, 0] })),
+      Array.from({ length: 6 }, (_, i) => place(bottleOf(0.11, '#4a2a1a'), { p: [-0.36 + (i % 3) * 0.36, 0.2, -0.17 + Math.floor(i / 3) * 0.34] })));
+    [[4.3, 0, 0], [4.3, 0, 0.9], [4.3, 0.5, 0.45], [4.3, 0, -0.9]].forEach(([x, y, z]) => out.push(place(crate, { p: [x, y0 + 0.25 + y, z + 0.4] })));
+    const truck = merge(part(rbox(3.2, 1.6, 1.3, 0.12), RED, { p: [-0.7, 1.25, 0] }), part(tube([[-2.2, 1.0, 0.66], [-1.4, 1.5, 0.66], [-0.4, 0.95, 0.66], [0.8, 1.45, 0.66]], 0.07), '#f4f5f6'),
+      part(rbox(1.1, 1.2, 1.25, 0.2), RED, { p: [1.5, 0.95, 0] }), part(box(0.05, 0.5, 1.0), '#22303e', { p: [2.06, 1.25, 0] }), part(box(4.4, 0.18, 1.2), '#3a3f47', { p: [-0.1, 0.36, 0] }),
+      [[-1.6, 0.6], [-1.0, 0.6], [1.5, 0.6], [-1.6, -0.6], [-1.0, -0.6], [1.5, -0.6]].flatMap(([x, z]) => [part(cyl(0.27, 0.27, 0.2, 18), '#1d1f24', { p: [x, 0.27, z], r: [Math.PI / 2, 0, 0] }), part(cyl(0.14, 0.14, 0.21, 14), '#c9ced6', { p: [x, 0.27, z], r: [Math.PI / 2, 0, 0] })]));
+    // ---- the bottles riding the line: each is a joint with its stages as children
+    const N = 9, period = 9, xAt = (t, i) => X0 + (cyc(t, period, i / N)) * (X1 - X0 + 0.6);
+    const moving = [
+      { geo: merge(ring(6, (a) => part(cyl(0.05, 0.03, 0.5, 8), '#aab3bc', { p: [Math.cos(a) * 0.5, -0.25, Math.sin(a) * 0.5] }))), pivot: [XF, beltY + 2.25, 0], anim: (t) => ({ ry: t * 1.2 }) },
+      { geo: merge(part(cyl(0.12, 0.12, 0.8, 12), '#c9ced6', { p: [0, 0.4, 0] }), part(cyl(0.22, 0.22, 0.12, 16), '#3a3f47')), pivot: [XC, beltY + bh + 0.05, 0], anim: (t) => ({ y: 0.45 - bump(cyc(t, period / N), 0.5, 0.08) * 0.45 }) },
+      { geo: merge(part(cyl(0.3, 0.3, 0.45, 24), RED, { r: [0, 0, 0] }), part(cyl(0.31, 0.31, 0.1, 24), '#f4f5f6', { p: [0, 0.05, 0] })), pivot: [XL, beltY + 0.7, -0.45], anim: (t) => ({ ry: t * 3 }) },
+      { geo: truck, pivot: [0, y0, 3.6], anim: (t) => { const f = cyc(t, 12), x = f < 0.5 ? -7 + 9.4 * easeOut(win(f, 0, 0.3)) : 2.4 + 6 * easeIn(win(f, 0.6, 0.9)); return { x, s: Math.min(1, Math.max(0.001, (5.2 - Math.abs(x)) / 0.6)) }; } },
+    ];
+    for (let i = 0; i < N; i++) {
+      const me = moving.length, x = (t) => xAt(t, i);
+      moving.push({ geo: null, pivot: [0, beltY + 0.05, 0], anim: (t) => { const X = x(t); return { x: X, s: X > X1 + 0.3 ? 0.001 : 1 }; } });
+      moving.push({ geo: bottleOf(bs, '#cfe6dd'), pivot: [0, 0, 0], parent: me, anim: (t) => ({ s: x(t) < XF ? 1 : 0.001 }) });
+      moving.push({ geo: bottleOf(bs * 1.002, '#4a2a1a'), pivot: [0, 0, 0], parent: me, anim: (t) => ({ s: x(t) >= XF ? 1 : 0.001, sy: x(t) >= XF ? Math.min(1, (x(t) - XF) / 0.25 + 0.05) : 0.001 }) });
+      moving.push({ geo: part(cyl(0.085, 0.085, 0.06, 16), RED), pivot: [0, bh + 0.02, 0], parent: me, anim: (t) => ({ s: x(t) >= XC ? 1 : 0.001 }) });
+      moving.push({ geo: merge(part(cyl(1.27 * bs, 1.27 * bs, 0.7 * bs * 1.4, 24), RED), part(torus(1.27 * bs, 0.012, TAU, 24), '#f4f5f6', { r: [Math.PI / 2, 0, 0] })), pivot: [0, 3.45 * bs, 0], parent: me, anim: (t) => ({ s: x(t) >= XL ? 1 : 0.001 }) });
+    }
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 
   // Walmart: everyday low prices at enormous scale. A Supercenter on its car park: shoppers push
