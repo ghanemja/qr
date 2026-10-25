@@ -776,37 +776,40 @@ export const HEROES2 = {
     moving.push({ geo: pickup, pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.05, 0.35)), a = along(drive, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry, s: (f > 0.92 ? 1 - win(f, 0.92, 0.99) : 1) * 0.85 + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // Best Buy: the store where you can try it, and the Geek Squad who set it up. The black and
-  // white Beetle leaves the blue store, an agent carries the new TV into the living room, it goes
-  // up on the wall and lights up.
+  // Best Buy: the store where you can try it, and the Geek Squad who set it up. Inside, the wall
+  // of TVs plays, laptops and phones wait on the tables and the blue shirts help; outside, the
+  // black-and-white Beetle drives to the customer's house, where the new TV goes on the wall.
   bestbuy: { finder: '#0046be', build: () => {
-    const R = rand(122), out = [], BLUE = '#0046be', TAG = '#fff200';
-    out.push(ground('#8fc66f'), part(box(10.2, 0.03, 1.2), '#5b616b', { p: [0, y0 + 0.015, -0.2] }));
-    // ---- the store, back: blue box, the yellow tag
-    const SX = -1.6, SZ = -3.1;
-    out.push(part(rbox(5.4, 2.2, 2.6, 0.05), BLUE, { p: [SX, y0 + 1.1, SZ] }), part(box(2.0, 1.4, 0.04), '#9cc3e0', { p: [SX + 1.0, y0 + 0.7, SZ + 1.31] }));
-    const tagG = merge(part(extrude([[-1.1, -0.5], [0.8, -0.5], [1.2, 0], [0.8, 0.5], [-1.1, 0.5]], 0.14), TAG), part(cyl(0.08, 0.08, 0.16, 14), '#1d1f24', { p: [0.85, 0, 0], r: [Math.PI / 2, 0, 0] }), pixText('BEST BUY', 0.06, '#1d1f24', 0.18).translate(-0.15, 0, 0));
-    out.push(place(tagG, { p: [SX - 0.6, y0 + 1.6, SZ + 1.4] }));
-    // Products in the window: TVs, a laptop, a fridge.
-    [[SX + 0.4, 0.8], [SX + 1.2, 0.7]].forEach(([x, w]) => out.push(part(rbox(w, w * 0.6, 0.04, 0.02), '#1d1f24', { p: [x, y0 + 0.9, SZ + 1.2] })));
-    // ---- the living room across the road: a cut-away room with a sofa and the bare wall
-    const RX = 1.6, RZ = 2.8;
-    out.push(part(rbox(4.0, 0.12, 3.0, 0.03), '#d9c3a0', { p: [RX, y0 + 0.06, RZ] }), part(rbox(4.0, 2.2, 0.14, 0.03), '#f1e2c6', { p: [RX, y0 + 1.1, RZ - 1.5] }), part(rbox(0.14, 2.2, 3.0, 0.03), '#ebd6b4', { p: [RX - 2.0, y0 + 1.1, RZ] }));
-    out.push(part(rbox(2.0, 0.5, 0.8, 0.12), '#5b6b7d', { p: [RX + 0.2, y0 + 0.4, RZ + 0.9] }), part(rbox(2.0, 0.6, 0.25, 0.1), '#5b6b7d', { p: [RX + 0.2, y0 + 0.7, RZ + 1.25] }), part(rbox(1.0, 0.06, 0.5, 0.02), K.wood, { p: [RX + 0.2, y0 + 0.4, RZ - 0.1] }), part(cyl(1.0, 1.0, 0.02, 32), '#c97b5a', { p: [RX + 0.2, y0 + 0.13, RZ + 0.3] }));
-    out.push(place(fan('#e5533d'), { p: [RX - 0.3, y0 + 0.3, RZ + 0.9], s: 1.3 }), place(fan('#2f9e6e'), { p: [RX + 0.6, y0 + 0.3, RZ + 0.9], s: 1.1 }));
-    out.push(trees(R, [[4.6, 4.6], [4.6, -4.6], [-4.6, 2.0], [-4.4, 4.4], [3.6, 0.9]]));
+    const R = rand(231), out = [], BLUE = '#0046be', TAG = '#fff200';
+    out.push(ground('#8fc66f'), part(rbox(6.6, 0.06, 6.0, 0.03), '#e9ecef', { p: [-1.7, y0 + 0.03, -1.8] }));
+    // ---- the store: blue walls, the yellow tag, the TV wall
+    out.push(part(rbox(6.6, 2.8, 0.2, 0.03), BLUE, { p: [-1.7, y0 + 1.4, -4.9] }), part(rbox(0.2, 2.8, 6.0, 0.03), '#0a3aa0', { p: [-4.9, y0 + 1.4, -1.8] }));
+    const tagG = merge(part(extrude([[-1.1, -0.45], [0.8, -0.45], [1.2, 0], [0.8, 0.45], [-1.1, 0.45]], 0.12), TAG), part(cyl(0.08, 0.08, 0.14, 14), '#1d1f24', { p: [0.85, 0, 0], r: [Math.PI / 2, 0, 0] }), pixText('BEST BUY', 0.055, '#1d1f24', 0.16).translate(-0.15, 0, 0));
+    out.push(place(tagG, { p: [1.0, y0 + 2.3, -4.75] }));
+    // Appliances along the left wall.
+    for (let k = 0; k < 4; k++) out.push(part(rbox(0.8, k % 2 ? 1.0 : 1.8, 0.8, 0.06), k % 2 ? K.white : '#c9ced6', { p: [-4.35, y0 + (k % 2 ? 0.5 : 0.9), -3.9 + k * 1.0] }), part(cyl(0.25, 0.25, 0.04, 20), '#3a3f47', { p: [-3.94, y0 + 0.5, -3.9 + k * 1.0], r: [0, 0, Math.PI / 2] }));
+    // Tables of laptops and phones.
+    [[-2.6, -2.4], [-0.6, -2.4], [-1.6, -0.6]].forEach(([x, z]) => { out.push(part(rbox(1.6, 0.9, 0.9, 0.04), K.white, { p: [x, y0 + 0.45, z] })); [-0.5, 0, 0.5].forEach((dx, i) => out.push(part(rbox(0.36, 0.03, 0.26, 0.02), '#3a3f47', { p: [x + dx, y0 + 0.92, z + 0.1] }), part(rbox(0.36, 0.24, 0.02, 0.02), '#1d1f24', { p: [x + dx, y0 + 1.04, z - 0.03], r: [-0.25, 0, 0] }))); });
+    // ---- the customer's house, front right, cut open to its living room
+    const HX = 2.8, HZ = 2.8;
+    out.push(part(rbox(3.2, 0.1, 2.8, 0.03), '#d9c3a0', { p: [HX, y0 + 0.05, HZ] }), part(rbox(3.2, 2.0, 0.14, 0.03), '#f1e2c6', { p: [HX, y0 + 1.0, HZ - 1.4] }), part(rbox(0.14, 2.0, 2.8, 0.03), '#ebd6b4', { p: [HX - 1.6, y0 + 1.0, HZ] }));
+    out.push(part(rbox(1.8, 0.45, 0.7, 0.12), '#5b6b7d', { p: [HX + 0.2, y0 + 0.33, HZ + 0.8] }), part(rbox(1.8, 0.55, 0.2, 0.1), '#5b6b7d', { p: [HX + 0.2, y0 + 0.6, HZ + 1.15] }), part(cyl(0.9, 0.9, 0.02, 32), '#c97b5a', { p: [HX + 0.2, y0 + 0.11, HZ + 0.2] }), place(fan('#e5533d'), { p: [HX - 0.2, y0 + 0.25, HZ + 0.8], s: 1.2 }), place(fan('#2f9e6e'), { p: [HX + 0.6, y0 + 0.25, HZ + 0.8], s: 1.0 }));
+    out.push(part(box(10.2, 0.03, 1.0), '#5b616b', { p: [0, y0 + 0.015, 4.55] }));
+    out.push(trees(R, [[4.6, -4.6], [4.6, -1.6], [-4.6, 3.0], [0.2, 2.4]], 0.5));
     // ---- moving parts
     const moving = [], P = 12;
-    // The Beetle: out of the lot, along the road, parks by the room.
+    // The TV wall: twelve screens, pictures changing.
+    const pics = ['#4fc3f7', '#f29a3a', '#5fae45', '#d6336c', '#8a6cf0', '#f2c94c'];
+    for (let r = 0; r < 3; r++) for (let k = 0; k < 4; k++) { out.push(part(rbox(1.0, 0.62, 0.06, 0.03), '#1d1f24', { p: [-3.9 + k * 1.1, y0 + 0.6 + r * 0.7, -4.75] })); pics.forEach((c, j) => moving.push({ geo: part(box(0.9, 0.52, 0.01), c), pivot: [-3.9 + k * 1.1, y0 + 0.6 + r * 0.7, -4.71], anim: (t) => (Math.floor(t * 0.7 + r * 0.6 + k * 0.4) % pics.length === j ? {} : { s: 0.001 }) })); }
+    // Blue shirts helping at the tables.
+    [[-2.6, -1.6], [-0.6, -1.6]].forEach(([x, z], i) => moving.push(...walker(moving.length, (t) => ({ x: x + Math.sin(t * 0.5 + i) * 0.4, z, ry: Math.PI / 2, still: true, push: Math.sin(t * 2 + i) > 0.4 }), { shirt: BLUE, pants: '#1d1f24', y: y0 + 0.03 })));
+    // The Beetle: out along the road to the house.
     const beetle = merge(part(new THREE.SphereGeometry(0.6, hi() ? 24 : 10, hi() ? 16 : 6, 0, TAU, 0, Math.PI / 2), '#1d1f24', { s: [1.6, 1.0, 1.0], p: [0, 0.28, 0] }), part(rbox(1.9, 0.3, 1.0, 0.12), '#1d1f24', { p: [0, 0.3, 0] }), part(box(0.8, 0.3, 1.02), K.white, { p: [0, 0.5, 0] }), part(box(0.3, 0.12, 1.03), '#ff6a13', { p: [0, 0.55, 0] }), part(box(0.04, 0.22, 0.6), '#9fcdea', { p: [0.62, 0.62, 0], r: [0, 0, 0.6] }), [[-0.6, 0.48], [0.6, 0.48], [-0.6, -0.48], [0.6, -0.48]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.1, 14), '#3a3f47', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] })));
-    const drive = curve([[-2.0, y0, -1.4], [-1.0, y0, -0.2], [1.5, y0, -0.2], [3.6, y0, -0.1], [4.2, y0, 1.2]]);
-    moving.push({ geo: beetle, pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.0, 0.25)), a = along(drive, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry, s: (f > 0.93 ? 1 - win(f, 0.93, 1) : Math.min(1, f / 0.03)) + 0.001 }; } });
-    // The agent carrying the TV from the car to the wall.
-    const tvBox = place(merge(part(rbox(1.0, 0.6, 0.12, 0.03), '#1d1f24')), { p: [0.45, 1.15, 0], r: [0, Math.PI / 2, 0] });
-    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.28, 0.5)); return { x: 4.0 - u * 2.2, z: 1.6 + u * -0.1, ry: Math.PI, still: f < 0.28 || f > 0.5, s: f < 0.26 || f > 0.92 ? 0.001 : 1 }; }, { shirt: K.white, pants: '#1d1f24', y: y0 + 0.12, carry: null }));
-    moving.push({ geo: part(rbox(1.0, 0.6, 0.1, 0.03), '#1d1f24'), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P); if (f < 0.26) return { s: 0.001 }; if (f < 0.5) { const u = easeIO(win(f, 0.28, 0.5)); return { x: 4.0 - u * 2.2 - 0.45, y: y0 + 1.3, z: 1.6 }; } const u = easeIO(win(f, 0.5, 0.62)); return { x: 1.35 + (RX - 1.35) * u, y: y0 + 1.3 + u * 0.15, z: 1.6 + (RZ - 1.42 - 1.6) * u, s: f > 0.95 ? 1 - win(f, 0.95, 1) + 0.001 : 1 }; } });
-    // The screen lighting up once it is on the wall.
-    moving.push({ geo: merge(part(box(0.9, 0.5, 0.02), '#4fc3f7'), part(box(0.9, 0.18, 0.025), '#5fae45', { p: [0, -0.16, 0] }), part(new THREE.CircleGeometry(0.08, 12), '#ffd23f', { p: [0.25, 0.12, 0.015] })), pivot: [RX, y0 + 1.45, RZ - 1.36], anim: (t) => { const f = cyc(t, P); return f > 0.64 && f < 0.95 ? { s: Math.min(1, win(f, 0.64, 0.68)) + 0.001 } : { s: 0.001 }; } });
+    moving.push({ geo: beetle, pivot: [0, y0, 4.55], anim: (t) => { const f = cyc(t, P), x = -5.6 + easeOut(win(f, 0, 0.25)) * 6.6 + easeIn(win(f, 0.8, 1)) * 5.6; return { x, s: clamp01((5.2 - Math.abs(x)) / 0.6) + 0.001 }; } });
+    // The agent carries the TV in; it goes on the wall and lights up.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.28, 0.48)); return { x: 1.2 + u * 1.4, z: 4.2 - u * 2.2, ry: Math.PI * 0.3, still: f < 0.28 || f > 0.48, s: f < 0.26 || f > 0.78 ? 0.001 : 1 }; }, { shirt: K.white, pants: '#1d1f24', y: y0 }));
+    moving.push({ geo: part(rbox(1.4, 0.8, 0.08, 0.03), '#1d1f24'), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P); if (f < 0.26) return { s: 0.001 }; if (f < 0.5) { const u = easeIO(win(f, 0.28, 0.48)); return { x: 1.2 + u * 1.4 + 0.3, y: y0 + 1.3, z: 4.2 - u * 2.2 }; } const u = easeIO(win(f, 0.5, 0.6)); return { x: 2.9 + (HX - 2.9) * u, y: y0 + 1.3 + u * 0.2, z: 2.0 + (HZ - 1.31 - 2.0) * u, s: f > 0.96 ? 0.001 : 1 }; } });
+    moving.push({ geo: merge(part(box(1.25, 0.66, 0.02), '#4fc3f7'), part(box(1.25, 0.22, 0.025), '#5fae45', { p: [0, -0.22, 0] }), part(new THREE.CircleGeometry(0.1, 12), '#ffd23f', { p: [0.35, 0.15, 0.015] })), pivot: [HX, y0 + 1.5, HZ - 1.26], anim: (t) => { const f = cyc(t, P); return f > 0.62 && f < 0.96 ? { s: Math.min(1, win(f, 0.62, 0.66)) + 0.001 } : { s: 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // TJX (T.J. Maxx): the treasure hunt. Trucks bring the brands' surplus straight from their
