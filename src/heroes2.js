@@ -1047,38 +1047,41 @@ export const HEROES2 = {
     [0, 0.5].forEach((o, i) => moving.push(...walker(moving.length, (t) => { const f = cyc(t, P, o), u = win(f, 0, 0.9); return { x: -2.4 + u * 2.0, z: 1.0 + u * 3.4, ry: -1.1, s: Math.min(1, u / 0.05, (1 - u) / 0.05) }; }, { shirt: ['#e5533d', '#3d7be0'][i], pants: '#2b3a55', y: y0, carry: part(rbox(0.4, 0.3, 0.3, 0.04), GREEN, { p: [0.2, 0.75, 0.32] }) })));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // AutoZone: the right part, today, and help fitting it. The car in the lot won't start; the
-  // AutoZoner brings the tester and a new battery from the store, which the hub truck keeps
-  // stocked, and the headlights come on.
+  // AutoZone: the right part, today. Inside the cut-away store the shelves run floor to ceiling;
+  // the AutoZoner looks the part up, it comes off the shelf, and out in the lot the battery goes
+  // in and the headlights come on. Out back the hub truck refills the shelves.
   autozone: { finder: '#d52b1e', build: () => {
-    const R = rand(130), out = [], RED = '#d52b1e', OR = '#f37f00';
+    const R = rand(223), out = [], RED = '#d52b1e', OR = '#f37f00';
     out.push(ground('#5b616b'), part(box(10.2, 0.02, 10.2), '#6a7079', { p: [0, y0 + 0.01, 0] }));
-    for (let i = 0; i < 5; i++) out.push(part(box(0.06, 0.012, 1.8), '#e9e6df', { p: [-1.6 + i * 1.5, y0 + 0.025, 2.2] }));
-    // ---- the store, back: white box with the red and orange stripes, the sign
-    const SX = -1.0, SZ = -3.0;
-    out.push(part(rbox(6.4, 2.2, 2.4, 0.05), '#f4f5f6', { p: [SX, y0 + 1.1, SZ] }), [RED, OR, RED].map((c, k) => part(box(6.44, 0.12, 2.44), c, { p: [SX, y0 + 1.65 + k * 0.14, SZ] })), place(pixText('AUTOZONE', 0.07, RED, 0.03), { p: [SX + 0.6, y0 + 1.2, SZ + 1.22] }), part(box(1.4, 1.0, 0.04), '#2a3c50', { p: [SX - 1.8, y0 + 0.5, SZ + 1.21] }));
-    // Shelves of parts seen through the window: batteries, oil, wipers.
-    for (let k = 0; k < 6; k++) out.push(part(rbox(0.2, 0.18, 0.15, 0.03), ['#1d1f24', '#f2c94c', OR][k % 3], { p: [SX - 2.3 + k * 0.2, y0 + 0.4, SZ + 1.15] }));
-    // ---- the hub warehouse, back left corner
-    out.push(part(rbox(2.0, 1.6, 2.2, 0.05), '#e6e9ed', { p: [-4.0, y0 + 0.8, 0.0] }), part(box(2.02, 0.25, 2.22), RED, { p: [-4.0, y0 + 1.5, 0.0] }), part(box(0.04, 1.0, 1.0), '#7b828c', { p: [-2.98, y0 + 0.5, 0.0] }));
-    // ---- the car in the lot with its hood up
-    const CX = 1.4, CZ = 2.2;
-    out.push(place(sedan('#3d7be0'), { p: [CX, y0, CZ], r: [0, Math.PI / 2, 0] }), part(box(0.95, 0.04, 0.7), '#2d5fb3', { p: [CX, y0 + 1.15, CZ - 0.95], r: [0.9, 0, 0] }));
-    out.push(place(fan('#5b6b7d'), { p: [CX + 1.0, y0, CZ - 1.3], s: 1.4 }));
-    out.push(trees(R, [[4.6, 4.6], [4.6, -1.0], [-4.6, 4.6], [3.4, -4.4]], 0.6));
+    // ---- the cut-away store: floor, back and left walls with the stripes
+    out.push(part(rbox(6.4, 0.06, 5.0, 0.03), '#e9ecef', { p: [-1.6, y0 + 0.04, -2.3] }), part(rbox(6.4, 2.8, 0.2, 0.03), '#f4f5f6', { p: [-1.6, y0 + 1.4, -4.7] }), part(rbox(0.2, 2.8, 5.0, 0.03), '#eef0f2', { p: [-4.7, y0 + 1.4, -2.3] }));
+    [RED, OR, RED].forEach((c, k) => out.push(part(box(6.42, 0.14, 0.22), c, { p: [-1.6, y0 + 2.3 + k * 0.16, -4.7] }), part(box(0.22, 0.14, 5.0), c, { p: [-4.7, y0 + 2.3 + k * 0.16, -2.3] })));
+    out.push(place(pixText('AUTOZONE', 0.08, RED, 0.03), { p: [-1.0, y0 + 1.95, -4.58] }));
+    // Floor-to-ceiling shelving: three aisles of parts.
+    const partC = ['#1d1f24', '#f2c94c', OR, '#3d7be0', '#e5533d', '#9aa1a9'];
+    [-3.6, -2.2, -0.8].forEach((x, a) => { out.push(part(rbox(0.7, 2.2, 3.2, 0.03), '#5b616b', { p: [x, y0 + 1.15, -2.9] })); for (let r = 0; r < 4; r++) for (let k = 0; k < 7; k++) { const c = partC[(a * 3 + r * 2 + k) % 6], y = y0 + 0.35 + r * 0.5, z = -4.2 + k * 0.42; out.push(r % 2 ? part(cyl(0.1, 0.1, 0.32, 10), c, { p: [x + 0.36, y + 0.06, z] }) : part(rbox(0.12, 0.3, 0.32, 0.03), c, { p: [x + 0.36, y + 0.06, z] }), part(r % 2 ? rbox(0.12, 0.3, 0.32, 0.03) : cyl(0.1, 0.1, 0.32, 10), partC[(k + 1) % 6], { p: [x - 0.36, y + 0.06, z] })); } });
+    // The counter, the lookup screen, the AutoZoner.
+    out.push(part(rbox(1.6, 0.9, 0.6, 0.04), RED, { p: [0.8, y0 + 0.45, -0.6] }), part(rbox(0.6, 0.4, 0.05, 0.03), '#1d1f24', { p: [0.8, y0 + 1.2, -0.75] }), part(box(0.5, 0.3, 0.01), '#4fc3f7', { p: [0.8, y0 + 1.2, -0.72] }), place(fan(RED), { p: [0.8, y0, -1.2], s: 1.4 }));
+    // ---- the lot: the customer's car, hood up; the back door and hub truck bay
+    const CX = 2.6, CZ = 2.6;
+    out.push(place(sedan('#3d7be0'), { p: [CX, y0, CZ], r: [0, Math.PI / 2, 0] }), part(box(0.95, 0.04, 0.7), '#2d5fb3', { p: [CX, y0 + 1.15, CZ - 0.95], r: [0.9, 0, 0] }), place(fan('#5b6b7d'), { p: [CX + 1.0, y0, CZ - 1.4], s: 1.4 }));
+    for (let i = 0; i < 4; i++) out.push(part(box(0.06, 0.012, 1.8), '#e9e6df', { p: [0.6 + i * 1.4, y0 + 0.025, CZ] }));
+    out.push(trees(R, [[4.6, -1.0], [-4.6, 4.6], [4.6, -4.6]], 0.55));
     // ---- moving parts
-    const moving = [], P = 10;
-    // The AutoZoner: out of the store with the battery, to the car, swaps it, back.
+    const moving = [], P = 12;
+    // The lookup: the part glows on the shelf, comes off to the counter.
+    moving.push({ geo: part(torus(0.3, 0.04, TAU, 24), '#62d35f', { r: [0, Math.PI / 2, 0] }), pivot: [-0.44, y0 + 0.41, -3.36], anim: (t) => { const f = cyc(t, P); return f > 0.05 && f < 0.2 ? { s: 1 + Math.sin(t * 10) * 0.1 } : { s: 0.001 }; } });
     const bat = merge(part(rbox(0.36, 0.26, 0.22, 0.03), '#1d1f24'), part(box(0.37, 0.06, 0.23), OR, { p: [0, 0.08, 0] }), part(cyl(0.03, 0.03, 0.06, 8), RED, { p: [0.1, 0.16, 0] }), part(cyl(0.03, 0.03, 0.06, 8), '#9aa1a9', { p: [-0.1, 0.16, 0] }));
-    const pathA = (f) => { const go = easeIO(win(f, 0.05, 0.3)), back1 = easeIO(win(f, 0.65, 0.85)), u = go - back1; return { x: SX + 0.6 + (CX - 0.4 - SX - 0.6) * u, z: SZ + 1.6 + (CZ - 1.7 - SZ - 1.6) * u, ry: f < 0.5 ? -Math.atan2(CZ - 1.7 - SZ - 1.6, CX - 0.4 - SX - 0.6) : Math.PI - Math.atan2(CZ - 1.7 - SZ - 1.6, CX - 0.4 - SX - 0.6), still: (f > 0.3 && f < 0.65) || f > 0.85 }; };
-    moving.push(...walker(moving.length, (t) => pathA(cyc(t, P)), { shirt: RED, pants: '#1d1f24', y: y0, carry: place(bat, { p: [0.35, 0.8, 0] }) }));
-    // The tester's light: red before, green after the swap.
-    moving.push({ geo: part(new THREE.SphereGeometry(0.12, 12, 8), '#ff3b30'), pivot: [CX + 0.2, y0 + 1.6, CZ - 0.9], anim: (t) => { const f = cyc(t, P); return f > 0.3 && f < 0.45 ? { s: 1 + Math.sin(t * 12) * 0.2 } : { s: 0.001 }; } });
-    moving.push({ geo: tickGeo(0.25), pivot: [CX + 0.2, y0 + 1.7, CZ - 0.9], anim: (t) => { const f = cyc(t, P); return f > 0.5 && f < 0.95 ? { ry: Math.PI / 4, s: back(win(f, 0.5, 0.56)) } : { s: 0.001 }; } });
-    // Headlights on once it starts.
-    moving.push({ geo: merge([-0.3, 0.3].map((x) => part(new THREE.CircleGeometry(0.4, 20), '#fff2b0', { p: [x, 0.02, 0.6], r: [-Math.PI / 2, 0, 0] }))), pivot: [CX, y0, CZ - 1.15], anim: (t) => { const f = cyc(t, P); return f > 0.52 && f < 0.95 ? { s: 1 } : { s: 0.001 }; } });
-    // The hub truck topping up the store.
-    moving.push({ geo: place(van(K.white, RED), { s: 0.85 }), pivot: [0, y0, -0.9], anim: (t) => { const f = cyc(t, P), x = -2.6 + Math.sin(Math.min(1, f / 0.7) * Math.PI) * 4.6; return { x, ry: f < 0.35 ? 0 : Math.PI, s: f > 0.75 ? 0.001 : 1 }; } });
+    moving.push(rider(bat, curve([[-0.44, y0 + 0.5, -3.36], [0.2, y0 + 2.0, -2.0], [0.8, y0 + 1.0, -0.6]]), P, 0, 0.18, 0.3));
+    // The AutoZoner takes it out to the car and fits it.
+    const walk = (f) => { const go = easeIO(win(f, 0.32, 0.5)), bk = easeIO(win(f, 0.78, 0.95)), u = go - bk; return { x: 0.8 + (CX - 0.4 - 0.8) * u, z: -1.2 + (CZ - 1.7 + 1.2) * u, ry: f < 0.6 ? -Math.atan2(CZ - 1.7 + 1.2, CX - 1.2) : Math.PI - Math.atan2(CZ - 1.7 + 1.2, CX - 1.2), still: (f > 0.5 && f < 0.78) || f < 0.32 || f > 0.95 }; };
+    moving.push(...walker(moving.length, (t) => walk(cyc(t, P)), { shirt: RED, pants: '#1d1f24', y: y0, carry: null }));
+    moving.push({ geo: bat, pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P); if (f < 0.3 || f > 0.62) return { s: 0.001 }; const w = walk(f); return f < 0.5 ? { x: w.x + 0.3, y: y0 + 0.85, z: w.z + 0.2 } : { x: CX, y: y0 + 0.85 - easeIO(win(f, 0.52, 0.6)) * 0.2, z: CZ - 0.95 }; } });
+    moving.push({ geo: tickGeo(0.28), pivot: [CX, y0 + 1.9, CZ - 0.9], anim: (t) => { const f = cyc(t, P); return f > 0.62 && f < 0.95 ? { ry: Math.PI / 4, s: back(win(f, 0.62, 0.68)) } : { s: 0.001 }; } });
+    moving.push({ geo: merge([-0.3, 0.3].map((x) => part(new THREE.CircleGeometry(0.45, 20), '#fff2b0', { p: [x, 0.02, 0.6], r: [-Math.PI / 2, 0, 0] }))), pivot: [CX, y0, CZ - 1.15], anim: (t) => { const f = cyc(t, P); return f > 0.64 && f < 0.97 ? { s: 1 } : { s: 0.001 }; } });
+    // The hub truck backing up to the side door and boxes going onto the shelves.
+    moving.push({ geo: place(merge(part(rbox(0.8, 0.9, 0.9, 0.08), RED, { p: [0.9, 0.6, 0] }), part(rbox(1.8, 1.1, 0.95, 0.05), K.white, { p: [-0.4, 0.75, 0] }), part(box(1.4, 0.3, 0.02), RED, { p: [-0.4, 0.8, 0.48] }), [[-0.8, 0.45], [0.8, 0.45], [-0.8, -0.45], [0.8, -0.45]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.12, 14), '#1d1f24', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] }))), { r: [0, Math.PI / 2, 0] }), pivot: [-2.6, y0, 0], anim: (t) => { const f = cyc(t, P, 0.5), z = 5.6 - easeOut(win(f, 0, 0.3)) * 4.4 + easeIn(win(f, 0.7, 1)) * 4.4; return { z, s: clamp01((5.0 - z) / 0.6) + 0.001 }; } });
+    for (let k = 0; k < 3; k++) moving.push(rider(part(rbox(0.35, 0.3, 0.3, 0.03), '#c99a62'), curve([[-2.6, y0 + 1.2, 1.0], [-2.8, y0 + 2.2, -0.6], [-3.6 + k * 1.4 * 0, y0 + 1.6, -1.8 - k * 0.4]]), P, 0.5 - k * 0.04, 0.32, 0.5));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // O'Reilly Auto Parts: the pros' parts store. From the big distribution centre the parts reach
