@@ -151,7 +151,8 @@
   "neuralink": "Thought into action, placed with a robot's precision",
   "scaleai": "The labelled data behind the models",
   "huggingface": "Where the AI community shares its models",
-  "runway": "Films from a sentence"
+  "runway": "Films from a sentence",
+  "discord": "Where communities hang out and talk"
  },
  "bank": [
   "PNC Financial Services",
@@ -529,8 +530,7 @@
   "Windstream Holdings",
   "Altice USA",
   "DISH Network",
-  "American Tower",
-  "Discord"
+  "American Tower"
  ],
  "social": [
   "ByteDance"
@@ -1452,8 +1452,7 @@
   "Altice USA": 3,
   "Frontier Communications": 3,
   "Windstream Holdings": 3,
-  "CenturyLink": 3,
-  "Discord": 0
+  "CenturyLink": 3
  },
  "amazon": [
   "Amazon.com"
@@ -1811,5 +1810,8 @@
  ],
  "runway": [
   "Runway"
+ ],
+ "discord": [
+  "Discord"
  ]
 }

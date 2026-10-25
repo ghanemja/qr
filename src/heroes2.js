@@ -2089,4 +2089,29 @@ export const HEROES2 = {
     for (let k = 0; k < 8; k++) moving.push(rider(merge(part(box(0.32, 0.24, 0.02), INK), part(box(0.24, 0.16, 0.025), ['#9fd0ff', '#f29a3a', '#bfe6ff'][k % 3])), strip, 2.4, k / 8, 0, 1));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Discord: where communities hang out. Round the big controller face float the servers, each
+  // full of friends; voices light up green as people talk, messages pop up, and a newcomer hops
+  // from one server to the next.
+  discord: { finder: '#5865f2', build: () => {
+    const R = rand(164), out = [], BLURP = '#5865f2';
+    out.push(ground('#8fc66f'), part(cyl(2.0, 2.0, 0.05, 48), '#e3e5fb', { p: [-0.4, y0 + 0.025, -0.4] }));
+    // ---- the controller face in the middle, standing on its plinth
+    const FQ = Math.PI / 4;
+    const faceSh = new THREE.Shape(); faceSh.moveTo(-1.2, -0.5); faceSh.quadraticCurveTo(-1.5, 0.6, -0.9, 0.95); faceSh.quadraticCurveTo(-0.6, 0.85, -0.4, 0.7); faceSh.lineTo(0.4, 0.7); faceSh.quadraticCurveTo(0.6, 0.85, 0.9, 0.95); faceSh.quadraticCurveTo(1.5, 0.6, 1.2, -0.5); faceSh.quadraticCurveTo(0.9, -0.8, 0.6, -0.7); faceSh.lineTo(0.45, -0.5); faceSh.lineTo(-0.45, -0.5); faceSh.lineTo(-0.6, -0.7); faceSh.quadraticCurveTo(-0.9, -0.8, -1.2, -0.5);
+    const faceG = merge(part(new THREE.ExtrudeGeometry(faceSh, { depth: 0.35, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.06, bevelSegments: hi() ? 3 : 1, curveSegments: hi() ? 12 : 4 }).translate(0, 0, -0.17), BLURP), [-1, 1].map((s) => part(new THREE.SphereGeometry(0.2, 16, 10), K.white, { p: [s * 0.45, 0.1, 0.25], s: [1, 1.15, 0.4] })));
+    out.push(part(cyl(0.6, 0.7, 0.4, 32), '#3a3f9a', { p: [-0.4, y0 + 0.2, -0.4] }), part(cyl(0.12, 0.12, 0.6, 12), '#c9ced6', { p: [-0.4, y0 + 0.7, -0.4] }));
+    // ---- the servers: round platforms in their own colours, with members
+    const servers = [[-3.2, -3.0, '#f29a3a'], [2.4, -3.2, '#2f9e6e'], [3.4, 1.2, '#e5533d'], [1.0, 3.6, '#8a6cf0'], [-3.4, 2.4, '#3fb8a8']];
+    servers.forEach(([x, z, c]) => { out.push(part(cyl(1.15, 1.25, 0.3, 32), c, { p: [x, y0 + 0.15, z] }), part(cyl(1.0, 1.0, 0.04, 32), shade(c, 1.25), { p: [x, y0 + 0.32, z] }), part(cyl(0.08, 0.08, 0.04, 12), K.white, { p: [x, y0 + 0.35, z] })); for (let k = 0; k < 4; k++) { const a = k * TAU / 4 + 0.4; out.push(place(fan(['#3d7be0', '#d6336c', '#f2c94c', '#1d1f24'][k], ['#e9b98f', '#8d5a3b', '#c58c66', '#f1c9a5'][k]), { p: [x + Math.cos(a) * 0.6, y0 + 0.32, z + Math.sin(a) * 0.6], s: 1.1 })); } });
+    out.push(trees(R, [[4.6, 4.6], [-4.6, -0.4], [0.0, -4.6], [4.6, -1.4], [-1.4, 4.6]], 0.5));
+    // ---- moving parts
+    const moving = [];
+    moving.push({ geo: faceG, pivot: [-0.4, y0 + 1.9, -0.4], anim: (t) => ({ ry: FQ + Math.sin(t * 0.8) * 0.3, y: Math.sin(t * 1.6) * 0.08 }) });
+    // Speaking rings under whoever is talking, and message bubbles rising.
+    servers.forEach(([x, z], i) => { for (let k = 0; k < 4; k++) { const a = k * TAU / 4 + 0.4; moving.push({ geo: part(torus(0.22, 0.03, TAU, 20), '#3ba55c', { r: [Math.PI / 2, 0, 0] }), pivot: [x + Math.cos(a) * 0.6, y0 + 0.36, z + Math.sin(a) * 0.6], anim: (t) => (Math.floor(t * 0.8 + i * 1.7) % 4 === k ? { s: 1 + Math.sin(t * 10) * 0.08 } : { s: 0.001 }) }); }
+      moving.push({ geo: merge(part(rbox(0.6, 0.36, 0.06, 0.12), K.white), [0, 1, 2].map((j) => part(new THREE.SphereGeometry(0.04, 8, 6), '#9aa1a9', { p: [-0.15 + j * 0.15, 0, 0.04] }))), pivot: [x, y0 + 1.4, z], anim: (t) => { const u = cyc(t, 3, i / 5); return { ry: FQ, y: u * 1.0, s: Math.sin(u * Math.PI) + 0.001 }; } }); });
+    // A newcomer hopping between servers.
+    moving.push({ geo: merge(fan(BLURP), part(torus(0.2, 0.03, TAU, 16), '#3ba55c', { p: [0, 0.02, 0], r: [Math.PI / 2, 0, 0] })), pivot: [0, y0 + 0.32, 0], anim: (t) => { const f = cyc(t, 10) * 5, i = Math.floor(f), u = f - i, a = servers[i], b = servers[(i + 1) % 5], m = easeIO(clamp01((u - 0.5) / 0.5)); return { x: a[0] + (b[0] - a[0]) * m, z: a[1] + (b[1] - a[1]) * m, y: hop(m) * 2.0, s: 1.1 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
