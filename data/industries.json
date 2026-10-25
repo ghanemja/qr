@@ -93,13 +93,13 @@
   "stripe": "The payments layer underneath",
   "kroger": "Robots in the back room",
   "citigroup": "A global network: money for the world's companies moves on Citi's own rails",
-  "morganstanley": "Wealth that stays: families' savings, guided by an advisor, compounding"
+  "morganstanley": "Wealth that stays: families' savings, guided by an advisor, compounding",
+  "capitalone": "A bank run on data, with its own payments network"
  },
  "bank": [
   "U.S. Bancorp",
   "PNC Financial Services",
   "Bank of New York Mellon",
-  "Capital One Financial",
   "BB&T Corp.",
   "SunTrust Banks",
   "State Street Corp.",
@@ -1660,5 +1660,8 @@
  ],
  "morganstanley": [
   "Morgan Stanley"
+ ],
+ "capitalone": [
+  "Capital One Financial"
  ]
 }

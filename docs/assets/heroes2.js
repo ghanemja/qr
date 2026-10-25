@@ -129,4 +129,42 @@ export const HEROES2 = {
     for (let k = 0; k < 8; k++) moving.push({ geo: part(new THREE.BoxGeometry(0.22, 0.12, 0.02), k % 3 ? '#62d35f' : '#ff6b5b'), pivot: [0, y0 + 1.6, 0], anim: (t) => { const u = cyc(t, 6, k / 8) * 2; return u < 1 ? { x: TX - W / 2 + u * W, z: TZ + W / 2 + 0.05 } : { x: TX + W / 2 + 0.05, z: TZ + W / 2 - (u - 1) * W, ry: Math.PI / 2 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Capital One: a bank run as a data company, now with its own payments network. The servers in
+  // the cloud score every card in the middle; payments race round the network loop it owns, from
+  // the shop and the café to the gas station and the home office.
+  capitalone: { finder: '#004977', build: () => {
+    const R = rand(103), out = [], NAVY = '#004977', RED = '#d03027';
+    out.push(ground('#8fc66f'));
+    // ---- the network loop and its four stops
+    const CX = 0.5, CZ = 0.5, RR = 3.25;
+    out.push(part(torus(RR, 0.12, TAU, 96), '#2b3440', { p: [CX, y0 + 0.06, CZ], r: [Math.PI / 2, 0, 0], s: [1, 1, 0.5] }), part(torus(RR, 0.05, TAU, 96), RED, { p: [CX, y0 + 0.13, CZ], r: [Math.PI / 2, 0, 0] }));
+    const at = (a, r = RR + 0.9) => [CX + Math.cos(a) * r, CZ + Math.sin(a) * r];
+    const stops = [-0.55, 0.75, 1.95, 3.15];
+    // A shop with an awning, a café, a gas station and a home office.
+    { const [x, z] = at(stops[0]); out.push(place(block(1.4, 1.1, 1.0, '#f4efe6', '#7aa6c8', 0.5), { p: [x, y0, z] }), ...[0, 1, 2, 3].map((i) => part(box(0.35, 0.05, 0.4), i % 2 ? K.white : '#2f9e6e', { p: [x - 0.52 + i * 0.35, y0 + 1.15, z + 0.62], r: [0.4, 0, 0] }))); }
+    { const [x, z] = at(stops[1]); out.push(part(rbox(1.3, 1.0, 1.1, 0.05), '#f6efe2', { p: [x, y0 + 0.5, z] }), part(rbox(1.36, 0.16, 1.16, 0.04), NAVY, { p: [x, y0 + 1.05, z] }), part(box(0.8, 0.5, 0.04), '#8fb9d8', { p: [x, y0 + 0.5, z + 0.56] }), part(cyl(0.3, 0.3, 0.05, 20), K.white, { p: [x + 0.9, y0 + 0.62, z + 0.2] }), part(cyl(0.03, 0.03, 0.6, 8), K.dark, { p: [x + 0.9, y0 + 0.3, z + 0.2] })); }
+    { const [x, z] = at(stops[2]); out.push(part(rbox(1.6, 0.1, 1.1, 0.03), RED, { p: [x, y0 + 1.5, z] }), [-0.6, 0.6].map((dx) => part(cyl(0.06, 0.06, 1.5, 10), K.white, { p: [x + dx, y0 + 0.75, z] })), part(rbox(0.3, 0.7, 0.3, 0.05), '#e9ecef', { p: [x, y0 + 0.35, z] }), part(box(0.2, 0.15, 0.02), '#2b3440', { p: [x, y0 + 0.5, z + 0.16] })); }
+    { const [x, z] = at(stops[3]); out.push(place(home('#eef3e6', '#5b6b7d', 1.4, 1.2, 0.95), { p: [x, y0, z], r: [0, Math.PI / 2, 0] })); }
+    // ---- the cloud and its servers, back left
+    [[-4.3, -2.4], [-4.3, -3.4], [-3.3, -4.3], [-2.3, -4.3]].forEach(([x, z], i) => out.push(place(serverRack(2.0, RED), { p: [x, y0, z], r: [0, i < 2 ? Math.PI / 2 : 0, 0] })));
+    out.push(part(rbox(3.4, 0.08, 3.4, 0.03), '#c9ced6', { p: [-3.4, y0 + 0.04, -3.4] }));
+    [[-3.6, 4.0, -3.6, 0.75], [-2.8, 3.8, -3.9, 0.6], [-4.2, 3.7, -2.8, 0.6], [-3.1, 4.4, -3.0, 0.55]].forEach(([x, y, z, r]) => out.push(part(new THREE.SphereGeometry(r, hi() ? 20 : 8, hi() ? 14 : 6), '#f4f7fb', { p: [x, y0 + y - 0.5, z] })));
+    // ---- the centre: a plinth for the card
+    out.push(part(cyl(0.9, 1.0, 0.3, 32), '#2b3440', { p: [CX, y0 + 0.15, CZ] }), part(cyl(0.18, 0.18, 0.6, 16), '#c9ced6', { p: [CX, y0 + 0.6, CZ] }));
+    trees(R, [[4.6, 4.6], [-4.6, 4.6], [4.6, -4.6], [0.6, -4.6]]);
+    // ---- moving parts
+    const moving = [];
+    // The card, turning to show its face.
+    const card = merge(part(rbox(2.6, 1.65, 0.1, 0.16), NAVY), part(torus(1.0, 0.07, Math.PI * 0.75, 32), RED, { p: [-0.2, -0.35, 0.06], r: [0, 0, Math.PI * 0.15] }),
+      part(rbox(0.42, 0.32, 0.03, 0.05), K.gold, { p: [-0.75, 0.15, 0.06] }), part(box(0.38, 0.01, 0.035), K.goldDk, { p: [-0.75, 0.15, 0.08] }), pixText('1234 5678', 0.04, K.white, 0.02).translate(0.2, -0.4, 0.06), part(box(2.6, 0.3, 0.02), '#1d1f24', { p: [0, 0.35, -0.06] }));
+    moving.push({ geo: card, pivot: [CX, y0 + 1.75, CZ], anim: (t) => ({ ry: Math.PI / 4 + Math.sin(t * 0.7) * 0.6, y: Math.sin(t * 1.4) * 0.06 }) });
+    // Data from the servers to the card: little blue packets.
+    const feed = curve([[-3.4, y0 + 2.4, -3.0], [-1.8, y0 + 3.0, -1.4], [CX - 0.3, y0 + 2.6, CZ - 0.3]]);
+    for (let k = 0; k < 6; k++) moving.push(rider(part(new THREE.BoxGeometry(0.14, 0.14, 0.14), k % 2 ? '#6cc3ff' : K.white), feed, 3, k / 6, 0, 1, (t) => ({ rx: t * 3 })));
+    // Payments racing round the loop, each stop flashing as one passes.
+    const loop = curve(Array.from({ length: 16 }, (_, i) => { const a = (i / 16) * TAU; return [CX + Math.cos(a) * RR, y0 + 0.3, CZ + Math.sin(a) * RR]; }), true);
+    for (let k = 0; k < 6; k++) moving.push({ geo: merge(part(new THREE.SphereGeometry(0.16, 14, 10), RED), part(torus(0.2, 0.03, TAU, 16), K.white, { r: [Math.PI / 2, 0, 0] })), pivot: [0, 0, 0], anim: (t) => { const p = loop.getPointAt(cyc(t, 9, k / 6)); return { x: p.x, y: p.y, z: p.z }; } });
+    stops.forEach((a, i) => { const [x, z] = at(a, RR); moving.push(pulse(x, y0 + 0.16, z, '#ffd479', 1.5, i * 0.2, 0.35)); });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
