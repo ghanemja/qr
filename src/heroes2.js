@@ -89,4 +89,44 @@ export const HEROES2 = {
     });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Morgan Stanley: the firm families trust with their savings. Money from the homes round the
+  // edge passes the advisor's desk and lands in the clients' portfolio, whose columns of gold keep
+  // compounding; the ticker on the Broadway tower never stops.
+  morganstanley: { finder: '#002d72', build: () => {
+    const R = rand(102), out = [], NAVY = '#002d72', SKY = '#6cace4';
+    out.push(ground('#93c873'));
+    // ---- the tower on Broadway: dark glass, mullions, and the LED ticker bands
+    const TX = -3.3, TZ = -3.3, W = 2.0, H = 5.9;
+    out.push(part(rbox(W, H, W, 0.05), '#2d4a6b', { p: [TX, y0 + H / 2, TZ] }));
+    for (let k = 0; k < 7; k++) { const o = -W / 2 + 0.15 + k * ((W - 0.3) / 6); out.push(part(new THREE.BoxGeometry(0.04, H - 0.1, 0.03), '#8fa6bf', { p: [TX + o, y0 + H / 2, TZ + W / 2 + 0.01] }), part(new THREE.BoxGeometry(0.03, H - 0.1, 0.04), '#8fa6bf', { p: [TX + W / 2 + 0.01, y0 + H / 2, TZ + o] })); }
+    [1.0, 1.6, 2.2].forEach((y, i) => out.push(part(new THREE.BoxGeometry(W + 0.06, 0.34, W + 0.06), i === 1 ? '#0b1a2e' : NAVY, { p: [TX, y0 + y, TZ] })));
+    out.push(part(box(W + 0.1, 0.25, W + 0.1), '#1d3557', { p: [TX, y0 + H, TZ] }), part(rbox(1.5, 0.28, 0.04, 0.03), K.white, { p: [TX, y0 + 3.0, TZ + W / 2 + 0.04] }), pixText('MS', 0.05, NAVY, 0.02).translate(TX, y0 + 3.0, TZ + W / 2 + 0.07));
+    // ---- the portfolio: a plinth with five columns of gold, rising left to right
+    const BZ = -1.6, bars = [0, 1, 2, 3, 4].map((k) => [-1.0 + k * 0.7, 1.0 + k * 0.42]);
+    out.push(part(rbox(3.9, 0.16, 1.0, 0.05), NAVY, { p: [0.4, y0 + 0.08, BZ] }), part(box(3.92, 0.04, 1.02), SKY, { p: [0.4, y0 + 0.17, BZ] }));
+    // ---- the advisor's desk in the middle: advisor and client across a table, a screen between
+    const DX = 0.9, DZ = 1.1;
+    out.push(part(rbox(1.6, 0.06, 0.9, 0.03), K.wood, { p: [DX, y0 + 0.74, DZ] }), [[-0.7, -0.38], [0.7, -0.38], [-0.7, 0.38], [0.7, 0.38]].map(([x, z]) => part(box(0.05, 0.72, 0.05), K.dark, { p: [DX + x, y0 + 0.36, DZ + z] })));
+    out.push(part(rbox(0.6, 0.38, 0.04, 0.02), '#1d1f24', { p: [DX, y0 + 1.0, DZ], r: [0, Math.PI / 4, 0] }), part(box(0.5, 0.3, 0.01), SKY, { p: [DX + 0.02, y0 + 1.0, DZ + 0.02], r: [0, Math.PI / 4, 0] }));
+    out.push(place(fan(NAVY), { p: [DX - 0.55, y0, DZ - 0.6], s: 1.3 }), place(fan('#d6336c', '#c58c66'), { p: [DX + 0.55, y0, DZ + 0.6], s: 1.3 }));
+    out.push(part(rbox(2.6, 0.04, 2.0, 0.02), '#d9cdb8', { p: [DX, y0 + 0.02, DZ] }));
+    // ---- the families' homes round the front and right, with their paths
+    const homes = [[4.0, -1.2, Math.PI / 2], [4.1, 1.9, Math.PI / 2], [2.4, 4.1, 0], [-0.9, 4.1, 0], [-3.9, 3.4, 0]];
+    homes.forEach(([x, z, ry], i) => out.push(place(home(['#fbf3e3', '#f1e2c6', '#e8eef4', '#f6e7e1', '#eef3e6'][i], ['#8a5a36', '#5b6b7d', '#a35a3c', '#3f6f8f', '#6f4a2c'][i], 1.4, 1.2, 0.95), { p: [x, y0, z], r: [0, ry, 0] })));
+    trees(R, [[-1.6, -4.6], [1.8, -4.6], [4.6, -4.4], [-4.6, -0.5], [-2.4, 1.6], [4.7, 4.6]]);
+    // ---- moving parts
+    const moving = [], P = 12;
+    // The columns compound: each grows through the cycle and settles back for the next year.
+    bars.forEach(([x, h], k) => moving.push({ geo: part(new THREE.CylinderGeometry(0.27, 0.27, h, hi() ? 28 : 12, hi() ? Math.round(h * 12) : 1), (X, Y) => (Math.floor((Y + h / 2) * 12) % 2 ? '#e9b949' : '#f6d66e'), { p: [0, h / 2, 0] }),
+      pivot: [x, y0 + 0.19, BZ], anim: (t) => { const f = cyc(t, P); return { sy: 0.55 + 0.45 * easeOut(win(f, 0, 0.9)) - 0.45 * easeIO(win(f, 0.92, 1)) }; } }));
+    // Savings from each home: to the advisor's desk, then on into a column.
+    const coinG = place(coin(0.2, 0.07), { r: [Math.PI / 2, 0, 0] });
+    homes.forEach(([x, z], i) => {
+      const [bx, h] = bars[i], path = curve([[x, y0 + 1.1, z], [(x + DX) / 2, y0 + 2.2, (z + DZ) / 2], [DX, y0 + 1.5, DZ], [(DX + bx) / 2, y0 + 3.2, (DZ + BZ) / 2], [bx, y0 + h + 0.5, BZ]]);
+      moving.push(rider(coinG, path, P / 2, i / 5, 0, 0.8, (t) => ({ ry: t * 4 })));
+    });
+    // The ticker crawling round the middle band.
+    for (let k = 0; k < 8; k++) moving.push({ geo: part(new THREE.BoxGeometry(0.22, 0.12, 0.02), k % 3 ? '#62d35f' : '#ff6b5b'), pivot: [0, y0 + 1.6, 0], anim: (t) => { const u = cyc(t, 6, k / 8) * 2; return u < 1 ? { x: TX - W / 2 + u * W, z: TZ + W / 2 + 0.05 } : { x: TX + W / 2 + 0.05, z: TZ + W / 2 - (u - 1) * W, ry: Math.PI / 2 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

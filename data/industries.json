@@ -92,10 +92,10 @@
   "cisco": "The internet runs through it",
   "stripe": "The payments layer underneath",
   "kroger": "Robots in the back room",
-  "citigroup": "A global network: money for the world's companies moves on Citi's own rails"
+  "citigroup": "A global network: money for the world's companies moves on Citi's own rails",
+  "morganstanley": "Wealth that stays: families' savings, guided by an advisor, compounding"
  },
  "bank": [
-  "Morgan Stanley",
   "U.S. Bancorp",
   "PNC Financial Services",
   "Bank of New York Mellon",
@@ -1657,5 +1657,8 @@
  ],
  "citigroup": [
   "Citigroup"
+ ],
+ "morganstanley": [
+  "Morgan Stanley"
  ]
 }
