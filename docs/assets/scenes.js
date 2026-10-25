@@ -3586,4 +3586,49 @@ export const SCENES = {
     });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-1.2, y0, 1.4], topAt: [biz[3].x, y0 + 2.2, biz[3].z] };
   },
+
+  // Hard hat (building products, appliances, flooring and insulation): everything that goes into a
+  // new home. In the open frame the pink insulation fills the walls panel by panel, the flooring
+  // goes down plank by plank and the roof trusses are set one by one; the delivery truck from the
+  // lumber yard brings the fridge, wheeled in on a dolly; the giant hard hat stands out front.
+  'industrial:2': () => {
+    const R = rand(5501), out = [], moving = [];
+    out.push(slab('#c9b99a'));
+    out.push(part(box(10.4, 0.03, 1.1), '#6b7078', { p: [0, y0 + 0.015, 4.5] }));
+    // ---- the house frame (middle left), scaled up
+    const FX = -1.4, FZ = -0.8, S = 1.45, W = 2.4, D = 2.0, H = 1.6;
+    out.push(place(frame(W, D, H), { p: [FX, y0, FZ], s: [S, S, S] }));
+    const L = (x, y, z) => new V(FX + x * S, y0 + y * S, FZ + z * S);
+    // ---- the lumber yard (back right): stacked boards, a shed
+    for (let i = 0; i < 3; i++) for (let j = 0; j < 4; j++) out.push(part(box(2.0, 0.14, 0.16), j % 2 ? '#e2c089' : '#d6b47a', { p: [3.0, y0 + 0.1 + j * 0.15, -4.2 + i * 0.6 + (j % 2) * 0.04] }));
+    out.push(part(rbox(2.2, 1.6, 1.4, 0.05), '#b8442f', { p: [3.2, y0 + 0.8, -2.4] }), part(prism(2.4, 0.6, 1.5), '#8e3424', { p: [3.2, y0 + 1.6, -2.4] }), part(rbox(1.0, 1.0, 0.06, 0.03), '#3a3f47', { p: [3.2, y0 + 0.5, -1.68] }));
+    for (let i = 0; i < 3; i++) out.push(part(cyl(0.22, 0.22, 0.9, 16), '#f39ab8', { p: [4.4, y0 + 0.22, -0.6 + i * 0.5], r: [0, 0, Math.PI / 2] }));
+    // ---- the giant hard hat on its sign post (front right)
+    const HX = 3.2, HZ = 2.4;
+    out.push(part(rbox(1.6, 0.5, 1.0, 0.06), K.white, { p: [HX, y0 + 0.25, HZ] }), part(box(1.62, 0.12, 1.02), 'A', { p: [HX, y0 + 0.46, HZ] }));
+    out.push(part(new THREE.SphereGeometry(0.85, hi() ? 32 : 12, hi() ? 16 : 6, 0, TAU, 0, Math.PI / 2), '#ffd23f', { p: [HX, y0 + 0.6, HZ], s: [1, 0.9, 1.1] }), part(cyl(1.15, 1.2, 0.1, 32), '#f2c230', { p: [HX + 0.1, y0 + 0.62, HZ + 0.1], s: [1, 1, 1.1] }), part(torus(0.84, 0.08, Math.PI, 24), '#f2c230', { p: [HX, y0 + 0.6, HZ], r: [0, Math.PI / 2, 0], s: [1.1, 0.92, 1] }));
+    out.push(part(rbox(0.6, 0.3, 0.05, 0.03), 'A', { p: [HX + 0.1, y0 + 0.95, HZ + 0.9], r: [-0.4, 0, 0] }));
+    [[-4.6, 3.0], [4.6, 0.8], [0.6, -4.4]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.5 + R() * 0.15)));
+    // ---- moving parts (one 14 s cycle)
+    const P = 14, F = (t) => cyc(t, P), fade = (f) => 1 - win(f, 0.95, 0.99);
+    // Insulation: pink batts between the studs of the back and left walls.
+    const bay = W / 7, ins = [];
+    for (let i = 0; i < 7; i++) ins.push(L(-W / 2 + bay * (i + 0.5), 0.36 + H / 2, -D / 2 + 0.05));
+    for (let i = 0; i < 6; i++) ins.push(L(-W / 2 + 0.05, 0.36 + H / 2, -D / 2 + D / 6 * (i + 0.5)));
+    ins.forEach((p, i) => moving.push({ geo: part(box(i < 7 ? bay * S * 0.9 : 0.08, H * S * 0.95, i < 7 ? 0.08 : D / 6 * S * 0.9), '#f39ab8'), pivot: p.toArray(), anim: (t) => { const f = F(t); return { s: back(win(f, 0.05 + i * 0.022, 0.08 + i * 0.022)) * fade(f) * 0.999 + 0.001 }; } }));
+    // Flooring: planks laid front to back.
+    for (let i = 0; i < 8; i++) moving.push({ geo: part(box(W * S * 0.96, 0.04, D * S / 8 * 0.94), i % 2 ? '#a0703f' : '#b07c48'), pivot: L(0, 0.39, D / 2 - D / 8 * (i + 0.5)).toArray(), anim: (t) => { const f = F(t); return { s: back(win(f, 0.36 + i * 0.025, 0.39 + i * 0.025)) * fade(f) * 0.999 + 0.001 }; } });
+    // Trusses set one by one across the rest of the roof.
+    for (let i = 0; i < 4; i++) { const p = L(-W / 2 + 0.95 + i * 0.4, 0.4 + H, 0); moving.push({ geo: truss(D + 0.1).scale(S, S, S), pivot: p.toArray(), anim: (t) => { const f = F(t), k = win(f, 0.6 + i * 0.05, 0.64 + i * 0.05); return { y: (1 - easeOut(k)) * 1.2, s: (k > 0 ? 1 : 0.001) * fade(f) }; } }); }
+    // The delivery truck pulls up; the fridge is wheeled in on its dolly.
+    moving.push({ geo: merge(part(rbox(0.9, 0.95, 1.0, 0.1), 'A', { p: [1.3, 0.72, 0] }), part(box(0.04, 0.32, 0.86), '#26323f', { p: [1.76, 0.9, 0] }), part(rbox(2.0, 1.3, 1.05, 0.06), K.white, { p: [-0.3, 0.95, 0] }), part(box(2.0, 0.22, 1.07), 'B', { p: [-0.3, 0.75, 0] }), [[-0.9, 0.45], [1.3, 0.45], [-0.9, -0.45], [1.3, -0.45]].map(([x, z]) => part(new THREE.CylinderGeometry(0.22, 0.22, 0.14, 14), '#1d1f24', { p: [x, 0.22, z], r: [Math.PI / 2, 0, 0] }))), pivot: [0, y0, 4.4], anim: (t) => { const f = F(t), x = f < 0.12 ? -6 + 6.6 * easeOut(win(f, 0.0, 0.12)) : f < 0.55 ? 0.6 : 0.6 + 6 * easeIn(win(f, 0.55, 0.72)); return { x, s: clamp01((5.0 - Math.abs(x)) / 0.7) * 0.999 + 0.001 }; } });
+    const D0 = new V(-0.4, 0, 3.6), D1 = L(W / 2 - 0.35, 0, -D / 2 + 0.4);
+    const dp = (f) => (f < 0.22 ? D0 : f < 0.45 ? D0.clone().lerp(new V(D1.x, 0, D1.z), easeIO(win(f, 0.22, 0.45))) : new V(D1.x, 0, D1.z));
+    moving.push({ geo: merge(part(rbox(0.55, 1.2, 0.5, 0.06), '#eef0f2', { p: [0, 0.65, 0] }), part(box(0.04, 0.5, 0.02), '#9aa1a9', { p: [0.2, 0.85, 0.26] }), part(box(0.56, 0.02, 0.51), '#c9ced6', { p: [0, 0.75, 0] })), pivot: [0, 0, 0], anim: (t) => { const f = F(t), p = dp(f); return { x: p.x, y: f < 0.45 ? y0 + 0.05 : D1.y + 0.06, z: p.z, s: f > 0.15 ? fade(f) * 0.999 + 0.001 : 0.001 }; } });
+    const hat = (c) => part(new THREE.SphereGeometry(0.19, 12, 8, 0, TAU, 0, Math.PI / 2), c, { p: [0, 1.62, 0] });
+    moving.push(...walker(moving.length, (t) => { const f = F(t), p = dp(f); return { x: p.x - 0.45, z: p.z + 0.35, ry: Math.atan2(-(D1.z - D0.z), D1.x - D0.x), s: f > 0.15 && f < 0.5 ? 1 : 0.001, still: f < 0.22 || f > 0.45, push: true }; }, { shirt: K.orange, pants: '#2b3a55', y: y0, carry: hat('#ffd23f') }));
+    // A carpenter on the deck, hammering.
+    moving.push(...walker(moving.length, (t) => ({ x: L(-0.3, 0, 0.2).x, z: L(-0.3, 0, 0.2).z, ry: Math.PI / 2 + Math.sin(t * 0.5) * 0.4, still: true, push: Math.sin(t * 8) > 0 }), { shirt: '#3d7be0', pants: '#2b3a55', y: y0 + 0.39 * S, carry: hat(K.white) }));
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.8, y0, 2.6], topAt: [3.2, y0 + 2.2, -2.4] };
+  },
 };
