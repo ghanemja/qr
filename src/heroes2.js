@@ -1764,4 +1764,30 @@ export const HEROES2 = {
     spots.forEach(([x, z], i) => moving.push({ geo: part(box(0.12, 0.12, 0.02), '#62d35f'), pivot: [x, y0 + 0.75, z - 1.19], anim: (t) => ({ s: Math.sin(t * 3 + i) > 0 ? 1 : 0.4 }) }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Goodyear: the tyre maker the whole world can see. The blimp drifts over the race track while
+  // the cars lap on Goodyear rubber, and the giant tyre stands by the factory.
+  goodyear: { finder: '#003e7e', build: () => {
+    const R = rand(153), out = [], BLUE = '#003e7e', YEL = '#fedb00';
+    out.push(ground('#7fbf5a'));
+    // ---- the oval track
+    const ring2 = (a1, b1, a2, b2, c, y) => { const n = hi() ? 96 : 32, tri = []; for (let i = 0; i < n; i++) { const u = (i / n) * TAU, v = ((i + 1) / n) * TAU; const A0 = [Math.cos(u) * a1, y, Math.sin(u) * b1], A1 = [Math.cos(u) * a2, y, Math.sin(u) * b2], B0 = [Math.cos(v) * a1, y, Math.sin(v) * b1], B1 = [Math.cos(v) * a2, y, Math.sin(v) * b2]; tri.push(...A0, ...B0, ...A1, ...A1, ...B0, ...B1); } const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(tri, 3)); g.computeVertexNormals(); return part(g, c); };
+    const TX = 0.6, TZ = 1.0;
+    out.push(place(ring2(2.6, 1.8, 4.0, 3.1, '#4a4f57', 0), { p: [TX, y0 + 0.012, TZ] }), place(ring2(3.95, 3.05, 4.05, 3.15, K.white, 0), { p: [TX, y0 + 0.016, TZ] }), place(ring2(2.55, 1.75, 2.65, 1.85, K.white, 0), { p: [TX, y0 + 0.016, TZ] }));
+    // Grandstand on the back straight.
+    out.push(part(extrude([[0, 0], [1.2, 0], [1.2, 1.0]], 4.0), '#c9ced6', { p: [TX, y0, TZ - 3.9], r: [0, -Math.PI / 2, 0] }).translate(0, 0, 0));
+    for (let k = 0; k < 12; k++) out.push(place(fan(['#e5533d', BLUE, YEL, '#2f9e6e'][k % 4]), { p: [TX - 1.8 + k * 0.33, y0 + 0.5 + (k % 2) * 0.35, TZ - 4.3 + (k % 2) * 0.4], s: 0.9 }));
+    // ---- the factory and its giant tyre, back left
+    out.push(part(rbox(2.0, 1.4, 1.6, 0.05), '#e6e9ed', { p: [-3.9, y0 + 0.7, -3.4] }), part(box(2.02, 0.3, 1.62), BLUE, { p: [-3.9, y0 + 1.3, -3.4] }), part(cyl(0.18, 0.2, 1.4, 12), '#9aa1a9', { p: [-4.4, y0 + 2.1, -3.8] }));
+    out.push(place(tyre(1.2, 0.7, YEL), { p: [-3.6, y0 + 1.2, -1.2], r: [0, Math.PI / 4, 0] }), part(rbox(1.2, 0.1, 0.8, 0.03), '#c9ced6', { p: [-3.6, y0 + 0.05, -1.2] }));
+    out.push(trees(R, [[TX, TZ], [TX - 1.2, TZ + 0.2], [TX + 1.2, TZ - 0.2], [-4.6, 4.6], [4.6, -4.4]], 0.55));
+    // ---- moving parts
+    const moving = [];
+    // The blimp, drifting round above.
+    const blimp = merge(part(new THREE.SphereGeometry(0.75, hi() ? 32 : 12, hi() ? 20 : 8), '#d8dde3', { s: [2.4, 1, 1] }), part(new THREE.SphereGeometry(0.76, hi() ? 32 : 12, hi() ? 20 : 8, 0, TAU, Math.PI * 0.4, Math.PI * 0.2), BLUE, { s: [2.4, 1, 1] }), part(rbox(0.6, 0.2, 0.25, 0.08), '#3a3f47', { p: [0.2, -0.8, 0] }), [0, 1, 2, 3].map((k) => part(extrude([[0, 0], [0.5, 0], [0.5, 0.45]], 0.05), BLUE, { p: [-1.6, 0, 0], r: [k * Math.PI / 2, 0, 0] })), place(pixText('GOODYEAR', 0.055, YEL, 0.02), { p: [0, 0, 0.77] }), place(pixText('GOODYEAR', 0.055, YEL, 0.02), { p: [0, 0, -0.77], r: [0, Math.PI, 0] }));
+    moving.push({ geo: blimp, pivot: [TX, y0 + 4.8, TZ - 1.0], anim: (t) => { const a = t * 0.15; return { x: Math.cos(a) * 1.4, z: Math.sin(a) * 0.9, ry: -a - Math.PI / 2, y: Math.sin(t * 0.7) * 0.15 }; } });
+    // The race cars lapping.
+    const racer = (c) => merge(part(rbox(1.0, 0.18, 0.45, 0.06), c, { p: [0, 0.18, 0] }), part(rbox(0.3, 0.14, 0.25, 0.05), '#1d1f24', { p: [-0.05, 0.33, 0] }), part(box(0.15, 0.04, 0.55), c, { p: [-0.45, 0.35, 0] }), [[-0.32, 0.25], [0.32, 0.25], [-0.32, -0.25], [0.32, -0.25]].map(([x, z]) => part(new THREE.CylinderGeometry(0.11, 0.11, 0.1, 12), '#1d1f24', { p: [x, 0.11, z], r: [Math.PI / 2, 0, 0] })), part(new THREE.CylinderGeometry(0.115, 0.115, 0.02, 12), YEL, { p: [0.32, 0.11, 0.3], r: [Math.PI / 2, 0, 0] }));
+    ['#e5533d', BLUE, YEL, '#2f9e6e'].forEach((c, i) => moving.push({ geo: racer(c), pivot: [TX, y0, TZ], anim: (t) => { const u = cyc(t, 5 + i * 0.4, i * 0.22) * TAU, a = 3.3 - (i % 2) * 0.35, b = 2.45 - (i % 2) * 0.35; return { x: Math.cos(u) * a, z: Math.sin(u) * b, ry: Math.atan2(-Math.cos(u) * b, -Math.sin(u) * a) }; } }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

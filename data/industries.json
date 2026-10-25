@@ -140,7 +140,8 @@
   "caesars": "One rewards card across a whole Strip of casinos",
   "carvana": "Buy it on your phone, pick it up from the vending machine",
   "carmax": "The no-haggle used car, reconditioned and priced at scale",
-  "hertz": "The airport counter with a car for everyone off the plane"
+  "hertz": "The airport counter with a car for everyone off the plane",
+  "goodyear": "The tyre maker the whole world can see"
  },
  "bank": [
   "PNC Financial Services",
@@ -407,7 +408,6 @@
   "AutoNation",
   "Penske Automotive Group",
   "Lear",
-  "Goodyear Tire & Rubber",
   "BorgWarner",
   "Tenneco",
   "Lithia Motors",
@@ -1786,5 +1786,8 @@
  ],
  "hertz": [
   "Hertz Global Holdings"
+ ],
+ "goodyear": [
+  "Goodyear Tire & Rubber"
  ]
 }
