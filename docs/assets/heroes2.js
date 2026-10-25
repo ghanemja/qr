@@ -1643,39 +1643,42 @@ export const HEROES2 = {
     [0, 0.33, 0.66].forEach((o, i) => moving.push(...walker(moving.length, (t) => { const u = cyc(t, 14, o); return { x: -4.6 + u * 9.2, z: 0.4, ry: 0, s: Math.min(1, u / 0.05, (1 - u) / 0.05) * 0.8 }; }, { shirt: ['#e5533d', '#2f9e6e', '#f2c94c'][i], pants: '#2b3a55', y: y0 })));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // MGM Resorts International: the Strip's biggest landlord. The golden lion guards the green
-  // tower, the slot machine's reels spin and pay out, and the BetMGM phone keeps the game going
-  // after guests fly home.
+  // MGM Resorts International: the Strip's biggest landlord. The golden lion guards the green MGM
+  // Grand, the Bellagio fountains dance on the lake, the row of slots spins and pays,
+  // and BetMGM keeps the game going on the phone after guests fly home.
   mgm: { finder: '#b8860b', build: () => {
-    const R = rand(148), out = [], GOLD = '#c9a227', EMER = '#2f8f5f';
-    out.push(ground('#4a4f57'), part(box(10.2, 0.02, 1.4), '#3a3f47', { p: [0, y0 + 0.01, 1.2] }));
-    for (let i = 0; i < 8; i++) out.push(part(box(0.6, 0.01, 0.06), '#f2c94c', { p: [-4.6 + i * 1.3, y0 + 0.025, 1.2] }));
-    // ---- the green tower, back left: three wings with gold trim
-    const GX = -2.8, GZ = -3.0;
+    const R = rand(238), out = [], GOLD = '#c9a227', EMER = '#2f8f5f';
+    out.push(ground('#4a4f57'), part(box(10.2, 0.02, 1.2), '#3a3f47', { p: [0, y0 + 0.01, 0.0] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(0.6, 0.01, 0.06), '#f2c94c', { p: [-4.6 + i * 1.3, y0 + 0.025, 0.0] }));
+    // ---- the MGM Grand, back left: three green wings with gold trim and the name
+    const GX = -3.0, GZ = -3.2;
     [0, 1, 2].forEach((k) => { const a = k * TAU / 3 + Math.PI / 4; out.push(part(rbox(0.9, 4.8 - k * 0.5, 1.8, 0.04), EMER, { p: [GX + Math.cos(a) * 0.7, y0 + (4.8 - k * 0.5) / 2, GZ + Math.sin(a) * 0.7], r: [0, -a, 0] })); });
     for (let y = 0.4; y < 4.6; y += 0.3) out.push(part(cyl(0.95, 0.95, 0.04, 6), GOLD, { p: [GX, y0 + y, GZ] }));
     out.push(place(pixText('MGM GRAND', 0.06, GOLD, 0.03), { p: [GX + 0.7, y0 + 4.4, GZ + 1.3], r: [0, Math.PI / 4, 0] }));
-    // ---- the golden lion on its plinth, middle
-    const LX = 0.4, LZ = -1.6;
+    // The golden lion on its plinth.
+    const LX = -0.6, LZ = -2.0;
     out.push(part(rbox(1.8, 0.8, 1.2, 0.06), '#d8d0bd', { p: [LX, y0 + 0.4, LZ] }));
     const lion = merge(part(capsule(0.35, 1.0), GOLD, { r: [0, 0, Math.PI / 2], p: [0, 0.4, 0] }), part(ball(0.42), '#b8860b', { p: [0.65, 0.75, 0] }), part(ball(0.28), GOLD, { p: [0.85, 0.75, 0] }), [[-0.45, 0.2], [0.45, 0.2], [-0.45, -0.2], [0.45, -0.2]].map(([x, z]) => part(capsule(0.1, 0.4), GOLD, { p: [x, 0.05, z] })), part(capsule(0.05, 0.6), GOLD, { p: [-0.75, 0.6, 0], r: [0, 0, 0.8] }));
     out.push(place(lion, { p: [LX, y0 + 1.05, LZ], r: [0, Math.PI / 4, 0], s: 1.2 }));
-    // ---- the slot machine, front right
-    const SX = 3.0, SZ = 3.3, SQ = Math.PI / 4;
-    out.push(part(rbox(1.8, 2.6, 1.0, 0.12), '#8a1538', { p: [SX, y0 + 1.3, SZ], r: [0, SQ, 0] }), part(rbox(1.5, 0.7, 0.1, 0.05), '#1d1f24', { p: [SX + 0.36, y0 + 1.6, SZ + 0.36], r: [0, SQ, 0] }), part(rbox(1.6, 0.4, 0.1, 0.05), GOLD, { p: [SX + 0.36, y0 + 2.35, SZ + 0.36], r: [0, SQ, 0] }), place(pixText('777', 0.06, '#8a1538', 0.03), { p: [SX + 0.42, y0 + 2.35, SZ + 0.42], r: [0, SQ, 0] }), part(rbox(1.4, 0.2, 0.4, 0.04), '#3a3f47', { p: [SX + 0.4, y0 + 0.9, SZ + 0.4], r: [0, SQ, 0] }));
-    // ---- the phone, front left
-    out.push(part(rbox(1.0, 1.9, 0.1, 0.14), '#1d1f24', { p: [-3.4, y0 + 1.1, 2.8], r: [0, SQ, 0] }), part(rbox(0.88, 1.7, 0.02, 0.1), '#0f5132', { p: [-3.36, y0 + 1.1, 2.84], r: [0, SQ, 0] }), place(pixText('BETMGM', 0.035, GOLD, 0.03), { p: [-3.33, y0 + 1.6, 2.87], r: [0, SQ, 0] }), part(rbox(0.5, 0.1, 0.3, 0.03), '#c9ced6', { p: [-3.4, y0 + 0.05, 2.8] }));
-    out.push(trees(R, [[4.6, -4.6], [1.6, -4.6], [4.6, -1.0], [-0.4, 4.6]], 0.5));
+    // ---- the casino floor, back right: a carpet and a row of slots
+    out.push(part(rbox(3.6, 0.04, 2.6, 0.03), '#6a1f3a', { p: [2.8, y0 + 0.03, -3.2] }));
+    // ---- the Bellagio lake, front: water and its balustrade
+    out.push(part(rbox(7.6, 0.06, 3.2, 0.3), 'W', { p: [0.6, y0 + 0.03, 2.8] }), part(rbox(7.8, 0.3, 0.12, 0.04), '#efe9dc', { p: [0.6, y0 + 0.15, 1.15] }));
+    // ---- the phone, on the left by the Strip
+    out.push(part(rbox(1.0, 1.9, 0.1, 0.14), '#1d1f24', { p: [-4.3, y0 + 1.1, -0.9], r: [0, Math.PI / 4, 0] }), part(rbox(0.88, 1.7, 0.02, 0.1), '#0f5132', { p: [-4.26, y0 + 1.1, -0.86], r: [0, Math.PI / 4, 0] }), place(pixText('BETMGM', 0.035, GOLD, 0.03), { p: [-4.23, y0 + 1.6, -0.83], r: [0, Math.PI / 4, 0] }), part(rbox(0.5, 0.1, 0.3, 0.03), '#c9ced6', { p: [-4.3, y0 + 0.05, -0.9] }));
+    out.push(trees(R, [[4.6, -0.9], [0.8, -4.6], [-1.2, -0.9]], 0.5));
     // ---- moving parts
     const moving = [], P = 6;
+    // The slots: four machines, reels spinning and stopping, coins spilling from the last.
     const sym = ['#e5533d', GOLD, '#2f9e6e', '#3d7be0'];
-    const fv = (dx, dy, dz) => { const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, SQ, 0)), v = new V(dx, dy, dz).applyQuaternion(q); return [SX + v.x, y0 + v.y, SZ + v.z]; };
-    for (let k = 0; k < 3; k++) moving.push({ geo: part(new THREE.CylinderGeometry(0.22, 0.22, 0.4, 16, 1), (x, y, z) => sym[Math.floor((Math.atan2(y, z) + Math.PI) / TAU * 8) % 4], { r: [0, 0, Math.PI / 2] }), pivot: fv(-0.45 + k * 0.45, 1.6, 0.48), anim: (t) => { const f = cyc(t, P), stop = 0.4 + k * 0.1; return { ry: SQ, rx: f < stop ? t * 18 : Math.PI / 2 }; } });
-    moving.push({ geo: merge(part(cyl(0.04, 0.04, 0.9, 8), '#c9ced6', { p: [0, 0.45, 0] }), part(ball(0.12), '#e5533d', { p: [0, 0.9, 0] })), pivot: fv(0.95, 1.4, 0), anim: (t) => ({ ry: SQ, rx: 0.9 * bump(cyc(t, P), 0.05, 0.04) }) });
-    for (let k = 0; k < 8; k++) moving.push({ geo: place(coin(0.14, 0.05), { r: [Math.PI / 2, 0, 0] }), pivot: fv(0, 0.95, 0.5), anim: (t) => { const f = cyc(t, P); if (f < 0.72 || f > 0.98) return { s: 0.001 }; const u = win(f, 0.72 + k * 0.02, 0.9 + k * 0.01); return { x: Math.cos(k) * u * 0.8 + u * 0.6, z: Math.sin(k) * u * 0.8 + u * 0.6, y: hop(u) * 0.7 - u * 0.7, rx: u * 9, s: u > 0 ? 1 : 0.001 }; } });
-    // A guest walking to the slot, and cars along the Strip.
-    moving.push({ geo: place(sedan('#f4f5f6'), { s: 0.75 }), pivot: [0, y0, 1.0], anim: (t) => { const x = -5.6 + cyc(t, 8) * 11.2; return { x, s: clamp01((5.0 - Math.abs(x)) / 0.5) + 0.001 }; } });
-    moving.push({ geo: place(sedan('#e5533d'), { s: 0.75 }), pivot: [0, y0, 1.5], anim: (t) => { const x = 5.6 - cyc(t, 10, 0.5) * 11.2; return { x, ry: Math.PI, s: clamp01((5.0 - Math.abs(x)) / 0.5) + 0.001 }; } });
+    for (let m = 0; m < 4; m++) { const x = 1.4 + m * 0.9, z = -3.4; out.push(part(rbox(0.8, 1.6, 0.7, 0.08), '#8a1538', { p: [x, y0 + 0.8, z] }), part(rbox(0.7, 0.45, 0.04, 0.03), '#1d1f24', { p: [x, y0 + 1.1, z + 0.36] }), part(rbox(0.74, 0.2, 0.06, 0.03), GOLD, { p: [x, y0 + 1.55, z + 0.34] }));
+      for (let k = 0; k < 3; k++) moving.push({ geo: part(new THREE.CylinderGeometry(0.1, 0.1, 0.18, 12), (X, Y, Z) => sym[Math.floor((Math.atan2(Y, Z) + Math.PI) / TAU * 8) % 4], { r: [0, 0, Math.PI / 2] }), pivot: [x - 0.2 + k * 0.2, y0 + 1.1, z + 0.38], anim: (t) => { const f = cyc(t, P, m * 0.13), stop = 0.4 + k * 0.1; return { rx: f < stop ? t * 18 : Math.PI / 2 }; } }); }
+    for (let k = 0; k < 8; k++) moving.push({ geo: place(coin(0.12, 0.04), { r: [Math.PI / 2, 0, 0] }), pivot: [4.1, y0 + 0.7, -3.0], anim: (t) => { const f = cyc(t, P); if (f < 0.72 || f > 0.98) return { s: 0.001 }; const u = win(f, 0.72 + k * 0.02, 0.9 + k * 0.01); return { x: Math.cos(k) * u * 0.6 + u * 0.3, z: Math.sin(k) * u * 0.4 + u * 0.6, y: hop(u) * 0.6 - u * 0.6, rx: u * 9, s: u > 0 ? 1 : 0.001 }; } });
+    // The fountains: rows of jets rising and falling in waves across the lake.
+    for (let k = 0; k < 11; k++) { const x = -2.6 + k * 0.62; moving.push({ geo: part(cyl(0.05, 0.12, 1.0, 8), '#e6f6fd', { p: [0, 0.5, 0] }), pivot: [x, y0 + 0.06, 2.6 + Math.sin(k * 0.9) * 0.5], anim: (t) => ({ sy: 0.2 + Math.max(0, Math.sin(t * 2.2 - k * 0.5)) * 2.4 + 0.001, rz: Math.sin(t * 1.1 + k) * 0.15 }) }); }
+    // Cars along the Strip.
+    moving.push({ geo: place(sedan('#f4f5f6'), { s: 0.7 }), pivot: [0, y0, -0.25], anim: (t) => { const x = -5.6 + cyc(t, 8) * 11.2; return { x, s: clamp01((5.0 - Math.abs(x)) / 0.5) + 0.001 }; } });
+    moving.push({ geo: place(sedan('#e5533d'), { s: 0.7 }), pivot: [0, y0, 0.3], anim: (t) => { const x = 5.6 - cyc(t, 10, 0.5) * 11.2; return { x, ry: Math.PI, s: clamp01((5.0 - Math.abs(x)) / 0.5) + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // Caesars Entertainment: one rewards card across a whole Strip of casinos. The fountains play
