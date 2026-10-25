@@ -116,7 +116,8 @@
   "gap": "One maker, four brands for every budget, and the denim to fill them",
   "lululemon": "A brand built on a community: the free yoga class and the run club",
   "ulta": "Every price point under one roof, and the points that bring members back",
-  "dollargeneral": "The store close to everyone in rural America"
+  "dollargeneral": "The store close to everyone in rural America",
+  "dollartree": "One low price on everything, from candy to party balloons"
  },
  "bank": [
   "PNC Financial Services",
@@ -328,7 +329,6 @@
  "retail": [
   "Albertsons",
   "Publix Super Markets",
-  "Dollar Tree",
   "Kohl's",
   "Nordstrom",
   "Ross Stores",
@@ -1199,7 +1199,6 @@
   "AutoZone": 10,
   "O'Reilly Automotive": 10,
   "Advance Auto Parts": 10,
-  "Dollar Tree": 11,
   "GameStop": 12,
   "Williams-Sonoma": 2,
   "Bed Bath & Beyond": 2,
@@ -1722,5 +1721,8 @@
  ],
  "dollargeneral": [
   "Dollar General"
+ ],
+ "dollartree": [
+  "Dollar Tree"
  ]
 }
