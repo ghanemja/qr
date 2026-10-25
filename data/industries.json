@@ -155,7 +155,8 @@
   "discord": "Where communities hang out and talk",
   "plaid": "The plumbing between apps and banks",
   "ramp": "The corporate card that saves money",
-  "nuro": "Delivery with no one in the driver's seat"
+  "nuro": "Delivery with no one in the driver's seat",
+  "figureai": "General-purpose humanoids at work on the factory floor"
  },
  "bank": [
   "PNC Financial Services",
@@ -676,7 +677,6 @@
  ],
  "robot": [
   "Boston Dynamics",
-  "Figure AI",
   "Apptronik",
   "Physical Intelligence",
   "Skild AI",
@@ -1822,5 +1822,8 @@
  ],
  "nuro": [
   "Nuro"
+ ],
+ "figureai": [
+  "Figure AI"
  ]
 }

@@ -2205,4 +2205,26 @@ export const HEROES2 = {
     moving.push({ geo: part(rbox(0.28, 0.32, 0.2, 0.03), '#d8c6a5'), pivot: [2.4, y0 + 0.9, 1.75], anim: (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.6, 0.7)); return f > 0.58 && f < 0.72 ? { z: u * 0.9 } : { s: 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Figure AI: general-purpose humanoids at work. On the factory floor the robots walk the parts
+  // from the racks to the fixtures and set them in place, shift after shift.
+  figureai: { finder: '#111111', build: () => {
+    const R = rand(168), out = [], INK = '#111111';
+    out.push(ground('#8fc66f'), part(rbox(9.0, 0.08, 7.4, 0.03), '#c9ced6', { p: [-0.2, y0 + 0.04, -0.6] }));
+    for (let k = 0; k < 2; k++) out.push(part(box(9.0, 0.012, 0.08), '#f2c94c', { p: [-0.2, y0 + 0.09, -1.2 + k * 2.0] }));
+    out.push(part(rbox(9.0, 2.6, 0.2, 0.03), '#e6e9ed', { p: [-0.2, y0 + 1.3, -4.3] }), place(pixText('FIGURE', 0.1, INK, 0.03), { p: [-2.2, y0 + 1.8, -4.18] }));
+    // ---- the racks of sheet-metal parts (back) and the fixtures (front)
+    const racks = [-3.2, -0.6, 2.0];
+    racks.forEach((x) => { out.push(part(rbox(1.6, 1.6, 0.6, 0.03), '#2a5bb0', { p: [x, y0 + 0.8, -3.4] })); for (let k = 0; k < 5; k++) out.push(part(box(1.2, 0.04, 0.5), '#b9bec6', { p: [x, y0 + 0.4 + k * 0.25, -3.35] })); });
+    racks.forEach((x) => out.push(part(rbox(1.4, 0.9, 1.0, 0.05), '#5b616b', { p: [x, y0 + 0.45, 1.8] }), part(box(1.2, 0.06, 0.8), '#f29a3a', { p: [x, y0 + 0.93, 1.8] })));
+    out.push(trees(R, [[4.6, 4.6], [-4.6, 4.6], [0.6, 4.6]], 0.5));
+    // ---- moving parts
+    const moving = [], P = 8;
+    // Each robot walks from its rack to its fixture carrying a panel, sets it down, walks back.
+    racks.forEach((x, i) => {
+      const leg = (t) => { const f = cyc(t, P, i / 3), go = easeIO(win(f, 0.1, 0.4)), back1 = easeIO(win(f, 0.55, 0.85)), u = go - back1; return { f, u, z: -2.6 + u * 3.6, ry: f < 0.5 ? -Math.PI / 2 : Math.PI / 2 }; };
+      moving.push(...humanoid(moving.length, (t) => { const l = leg(t); return { x: x, z: l.z, ry: l.ry }; }, { y: y0, shell: '#e9ecef', joint: INK, s: 1.2 }));
+      moving.push({ geo: merge(part(box(1.0, 0.04, 0.6), '#b9bec6'), part(box(0.3, 0.05, 0.2), '#9aa1a9', { p: [0.2, 0, 0.1] })), pivot: [x, 0, 0], anim: (t) => { const l = leg(t); if (l.f < 0.1 || (l.f > 0.45 && l.f < 0.98)) return l.f > 0.45 && l.f < 0.98 ? { y: y0 + 0.98, z: 1.8 } : { y: y0 + 1.2, z: -2.6 + 0.3 }; return { y: y0 + 1.25, z: l.z + 0.45 }; } });
+    });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
