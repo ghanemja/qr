@@ -947,37 +947,36 @@ export const HEROES2 = {
     [0, 0.18, 0.36, 0.54].forEach((o, i) => moving.push(...walker(moving.length, (t) => { const u = cyc(t, 14, o) * 4, side = Math.floor(u), w = u - side, L = 4.2; const pts = [[-L, -L], [L, -L], [L, L], [-L, L]], a = pts[side], b = pts[(side + 1) % 4]; return { x: a[0] + (b[0] - a[0]) * w, z: a[1] + (b[1] - a[1]) * w, ry: [0, -Math.PI / 2, Math.PI, Math.PI / 2][side] }; }, { shirt: [RED, '#3fb8a8', '#f29a3a', '#5b2a86'][i], pants: '#1d1f24', y: y0 })));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // Ulta Beauty: every price point under one roof, and the members' points that bring them back.
-  // Drugstore and prestige share the shelves, the salon chairs are busy, and each purchase fills
-  // the member's points until a reward pops out.
+  // Ulta Beauty: every price point under one roof, and points that bring members back. The walls
+  // run floor to ceiling with drugstore and prestige side by side, the salon chairs are busy, and
+  // every purchase at the till sends points up the member's gauge until a reward pops out.
   ulta: { finder: '#f05a28', build: () => {
-    const R = rand(127), out = [], OR = '#f05a28', PINK = '#e8558f';
-    out.push(ground('#8fc66f'), part(rbox(7.6, 0.08, 6.4, 0.03), '#f6efe9', { p: [-0.8, y0 + 0.04, -1.0] }));
-    // ---- cut-away walls with the sign
-    out.push(part(rbox(7.6, 2.4, 0.2, 0.03), '#fbe7dc', { p: [-0.8, y0 + 1.2, -4.2] }), part(rbox(0.2, 2.4, 6.4, 0.03), '#f8e0d4', { p: [-4.6, y0 + 1.2, -1.0] }), part(box(7.62, 0.3, 0.22), OR, { p: [-0.8, y0 + 2.25, -4.2] }), place(pixText('ULTA BEAUTY', 0.06, K.white, 0.03), { p: [-0.8, y0 + 2.25, -4.08] }));
-    // ---- the wall of products: two halves, everyday and prestige
-    for (let r = 0; r < 4; r++) {
-      out.push(part(box(6.0, 0.05, 0.4), K.white, { p: [-0.8, y0 + 0.5 + r * 0.42, -3.9] }));
-      for (let k = 0; k < 22; k++) { const x = -3.6 + k * 0.27, c = ['#e5533d', PINK, '#8a6cf0', '#f2c94c', '#3fb8a8', '#1d1f24', '#d6336c'][(k + r * 3) % 7], kind = (k + r) % 3; out.push(kind === 0 ? part(cyl(0.05, 0.05, 0.22, 10), c, { p: [x, y0 + 0.64 + r * 0.42, -3.85] }) : kind === 1 ? part(rbox(0.14, 0.24, 0.12, 0.03), c, { p: [x, y0 + 0.65 + r * 0.42, -3.85] }) : place(bottle(0.3, c, K.gold), { p: [x, y0 + 0.53 + r * 0.42, -3.85] })); }
-    }
-    out.push(part(box(0.04, 1.7, 0.42), OR, { p: [-0.8, y0 + 1.15, -3.9] }));
-    // ---- the salon: chairs and mirrors along the left wall
-    [-2.6, -1.2, 0.2].forEach((z) => out.push(part(rbox(0.06, 0.9, 0.7, 0.03), '#cfe6f2', { p: [-4.45, y0 + 1.3, z] }), part(cyl(0.12, 0.2, 0.4, 14), '#3a3f47', { p: [-3.8, y0 + 0.2, z] }), part(rbox(0.6, 0.12, 0.6, 0.05), '#1d1f24', { p: [-3.8, y0 + 0.5, z] }), part(rbox(0.12, 0.6, 0.6, 0.05), '#1d1f24', { p: [-4.05, y0 + 0.85, z] }), place(fan(['#e5533d', '#8a6cf0', '#3fb8a8'][Math.round(z + 3) % 3]), { p: [-3.8, y0 + 0.2, z], s: 1.2 }), place(fan('#1d1f24'), { p: [-3.2, y0, z + 0.3], s: 1.3 })));
-    // ---- the till
-    out.push(part(rbox(1.8, 0.9, 0.7, 0.04), OR, { p: [1.6, y0 + 0.45, 0.4] }), part(rbox(0.4, 0.3, 0.06, 0.03), '#1d1f24', { p: [1.6, y0 + 1.1, 0.3] }));
-    // ---- the points board: a member card and its gauge, front right
-    const BX = 3.6, BZ = 2.6, BQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 4, 0)), bp = (dx, dy) => { const v = new V(dx, dy, 0.06).applyQuaternion(BQ); return [BX + v.x, y0 + v.y, BZ + v.z]; };
-    out.push(part(rbox(2.0, 1.4, 0.1, 0.05), K.white, { p: bp(0, 1.6), q: BQ }), part(box(0.08, 0.95, 0.08), '#9aa1a9', { p: [BX, y0 + 0.47, BZ] }), part(rbox(1.7, 0.2, 0.04, 0.05), '#f2e4dc', { p: bp(0, 1.25), q: BQ }), place(cardGeo(OR), { p: bp(-0.35, 1.8), q: BQ }), part(star(0.18, 0.06), PINK, { p: bp(0.6, 1.8), q: BQ }));
-    out.push(trees(R, [[4.6, -4.6], [4.6, -1.8], [-4.6, 4.6], [-1.6, 4.6], [1.4, 4.6]]));
+    const R = rand(229), out = [], OR = '#f05a28', PINK = '#e8558f';
+    out.push(ground('#8fc66f'), part(rbox(9.6, 0.06, 9.0, 0.03), '#f6efe9', { p: [-0.2, y0 + 0.03, -0.5] }));
+    // ---- the walls with the sign, product walls floor to ceiling
+    out.push(part(rbox(9.6, 2.8, 0.2, 0.03), '#fbe7dc', { p: [-0.2, y0 + 1.4, -4.9] }), part(rbox(0.2, 2.8, 9.0, 0.03), '#f8e0d4', { p: [-4.9, y0 + 1.4, -0.5] }), part(box(9.62, 0.34, 0.22), OR, { p: [-0.2, y0 + 2.65, -4.9] }), place(pixText('ULTA BEAUTY', 0.08, K.white, 0.03), { p: [-0.6, y0 + 2.65, -4.77] }));
+    const pc = ['#e5533d', PINK, '#8a6cf0', '#f2c94c', '#3fb8a8', '#1d1f24', '#d6336c', '#f29a3a'];
+    for (let r = 0; r < 5; r++) { out.push(part(box(8.6, 0.05, 0.4), K.white, { p: [0.2, y0 + 0.4 + r * 0.46, -4.6] })); for (let k = 0; k < 30; k++) { const x = -4.0 + k * 0.29, c = pc[(k + r * 3) % 8], kd = (k + r) % 3; out.push(kd === 0 ? part(cyl(0.05, 0.05, 0.24, 10), c, { p: [x, y0 + 0.55 + r * 0.46, -4.55] }) : kd === 1 ? part(rbox(0.15, 0.26, 0.12, 0.03), c, { p: [x, y0 + 0.56 + r * 0.46, -4.55] }) : place(bottle(0.32, c, K.gold), { p: [x, y0 + 0.43 + r * 0.46, -4.55] })); } }
+    out.push(part(box(0.06, 2.3, 0.42), OR, { p: [0.2, y0 + 1.35, -4.6] }), place(pixText('PRESTIGE', 0.035, OR, 0.02), { p: [2.4, y0 + 2.4, -4.76] }), place(pixText('EVERYDAY', 0.035, OR, 0.02), { p: [-2.0, y0 + 2.4, -4.76] }));
+    // ---- two gondola islands of testers
+    [[-1.4, -2.4], [1.6, -2.4]].forEach(([x, z], i) => { out.push(part(rbox(2.2, 1.0, 0.9, 0.05), K.white, { p: [x, y0 + 0.5, z] }), part(box(2.2, 0.04, 0.9), '#f2e4dc', { p: [x, y0 + 1.02, z] })); for (let k = 0; k < 8; k++) out.push(part(cyl(0.05, 0.05, 0.2, 10), pc[(k + i * 3) % 8], { p: [x - 0.9 + k * 0.26, y0 + 1.14, z + (k % 2 ? 0.15 : -0.15)] })); });
+    // ---- the salon along the left wall: mirrors, chairs, clients
+    [-3.0, -1.4, 0.2, 1.8].forEach((z, i) => out.push(part(rbox(0.06, 1.0, 0.8, 0.03), '#cfe6f2', { p: [-4.75, y0 + 1.4, z] }), part(cyl(0.14, 0.22, 0.45, 14), '#3a3f47', { p: [-4.0, y0 + 0.22, z] }), part(rbox(0.65, 0.12, 0.65, 0.05), '#1d1f24', { p: [-4.0, y0 + 0.5, z] }), part(rbox(0.12, 0.65, 0.65, 0.05), '#1d1f24', { p: [-4.28, y0 + 0.85, z] }), place(fan(pc[i]), { p: [-4.0, y0 + 0.2, z], s: 1.25 })));
+    // ---- the till and the points gauge, front right
+    out.push(part(rbox(2.0, 0.95, 0.8, 0.04), OR, { p: [2.4, y0 + 0.48, 0.6] }), part(rbox(0.4, 0.3, 0.06, 0.03), '#1d1f24', { p: [2.4, y0 + 1.15, 0.4] }));
+    const GX = 3.9, GZ = -2.4, Q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 4, 0)), gp = (dx, dy, dz = 0.07) => { const v = new V(dx, dy, dz).applyQuaternion(Q); return [GX + v.x, y0 + dy, GZ + v.z]; };
+    out.push(part(rbox(1.3, 3.2, 0.14, 0.08), K.white, { p: gp(0, 1.7, 0), q: Q }), part(rbox(0.8, 2.4, 0.04, 0.06), '#f2e4dc', { p: gp(0, 1.55), q: Q }), place(cardGeo(OR), { p: gp(0, 3.0, 0.1), q: Q }), part(rbox(0.6, 0.15, 0.6, 0.04), '#c9ced6', { p: [GX, y0 + 0.08, GZ] }));
+    out.push(trees(R, [[-4.6, 4.6], [-1.4, 4.6], [1.6, 4.6]], 0.45));
     // ---- moving parts
-    const moving = [], P = 9;
-    // Shoppers: walk the aisle to the till and out with a bag.
-    [0, 0.5].forEach((o, i) => moving.push(...walker(moving.length, (t) => { const f = cyc(t, P, o), u = easeIO(win(f, 0, 0.45)), w = easeIO(win(f, 0.6, 1)); return f < 0.6 ? { x: -1.6 + u * 3.0, z: -2.4 + u * 3.1, ry: -0.8, still: f > 0.45 } : { x: 1.4 + w * 2.6, z: 0.7 + w * 3.6, ry: -1.0 }; }, { shirt: [PINK, '#3fb8a8'][i], pants: '#2b3a55', y: y0, carry: part(rbox(0.3, 0.35, 0.12, 0.03), OR, { p: [0.05, 0.75, 0.32] }) })));
-    // The points gauge filling with every purchase; a reward pops when it is full.
-    moving.push({ geo: part(rbox(1.0, 0.16, 0.04, 0.04), OR, { p: [0.5, 0, 0] }), pivot: bp(-0.78, 1.25), anim: (t) => { const f = cyc(t, P * 2), lvl = Math.min(4, Math.floor(f * 2 * 4.6)) / 4; return { q: BQ, sx: f > 0.95 ? 0.001 : lvl * 1.56 + 0.001 }; } });
-    moving.push({ geo: merge(part(rbox(0.7, 0.5, 0.3, 0.05), PINK), part(box(0.72, 0.1, 0.32), K.gold), part(box(0.1, 0.52, 0.32), K.gold)), pivot: bp(0, 2.6), anim: (t) => { const f = cyc(t, P * 2); return f > 0.88 ? { q: BQ, s: back(win(f, 0.88, 0.94)) * Math.min(1, (1 - f) / 0.03) + 0.001, y: Math.sin(t * 6) * 0.05 } : { s: 0.001 }; } });
-    // A lipstick twisting up on the counter.
-    moving.push({ geo: merge(part(cyl(0.08, 0.08, 0.5, 16), '#1d1f24', { p: [0, 0.25, 0] }), part(cyl(0.07, 0.07, 0.3, 16), '#c2185b', { p: [0, 0.65, 0] })), pivot: [1.6, y0 + 0.9, -1.6], anim: (t) => ({ ry: t, y: Math.sin(t * 2) * 0.05 }) });
+    const moving = [], P = 10;
+    // Stylists at work behind the chairs, dryers waving.
+    [-3.0, -1.4, 0.2, 1.8].forEach((z, i) => moving.push(...walker(moving.length, (t) => ({ x: -3.4, z: z + 0.1, ry: Math.PI, still: true, push: Math.sin(t * 3 + i * 1.3) > 0 }), { shirt: '#1d1f24', pants: '#3a3f47', y: y0 + 0.03 })));
+    // Shoppers: through the gondolas to the till, then out.
+    [0, 0.33, 0.66].forEach((o, i) => moving.push(...walker(moving.length, (t) => { const f = cyc(t, P, o), u = easeIO(win(f, 0, 0.45)), w = easeIO(win(f, 0.55, 1)); return f < 0.55 ? { x: -1.8 + u * 3.6, z: -1.2 + u * 1.2, ry: -0.3, still: f > 0.45 } : { x: 1.8 + w * 1.8, z: 0.0 + w * 4.0, ry: -1.1, s: Math.min(1, (1 - f) / 0.05) }; }, { shirt: [PINK, '#3fb8a8', '#f29a3a'][i], pants: '#2b3a55', y: y0 + 0.03, carry: part(rbox(0.3, 0.35, 0.12, 0.03), OR, { p: [0.05, 0.75, 0.32] }) })));
+    // Each sale sends points up to the gauge; it fills in steps; at the top the reward pops.
+    for (let k = 0; k < 3; k++) moving.push(rider(merge(part(cyl(0.16, 0.16, 0.05, 16), PINK, { r: [Math.PI / 2, 0, 0] }), part(star(0.1, 0.06), K.white)), curve([[2.4, y0 + 1.4, 0.6], [3.4, y0 + 3.2, -0.8], gp(0, 2.4, 0.2)]), P, k * 0.33 - 0.45, 0, 0.12, () => ({ ry: Math.PI / 4 })));
+    moving.push({ geo: part(rbox(0.7, 2.3, 0.03, 0.05), OR, { p: [0, 1.15, 0] }), pivot: gp(0, 0.4, 0.1), anim: (t) => { const f = cyc(t, P * 2), lvl = Math.min(6, Math.floor(f * 7)) / 6; return { q: Q, sy: f > 0.95 ? 0.001 : lvl * 0.95 + 0.001 }; } });
+    moving.push({ geo: merge(part(rbox(0.9, 0.7, 0.4, 0.06), PINK), part(box(0.92, 0.14, 0.42), K.gold), part(box(0.14, 0.72, 0.42), K.gold)), pivot: gp(0, 3.9, 0.3), anim: (t) => { const f = cyc(t, P * 2); return f > 0.86 ? { q: Q, s: back(win(f, 0.86, 0.92)) * Math.min(1, (1 - f) / 0.03) + 0.001, y: Math.sin(t * 6) * 0.06 } : { s: 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // Dollar General: the store that is close to everyone in rural America. Across the farmland
