@@ -108,7 +108,8 @@
   "intuit": "The money software for households and small businesses: refunds and books",
   "workday": "One system for a company's people and its pay",
   "motorolasolutions": "The radios first responders bet their lives on",
-  "charter": "The cable already runs to every house on the street"
+  "charter": "The cable already runs to every house on the street",
+  "lowes": "Everything for the job, from the store's lumber yard to the deck in your backyard"
  },
  "bank": [
   "PNC Financial Services",
@@ -318,7 +319,6 @@
   "Quanta Services"
  ],
  "retail": [
-  "Lowe's",
   "Albertsons",
   "Best Buy",
   "TJX",
@@ -1195,7 +1195,6 @@
   "Tapestry": 15,
   "Costco Wholesale": 5,
   "BJ's Wholesale Club": 5,
-  "Lowe's": 6,
   "Tractor Supply": 6,
   "Best Buy": 7,
   "Foot Locker": 8,
@@ -1704,5 +1703,8 @@
  ],
  "charter": [
   "Charter Communications"
+ ],
+ "lowes": [
+  "Lowe's"
  ]
 }

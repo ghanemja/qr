@@ -737,4 +737,41 @@ export const HEROES2 = {
     });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Lowe's: everything for the job, from the store to the backyard. The pickup loads lumber at
+  // the big blue store and drives it home, where the deck goes down board by board.
+  lowes: { finder: '#004990', build: () => {
+    const R = rand(121), out = [], BLUE = '#004990';
+    out.push(ground('#8fc66f'), part(box(10.2, 0.03, 1.3), '#5b616b', { p: [0, y0 + 0.015, 0.2] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(0.6, 0.01, 0.06), '#f2c94c', { p: [-4.6 + i * 1.3, y0 + 0.035, 0.2] }));
+    // ---- the store, back: a big box with the house-shaped sign and the garden centre
+    const SX = -1.4, SZ = -3.1;
+    out.push(part(rbox(6.0, 2.2, 2.6, 0.05), '#e9e4da', { p: [SX, y0 + 1.1, SZ] }), part(box(6.04, 0.3, 2.64), BLUE, { p: [SX, y0 + 2.05, SZ] }), part(box(1.6, 1.4, 0.04), '#2a3c50', { p: [SX + 0.6, y0 + 0.7, SZ + 1.31] }));
+    const signG = merge(part(extrude([[-1.0, 0], [1.0, 0], [1.0, 0.6], [0, 1.1], [-1.0, 0.6]], 0.14), BLUE), pixText("LOWE'S", 0.075, K.white, 0.18).translate(0, 0.42, 0));
+    out.push(place(signG, { p: [SX + 0.6, y0 + 2.25, SZ + 1.3] }));
+    // The lumber yard on the left end: racks of boards.
+    for (let r = 0; r < 3; r++) for (let k = 0; k < 4; k++) out.push(part(box(2.0, 0.12, 0.6), k % 2 ? '#e2c089' : '#d6b47a', { p: [-4.0, y0 + 0.3 + k * 0.14 + r * 0.0, -0.9 - r * 0.8] }));
+    [[-4.0, -0.9], [-4.0, -1.7], [-4.0, -2.5]].forEach(([x, z]) => out.push(part(box(2.2, 0.06, 0.08), '#7b828c', { p: [x, y0 + 0.2, z] })));
+    // Garden centre on the right end: plants in rows.
+    for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) out.push(part(cyl(0.16, 0.12, 0.2, 10), '#8a5a36', { p: [2.4 + i * 0.4, y0 + 0.1, -1.4 - j * 0.45] }), part(new THREE.SphereGeometry(0.2, 10, 7), ['#5fae45', '#e5533d', '#f2c94c', '#d6336c'][(i + j) % 4], { p: [2.4 + i * 0.4, y0 + 0.32, -1.4 - j * 0.45] }));
+    // ---- the backyard across the road: the house, a lawn, the deck frame
+    const HX = 1.8, HZ = 3.4;
+    out.push(place(house2('#eef3e6', '#5b6b7d', BLUE), { p: [-2.2, y0, 3.2], r: [0, Math.PI / 2, 0], s: 0.85 }));
+    out.push(part(box(4.0, 0.15, 0.04), '#e2c089', { p: [HX, y0 + 0.35, HZ - 1.0] }), part(box(4.0, 0.15, 0.04), '#e2c089', { p: [HX, y0 + 0.35, HZ + 1.0] }));
+    for (let i = 0; i < 6; i++) out.push(part(box(0.06, 0.15, 2.0), '#c9a36b', { p: [HX - 1.9 + i * 0.76, y0 + 0.35, HZ] }));
+    [[-1.9, -1], [1.9, -1], [-1.9, 1], [1.9, 1]].forEach(([x, z]) => out.push(part(box(0.14, 0.4, 0.14), '#c9a36b', { p: [HX + x, y0 + 0.2, HZ + z] })));
+    out.push(part(rbox(0.9, 0.5, 0.5, 0.04), '#3a3f47', { p: [HX + 1.3, y0 + 0.25, HZ - 1.5] }), part(box(1.0, 0.1, 0.4), '#e2c089', { p: [HX + 1.3, y0 + 0.55, HZ - 1.5] }));
+    out.push(trees(R, [[4.6, 4.6], [4.6, 1.6], [-4.6, 1.6], [4.6, -4.6], [-0.2, 4.6]]));
+    // ---- moving parts
+    const moving = [], P = 12, N = 12;
+    // The deck boards going down one by one.
+    for (let k = 0; k < N; k++) moving.push({ geo: part(box(0.28, 0.05, 2.1), k % 2 ? '#e2c089' : '#d6b47a'), pivot: [HX - 1.85 + k * 0.335, y0 + 0.45, HZ], anim: (t) => { const f = cyc(t, P), a = 0.4 + k * 0.045; return f < a || f > 0.97 ? { s: 0.001 } : { y: (1 - easeOut(win(f, a, a + 0.04))) * 0.6 }; } });
+    // The DIYer with a hammer.
+    const diy = moving.length;
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P), k = Math.min(N - 1, Math.max(0, Math.floor((f - 0.4) / 0.045))); return f < 0.4 ? { x: HX + 2.4, z: HZ - 0.6, ry: Math.PI, still: true } : { x: HX - 1.85 + k * 0.335, z: HZ - 1.4, ry: Math.PI / 2, still: true, push: Math.sin(t * 14) > 0 }; }, { shirt: BLUE, pants: '#2b3a55', y: y0 }));
+    // The pickup: loads at the yard, drives the road, parks by the house.
+    const pickup = merge(part(rbox(1.0, 0.7, 0.9, 0.08), '#c0392b', { p: [0.55, 0.6, 0] }), part(box(0.04, 0.3, 0.75), '#26323f', { p: [1.06, 0.75, 0] }), part(rbox(2.2, 0.4, 0.95, 0.06), '#c0392b', { p: [0, 0.4, 0] }), part(box(1.2, 0.08, 0.85), '#7a1f15', { p: [-0.5, 0.62, 0] }), [[-0.75, 0.45], [0.75, 0.45], [-0.75, -0.45], [0.75, -0.45]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.12, 14), '#1d1f24', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] })), [0, 1, 2].map((k) => part(box(1.6, 0.08, 0.2), '#e2c089', { p: [-0.6, 0.7 + k * 0.08, -0.25 + k * 0.25] })));
+    const drive = curve([[-3.0, y0, -0.3], [-1.5, y0, 0.25], [1.0, y0, 0.25], [3.2, y0, 0.35], [4.0, y0, 1.6], [3.8, y0, 2.4]]);
+    moving.push({ geo: pickup, pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.05, 0.35)), a = along(drive, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry, s: (f > 0.92 ? 1 - win(f, 0.92, 0.99) : 1) * 0.85 + 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
