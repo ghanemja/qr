@@ -2236,5 +2236,48 @@ export const HEROES = {
       pivot: [0, y0 + rim * 0.8 + 0.02, 0], anim: (t) => { const f = cyc(t, 10), a = Math.PI * 0.6 + (f < 0.5 ? f : 1 - f) * 1.4, r = r0 + 3 * dr + 0.3; return { x: Math.cos(a) * r, z: Math.sin(a) * r, ry: -a + (f < 0.5 ? -Math.PI / 2 : Math.PI / 2) }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // PepsiCo: snacks and drinks, delivered straight to the shelf. Potatoes roll into the fryer and
+  // come out as chips that tumble into bags; blue cans race down their own line; the delivery
+  // truck heads for the stores; the globe turns over the gate.
+  pepsico: { finder: '#004b93', build: () => {
+    const R = rand(73), out = [], y0 = 0.24, BLUE = '#004b93', RED = '#c9002b', CHIP = '#f2c14e';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#a9cf8a', { p: [0, 0.12, 0] }), part(box(8.4, 0.03, 6.4), '#dfe3e8', { p: [0, y0 + 0.015, -1.6] }));
+    const globe = () => merge(part(new THREE.SphereGeometry(0.5, hi() ? 40 : 14, hi() ? 24 : 8), (px, py) => (py > 0.12 ? RED : py < -0.12 ? BLUE : '#ffffff')), part(torus(0.5, 0.02, TAU, 40), '#e9ecef', { r: [Math.PI / 2, 0, 0] }));
+    // ---- the snack line: potato hopper, belt, fryer with its hood, the bagger
+    const LZ = -3.2;
+    out.push(part(lathe([[0.2, 0], [0.7, 0.8], [0.72, 1.0], [0.0, 1.0]], 24), '#9aa1a9', { p: [-3.8, y0 + 0.8, LZ] }), ...[-1, 1].flatMap((sx) => [-1, 1].map((sz) => part(box(0.06, 0.8, 0.06), '#7b828c', { p: [-3.8 + sx * 0.45, y0 + 0.4, LZ + sz * 0.45] }))));
+    if (hi()) for (let i = 0; i < 14; i++) out.push(part(ball(0.12), '#b08a5e', { p: [-3.8 + (R() - 0.5) * 0.9, y0 + 1.7 + R() * 0.15, LZ + (R() - 0.5) * 0.9], s: [1.2, 0.9, 1] }));
+    out.push(part(rbox(5.8, 0.12, 0.5, 0.03), '#3a3f47', { p: [-0.6, y0 + 0.7, LZ] }), part(box(5.8, 0.02, 0.42), '#5b616b', { p: [-0.6, y0 + 0.77, LZ] }));
+    for (let i = 0; i < 6; i++) out.push(part(box(0.06, 0.7, 0.4), '#9aa1a9', { p: [-3.2 + i * 1.05, y0 + 0.35, LZ] }));
+    out.push(part(rbox(1.6, 0.6, 1.0, 0.06), '#c9ced6', { p: [-1.0, y0 + 1.05, LZ] }), part(lathe([[0.9, 0], [0.4, 0.5], [0.15, 0.55], [0, 0.55]], 4), '#9aa1a9', { p: [-1.0, y0 + 1.35, LZ], r: [0, Math.PI / 4, 0], s: [1.2, 1, 0.8] }), part(cyl(0.1, 0.1, 0.8, 12), '#9aa1a9', { p: [-1.0, y0 + 2.2, LZ] }));
+    out.push(part(rbox(0.9, 1.6, 0.9, 0.06), '#e9ecef', { p: [2.6, y0 + 0.8, LZ] }), part(lathe([[0, 0], [0.4, 0.5], [0.42, 0.55], [0, 0.55]], 24), '#c9ced6', { p: [2.6, y0 + 1.6, LZ], r: [Math.PI, 0, 0] }));
+    out.push(part(rbox(1.4, 0.1, 0.9, 0.03), '#3a3f47', { p: [3.6, y0 + 0.4, LZ + 0.3] }));
+    // ---- the drinks line: a curving belt of cans past the filler carousel
+    const cans = curve([[-3.8, y0 + 0.75, -0.6], [-1.6, y0 + 0.75, -0.6], [0.0, y0 + 0.75, -1.1], [1.8, y0 + 0.75, -0.6], [3.8, y0 + 0.75, -0.6]]);
+    out.push(part(tubeOn(cans, 0.2, hi() ? 60 : 16), '#3a3f47', { s: [1, 1, 1] }));
+    for (let i = 0; i <= 8; i++) { const p = cans.getPointAt(i / 8); out.push(part(box(0.06, 0.6, 0.06), '#9aa1a9', { p: [p.x, y0 + 0.3, p.z] })); }
+    out.push(part(cyl(0.7, 0.7, 0.9, 32), '#c9ced6', { p: [0.0, y0 + 1.25, -1.9] }), part(cyl(0.72, 0.72, 0.08, 32), BLUE, { p: [0.0, y0 + 1.72, -1.9] }));
+    // ---- the gate with the turning globe, and the giant chip bag
+    out.push(part(rbox(0.3, 2.4, 0.3, 0.05), '#e9ecef', { p: [-1.6, y0 + 1.2, 3.2] }), part(rbox(0.3, 2.4, 0.3, 0.05), '#e9ecef', { p: [1.0, y0 + 1.2, 3.2] }), part(rbox(3.0, 0.3, 0.32, 0.05), BLUE, { p: [-0.3, y0 + 2.5, 3.2] }), part(cyl(0.05, 0.05, 0.25, 8), '#c9ced6', { p: [-0.3, y0 + 2.75, 3.2] }));
+    const bag = merge(part(lathe([[0, 0], [0.55, 0], [0.62, 0.3], [0.6, 1.1], [0.5, 1.45], [0.0, 1.5]], 32), '#f2c14e', { s: [1, 1, 0.55] }), part(box(1.05, 0.08, 0.3), '#e0a93a', { p: [0, 1.5, 0] }), part(cyl(0.42, 0.42, 0.03, 32), RED, { p: [0, 0.8, 0.335], r: [Math.PI / 2, 0, 0], s: [1.1, 1, 0.8] }), part(cyl(0.18, 0.18, 0.035, 24), '#ffd23f', { p: [0, 0.86, 0.345], r: [Math.PI / 2, 0, 0] }), part(box(0.5, 0.06, 0.02), '#ffffff', { p: [0, 0.62, 0.35] }));
+    out.push(place(bag, { p: [3.4, y0, 3.0], r: [0, Math.PI / 4, 0.0], s: 1.3 }));
+    [[-4.6, 4.6], [-4.6, 1.8], [4.6, 1.0], [-3.0, 4.6], [2.2, 4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.75 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    moving.push({ geo: globe(), pivot: [-0.3, y0 + 3.2, 3.2], anim: (t) => ({ ry: t * 0.8 }) });
+    // Potatoes on the belt to the fryer; chips out the other side flying into the bagger.
+    for (let k = 0; k < 5; k++) moving.push({ geo: part(ball(0.13), '#b08a5e', { s: [1.25, 0.9, 1] }), pivot: [-3.4, y0 + 0.9, LZ], anim: (t) => { const u = cyc(t, 3, k / 5); return { x: u * 2.0, rz: -u * 6, s: Math.min(1, (1 - u) / 0.1) + 0.001 }; } });
+    for (let k = 0; k < 10; k++) moving.push({ geo: part(extrude([[-0.1, -0.06], [0.1, -0.05], [0.06, 0.08], [-0.07, 0.07]], 0.015), CHIP), pivot: [-0.1, y0 + 0.86, LZ], anim: (t) => { const u = cyc(t, 2.5, k / 10), jitter = Math.sin(k * 7.1) * 0.12; return u < 0.75 ? { x: u / 0.75 * 2.4, z: jitter, rx: Math.PI / 2, rz: k } : { x: 2.4 + win(u, 0.75, 1) * 0.3, y: hop(win(u, 0.75, 1)) * 0.9 + win(u, 0.75, 1) * 0.6, z: jitter * (1 - win(u, 0.75, 1)), rx: u * 20, rz: u * 13 }; } });
+    // Finished bags sliding off the bagger.
+    for (let k = 0; k < 3; k++) moving.push({ geo: place(bag, { s: 0.28 }), pivot: [3.0, y0 + 0.45, LZ + 0.3], anim: (t) => { const u = cyc(t, 2.2, k / 3); return { x: u * 1.2, s: Math.min(1, u / 0.1, (1 - u) / 0.1) + 0.001, ry: Math.PI / 2 }; } });
+    // Cans riding the drinks line, and the filler turning.
+    const can = merge(part(cyl(0.09, 0.09, 0.26, 20), BLUE), part(cyl(0.095, 0.095, 0.06, 20), RED, { p: [0, 0.03, 0] }), part(cyl(0.07, 0.07, 0.02, 16), '#c9ced6', { p: [0, 0.14, 0] }));
+    for (let k = 0; k < 12; k++) moving.push({ geo: can, pivot: [0, 0.18, 0], anim: (t) => { const p = cans.getPointAt(cyc(t, 6, k / 12)); return { x: p.x, y: p.y, z: p.z }; } });
+    moving.push({ geo: merge(ring(10, (a) => part(cyl(0.05, 0.05, 0.3, 8), '#9aa1a9', { p: [Math.cos(a) * 0.55, -0.6, Math.sin(a) * 0.55] }))), pivot: [0.0, y0 + 1.25, -1.9], anim: (t) => ({ ry: t * 1.5 }) });
+    // The delivery truck.
+    moving.push({ geo: merge(part(rbox(0.8, 0.85, 0.95, 0.1), BLUE, { p: [1.3, 0.6, 0] }), part(box(0.04, 0.32, 0.8), '#26323f', { p: [1.71, 0.8, 0] }), part(rbox(2.2, 1.15, 1.0, 0.06), '#f4f5f6', { p: [-0.3, 0.8, 0] }), place(globe(), { p: [-0.3, 0.85, 0.5], s: [0.6, 0.6, 0.1] }), [[-1.0, 0.45], [1.3, 0.45], [-1.0, -0.45], [1.3, -0.45]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.14, 14), '#1d1f24', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] }))),
+      pivot: [0, y0, 2.0], anim: (t) => { const f = cyc(t, 10), x = -5.6 + f * 11.2; return { x, s: clamp01((5.2 - Math.abs(x)) / 0.5) + 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

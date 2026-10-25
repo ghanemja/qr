@@ -67,7 +67,8 @@
   "ups": "Hub to doorstep",
   "ibm": "Mainframes to qubits",
   "lilly": "Medicine at scale",
-  "caterpillar": "Moving the earth"
+  "caterpillar": "Moving the earth",
+  "pepsico": "Snacks and sips"
  },
  "bank": [
   "Wells Fargo",
@@ -541,7 +542,6 @@
   "Aramark"
  ],
  "drink": [
-  "PepsiCo",
   "Keurig Dr Pepper",
   "Molson Coors Brewing",
   "Constellation Brands"
@@ -1587,5 +1587,8 @@
  ],
  "caterpillar": [
   "Caterpillar"
+ ],
+ "pepsico": [
+  "PepsiCo"
  ]
 }
