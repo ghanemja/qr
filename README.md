@@ -15,6 +15,7 @@ Covers the 2019 Fortune 500 (latest list available as open data) plus a hand-pic
 npm install
 npm run build                      # writes docs/
 SITE_URL=https://example.com/ npm run build   # URL encoded in the QR codes and canonical links
+GOATCOUNTER=mysite npm run build   # analytics site (default ghanemja; empty turns it off)
 ```
 
 Data lives in `data/`: `fortune500.json` (made by `python3 tools/prepare_f500.py` from the two CSVs) and `startups.json` (edit by hand). Page templates are in `tools/build.mjs`; browser code and styles are in `src/`.

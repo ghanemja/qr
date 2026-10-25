@@ -485,10 +485,11 @@ function start() {
       const slug = hit.object.userData.slug;
       const rid = hit.object.userData.region || regionOf.get(slug)?.id;
       stopTour();
+      window.track?.(`map: ${slug ? `company ${slug}` : `region ${rid}`}`);
       if (rid) openRegion(rid, { select: slug || null });
     } else if (current) {
       const hit = pick(ev, current.pick);
-      if (hit) { stopTour(); selectCompany(hit.object.userData.slug); }
+      if (hit) { stopTour(); window.track?.(`map: company ${hit.object.userData.slug}`); selectCompany(hit.object.userData.slug); }
     }
   });
 
@@ -750,6 +751,7 @@ function start() {
     qIn.blur();
     stopTour();
     qIn.value = h.region ? h.region.name : h.d.n;
+    window.track?.(`search: ${qIn.value}`);
     const r = h.region || regionOf.get(h.d.s);
     if (r) openRegion(r.id, { select: h.d ? h.d.s : null });
   }

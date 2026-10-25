@@ -3,6 +3,7 @@
 // Builds the static site into docs/ from data/*.json.
 //   npm install && npm run build
 // SITE_URL (optional) sets canonical/OG URLs, e.g. SITE_URL=https://example.com/atlas/
+// GOATCOUNTER (optional) picks the analytics site, e.g. GOATCOUNTER=mysite for mysite.goatcounter.com (empty turns it off)
 import { readFileSync, writeFileSync, mkdirSync, rmSync, copyFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -23,6 +24,8 @@ const LIST_YEAR = 2026;
 const LICENSE_TEXT = readFileSync(join(ROOT, 'LICENSE'), 'utf8');
 const AUTHOR = 'Janelle Ghanem';
 const REPO_URL = 'https://github.com/ghanemja/qr';
+// Your GoatCounter site code (the "mysite" in mysite.goatcounter.com); empty turns analytics off.
+const GOATCOUNTER = process.env.GOATCOUNTER ?? 'ghanemja';
 
 const readJSON = (p) => JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -337,6 +340,7 @@ const describe = (c) => c.kind === 'f500'
   ? `${c.name} — No. ${c.rank} on the ${LIST_YEAR} Fortune 500, headquartered in ${place(c)}.`
   : `${c.name} — ${c.sector} startup founded in ${c.founded}, based in ${place(c)}. ${c.blurb}`;
 
+const analytics = (up) => (GOATCOUNTER ? `\n<script src="${up}assets/analytics.js" data-goatcounter="${GOATCOUNTER}" data-site="qr"></script>` : '');
 const head = ({ title, description, path, depth }) => {
   const up = '../'.repeat(depth);
   return `<!doctype html>
@@ -353,7 +357,7 @@ const head = ({ title, description, path, depth }) => {
 <meta property="og:url" content="${SITE_URL}${path}">
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="${up}assets/icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="${up}assets/site.css">
+<link rel="stylesheet" href="${up}assets/site.css">${analytics(up)}
 </head>`;
 };
 
@@ -413,7 +417,7 @@ const qwHead = ({ title, description, path, depth }) => {
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="${up}assets/icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="${up}assets/qrworld.css">
-<script type="importmap">{"imports":{"three":"${up || './'}assets/three.module.min.js"}}</script>
+<script type="importmap">{"imports":{"three":"${up || './'}assets/three.module.min.js"}}</script>${analytics(up)}
 </head>`;
 };
 const qwTop = (depth, current = '') => {
@@ -845,7 +849,7 @@ ${footer(0)}
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(join(OUT, 'c'), { recursive: true });
 mkdirSync(join(OUT, 'assets'), { recursive: true });
-for (const f of ['site.css', 'qrworld.css', 'atlas.js', 'qr-card.js', 'directory.js', 'icon.svg', 'qrworld.js', 'models.js', 'qrsculpture.js', 'company3d.js', 'home.js', 'BufferGeometryUtils.js', 'RoundedBoxGeometry.js', 'kit.js', 'heroes.js', 'heroes2.js', 'scenes.js', 'sitesearch.js', 'library.js']) copyFileSync(join(ROOT, 'src', f), join(OUT, 'assets', f));
+for (const f of ['site.css', 'qrworld.css', 'atlas.js', 'qr-card.js', 'directory.js', 'icon.svg', 'qrworld.js', 'models.js', 'qrsculpture.js', 'company3d.js', 'home.js', 'BufferGeometryUtils.js', 'RoundedBoxGeometry.js', 'kit.js', 'heroes.js', 'heroes2.js', 'scenes.js', 'sitesearch.js', 'library.js', 'analytics.js']) copyFileSync(join(ROOT, 'src', f), join(OUT, 'assets', f));
 
 copyFileSync(join(ROOT, 'node_modules/qrcode-generator/qrcode.js'), join(OUT, 'assets/qrcode.js'));
 copyFileSync(join(ROOT, 'node_modules/three/build/three.module.min.js'), join(OUT, 'assets/three.module.min.js'));
