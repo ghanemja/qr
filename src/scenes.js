@@ -278,6 +278,14 @@ const wafer = (r = 0.5, dies = false) => { const g = [part(cyl(r, r, 0.04, hi() 
 const chipGeo = (w = 0.5) => merge(part(rbox(w, w * 0.16, w, w * 0.06), '#24272d', { p: [0, w * 0.08, 0] }), part(rbox(w * 0.5, w * 0.05, w * 0.5, w * 0.03), 'A', { p: [0, w * 0.18, 0] }),
   hi() ? ring(4, (a) => [-0.3, -0.1, 0.1, 0.3].map((k) => part(box(w * 0.06, w * 0.04, w * 0.14), K.gold, { p: [Math.cos(a) * w * 0.55 - Math.sin(a) * k * w, w * 0.03, Math.sin(a) * w * 0.55 + Math.cos(a) * k * w], r: [0, -a + Math.PI / 2, 0] }))) : []);
 
+// A desk with a chair, facing +z, on y = 0 (laptop on top).
+const desk = (top = K.wood, laptop = '#3a3f47') => merge(part(rbox(1.4, 0.06, 0.7, 0.02), top, { p: [0, 0.74, 0] }), [[-0.62, -0.28], [0.62, -0.28], [-0.62, 0.28], [0.62, 0.28]].map(([x, z]) => part(box(0.05, 0.72, 0.05), K.dark, { p: [x, 0.36, z] })),
+  part(rbox(0.5, 0.03, 0.34, 0.01), laptop, { p: [0, 0.78, 0.05] }), part(rbox(0.5, 0.34, 0.02, 0.01), laptop, { p: [0, 0.94, -0.12], r: [-0.25, 0, 0] }), part(box(0.44, 0.28, 0.01), '#9fcdea', { p: [0, 0.94, -0.105], r: [-0.25, 0, 0] }),
+  part(rbox(0.46, 0.06, 0.46, 0.03), K.dark, { p: [0, 0.46, 0.6] }), part(rbox(0.46, 0.5, 0.06, 0.03), K.dark, { p: [0, 0.72, 0.83] }), part(cyl(0.03, 0.03, 0.44, 8), K.steelDk, { p: [0, 0.22, 0.6] }));
+// A server rack (front toward +z) on y = 0, h tall, with drive bays.
+const serverRack = (h = 2.0, top = 'A') => merge(part(rbox(0.9, h, 0.8, 0.04), '#2b2f36', { p: [0, h / 2, 0] }), part(box(0.92, 0.12, 0.82), top, { p: [0, h - 0.06, 0] }),
+  Array.from({ length: Math.floor((h - 0.3) / 0.26) }, (_, i) => part(rbox(0.78, 0.2, 0.04, 0.02), '#3a3f47', { p: [0, 0.2 + i * 0.26, 0.41] })));
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -2256,5 +2264,63 @@ export const SCENES = {
     // A tech in a bunny suit by the puller.
     moving.push(...walker(moving.length, (t) => { const k = Math.sin(t * 0.4); return { x: -1.4 + k * 1.3, z: -1.2, ry: Math.cos(t * 0.4) > 0 ? 0 : Math.PI }; }, { shirt: K.white, pants: K.white, skin: '#e9b98f', hair: '#c3d3e6', y: y0 }));
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-1.4, y0, 2.0], topAt: [SX, y0 + 0.9, SZ] };
+  },
+
+  // Terminal (developer tools, platforms and IT services): type it, ship it, it's live everywhere.
+  // On the big terminal the code types itself line by line; the build checks run green; the
+  // deploy leaps from the terminal to the turning globe and fans out to the edge servers round the
+  // board, whose lights come up as it lands.
+  'software:3': () => {
+    const R = rand(3101), out = [], moving = [];
+    out.push(slab('#cfd6de'));
+    out.push(part(rbox(10.0, 0.03, 10.0, 0.04), '#e3e8ee', { p: [0, y0 + 0.015, 0] }));
+    if (hi()) for (let i = -4; i <= 4; i++) out.push(part(box(0.02, 0.012, 9.8), '#d4dbe3', { p: [i * 1.1, y0 + 0.03, 0] }), part(box(9.8, 0.012, 0.02), '#d4dbe3', { p: [0, y0 + 0.03, i * 1.1] }));
+    // ---- the big terminal (back left), facing the camera
+    const TX = -2.6, TZ = -2.6, TA = Math.PI / 4, q = new THREE.Quaternion().setFromAxisAngle(new V(0, 1, 0), TA), SW = 3.6, SH = 2.4, SY = y0 + 1.1;
+    const at = (lx, ly, lz) => new V(lx, ly, lz).applyQuaternion(q).add(new V(TX, 0, TZ));
+    const term = [part(rbox(SW + 0.3, SH + 0.5, 0.25, 0.1), K.dark, { p: [0, SY + SH / 2 + 0.1, 0] }), part(box(SW, SH, 0.04), '#141a22', { p: [0, SY + SH / 2, 0.13] }), part(rbox(SW + 0.3, 0.32, 0.27, 0.08), 'A', { p: [0, SY + SH + 0.2, 0] })];
+    [0, 1, 2].forEach((i) => term.push(part(new THREE.SphereGeometry(0.07, 10, 8), ['#ff5f57', '#febc2e', '#28c840'][i], { p: [-SW / 2 + 0.2 + i * 0.22, SY + SH + 0.2, 0.15] })));
+    term.push(part(rbox(0.5, SY - y0, 0.4, 0.06), K.steelDk, { p: [0, (SY - y0) / 2 + 0.05, 0] }), part(rbox(1.8, 0.1, 1.0, 0.04), K.dark, { p: [0, 0.05, 0] }));
+    out.push(place(merge(term), { p: [TX, y0, TZ], r: [0, TA, 0] }));
+    // ---- the developer's desk in front of it
+    out.push(place(desk(K.wood, '#3a3f47'), { p: [-0.8, y0, -0.6], r: [0, TA, 0] }), part(cyl(0.08, 0.07, 0.14, 12), K.white, { p: [-0.55, y0 + 0.84, -0.85] }));
+    // ---- the globe (back right) on its stand
+    const GX = 2.6, GZ = -2.7, GR = 1.25, GY = y0 + 2.3;
+    out.push(part(cyl(0.7, 0.9, 0.3, 32), K.dark, { p: [GX, y0 + 0.15, GZ] }), part(cyl(0.08, 0.08, GY - GR - y0, 10), K.steelDk, { p: [GX, (GY - GR + y0) / 2, GZ] }), part(torus(GR + 0.12, 0.04, Math.PI, 40), K.steelDk, { p: [GX, GY, GZ], r: [0, Math.PI / 4, Math.PI / 2] }));
+    // ---- the edge servers round the board
+    const edges = [new V(4.1, 0, 0.6), new V(1.8, 0, 3.8), new V(-2.4, 0, 3.4), new V(-4.2, 0, 0.4)];
+    edges.forEach((e) => out.push(place(serverRack(1.6, 'A'), { p: [e.x, y0, e.z], r: [0, Math.PI / 4, 0] }), part(cyl(0.7, 0.7, 0.04, 24), '#d4dbe3', { p: [e.x, y0 + 0.02, e.z] })));
+    // Network cables along the floor: terminal to globe, globe out to each edge.
+    const cables = [curve([[TX + 0.6, y0 + 0.05, TZ + 0.6], [-0.4, y0 + 0.05, -2.2], [GX - 0.8, y0 + 0.05, GZ + 0.4]]), ...edges.map((e) => curve([[GX, y0 + 0.05, GZ], [(GX + e.x) / 2 + 0.4, y0 + 0.05, (GZ + e.z) / 2 + 0.3], [e.x, y0 + 0.05, e.z]]))];
+    cables.forEach((c) => out.push(part(tubeOn(c, 0.05), '#5b616b')));
+    // ---- moving parts (one 10 s cycle)
+    const P = 10, F = (t) => cyc(t, P);
+    // Code types itself, line by line; the cursor blinks; the lines flash green on a pass.
+    const lines = [[1.8, 'B', 0], [2.6, '#c3c9d0', 0.3], [1.2, '#9ad0f0', 0.3], [2.2, '#c3c9d0', 0.6], [1.6, '#f6d77a', 0.3], [2.4, '#c3c9d0', 0]];
+    lines.forEach(([w, c, ind], i) => { const p0 = at(-SW / 2 + 0.25 + ind, SY + SH - 0.35 - i * 0.3, 0.16); moving.push({ geo: part(box(w, 0.14, 0.03), c, { p: [w / 2, 0, 0] }).applyQuaternion(q), pivot: p0.toArray(), anim: (t) => { const f = F(t), k = win(f, 0.02 + i * 0.06, 0.07 + i * 0.06); return { sx: k * (1 - win(f, 0.9, 0.95)) * 0.999 + 0.001 }; } }); });
+    const pass = at(-SW / 2 + 0.3, SY + 0.3, 0.16);
+    moving.push({ geo: merge(part(box(0.18, 0.18, 0.03), '#28c840'), part(box(1.6, 0.14, 0.03), '#28c840', { p: [1.05, 0, 0] })).applyQuaternion(q), pivot: pass.toArray(), anim: (t) => { const f = F(t); return { s: f > 0.42 && f < 0.92 ? 1 : 0.001 }; } });
+    moving.push({ geo: part(box(0.12, 0.2, 0.03), K.white).applyQuaternion(q), pivot: [0, 0, 0], anim: (t) => { const f = F(t), i = Math.min(5, Math.floor(Math.max(0, f - 0.02) / 0.06)), [w, , ind] = lines[i], k = win(f, 0.02 + i * 0.06, 0.07 + i * 0.06), p = at(-SW / 2 + 0.25 + ind + w * k + 0.12, SY + SH - 0.35 - i * 0.3, 0.17); return { x: p.x, y: p.y, z: p.z, s: f < 0.4 && cyc(t, 0.6) < 0.5 ? 1 : 0.001 }; } });
+    // The developer at the desk, typing.
+    const dv = new V(-0.8, 0, -0.6).add(new V(0, 0, 0.5).applyQuaternion(q));
+    moving.push(...walker(moving.length, () => ({ x: dv.x, z: dv.z, ry: Math.PI * 0.75, still: true, push: true }), { shirt: 'B', pants: '#2b3a55', y: y0 - 0.22 }));
+    // The globe turns, with its land masses in the brand colour.
+    const land = [];
+    for (let i = 0; i < (hi() ? 70 : 24); i++) { const u = R(), v = R() * 0.8 + 0.1, th = u * TAU, ph = v * Math.PI, n = new V(Math.sin(ph) * Math.cos(th), Math.cos(ph), Math.sin(ph) * Math.sin(th)); if (Math.sin(th * 2 + ph * 3) > -0.1) land.push(part(new THREE.SphereGeometry(0.22 + R() * 0.16, 8, 6), 'A', { p: n.multiplyScalar(GR * 0.9).toArray(), s: [1, 0.7, 1] })); }
+    moving.push({ geo: merge(part(new THREE.SphereGeometry(GR, hi() ? 40 : 14, hi() ? 28 : 10), '#7fc4e8'), land), pivot: [GX, GY, GZ], anim: (t) => ({ ry: t * 0.35 }) });
+    // The deploy: from the terminal, over to the globe, then out to each edge server.
+    const pkt = merge(part(rbox(0.36, 0.36, 0.36, 0.08), 'A'), part(box(0.2, 0.05, 0.38), K.white, { p: [0, 0.07, 0] }), part(box(0.2, 0.05, 0.38), K.white, { p: [0, -0.07, 0] }));
+    const T0 = at(SW / 2 - 0.2, SY + SH + 0.3, 0.2), G0 = new V(GX, GY + GR + 0.2, GZ);
+    moving.push({ geo: pkt, pivot: [0, 0, 0], anim: (t) => { const f = F(t), u = easeIO(win(f, 0.45, 0.6)), p = T0.clone().lerp(G0, u); return { x: p.x, y: p.y + hop(u) * 1.6, z: p.z, ry: u * 6, s: f > 0.44 && f < 0.61 ? 1 : 0.001 }; } });
+    edges.forEach((e, i) => {
+      const E = new V(e.x, y0 + 1.9, e.z);
+      moving.push({ geo: pkt, pivot: [0, 0, 0], anim: (t) => { const f = F(t), u = easeIO(win(f, 0.6 + i * 0.03, 0.75 + i * 0.03)), p = G0.clone().lerp(E, u); return { x: p.x, y: p.y + hop(u) * 1.2, z: p.z, ry: -u * 6, s: (f > 0.6 + i * 0.03 && f < 0.76 + i * 0.03 ? 0.7 : 0.001) }; } });
+      // Its bays light up as the deploy lands, a tick pops.
+      const ry = Math.PI / 4, fwd = new V(Math.sin(ry), 0, Math.cos(ry));
+      for (let k = 0; k < 5; k++) moving.push({ geo: part(box(0.6, 0.06, 0.02), '#62d35f', { r: [0, ry, 0] }), pivot: [e.x + fwd.x * 0.43, y0 + 0.2 + k * 0.26, e.z + fwd.z * 0.43], anim: (t) => { const f = F(t), on = win(f, 0.76 + i * 0.03 + k * 0.01, 0.78 + i * 0.03 + k * 0.01) * (1 - win(f, 0.97, 1)); return { sx: on * 0.999 + 0.001 }; } });
+      moving.push({ geo: tickGeo(0.24), pivot: [e.x, y0 + 2.1, e.z], anim: (t) => { const f = F(t), a = 0.76 + i * 0.03; return { y: easeOut(win(f, a, a + 0.04)) * 0.3, ry: Math.PI / 4, s: life(f, a, a + 0.03, a + 0.12, a + 0.15) }; } });
+    });
+    cables.forEach((c, i) => { for (let k = 0; k < 2; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.08, 8, 6), i ? '#62d35f' : 'B'), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 2.4, k / 2 + i * 0.13), p = c.getPointAt(u); return { x: p.x, y: p.y + 0.04, z: p.z }; } }); });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-0.4, y0, 2.0], topAt: [GX, y0 + 0.3, GZ + 1.2] };
   },
 };
