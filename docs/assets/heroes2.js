@@ -1493,36 +1493,38 @@ export const HEROES2 = {
     });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // Abbott: medicine you can wear. The FreeStyle Libre sensor on the arm reads glucose all day
-  // and sends it to the phone, whose line draws itself as the day goes; the lab behind runs the
-  // tests the world relies on.
+  // Abbott: medicine you can wear. A runner laps the park with a FreeStyle Libre on her arm; the
+  // sensor, shown big above her, reads her glucose every minute and sends it to the giant phone,
+  // whose line draws itself as the day goes. The lab behind makes the tests the world relies on.
   abbott: { finder: '#009cde', build: () => {
-    const R = rand(144), out = [], BLUE = '#009cde', NAVY = '#00205b';
-    out.push(ground('#8fc66f'), part(cyl(2.8, 2.8, 0.05, 48), '#e8ecef', { p: [-0.6, y0 + 0.025, 0.4] }));
-    // ---- the lab, back left
-    out.push(place(block(3.0, 2.6, 2.0, K.white, '#7fb7d8', 0.35), { p: [-3.0, y0, -3.4] }), part(box(3.04, 0.35, 2.04), NAVY, { p: [-3.0, y0 + 2.45, -3.4] }), place(pixText('ABBOTT', 0.07, K.white, 0.03), { p: [-3.0, y0 + 2.45, -2.37] }));
-    for (let k = 0; k < 5; k++) out.push(place(tubeGeo(['#e5533d', BLUE, '#f2c94c', '#2f9e6e', '#8a6cf0'][k]), { p: [-4.0 + k * 0.4, y0, -2.0], s: 1.3 }));
-    out.push(part(rbox(2.2, 0.8, 0.9, 0.04), K.white, { p: [-3.0, y0 + 0.4, -1.8] }));
-    // ---- the giant arm, resting on its stand: skin, elbow, hand, with the round sensor
-    // ---- the sensor as a monument: the round FreeStyle Libre, as big as a table, tilted to the sky
-    const AX = -0.8, AZ = 0.6, AQ = Math.PI / 4;
-    const sensor = merge(part(cyl(1.3, 1.3, 0.35, 48), K.white), part(cyl(1.1, 1.1, 0.37, 48), '#e9ecef'), part(torus(1.3, 0.06, TAU, 48), '#c9ced6', { p: [0, 0.17, 0], r: [Math.PI / 2, 0, 0] }), part(cyl(0.18, 0.18, 0.4, 20), BLUE), place(pixText('LIBRE', 0.06, '#7b828c', 0.03), { p: [0, 0.2, 0.6], r: [-Math.PI / 2, 0, 0] }));
-    out.push(part(cyl(0.6, 0.7, 0.6, 24), '#c9ced6', { p: [AX, y0 + 0.3, AZ] }), place(sensor, { p: [AX, y0 + 1.4, AZ], r: [0.7, AQ, 0, 'YXZ'] }));
-    // A wearer with the small one on her arm, checking her phone.
-    out.push(place(fan('#d6336c'), { p: [1.4, y0, 2.6], s: 1.5 }), part(cyl(0.07, 0.07, 0.03, 14), K.white, { p: [1.62, y0 + 0.95, 2.6], r: [0, 0, Math.PI / 2] }));
-    // ---- the phone, front right, with its chart frame
-    const PX = 3.0, PZ = 2.6, PQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 4, 0)), pp = (dx, dy, dz = 0.07) => { const v = new V(dx, dy, dz).applyQuaternion(PQ); return [PX + v.x, y0 + v.y, PZ + v.z]; };
-    out.push(part(rbox(1.5, 2.8, 0.14, 0.2), '#1d1f24', { p: pp(0, 1.6, 0), q: PQ }), part(rbox(1.34, 2.56, 0.02, 0.14), K.white, { p: pp(0, 1.6), q: PQ }), part(box(1.1, 0.5, 0.02), '#d9f0e0', { p: pp(0, 1.55, 0.08), q: PQ }), part(box(1.1, 0.02, 0.025), '#9aa1a9', { p: pp(0, 1.3, 0.09), q: PQ }), place(pixText('108', 0.07, NAVY, 0.03), { p: pp(-0.15, 2.4, 0.09), q: PQ }), part(rbox(0.6, 0.12, 0.6, 0.04), '#c9ced6', { p: [PX, y0 + 0.06, PZ] }));
-    out.push(trees(R, [[4.6, -4.6], [1.6, -4.6], [4.6, -1.6], [-4.6, 4.6], [-1.6, 4.6]], 0.55));
+    const R = rand(219), out = [], BLUE = '#009cde', NAVY = '#00205b';
+    out.push(ground('#8fc66f'));
+    // ---- the running track: a red oval round the park
+    const ring2 = (a1, b1, a2, b2, c, y) => { const n = hi() ? 96 : 32, tri = []; for (let i = 0; i < n; i++) { const u = (i / n) * TAU, v = ((i + 1) / n) * TAU; const A0 = [Math.cos(u) * a1, y, Math.sin(u) * b1], A1 = [Math.cos(u) * a2, y, Math.sin(u) * b2], B0 = [Math.cos(v) * a1, y, Math.sin(v) * b1], B1 = [Math.cos(v) * a2, y, Math.sin(v) * b2]; tri.push(...A0, ...B0, ...A1, ...A1, ...B0, ...B1); } const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(tri, 3)); g.computeVertexNormals(); return part(g, c); };
+    out.push(place(ring2(3.6, 3.6, 4.5, 4.5, '#c8553d', 0), { p: [0, y0 + 0.012, 0] }), place(ring2(4.03, 4.03, 4.07, 4.07, '#f4f1ea', 0), { p: [0, y0 + 0.016, 0] }));
+    // ---- the lab, back left inside the track
+    out.push(place(block(2.2, 2.2, 1.6, K.white, '#7fb7d8', 0.35), { p: [1.7, y0, -2.0] }), part(box(2.24, 0.35, 1.64), NAVY, { p: [1.7, y0 + 2.05, -2.0] }), place(pixText('ABBOTT', 0.06, K.white, 0.03), { p: [1.7, y0 + 2.05, -1.17] }));
+    for (let k = 0; k < 4; k++) out.push(place(tubeGeo(['#e5533d', BLUE, '#f2c94c', '#2f9e6e'][k]), { p: [0.9 + k * 0.4, y0, -0.9], s: 1.4 }));
+    // ---- the giant phone, centre, on its plinth
+    const Q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 4, 0)), pp = (dx, dy, dz = 0.09) => { const v = new V(dx, dy, dz).applyQuaternion(Q); return [-0.6 + v.x, y0 + dy, 0.4 + v.z]; };
+    out.push(part(cyl(0.7, 0.8, 0.3, 32), '#3a3f47', { p: [-0.6, y0 + 0.15, 0.4] }), part(rbox(1.9, 3.4, 0.16, 0.24), '#1d1f24', { p: pp(0, 2.0, 0), q: Q }), part(rbox(1.72, 3.16, 0.02, 0.16), K.white, { p: pp(0, 2.0), q: Q }));
+    out.push(place(pixText('108', 0.09, NAVY, 0.03), { p: pp(0, 3.15, 0.1), q: Q }), part(box(1.5, 0.9, 0.02), '#e6f6ec', { p: pp(0, 2.0, 0.1), q: Q }), part(box(1.5, 0.3, 0.025), '#cdeed8', { p: pp(0, 2.0, 0.11), q: Q }), part(rbox(1.2, 0.5, 0.02, 0.1), '#e9f6fc', { p: pp(0, 1.0, 0.1), q: Q }));
+    // Benches and planting.
+    [[2.6, 0.0], [-2.4, 2.0]].forEach(([x, z]) => out.push(part(rbox(1.0, 0.08, 0.35, 0.03), K.wood, { p: [x, y0 + 0.4, z], r: [0, Math.PI / 4, 0] }), part(box(0.9, 0.4, 0.06), '#3a3f47', { p: [x, y0 + 0.2, z], r: [0, Math.PI / 4, 0] })));
+    out.push(trees(R, [[-1.6, -2.6], [0.8, 2.4], [-2.8, -0.6], [2.8, 1.2], [-4.8, -4.8], [4.8, 4.8]], 0.55));
     // ---- moving parts
-    const moving = [], P = 8;
-    // Signal rings from the sensor to the phone.
-    const sense = [AX, y0 + 2.0, AZ];
-    for (let k = 0; k < 3; k++) moving.push({ geo: part(torus(0.5, 0.03, TAU, 32), BLUE, { r: [Math.PI / 2, 0, 0] }), pivot: sense, anim: (t) => { const u = cyc(t, 2, k / 3); return { s: 0.6 + u * 1.6, y: u * 0.3 }; } });
-    moving.push(rider(part(new THREE.SphereGeometry(0.1, 10, 8), BLUE), curve([sense, [(sense[0] + PX) / 2, y0 + 3.4, (sense[2] + PZ) / 2], pp(0, 2.0, 0.1)]), 2, 0, 0, 1));
-    // The glucose line drawing itself across the screen: dots appear left to right.
-    const N = 14, gl = (u) => 0.12 * Math.sin(u * 9) + 0.08 * Math.sin(u * 23 + 1);
-    for (let k = 0; k < N; k++) { const u = k / (N - 1); moving.push({ geo: part(new THREE.SphereGeometry(0.045, 8, 6), gl(u) > 0.13 ? '#f29a3a' : '#2f9e6e'), pivot: pp(-0.5 + u * 1.0, 1.55 + gl(u), 0.1), anim: (t) => { const f = cyc(t, P); return f > u * 0.85 && f < 0.97 ? { s: 1 } : { s: 0.001 }; } }); }
+    const moving = [], P = 10;
+    const runPos = (t) => { const u = cyc(t, P) * TAU; return { x: Math.cos(u) * 4.05, z: Math.sin(u) * 4.05, ry: -u - Math.PI / 2 }; };
+    moving.push(...walker(moving.length, (t) => runPos(t), { shirt: '#d6336c', pants: '#1d1f24', y: y0, carry: part(cyl(0.08, 0.08, 0.04, 16), K.white, { p: [0, 1.15, 0.3], r: [Math.PI / 2, 0, 0] }) }));
+    // The sensor shown big above her, pulsing.
+    const sens = moving.length;
+    moving.push({ geo: merge(part(cyl(0.45, 0.45, 0.14, 40), K.white, { r: [Math.PI / 2, 0, 0] }), part(cyl(0.34, 0.34, 0.15, 40), '#e9ecef', { r: [Math.PI / 2, 0, 0] }), part(cyl(0.08, 0.08, 0.16, 16), BLUE, { r: [Math.PI / 2, 0, 0] })), pivot: [0, y0 + 2.6, 0], anim: (t) => { const p = runPos(t); return { x: p.x * 0.97, z: p.z * 0.97, ry: Math.PI / 4, y: Math.sin(t * 3) * 0.06, s: 1.5 }; } });
+    moving.push({ geo: part(torus(0.6, 0.03, TAU, 32), BLUE), pivot: [0, 0, 0], parent: sens, anim: (t) => { const u = cyc(t, 1); return { s: 0.8 + u * 0.8 }; } });
+    // A reading every second, from the runner to the phone.
+    for (let k = 0; k < 3; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.12, 10, 8), BLUE), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 1, k / 3); const tr = t - u; const p = runPos(tr), a = new V(p.x, y0 + 2.6, p.z), b = new V(...pp(0, 2.0, 0.3)), m = a.clone().lerp(b, u); return { x: m.x, y: m.y + hop(u) * 1.0, z: m.z }; } });
+    // The glucose line drawing across the screen.
+    const N = 16, gl = (u) => 0.18 * Math.sin(u * 8) + 0.1 * Math.sin(u * 19 + 1);
+    for (let k = 0; k < N; k++) { const u = k / (N - 1); moving.push({ geo: part(new THREE.SphereGeometry(0.06, 8, 6), gl(u) > 0.2 ? '#f29a3a' : '#2f9e6e'), pivot: pp(-0.65 + u * 1.3, 2.0 + gl(u), 0.13), anim: (t) => { const f = cyc(t, P); return f > u * 0.9 && f < 0.98 ? { s: 1 } : { s: 0.001 }; } }); }
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // Marriott International: thirty brands, one membership. Travellers check in at the Ritz, the
