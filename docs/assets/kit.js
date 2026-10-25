@@ -30,8 +30,19 @@ function part(geo, color, { p = [0, 0, 0], r = [0, 0, 0], s = 1, q = null } = {}
   }
   g.setAttribute('color', new THREE.BufferAttribute(arr, 3));
   g.setAttribute('mask', new THREE.BufferAttribute(mask, 1));
+  // How much the wind moves each vertex (0 = rigid); see windy() and modelMaterial.
+  g.setAttribute('wind', new THREE.BufferAttribute(new Float32Array(n), 1));
   return g;
 }
+// Let a coloured geometry sway in the wind: weight(x, y, z) per vertex, about 0-1.
+function windy(g, weight) {
+  const pos = g.attributes.position, w = g.attributes.wind;
+  for (let i = 0; i < pos.count; i++) w.setX(i, typeof weight === 'function' ? weight(pos.getX(i), pos.getY(i), pos.getZ(i)) : weight);
+  w.needsUpdate = true;
+  return g;
+}
+// A repeatable random sequence from a seed, so a model is the same every time it's built.
+const rand = (seed) => { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) >>> 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
 const merge = (...parts) => mergeGeometries(parts.flat(Infinity));
 // Move an already-coloured geometry without repainting it.
 function place(geo, { p = [0, 0, 0], r = [0, 0, 0], s = 1 } = {}) {
@@ -81,6 +92,58 @@ function star(r, depth) {
   }
   return extrude(pts, depth);
 }
+// ---------- organic kit: branches, leaves, grass ----------
+// A tube along points that tapers from radius r0 to r1 (trunks, branches, roots, stems).
+function taper(pts, r0, r1, segs) {
+  const c = new THREE.CatmullRomCurve3(pts.map((p) => new V(...p))), n = segs || (hi() ? 20 : 6), rs = hi() ? 12 : 6;
+  const g = new THREE.TubeGeometry(c, n, 1, rs, false), pos = g.attributes.position, pt = new V(), v = new V();
+  for (let j = 0; j <= n; j++) {
+    c.getPointAt(j / n, pt);
+    const r = r0 + (r1 - r0) * (j / n);
+    for (let k = 0; k <= rs; k++) { const i = j * (rs + 1) + k; v.fromBufferAttribute(pos, i).sub(pt).multiplyScalar(r).add(pt); pos.setXYZ(i, v.x, v.y, v.z); }
+  }
+  g.computeVertexNormals();
+  return g;
+}
+// One leaf: a lobed blade (maple-like when lobes = 5, plain when 0), cupped a little, visible
+// from both sides, about 1 unit long along +y from its stem at the origin.
+function leafShape(lobes = 5) {
+  const sh = new THREE.Shape(), N = hi() ? 30 : 10;
+  for (let i = 0; i <= N; i++) {
+    // Pointed lobes: a triangle wave around the outline, softened a little.
+    const a = (i / N) * TAU, w = ((lobes * a) / TAU + 0.5) % 1, tri = 1 - Math.abs(w * 2 - 1), lobe = lobes ? 0.52 + 0.55 * tri ** 1.35 : 1;
+    const x = Math.sin(a) * 0.5 * lobe, y = 0.5 - Math.cos(a) * 0.5 * (lobes ? lobe * 0.9 : 1);
+    i ? sh.lineTo(x, y) : sh.moveTo(x, y);
+  }
+  const g = new THREE.ShapeGeometry(sh, 2), pos = g.attributes.position;
+  for (let i = 0; i < pos.count; i++) pos.setZ(i, pos.getX(i) ** 2 * 0.35 - pos.getY(i) * 0.08);
+  const back = g.clone(), idx = back.index.array;
+  for (let i = 0; i < idx.length; i += 3) [idx[i + 1], idx[i + 2]] = [idx[i + 2], idx[i + 1]];
+  return mergeGeometries([g.toNonIndexed(), back.toNonIndexed()].map((x) => (x.computeVertexNormals(), x)));
+}
+// One grass blade: a thin curved taper, both sides, `h` tall, leaning along +x.
+function bladeShape(h = 1, lean = 0.35) {
+  const n = hi() ? 4 : 2, pts = [];
+  for (let i = 0; i <= n; i++) { const u = i / n, w = 0.07 * (1 - u * 0.92); pts.push([-w + lean * u * u, u * h], [w + lean * u * u, u * h]); }
+  const g = new THREE.BufferGeometry(), pos = [];
+  for (let i = 0; i < n; i++) { const [a, b, c, d] = [pts[i * 2], pts[i * 2 + 1], pts[i * 2 + 2], pts[i * 2 + 3]]; pos.push(...a, 0, ...b, 0, ...d, 0, ...a, 0, ...d, 0, ...c, 0, ...a, 0, ...d, 0, ...b, 0, ...a, 0, ...c, 0, ...d, 0); }
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.computeVertexNormals();
+  return g;
+}
+const shade = (hex, k) => '#' + col.set(hex).multiplyScalar(k).getHexString();
+// A tuft of grass: `n` blades around (x, z) in a radius, colours from `greens`, swaying.
+function tuft(random, x, z, r, n, greens, h = 1) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const a = random() * TAU, d = Math.sqrt(random()) * r, hh = h * (0.6 + random() * 0.7);
+    const base = greens[Math.floor(random() * greens.length)], k = 0.85 + random() * 0.25;
+    const g = part(bladeShape(hh, 0.15 + random() * 0.35), (X, Y) => shade(base, k * (0.72 + 0.55 * Math.min(1, Y / hh))), { p: [x + Math.cos(a) * d, 0, z + Math.sin(a) * d], r: [0, random() * TAU, 0] });
+    out.push(windy(g, (X, Y) => Math.min(1, Y / hh) ** 2 * 0.6));
+  }
+  return out;
+}
+
 // A round rod from a to b, t thick.
 function beam(a, b, t, color) {
   const A = new V(...a), B = new V(...b);
@@ -123,6 +186,6 @@ const K = {
 };
 
 export const withDetail = (detail, make) => { const was = DETAIL; DETAIL = detail; try { return make(); } finally { DETAIL = was; } };
-export { THREE, V, BRAND, part, merge, place, box, cyl, lathe, tube, ball, cone, torus, extrude, prism, star, beam, ring, faceted, hi,
+export { THREE, V, BRAND, part, windy, rand, taper, leafShape, bladeShape, shade, tuft, merge, place, box, cyl, lathe, tube, ball, cone, torus, extrude, prism, star, beam, ring, faceted, hi,
   TAU, clamp01, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, legacy, K };
 
