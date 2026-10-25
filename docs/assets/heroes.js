@@ -1800,5 +1800,53 @@ export const HEROES = {
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, 14, 0.4), x = -4.8 + f * 9.6; return { x, z: -2.35, ry: 0, s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: '#5b7f95', pants: '#2b3a55', skin: '#c58c66', hair: '#1d1f24', y: y0, carry: part(rbox(0.3, 0.02, 0.22, 0.01), '#b9bec6', { p: [0.2, 1.05, 0.25] }) }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // OpenAI: the most-used AI, on some of the biggest compute ever built. Data halls hum behind,
+  // fans turning, power flowing in from the substation; the blossom turns over the plaza; a crowd
+  // sends prompts up from their phones and answers come back down.
+  openai: { finder: '#10a37f', build: () => {
+    const R = rand(89), out = [], y0 = 0.24, INK = '#111111', GRN = '#10a37f';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#d9dcd6', { p: [0, 0.12, 0] }), part(cyl(2.6, 2.6, 0.03, 64), '#eef0ec', { p: [0, y0 + 0.015, 1.2] }));
+    // ---- the data halls, each with rooftop fan housings
+    const halls = [-3.2, 0, 3.2];
+    halls.forEach((x) => {
+      out.push(part(rbox(2.7, 1.1, 1.7, 0.05), '#f4f5f6', { p: [x, y0 + 0.55, -3.6] }), part(box(2.5, 0.06, 0.02), GRN, { p: [x, y0 + 0.92, -3.6 + 0.86] }));
+      if (hi()) for (let i = 0; i < 10; i++) out.push(part(box(0.12, 0.6, 0.02), '#c9ced6', { p: [x - 1.1 + i * 0.245, y0 + 0.45, -3.6 + 0.86] }));
+      for (let i = 0; i < 3; i++) out.push(part(cyl(0.3, 0.3, 0.16, 24), '#d6d9dd', { p: [x - 0.8 + i * 0.8, y0 + 1.18, -3.6] }));
+    });
+    // The substation: transformers and a line of pylons bringing power in.
+    out.push(part(rbox(1.6, 0.06, 2.2, 0.03), '#9aa1a9', { p: [4.2, y0 + 0.03, -0.6] }));
+    for (const z of [-1.2, -0.3, 0.6]) out.push(part(rbox(0.6, 0.6, 0.5, 0.04), '#7b828c', { p: [4.1, y0 + 0.34, z] }), part(cyl(0.05, 0.05, 0.4, 8), '#c9ced6', { p: [4.25, y0 + 0.84, z] }));
+    const pylon = (x, z) => [beam([x - 0.3, y0, z - 0.3], [x, y0 + 2.6, z], 0.03, '#7b828c'), beam([x + 0.3, y0, z - 0.3], [x, y0 + 2.6, z], 0.03, '#7b828c'), beam([x - 0.3, y0, z + 0.3], [x, y0 + 2.6, z], 0.03, '#7b828c'), beam([x + 0.3, y0, z + 0.3], [x, y0 + 2.6, z], 0.03, '#7b828c'), part(box(0.05, 0.05, 0.9), '#7b828c', { p: [x, y0 + 2.3, z] })];
+    out.push(pylon(4.6, -2.6), pylon(4.6, -4.7));
+    for (const dz of [-0.4, 0.4]) out.push(part(tube([[4.6, y0 + 2.3, -4.7 + dz], [4.6, y0 + 2.0, -3.65 + dz], [4.6, y0 + 2.3, -2.6 + dz]], 0.012), '#2b2f36'), part(tube([[4.6, y0 + 2.3, -2.6 + dz], [4.5, y0 + 1.6, -1.6 + dz * 0.5], [4.25, y0 + 1.04, -0.75 + dz]], 0.012), '#2b2f36'));
+    // Cables from the halls to the plinth.
+    const feeds = halls.map((x) => curve([[x, y0 + 0.05, -2.7], [x * 0.6, y0 + 0.05, -1.2], [0, y0 + 0.05, 0.6]]));
+    feeds.forEach((c) => out.push(part(tubeOn(c, 0.05, hi() ? 40 : 10), '#3a3f47')));
+    // The plinth under the blossom.
+    out.push(part(lathe([[0, 0], [1.0, 0], [0.95, 0.12], [0.5, 0.2], [0.42, 0.9], [0, 0.9]], 48), '#f4f5f6', { p: [0, y0 + 0.03, 1.2] }), part(torus(0.47, 0.03, TAU, 48), GRN, { p: [0, y0 + 0.93, 1.2], r: [Math.PI / 2, 0, 0] }));
+    // ---- the crowd with their phones
+    const crowd = [[-2.6, 3.6, '#5b7f95'], [-1.4, 4.2, '#c97d5d'], [-0.1, 4.4, '#7a8a6a'], [1.3, 4.1, '#8a6cf0'], [2.5, 3.5, '#d6336c'], [-3.4, 2.4, '#f29a3a'], [3.3, 2.2, '#3d7be0']];
+    const person = (x, z, shirt, i) => { const skin = ['#e9b98f', '#c58c66', '#8d5a3b'][i % 3], hair = ['#3a2a20', '#1d1f24', '#d9b26b', '#a0522d'][i % 4], a = Math.atan2(1.2 - z, -x); const c = Math.cos(a), s = Math.sin(a);
+      return [part(capsule(0.17, 0.42), shirt, { p: [x, y0 + 1.0, z] }), part(ball(0.15), skin, { p: [x, y0 + 1.5, z] }), part(ball(0.16), hair, { p: [x - c * 0.02, y0 + 1.55, z + s * 0.02], s: [1, 0.75, 1] }), part(capsule(0.075, 0.5), '#2b3a55', { p: [x - s * 0.08, y0 + 0.4, z - c * 0.08] }), part(capsule(0.075, 0.5), '#2b3a55', { p: [x + s * 0.08, y0 + 0.4, z + c * 0.08] }),
+        part(rbox(0.1, 0.18, 0.02, 0.02), INK, { p: [x + c * 0.28, y0 + 1.35, z - s * 0.28], r: [0, a + Math.PI / 2, -0.4] }), beam([x, y0 + 1.25, z], [x + c * 0.26, y0 + 1.3, z - s * 0.26], 0.05, shirt)]; };
+    crowd.forEach(([x, z, c], i) => out.push(person(x, z, c, i)));
+    [[-4.6, 4.6], [-4.6, 0.6], [4.6, 4.0], [-4.6, -1.6], [1.6, -1.8], [-1.6, -1.8]].slice(0, 4).forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.75 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // The blossom: six rounded links woven round a hexagon, turning slowly.
+    const link = merge(part(new THREE.TorusGeometry(0.4, 0.075, hi() ? 10 : 5, hi() ? 48 : 16), INK, { s: [1.45, 1, 1] }));
+    const blossom = merge([0, 1, 2, 3, 4, 5].map((k) => { const a = (k * Math.PI) / 3; return place(link, { p: [Math.cos(a + Math.PI / 2) * 0.5, Math.sin(a + Math.PI / 2) * 0.5, (k % 2 ? 0.06 : -0.06)], r: [0, 0, a] }); }));
+    moving.push({ geo: blossom, pivot: [0, y0 + 2.6, 1.2], anim: (t) => ({ ry: Math.PI / 4 + Math.sin(t * 0.6) * 0.6, rz: t * 0.3, s: 1.25 }) });
+    // Fans spinning on the halls.
+    halls.forEach((x) => { for (let i = 0; i < 3; i++) moving.push({ geo: merge(ring(5, (a) => part(box(0.24, 0.02, 0.08), '#5b616b', { p: [Math.cos(a) * 0.12, 0, Math.sin(a) * 0.12], r: [0.4, -a, 0] })), part(cyl(0.05, 0.05, 0.04, 10), '#3a3f47')), pivot: [x - 0.8 + i * 0.8, y0 + 1.28, -3.6], anim: (t) => ({ ry: t * (7 + i) }) }); });
+    // Power and compute flowing into the blossom.
+    feeds.forEach((c, i) => { for (let k = 0; k < 3; k++) moving.push({ geo: part(rbox(0.14, 0.08, 0.08, 0.03), GRN), pivot: [0, 0.03, 0], anim: (t) => { const u = cyc(t, 2.4, k / 3 + i * 0.1), a = along(c, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry }; } }); });
+    // Prompts rising from the phones, answers coming back.
+    const top = [0, y0 + 2.6, 1.2];
+    crowd.forEach(([x, z], i) => { const a = Math.atan2(1.2 - z, -x), A = [x + Math.cos(a) * 0.28, y0 + 1.5, z - Math.sin(a) * 0.28], c = curve([A, [(A[0] + top[0]) / 2, y0 + 3.4, (A[2] + top[2]) / 2], top]);
+      moving.push({ geo: merge(part(rbox(0.5, 0.32, 0.05, 0.1), '#ffffff'), part(box(0.3, 0.04, 0.01), '#9aa1a9', { p: [0, 0.02, 0.025] })), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 4, i * 0.14); if (f > 0.5) return { s: 0.001 }; const p = c.getPointAt(f * 2); return { x: p.x, y: p.y, z: p.z, ry: Math.PI / 4, s: Math.min(1, f / 0.05, (0.5 - f) / 0.06) + 0.001 }; } });
+      moving.push({ geo: merge(part(rbox(0.55, 0.34, 0.05, 0.1), GRN), [-0.12, 0, 0.12].map((dx) => part(ball(0.04), '#ffffff', { p: [dx, 0, 0.03] }))), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, 4, i * 0.14); if (f < 0.5) return { s: 0.001 }; const p = c.getPointAt(1 - (f - 0.5) * 2); return { x: p.x, y: p.y, z: p.z, ry: Math.PI / 4, s: Math.min(1, (f - 0.5) / 0.05, (1 - f) / 0.06) + 0.001 }; } }); });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
