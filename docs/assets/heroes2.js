@@ -7,7 +7,8 @@ import { y0, slab, coin, home, house2, truss, frame, tyre, bin, gear, reach2, st
 
 // ---------- small helpers for this batch ----------
 const ground = (c) => part(rbox(10.4, 0.24, 10.4, 0.08), c, { p: [0, 0.12, 0] });
-const trees = (R, pts, s0 = 0.6) => pts.map(([x, z, s]) => miniTree(R, x, y0, z, s ?? s0 + R() * 0.2));
+// (kept 0.75 in from the edge so their leaves stay on the board)
+const trees = (R, pts, s0 = 0.6) => pts.map(([x, z, s]) => miniTree(R, Math.max(-4.45, Math.min(4.45, x)), y0, Math.max(-4.45, Math.min(4.45, z)), s ?? s0 + R() * 0.2));
 // A blocky pixel font (5 rows) for signs and labels: pixText(str, px, colour, depth) is centred on
 // the origin in the xy plane, facing +z.
 const FONT = {
@@ -71,7 +72,7 @@ export const HEROES2 = {
       [[-0.32, -0.28, 1.7], [0.3, -0.25, 1.15], [-0.25, 0.33, 0.8], [0.33, 0.33, 1.3]].forEach(([dx, dz, h], k) => out.push(place(block(0.48, h, 0.48, k ? '#eef1f4' : '#dfe5ec', k % 2 ? '#7d9cbc' : '#5f80a3', 0.26), { p: [cx + dx, y0 + 0.12, cz + dz] })));
       out.push(part(box(0.5, 0.06, 0.5), c, { p: [cx - 0.32, y0 + 1.85, cz - 0.28] }), part(cyl(0.02, 0.02, 0.6, 8), '#7b828c', { p: [cx - 0.32, y0 + 2.15, cz - 0.28] }), part(box(0.34, 0.22, 0.02), c, { p: [cx - 0.15, y0 + 2.33, cz - 0.28] }));
     });
-    trees(R, [[-1.6, -4.5], [1.4, -4.6], [-4.6, -1.4], [4.6, -2.0], [0.9, 4.6], [4.6, 2.4], [-2.4, 2.3]]);
+    out.push(trees(R, [[-1.6, -4.5], [1.4, -4.6], [-4.6, -1.4], [4.6, -2.0], [0.9, 4.6], [4.6, 2.4], [-2.4, 2.3]]));
     // ---- moving parts
     const moving = [], P = 6;
     // The globe: blue oceans, green continents, white caps, turning.
@@ -113,7 +114,7 @@ export const HEROES2 = {
     // ---- the families' homes round the front and right, with their paths
     const homes = [[4.0, -1.2, Math.PI / 2], [4.1, 1.9, Math.PI / 2], [2.4, 4.1, 0], [-0.9, 4.1, 0], [-3.9, 3.4, 0]];
     homes.forEach(([x, z, ry], i) => out.push(place(home(['#fbf3e3', '#f1e2c6', '#e8eef4', '#f6e7e1', '#eef3e6'][i], ['#8a5a36', '#5b6b7d', '#a35a3c', '#3f6f8f', '#6f4a2c'][i], 1.4, 1.2, 0.95), { p: [x, y0, z], r: [0, ry, 0] })));
-    trees(R, [[-1.6, -4.6], [1.8, -4.6], [4.6, -4.4], [-4.6, -0.5], [-2.4, 1.6], [4.7, 4.6]]);
+    out.push(trees(R, [[-1.6, -4.6], [1.8, -4.6], [4.6, -4.4], [-4.6, -0.5], [-2.4, 1.6], [4.7, 4.6]]));
     // ---- moving parts
     const moving = [], P = 12;
     // The columns compound: each grows through the cycle and settles back for the next year.
@@ -151,7 +152,7 @@ export const HEROES2 = {
     [[-3.6, 4.0, -3.6, 0.75], [-2.8, 3.8, -3.9, 0.6], [-4.2, 3.7, -2.8, 0.6], [-3.1, 4.4, -3.0, 0.55]].forEach(([x, y, z, r]) => out.push(part(new THREE.SphereGeometry(r, hi() ? 20 : 8, hi() ? 14 : 6), '#f4f7fb', { p: [x, y0 + y - 0.5, z] })));
     // ---- the centre: a plinth for the card
     out.push(part(cyl(0.9, 1.0, 0.3, 32), '#2b3440', { p: [CX, y0 + 0.15, CZ] }), part(cyl(0.18, 0.18, 0.6, 16), '#c9ced6', { p: [CX, y0 + 0.6, CZ] }));
-    trees(R, [[4.6, 4.6], [-4.6, 4.6], [4.6, -4.6], [0.6, -4.6]]);
+    out.push(trees(R, [[4.6, 4.6], [-4.6, 4.6], [4.6, -4.6], [0.6, -4.6]]));
     // ---- moving parts
     const moving = [];
     // The card, turning to show its face.
@@ -192,7 +193,7 @@ export const HEROES2 = {
     // ---- the family's plot across the road: the frame going up
     const HX = 1.6, HZ = 2.6;
     out.push(part(box(3.6, 0.03, 2.9), '#7fb35a', { p: [HX, y0 + 0.015, HZ] }), part(box(0.8, 0.03, 1.2), '#d8d4ca', { p: [HX - 0.1, y0 + 0.03, HZ + 1.5] }));
-    trees(R, [[-4.6, 1.4], [-4.4, 4.4], [4.7, 0.9], [4.6, 4.6], [-1.6, 3.2]]);
+    out.push(trees(R, [[-4.6, 1.4], [-4.4, 4.4], [4.7, 0.9], [4.6, 4.6], [-1.6, 3.2]]));
     out.push(place(home('#eef3e6', '#5b6b7d', 1.5, 1.3, 1.0), { p: [-3.0, y0, 2.8] }));
     // ---- moving parts
     const moving = [], P = 10;
@@ -225,7 +226,7 @@ export const HEROES2 = {
     out.push(part(rbox(1.8, 0.5, 1.4, 0.05), BLUE, { p: [0, y0 + 2.75, LZ] }), place(pixText("MOODY'S", 0.05, K.white, 0.02), { p: [0, y0 + 2.75, LZ + 0.71] }));
     // ---- the issuers, behind the start of the line: a city hall, a company and a country's flag
     out.push(part(rbox(1.6, 1.0, 1.1, 0.04), '#efe9dc', { p: [1.5, y0 + 0.5, -2.6] }), part(cyl(0.3, 0.35, 0.3, 20), '#efe9dc', { p: [1.5, y0 + 1.15, -2.6] }), part(new THREE.SphereGeometry(0.34, 20, 10, 0, TAU, 0, Math.PI / 2), '#9fb7c9', { p: [1.5, y0 + 1.3, -2.6] }), [0, 1, 2, 3].map((i) => part(cyl(0.05, 0.05, 0.8, 8), K.white, { p: [1.05 + i * 0.3, y0 + 0.4, -1.98] })));
-    out.push(place(block(1.3, 2.2, 1.1, '#e3e6ea', '#5b7fa6', 0.3), { p: [3.5, y0, -2.3] }), part(box(1.32, 0.3, 1.12), '#e5533d', { p: [3.5, y0 + 2.05, -2.3] }), part(cyl(0.04, 0.04, 2.6, 8), '#c9ced6', { p: [3.9, y0 + 1.3, -4.2] }), part(box(0.8, 0.5, 0.02), (x) => (x < 4.26 ? '#2f9e6e' : x < 4.53 ? K.white : '#e5533d'), { p: [4.4, y0 + 2.3, -4.2] }));
+    out.push(place(block(1.3, 2.2, 1.1, '#e3e6ea', '#5b7fa6', 0.3), { p: [3.5, y0, -2.3] }), part(box(1.32, 0.3, 1.12), '#e5533d', { p: [3.5, y0 + 2.05, -2.3] }), part(cyl(0.04, 0.04, 2.6, 8), '#c9ced6', { p: [3.9, y0 + 1.3, -4.2] }), ['#2f9e6e', K.white, '#e5533d'].map((c, i) => part(box(0.27, 0.5, 0.02), c, { p: [4.13 + i * 0.27, y0 + 2.3, -4.2] })));
     out.push(part(rbox(1.2, 0.08, 0.35, 0.03), K.wood, { p: [2.6, y0 + 0.4, 3.0] }), [-0.5, 0.5].map((dx) => part(box(0.06, 0.4, 0.3), K.dark, { p: [2.6 + dx, y0 + 0.2, 3.0] })));
     // ---- the rating scale, back left: a board of grades with a pointer
     const SX = -3.4, SZ = -3.3, grades = [['AAA', '#2f9e6e'], ['AA', '#5fae5b'], ['A', '#9bc53d'], ['BAA', '#f2c94c'], ['BA', '#f29a3a'], ['B', '#e5533d']];
@@ -234,7 +235,7 @@ export const HEROES2 = {
     // ---- the investors, front left
     [[-3.4, 2.2, '#3d7be0'], [-2.7, 2.5, '#e5533d'], [-3.9, 2.9, '#2f9e6e'], [-3.1, 3.2, '#8a6cf0'], [-2.3, 3.1, '#f29a3a'], [-1.6, 2.4, '#d6336c'], [-2.0, 3.8, '#3fb8a8']].forEach(([x, z, c]) => out.push(place(fan(c), { p: [x, y0, z], s: 1.5 })));
     out.push(part(rbox(1.5, 1.1, 1.2, 0.05), '#c9ced6', { p: [-4.3, y0 + 0.55, 1.9] }), part(cyl(0.38, 0.38, 0.08, 24), '#9aa1a9', { p: [-4.3, y0 + 0.6, 2.52], r: [Math.PI / 2, 0, 0] }), part(torus(0.38, 0.05, TAU, 24), K.gold, { p: [-4.3, y0 + 0.6, 2.56] }));
-    trees(R, [[4.7, 2.2], [-0.6, -4.6], [0.6, 3.8], [4.4, 4.4], [-4.6, 4.6], [1.8, 4.6], [-1.0, -2.4]]);
+    out.push(trees(R, [[4.7, 2.2], [-0.6, -4.6], [0.6, 3.8], [4.4, 4.4], [-4.6, 4.6], [1.8, 4.6], [-1.0, -2.4]]));
     // ---- moving parts
     const moving = [], T = 2.4;
     // The press ram stamps once every step, while the line is still.
