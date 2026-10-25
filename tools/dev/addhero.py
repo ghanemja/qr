@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: MIT
-# Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
+# Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 # usage: addhero.py <heroId> "<label>" "<Company key>" ["<Company key>" ...]
 import json, sys
 import os

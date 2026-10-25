@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
+// Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 const {chromium}=require('playwright');(async()=>{const b=await chromium.launch({args:['--use-gl=swiftshader','--enable-unsafe-swiftshader']});
 const S=(process.env.DEV_OUT||'/tmp/qr-dev')+'/';const [slug,out,w,h]=process.argv.slice(2);
 const p=await b.newPage({viewport:{width:+w||1300,height:+h||1100},deviceScaleFactor:1});const errs=[];p.on('pageerror',e=>errs.push(e.message));

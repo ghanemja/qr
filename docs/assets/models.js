@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
+// Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 // Low-poly signature models: several shapes per kind of company (about 10 units tall, built at
 // the origin), plus optional moving parts (wings that flap, blades that spin, phones that fall).
 // Geometry carries vertex colours; parts painted 'A'/'B' (and darker 'Ad'/'Bd') take the

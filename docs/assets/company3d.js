@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
+// Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 // Company page: mounts the company's QR world and wires the page controls to it.
 import { webglAvailable } from './qrworld.js';
 import { createQRWorld } from './qrsculpture.js';

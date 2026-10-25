@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
+// Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 // 3D asset library: browse every model on the site and download it as a GLB (via three's
 // GLTFExporter), with the project credit and the MIT licence embedded in each file. A model can
 // also be downloaded as a .zip holding the GLB, LICENSE.txt and a short credit note.

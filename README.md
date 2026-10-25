@@ -27,4 +27,4 @@ Each company is drawn as one 3D model of what it does, and no two companies look
 
 ## Licence
 
-MIT, © 2026 ghanemja. See [`LICENSE`](LICENSE); the built site serves it at `docs/LICENSE.txt`. That covers the code and the 3D models, including the GLB files from the asset library: keep the copyright notice and licence with them when you share or reuse them. Vendored third-party files (three.js and its add-ons, qrcode-generator) keep their own licences, and company names belong to their owners.
+MIT, © 2026 Janelle Ghanem. See [`LICENSE`](LICENSE); the built site serves it at `docs/LICENSE.txt`. That covers the code and the 3D models, including the GLB files from the asset library: keep the copyright notice and licence with them when you share or reuse them. Vendored third-party files (three.js and its add-ons, qrcode-generator) keep their own licences, and company names belong to their owners.

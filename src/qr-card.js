@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
+// Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 // QR drawing shared by the map and the company pages (needs qrcode-generator).
 window.QRCard = (() => {
   const initials = (name) => name.replace(/\(.*?\)/g, '').split(/[\s&.-]+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();

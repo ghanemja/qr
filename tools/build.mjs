@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
+// Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 // Builds the static site into docs/ from data/*.json.
 //   npm install && npm run build
 // SITE_URL (optional) sets canonical/OG URLs, e.g. SITE_URL=https://example.com/atlas/
@@ -21,7 +21,7 @@ const LIST_YEAR = 2026;
 // The project's licence (LICENSE, MIT): credited in the footer and the About page, and embedded
 // in every model the 3D asset library exports.
 const LICENSE_TEXT = readFileSync(join(ROOT, 'LICENSE'), 'utf8');
-const AUTHOR = 'ghanemja';
+const AUTHOR = 'Janelle Ghanem';
 const REPO_URL = 'https://github.com/ghanemja/qr';
 
 const readJSON = (p) => JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
@@ -742,7 +742,7 @@ ${topbar(0, siteSearch('search'))}
   <h2>Corrections</h2>
   <p>Edit <code>data/fortune500.json</code> or <code>data/startups.json</code> and run <code>npm run build</code>.</p>
   <h2>Licence and credit</h2>
-  <p>QR Compass, including its code and 3D models, is made by <a href="https://github.com/${AUTHOR}">${AUTHOR}</a> and released under the <a href="LICENSE.txt">MIT License</a> (© ${LIST_YEAR} ${AUTHOR}): you may use, change and share it, as long as the copyright notice and licence travel with it. The source is on <a href="${REPO_URL}">GitHub</a>. Company names belong to their owners; the data sources above keep their own terms.</p>
+  <p>QR Compass, including its code and 3D models, is made by <a href="https://github.com/ghanemja">${AUTHOR}</a> and released under the <a href="LICENSE.txt">MIT License</a> (© ${LIST_YEAR} ${AUTHOR}): you may use, change and share it, as long as the copyright notice and licence travel with it. The source is on <a href="${REPO_URL}">GitHub</a>. Company names belong to their owners; the data sources above keep their own terms.</p>
 </main>
 ${footer(0)}
 <script src="assets/sitesearch.js"></script>

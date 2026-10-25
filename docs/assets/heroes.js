@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
+// Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 // Signature models for the biggest names: each one shows the thing that put the company where it
 // is (its moat), not just what it sells. Built with the same kit as the kinds of company, about
 // 10 units tall at the origin; each is its own kind in models.js, with a finder colour and label.
