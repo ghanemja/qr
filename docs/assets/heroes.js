@@ -1,7 +1,7 @@
 // Signature models for the biggest names: each one shows the thing that put the company where it
 // is (its moat), not just what it sells. Built with the same kit as the kinds of company, about
 // 10 units tall at the origin; each is its own kind in models.js, with a finder colour and label.
-import { THREE, V, part, merge, place, box, cyl, lathe, tube, ball, cone, torus, extrude, beam, ring, hi, TAU, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, K } from './kit.js';
+import { THREE, V, part, windy, rand, taper, leafShape, shade, tuft, merge, place, box, cyl, lathe, tube, ball, cone, torus, extrude, beam, ring, hi, TAU, cyc, win, easeIn, easeOut, easeIO, back, bump, hop, life, K } from './kit.js';
 import { RoundedBoxGeometry } from './RoundedBoxGeometry.js';
 
 // A box with a chosen corner radius (the kit's boxes pick a modest one themselves).
@@ -16,41 +16,120 @@ const flameGeo = () => merge(part(lathe([[0, 0], [0.55, 0.25], [0.6, 0.7], [0.3,
 const puff = (r = 0.8) => part(ball(r), '#f1eee8');
 
 export const HEROES = {
-  // Amazon: the logistics machine. Parcels ride a smile-shaped conveyor out of the fulfilment
-  // centre; a delivery drone collects one at the arrow and flies it away.
+  // Amazon: the logistics machine. A fulfilment centre with a trailer at its dock sends parcels
+  // down a smile-shaped conveyor; a delivery drone collects one at the arrow and flies it off,
+  // and an electric delivery van heads out along the lot.
   amazon: { finder: '#ff9900', build: () => {
-    const smile = curve([[-4.2, 1.5, 1.2], [-3, 0.75, 2.6], [-0.6, 0.45, 3.4], [1.8, 0.7, 3.1], [3.6, 1.5, 2]]);
-    const legs = [0.1, 0.35, 0.6, 0.85].map((u) => smile.getPointAt(u));
-    const drone = merge(part(ball(0.55), '#2f3a46', { s: [1.3, 0.6, 1.3] }), part(ball(0.3), '#7cc0ff', { p: [0.5, 0.05, 0], s: [1, 0.6, 1] }), ring(4, (a) => beam([0, 0, 0], [Math.cos(a + 0.785) * 1.3, 0.1, Math.sin(a + 0.785) * 1.3], 0.14, '#2f3a46')), ring(4, (a) => part(cyl(0.12, 0.12, 0.3, 10), K.ink, { p: [Math.cos(a + 0.785) * 1.3, 0.25, Math.sin(a + 0.785) * 1.3] })));
-    const rotor = merge(part(box(1.1, 0.03, 0.1), '#dfe5ec'), part(box(0.1, 0.03, 1.1), '#dfe5ec'));
-    const pick = [3.6, 2.2, 2], loop = (th) => [Math.cos(th) * 4.4, 8 + Math.sin(th * 2) * 0.4, Math.sin(th) * 3.4];
-    const dronePath = (t) => {
-      const f = cyc(t, 9), top = [pick[0], 8, pick[2]], start = loop(Math.atan2(pick[2] / 3.4, pick[0] / 4.4));
-      const mix = (a, b, k) => a.map((v, i) => v + (b[i] - v) * k);
-      if (f < 0.14) return mix(start, top, easeIO(f / 0.14));
-      if (f < 0.28) return mix(top, pick, easeIO(win(f, 0.14, 0.28)));
-      if (f < 0.36) return pick;
-      if (f < 0.5) return mix(pick, top, easeIO(win(f, 0.36, 0.5)));
-      if (f < 0.64) return mix(top, start, easeIO(win(f, 0.5, 0.64)));
-      const th0 = Math.atan2(pick[2] / 3.4, pick[0] / 4.4);
-      return loop(th0 + TAU * easeIO(win(f, 0.64, 1)));
+    const R = rand(5), ORANGE = '#ff9900', NAVY = '#232f3e', PRIME = '#1a98ff', y0 = 0.24;
+    const out = [];
+    // ---- the lot: asphalt, painted bays, kerbs, planted strips with trees, lamp posts
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#5b616b', { p: [0, 0.12, 0] }));
+    for (let i = 0; i < 6; i++) out.push(part(box(0.06, 0.012, 1.2), '#e9e6df', { p: [-3.6 + i * 0.9, y0 + 0.006, 4.0] }));
+    out.push(part(box(9.6, 0.012, 0.06), '#f2c94c', { p: [0, y0 + 0.006, 3.3] }), part(box(0.06, 0.012, 7.2), '#f2c94c', { p: [3.15, y0 + 0.006, -1] }));
+    const strip = (x0, z0, w, d) => { out.push(part(rbox(w, 0.18, d, 0.06), '#c9c4b8', { p: [x0, y0 + 0.09, z0] }), part(box(w - 0.2, 0.1, d - 0.2), '#6aa84f', { p: [x0, y0 + 0.16, z0] })); };
+    strip(-0.5, -4.85, 9.4, 0.7); strip(-4.85, 0.3, 0.7, 9.4);
+    const miniTree = (x, z, s) => {
+      const leaf = leafShape(0), g = [part(taper([[x, y0 + 0.2, z], [x + 0.05 * s, y0 + 0.9 * s, z], [x, y0 + 1.6 * s, z + 0.04]], 0.1 * s, 0.05 * s, 8), '#7a5233')];
+      for (let c = 0; c < 4; c++) {
+        const cx = x + (R() - 0.5) * 0.7 * s, cy = y0 + (1.5 + R() * 0.7) * s, cz = z + (R() - 0.5) * 0.7 * s;
+        for (let i = 0, n = hi() ? 26 : 8; i < n; i++) {
+          const d = new V(R() * 2 - 1, R() * 2 - 0.8, R() * 2 - 1).normalize(), at = new V(cx, cy, cz).addScaledVector(d, 0.45 * s * (0.5 + 0.5 * R()));
+          const k = 0.72 + 0.35 * (d.y * 0.5 + 0.5);
+          g.push(windy(part(leaf, shade(['#6fbf4c', '#86cc5f', '#5fae45', '#9bd85f'][Math.floor(R() * 4)], k), { p: at.toArray(), q: new THREE.Quaternion().setFromUnitVectors(new V(0, 0, 1), d), s: 0.32 * s * (0.8 + R() * 0.4) }), 0.5));
+        }
+      }
+      return g;
     };
+    [[-3.6, -4.85, 1], [-1.2, -4.85, 0.85], [1.6, -4.85, 1.05], [-4.85, -2.2, 0.9], [-4.85, 1.2, 1], [-4.85, 3.9, 0.85]].forEach(([x, z, s]) => out.push(miniTree(x, z, s)));
+    [[3.9, -4.85], [-4.85, -0.5], [0.2, -4.85], [-4.85, 2.6]].forEach(([x, z]) => out.push(tuft(R, x, z, 0.25, hi() ? 14 : 5, ['#6cc23a', '#7fcf3f', '#94d84f'], 0.45).map((g) => g.translate(0, y0 + 0.2, 0))));
+    const lamp = (x, z, a) => [part(cyl(0.06, 0.08, 3.4, 12), '#5b616b', { p: [x, y0 + 1.7, z] }), beam([x, y0 + 3.35, z], [x + Math.cos(a) * 0.7, y0 + 3.45, z + Math.sin(a) * 0.7], 0.06, '#5b616b'), part(rbox(0.45, 0.12, 0.22, 0.05), '#3a3f47', { p: [x + Math.cos(a) * 0.75, y0 + 3.42, z + Math.sin(a) * 0.75], r: [0, -a, 0] }), part(box(0.38, 0.02, 0.16), '#fff6d8', { p: [x + Math.cos(a) * 0.75, y0 + 3.35, z + Math.sin(a) * 0.75], r: [0, -a, 0] })];
+    out.push(lamp(4.7, 1.2, Math.PI), lamp(-3.9, 4.7, -Math.PI / 2));
+
+    // ---- the fulfilment centre: ribbed cladding, dark parapet with the smile, roof plant, docks
+    const B = { x0: -4.2, x1: 1.4, z0: -4.1, z1: 0.2, h: 3.4 }, cx = (B.x0 + B.x1) / 2, cz = (B.z0 + B.z1) / 2;
+    out.push(part(box(B.x1 - B.x0, B.h, B.z1 - B.z0), '#ebe8e1', { p: [cx, y0 + B.h / 2, cz] }));
+    for (let x = B.x0 + 0.2; x < B.x1 - 0.1; x += 0.24) out.push(part(box(0.07, B.h - 0.7, 0.05), '#d8d4ca', { p: [x, y0 + (B.h - 0.7) / 2 + 0.1, B.z1 + 0.025] }));
+    for (let z = B.z0 + 0.2; z < B.z1 - 0.1; z += 0.24) out.push(part(box(0.05, B.h - 0.7, 0.07), '#d8d4ca', { p: [B.x1 + 0.025, y0 + (B.h - 0.7) / 2 + 0.1, z] }));
+    out.push(part(box(B.x1 - B.x0 + 0.12, 0.62, B.z1 - B.z0 + 0.12), NAVY, { p: [cx, y0 + B.h - 0.2, cz] }), part(box(B.x1 - B.x0 + 0.2, 0.08, B.z1 - B.z0 + 0.2), '#3a4656', { p: [cx, y0 + B.h + 0.13, cz] }));
+    // The smile on the parapet.
+    const smileLogo = curve([[-2.9, y0 + 3.08, B.z1 + 0.09], [-2.2, y0 + 2.92, B.z1 + 0.09], [-1.3, y0 + 2.95, B.z1 + 0.09], [-0.75, y0 + 3.12, B.z1 + 0.09]]);
+    out.push(part(tubeOn(smileLogo, 0.055, 32), ORANGE), part(cone(0.1, 0.22, 12), ORANGE, { p: [-0.68, y0 + 3.16, B.z1 + 0.09], r: [0, 0, -1.1] }));
+    out.push(part(box(B.x1 - B.x0 - 0.2, 0.06, B.z1 - B.z0 - 0.2), '#c3c7cc', { p: [cx, y0 + B.h + 0.03, cz] }));
+    for (let i = 0; i < 3; i++) for (let j = 0; j < 2; j++) out.push(part(box(0.5, 0.05, 1.3), '#9fc6e0', { p: [-3.5 + i * 1.5, y0 + B.h + 0.08, -3.2 + j * 1.9] }), part(box(0.58, 0.07, 1.38), '#e9e6df', { p: [-3.5 + i * 1.5, y0 + B.h + 0.06, -3.2 + j * 1.9] }));
+    [[0.3, -3.3], [0.3, -1.5], [-3.6, -0.7]].forEach(([x, z]) => out.push(part(rbox(0.9, 0.48, 0.75, 0.08), '#a7adb4', { p: [x, y0 + B.h + 0.3, z] }), part(cyl(0.26, 0.26, 0.06, 20), '#3a3f47', { p: [x, y0 + B.h + 0.56, z] }), part(torus(0.26, 0.03, TAU, 24), '#8d939a', { p: [x, y0 + B.h + 0.6, z], r: [Math.PI / 2, 0, 0] })));
+    // Entrance on the front.
+    out.push(part(box(1, 1.5, 0.06), '#2c3e55', { p: [-3.4, y0 + 0.75, B.z1 + 0.04] }), part(box(0.03, 1.5, 0.08), '#9aa4b1', { p: [-3.4, y0 + 0.75, B.z1 + 0.05] }), part(rbox(1.5, 0.1, 0.7, 0.04), NAVY, { p: [-3.4, y0 + 1.7, B.z1 + 0.35] }));
+    // Loading docks on the side: roll-up doors, bumpers, a canopy, and a trailer backed in.
+    const docks = [-3.3, -2.0, -0.7];
+    docks.forEach((z) => {
+      out.push(part(box(0.06, 1.9, 1.05), '#3a3f47', { p: [B.x1 + 0.06, y0 + 0.95, z] }));
+      for (let k = 0; k < 9; k++) out.push(part(box(0.05, 0.17, 0.92), k % 2 ? '#c6cbd1' : '#b3b9c0', { p: [B.x1 + 0.1, y0 + 0.12 + k * 0.19, z] }));
+      out.push(part(rbox(0.16, 0.3, 0.14, 0.04), '#1d1f24', { p: [B.x1 + 0.14, y0 + 0.4, z - 0.42] }), part(rbox(0.16, 0.3, 0.14, 0.04), '#1d1f24', { p: [B.x1 + 0.14, y0 + 0.4, z + 0.42] }), part(box(0.5, 0.02, 1.1), '#f2c94c', { p: [B.x1 + 0.4, y0 + 0.01, z] }));
+    });
+    out.push(part(rbox(0.9, 0.1, 4.0, 0.04), NAVY, { p: [B.x1 + 0.45, y0 + 2.2, -2] }), [-3.9, -0.1].map((z) => beam([B.x1 + 0.85, y0 + 2.2, z], [B.x1 + 0.05, y0 + 2.9, z], 0.05, '#3a3f47')));
+    const trailer = merge(part(rbox(3.2, 1.75, 1.1, 0.08), '#f4f5f6', { p: [0, 1.15, 0] }), part(box(3.1, 0.3, 0.02), PRIME, { p: [0, 0.75, 0.56] }), part(box(3.1, 0.05, 0.02), PRIME, { p: [0, 1.95, 0.56] }),
+      part(tubeOn(curve([[-0.9, 1.45, 0.565], [-0.3, 1.3, 0.565], [0.4, 1.32, 0.565], [0.85, 1.5, 0.565]]), 0.04, 24), ORANGE),
+      part(box(0.9, 0.12, 1), '#3a3f47', { p: [1.1, 0.25, 0] }), [[0.9, 0.42], [1.35, 0.42], [0.9, -0.42], [1.35, -0.42]].map(([x, z]) => part(cyl(0.21, 0.21, 0.16, 18), '#1d1f24', { p: [x, 0.22, z], r: [Math.PI / 2, 0, 0] })),
+      [-0.9, -0.9].map((x, i) => part(box(0.05, 0.42, 0.05), '#5b616b', { p: [x, 0.3, i ? 0.4 : -0.4] })));
+    out.push(place(trailer, { p: [B.x1 + 1.75, y0, -2] }));
+
+    // ---- the smile conveyor: rollers between orange rails, on legs, out of the building
+    const belt = curve([[-2.6, y0 + 1.15, B.z1 + 0.3], [-2.4, y0 + 0.95, 1.6], [-1.0, y0 + 0.82, 2.75], [0.9, y0 + 0.86, 3.0], [2.35, y0 + 1.05, 2.45]]);
+    const L = belt.getLength(), side = (u, o) => { const p = belt.getPointAt(u), t = belt.getTangentAt(u); return p.clone().add(new V(-t.z, 0, t.x).normalize().multiplyScalar(o)); };
+    for (let s = 0.1; s < L; s += 0.2) {
+      const u = s / L, p = belt.getPointAt(u), t = belt.getTangentAt(u);
+      out.push(part(cyl(0.065, 0.065, 0.92, 10), '#9aa1a9', { p: p.toArray(), q: new THREE.Quaternion().setFromUnitVectors(new V(0, 1, 0), new V(-t.z, 0, t.x).normalize()) }));
+    }
+    [-0.5, 0.5].forEach((o) => out.push(part(tubeOn(curve(Array.from({ length: 12 }, (_, i) => side(i / 11, o).toArray())), 0.07, 64), ORANGE)));
+    for (let s = 0.4; s < L; s += 1.05) { const u = s / L; [-0.45, 0.45].forEach((o) => { const p = side(u, o); out.push(part(cyl(0.05, 0.05, p.y - y0, 8), '#5b616b', { p: [p.x, (p.y + y0) / 2, p.z] })); }); }
+    // The arrow at the end of the smile.
+    const end = belt.getPointAt(1), dir = belt.getTangentAt(1);
+    out.push(part(cone(0.75, 1, 3), ORANGE, { p: end.clone().addScaledVector(dir, 0.5).toArray(), q: new THREE.Quaternion().setFromUnitVectors(new V(0, 1, 0), dir.clone().setY(0).normalize()), s: [1, 1, 0.25] }));
+
+    // ---- parcels of different sizes, with tape and a label
+    const box3 = (w, h, d) => merge(part(rbox(w, h, d, 0.03), '#c99a62'), part(box(w + 0.01, 0.012, 0.12), '#e3c690', { p: [0, h / 2, 0] }), part(box(0.012, h * 0.5, 0.12), '#e3c690', { p: [w / 2, h / 4, 0] }), part(box(w * 0.38, 0.01, d * 0.32), K.white, { p: [w * 0.18, h / 2 + 0.006, d * 0.2] }), part(box(w * 0.2, 0.012, d * 0.05), '#2b2f36', { p: [w * 0.14, h / 2 + 0.012, d * 0.26] }));
+    const sizes = [[0.62, 0.42, 0.5], [0.45, 0.3, 0.4], [0.7, 0.5, 0.56], [0.5, 0.36, 0.44], [0.4, 0.4, 0.4]];
+
+    // ---- the delivery drone and its route
+    const arm = (a) => part(taper([[0, 0, 0], [Math.cos(a) * 0.5, 0.06, Math.sin(a) * 0.5], [Math.cos(a) * 0.95, 0.1, Math.sin(a) * 0.95]], 0.07, 0.05, 10), '#e9eef3');
+    const drone = merge(part(rbox(0.95, 0.3, 0.7, 0.14), '#f1f4f7'), part(ball(0.28), NAVY, { p: [0.1, 0.13, 0], s: [1.2, 0.55, 1] }), part(box(0.5, 0.04, 0.02), PRIME, { p: [0, 0, 0.36] }),
+      [0.785, 2.356, 3.927, 5.498].flatMap((a, i) => [arm(a), part(cyl(0.12, 0.14, 0.2, 16), '#2b2f36', { p: [Math.cos(a) * 0.95, 0.16, Math.sin(a) * 0.95] }), part(ball(0.04), i < 2 ? '#5fd08f' : '#e5533d', { p: [Math.cos(a) * 1.07, 0.08, Math.sin(a) * 1.07] })]),
+      [-0.25, 0.25].flatMap((z) => [part(tubeOn(curve([[-0.45, -0.42, z], [0, -0.45, z], [0.45, -0.42, z]]), 0.03, 12), '#5b616b'), beam([-0.2, -0.15, z * 0.8], [-0.25, -0.43, z], 0.04, '#5b616b'), beam([0.2, -0.15, z * 0.8], [0.25, -0.43, z], 0.04, '#5b616b')]));
+    const blade = part(extrude([[0, -0.05], [0.25, -0.07], [0.55, -0.04], [0.6, 0], [0.55, 0.04], [0.25, 0.06], [0, 0.05]], 0.02), '#dfe5ec', { r: [Math.PI / 2, 0, 0] });
+    const prop = merge(blade, place(blade, { r: [0, Math.PI, 0] }), part(cyl(0.05, 0.05, 0.06, 10), '#2b2f36'));
+    const pick = end.clone().addScaledVector(dir, 0.2).add(new V(0, 1.15, 0)).toArray(), H = 6.6;
+    const loop = (th) => [Math.cos(th) * 3.6 - 0.5, H + Math.sin(th * 2) * 0.3, Math.sin(th) * 3.4 - 0.6];
+    const th0 = Math.atan2((pick[2] + 0.6) / 3.4, (pick[0] + 0.5) / 3.6);
+    const dronePath = (t) => {
+      const f = cyc(t, 10), top = [pick[0], H, pick[2]], start = loop(th0), mix = (a, b, k) => a.map((v, i) => v + (b[i] - v) * k);
+      if (f < 0.12) return mix(start, top, easeIO(f / 0.12));
+      if (f < 0.26) return mix(top, pick, easeIO(win(f, 0.12, 0.26)));
+      if (f < 0.34) return pick;
+      if (f < 0.48) return mix(pick, top, easeIO(win(f, 0.34, 0.48)));
+      if (f < 0.6) return mix(top, start, easeIO(win(f, 0.48, 0.6)));
+      return loop(th0 + TAU * easeIO(win(f, 0.6, 1)));
+    };
+    // ---- the electric delivery van
+    const van = merge(part(rbox(2.5, 1.45, 1.15, 0.3), '#eef0f2', { p: [0, 0.98, 0] }), part(rbox(0.5, 0.75, 1.1, 0.2), '#eef0f2', { p: [1.3, 0.62, 0] }),
+      part(box(0.3, 0.55, 1.0), '#22303e', { p: [1.12, 1.33, 0], r: [0, 0, -0.35] }), part(box(0.03, 0.06, 1.0), '#e8f4ff', { p: [1.56, 0.86, 0] }), part(box(2.1, 0.12, 0.02), PRIME, { p: [-0.2, 0.7, 0.58] }),
+      part(tubeOn(curve([[-0.9, 1.25, 0.585], [-0.4, 1.1, 0.585], [0.2, 1.12, 0.585], [0.55, 1.3, 0.585]]), 0.035, 20), ORANGE),
+      [[-0.8, 0.5], [0.95, 0.5], [-0.8, -0.5], [0.95, -0.5]].flatMap(([x, z]) => [part(cyl(0.27, 0.27, 0.2, 20), '#1d1f24', { p: [x, 0.27, z], r: [Math.PI / 2, 0, 0] }), part(cyl(0.15, 0.15, 0.21, 16), '#c9ced6', { p: [x, 0.27, z], r: [Math.PI / 2, 0, 0] })]));
+
     return {
       bare: true, move: () => ({}),
-      geo: merge(
-        part(box(6.6, 3.4, 4), '#eceae4', { p: [-1.2, 1.7, -1.4] }), part(box(6.7, 0.6, 4.1), '#232f3e', { p: [-1.2, 3.5, -1.4] }),
-        ring(3, (a, i) => part(box(1.3, 1.9, 0.12), '#5b6470', { p: [-3.2 + i * 2, 0.95, 0.62] })), part(box(1.6, 0.5, 0.1), '#ff9900', { p: [-1.2, 2.7, 0.62] }),
-        part(tubeOn(smile, 0.42), '#ff9900'), part(cone(0.95, 1.4, 24), '#ff9900', { p: [3.95, 1.9, 1.75], r: [0, 0, -1.1] }),
-        legs.map((p) => part(cyl(0.12, 0.12, p.y, 8), K.steelDk, { p: [p.x, p.y / 2, p.z] })),
-      ),
+      geo: merge(out),
       moving: [
-        ...[0, 1, 2, 3].map((i) => ({ geo: parcel(0.85), pivot: [0, 0, 0], anim: (t) => {
-          const u = cyc(t, 6, i / 4), { p, ry } = along(smile, Math.min(0.97, u));
-          return { x: p.x, y: p.y + 0.78, z: p.z, ry, s: u < 0.04 ? u / 0.04 : u > 0.9 ? Math.max(0, 1 - (u - 0.9) / 0.07) : 1 };
+        // 0-4: parcels riding the conveyor
+        ...sizes.map((sz, i) => ({ geo: box3(...sz), pivot: [0, 0, 0], anim: (t) => {
+          const u = cyc(t, 7, i / sizes.length), { p, ry } = along(belt, Math.min(0.98, u));
+          return { x: p.x, y: p.y + 0.07 + sz[1] / 2, z: p.z, ry: ry + (i % 2) * 0.2, s: u < 0.05 ? u / 0.05 : u > 0.92 ? Math.max(0.001, 1 - (u - 0.92) / 0.06) : 1 };
         } })),
-        { geo: drone, pivot: [0, 0, 0], anim: (t) => { const p = dronePath(t); return { x: p[0], y: p[1], z: p[2], rz: Math.sin(t * 1.3) * 0.06, rx: Math.cos(t * 1.1) * 0.06, s: 1.5 }; } },
-        ...ring(4, (a) => ({ geo: rotor, pivot: [Math.cos(a + 0.785) * 1.3, 0.42, Math.sin(a + 0.785) * 1.3], parent: 4, anim: (t) => ({ ry: t * 30 }) })),
-        { geo: merge(beam([0, 0, 0], [0, -0.7, 0], 0.05, K.ink), parcel(0.7).translate(0, -1.05, 0)), pivot: [0, -0.3, 0], parent: 4, anim: (t) => { const f = cyc(t, 9); return { s: f > 0.31 && f < 0.86 ? (f > 0.8 ? 1 - win(f, 0.8, 0.86) : 1) : 0 }; } },
+        // 5: the drone, 6-9: its propellers, 10: the parcel on its tether
+        { geo: drone, pivot: [0, 0, 0], anim: (t) => { const p = dronePath(t); return { x: p[0], y: p[1], z: p[2], ry: -t * 0.3, rz: Math.sin(t * 1.3) * 0.05, rx: Math.cos(t * 1.1) * 0.05, s: 1.25 }; } },
+        ...[0.785, 2.356, 3.927, 5.498].map((a, i) => ({ geo: prop, pivot: [Math.cos(a) * 0.95, 0.3, Math.sin(a) * 0.95], parent: 5, anim: (t) => ({ ry: t * (i % 2 ? 34 : -34) }) })),
+        { geo: merge(beam([0, 0, 0], [0, -0.55, 0], 0.025, '#2b2f36'), box3(0.45, 0.32, 0.38).translate(0, -0.72, 0)), pivot: [0, -0.45, 0], parent: 5, anim: (t) => { const f = cyc(t, 10); return { s: f > 0.3 && f < 0.88 ? (f > 0.82 ? 1 - win(f, 0.82, 0.88) : 1) : 0, rz: Math.sin(t * 2.2) * 0.12 }; } },
+        // 11: the van heading out along the lot
+        { geo: van, pivot: [0, y0, 4.45], anim: (t) => { const f = cyc(t, 9), x = -3.9 + f * 9.3; return { x, ry: 0, y: Math.abs(Math.sin(t * 11)) * 0.015, s: f < 0.06 ? f / 0.06 : f > 0.94 ? (1 - f) / 0.06 : 1 }; } },
       ],
     };
   } },
