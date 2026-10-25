@@ -1820,35 +1820,38 @@ export const HEROES2 = {
     for (let k = 0; k < 3; k++) moving.push(rider(part(rbox(0.3, 0.25, 0.25, 0.03), '#c99a62'), curve([[3.2, y0 + 1.0, -2.3], [2.6, y0 + 2.0, -1.4], [1.8, y0 + 1.3, -0.5]]), 4, k / 3, 0, 0.7));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // Northrop Grumman: the planes and telescopes no one else can build. The B-21 flying wing sweeps
-  // over the hangar, and the James Webb telescope opens its gold mirror on the test stand.
+  // Northrop Grumman: the machines no one else can build. The B-21 Raider rolls down the runway
+  // and lifts off while another sweeps overhead; the James Webb telescope unfolds its gold mirror
+  // over its five-layer sunshield; and a rocket stands on its solid boosters behind.
   northrop: { finder: '#0d2240', build: () => {
-    const R = rand(155), out = [], NAVY = '#0d2240', GOLD = '#d9a93a';
-    out.push(ground('#b9b49a'), part(box(10.2, 0.02, 1.4), '#4a4f57', { p: [0, y0 + 0.01, 3.8] }));
-    for (let i = 0; i < 8; i++) out.push(part(box(0.55, 0.01, 0.06), '#f4f4f0', { p: [-4.4 + i * 1.25, y0 + 0.02, 3.8] }));
-    // ---- the hangar, back left: an arched roof
-    const HX = -2.6, HZ = -3.0;
-    out.push(part(new THREE.CylinderGeometry(1.8, 1.8, 3.6, hi() ? 32 : 12, 1, false, 0, Math.PI), '#c9ced6', { p: [HX, y0, HZ], r: [0, 0, Math.PI / 2] }), part(box(0.04, 1.6, 2.4), '#3a3f47', { p: [HX + 1.82, y0 + 0.8, HZ] }), place(pixText('NORTHROP', 0.06, NAVY, 0.03), { p: [HX, y0 + 1.95, HZ + 1.0], r: [-0.6, 0, 0] }));
-    // ---- the telescope's test stand, front right: a tower and its sunshield
-    const TX = 2.4, TZ = 0.6;
-    out.push(part(rbox(2.4, 0.3, 2.4, 0.05), '#9aa1a9', { p: [TX, y0 + 0.15, TZ] }));
-    for (let k = 0; k < 5; k++) out.push(part(extrude([[-1.6, -0.9], [1.6, -0.9], [2.0, 0], [1.6, 0.9], [-1.6, 0.9], [-2.0, 0]], 0.02), ['#c9a7d8', '#d8c0e4', '#c9a7d8', '#d8c0e4', '#e8d6f0'][k], { p: [TX, y0 + 0.55 + k * 0.08, TZ], r: [Math.PI / 2, 0, Math.PI / 4], s: 0.6 }));
-    out.push(part(cyl(0.12, 0.12, 0.9, 10), '#2b2f36', { p: [TX, y0 + 1.2, TZ] }));
-    out.push(trees(R, [[4.6, -4.6], [1.0, -4.6], [-4.6, 1.4], [-4.6, 4.6]], 0.5));
+    const R = rand(220), out = [], NAVY = '#0d2240', GOLD = '#d9a93a';
+    out.push(ground('#c9b98f'), part(box(10.2, 0.02, 1.6), '#4a4f57', { p: [0, y0 + 0.01, 2.8] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(0.55, 0.01, 0.08), '#f4f4f0', { p: [-4.4 + i * 1.25, y0 + 0.02, 2.8] }));
+    // ---- the hangar, back left: an arched roof with the name
+    const HX = -2.8, HZ = -2.6;
+    out.push(part(new THREE.CylinderGeometry(2.0, 2.0, 3.6, hi() ? 32 : 12, 1, false, 0, Math.PI), '#c9ced6', { p: [HX, y0, HZ], r: [0, 0, Math.PI / 2] }), part(new THREE.CircleGeometry(2.0, hi() ? 32 : 12, 0, Math.PI), '#3a3f47', { p: [HX + 1.81, y0, HZ], r: [0, Math.PI / 2, 0] }), place(pixText('NORTHROP GRUMMAN', 0.05, NAVY, 0.03), { p: [HX, y0 + 1.6, HZ + 1.3], r: [-0.85, 0, 0] }));
+    out.push(part(box(2.4, 0.02, 3.0), '#9aa1a9', { p: [HX + 2.4, y0 + 0.01, HZ + 0.8] }));
+    // ---- the rocket on its pad, back
+    out.push(part(rbox(1.6, 0.3, 1.6, 0.05), '#7b828c', { p: [0.8, y0 + 0.15, -3.9] }), place(rocketGeo(4.6, '#f4f5f6', NAVY, '#3a3f47'), { p: [0.8, y0 + 0.3, -3.9] }), [-1, 1].map((s) => part(cyl(0.18, 0.18, 2.6, 16), K.white, { p: [0.8 + s * 0.48, y0 + 1.6, -3.9] })), [-1, 1].map((s) => part(cone(0.18, 0.35, 16), K.white, { p: [0.8 + s * 0.48, y0 + 3.05, -3.9] })));
+    out.push(part(box(0.3, 4.4, 0.3), '#c0392b', { p: [-0.3, y0 + 2.2, -4.3] }), part(box(0.9, 0.12, 0.12), '#c0392b', { p: [0.15, y0 + 3.6, -4.3] }));
+    // ---- the telescope on its test stand, right: the sunshield kite with five layers
+    const TX = 3.0, TZ = -0.8;
+    out.push(part(rbox(1.2, 0.6, 1.2, 0.05), '#9aa1a9', { p: [TX, y0 + 0.3, TZ] }), part(cyl(0.12, 0.12, 0.9, 10), '#3a3f47', { p: [TX, y0 + 1.0, TZ] }));
+    for (let k = 0; k < 5; k++) out.push(part(extrude([[-1.8, -0.9], [1.8, -0.9], [2.2, 0], [1.8, 0.9], [-1.8, 0.9], [-2.2, 0]], 0.02), ['#b48fd0', '#c9a7d8', '#b48fd0', '#d8c0e4', '#e8d6f0'][k], { p: [TX, y0 + 1.4 + k * 0.09, TZ], r: [Math.PI / 2, 0, Math.PI / 4], s: 0.75 }));
+    out.push(part(rbox(0.6, 0.4, 0.6, 0.05), '#2b2f36', { p: [TX, y0 + 1.25, TZ] }));
+    out.push(trees(R, [[-4.6, 1.0], [4.6, -4.4], [-0.6, 1.2], [4.6, 4.6]], 0.5));
     // ---- moving parts
     const moving = [];
-    // The Webb mirror: the central hexes, and two wings of hexes that fold open.
-    const hex = (c) => part(new THREE.CylinderGeometry(0.28, 0.28, 0.06, 6), c, { r: [Math.PI / 2, 0, Math.PI / 6] });
-    const hexAt = (q, r) => [0.5 * (q + r / 2), 0.43 * r];
-    const centre = merge([[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, -1], [-1, 1]].map(([q, r]) => place(hex(GOLD), { p: [...hexAt(q, r), 0] })), part(cyl(0.03, 0.03, 1.2, 6), '#2b2f36', { p: [0, 0, 0.6], r: [Math.PI / 2, 0, 0] }), part(cyl(0.12, 0.12, 0.06, 10), '#2b2f36', { p: [0, 0, 1.2], r: [Math.PI / 2, 0, 0] }));
-    const mirror = moving.length, MQ = Math.PI / 4;
-    moving.push({ geo: centre, pivot: [TX, y0 + 2.0, TZ], anim: (t) => ({ ry: MQ, rx: -0.35 }) });
-    [-1, 1].forEach((side) => moving.push({ geo: merge([[0, 0], [0, 1], [0, -1]].map(([q, r]) => place(hex('#e9bb4a'), { p: [side * 0.5 + hexAt(q, r)[0], hexAt(q, r)[1], 0] }))), pivot: [side * 0.75, 0, 0], parent: mirror, anim: (t) => { const f = cyc(t, 10), open = easeIO(win(f, 0.15, 0.45)) - easeIO(win(f, 0.85, 1)); return { ry: side * (1 - open) * 1.6 }; } }));
-    // The B-21: a dark flying wing sweeping round over the base.
-    const wing = merge(part(extrude([[1.2, 0], [-0.4, 1.9], [-0.7, 1.5], [-0.45, 1.0], [-0.75, 0.6], [-0.5, 0], [-0.75, -0.6], [-0.45, -1.0], [-0.7, -1.5], [-0.4, -1.9]], 0.12), '#4a4f57', { r: [Math.PI / 2, 0, 0] }), part(new THREE.SphereGeometry(0.4, 16, 8, 0, TAU, 0, Math.PI / 2), '#3a3f47', { s: [1.4, 0.4, 0.8], p: [0.2, 0.05, 0] }), part(box(0.25, 0.03, 0.4), '#1d1f24', { p: [0.6, 0.12, 0] }));
-    moving.push({ geo: wing, pivot: [0.4, y0 + 4.6, 0.0], anim: (t) => { const a = t * 0.35; return { x: Math.cos(a) * 2.4, z: Math.sin(a) * 2.0, ry: -a - Math.PI / 2, rx: -0.25 }; } });
-    // A second one taxiing out of the hangar.
-    moving.push({ geo: place(wing, { s: 0.7 }), pivot: [HX + 1.0, y0 + 0.35, HZ], anim: (t) => { const f = cyc(t, 12), u = easeIO(win(f, 0.1, 0.6)); return { x: u * 2.4, z: u * 0.6, s: f > 0.85 ? 1 - win(f, 0.85, 1) + 0.001 : Math.min(1, f / 0.1) + 0.001 }; } });
+    // The mirror: a centre of seven gold hexes and two wings of three that unfold.
+    const hex = (c) => part(new THREE.CylinderGeometry(0.3, 0.3, 0.07, 6), c, { r: [Math.PI / 2, 0, Math.PI / 6] });
+    const hexAt = (q, r) => [0.54 * (q + r / 2), 0.47 * r];
+    const mir = moving.length, MQ = Math.PI / 4;
+    moving.push({ geo: merge([[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1], [1, -1], [-1, 1]].map(([q, r]) => place(hex(GOLD), { p: [...hexAt(q, r), 0] })), part(cyl(0.03, 0.03, 1.4, 6), '#2b2f36', { p: [0, 0, 0.7], r: [Math.PI / 2, 0, 0] }), part(cyl(0.14, 0.14, 0.08, 10), '#2b2f36', { p: [0, 0, 1.4], r: [Math.PI / 2, 0, 0] }), part(rbox(0.3, 1.6, 0.2, 0.04), '#3a3f47', { p: [0, -0.5, -0.2] })), pivot: [TX, y0 + 3.0, TZ], anim: () => ({ ry: MQ, rx: -0.35 }) });
+    [-1, 1].forEach((side) => moving.push({ geo: merge([[0, 0], [0, 1], [0, -1]].map(([q, r]) => place(hex('#e9bb4a'), { p: [side * 0.54 + hexAt(q, r)[0] - (r ? side * 0.27 * 0 : 0), hexAt(q, r)[1], 0] }))), pivot: [side * 0.81, 0, 0], parent: mir, anim: (t) => { const f = cyc(t, 12), open = easeIO(win(f, 0.15, 0.45)) - easeIO(win(f, 0.85, 1)); return { ry: side * (1 - open) * 1.7 }; } }));
+    // The B-21: a dark flying wing, one taking off, one sweeping round overhead.
+    const wing = merge(part(extrude([[1.2, 0], [-0.4, 1.9], [-0.7, 1.5], [-0.45, 1.0], [-0.75, 0.6], [-0.5, 0], [-0.75, -0.6], [-0.45, -1.0], [-0.7, -1.5], [-0.4, -1.9]], 0.14), '#4a4f57', { r: [Math.PI / 2, 0, 0] }), part(new THREE.SphereGeometry(0.42, 16, 8, 0, TAU, 0, Math.PI / 2), '#3a3f47', { s: [1.4, 0.4, 0.8], p: [0.2, 0.06, 0] }), part(box(0.25, 0.03, 0.4), '#1d1f24', { p: [0.62, 0.14, 0] }));
+    moving.push({ geo: place(wing, { s: 1.2 }), pivot: [0, y0 + 0.3, 2.8], anim: (t) => { const f = cyc(t, 10), x = -5.4 + easeIn(win(f, 0.1, 0.85)) * 11, y = easeIn(win(f, 0.5, 1)) * 3.0; return { x, y, rz: Math.min(0.2, win(f, 0.45, 0.6) * 0.2), s: clamp01((5.2 - Math.abs(x)) / 0.7) * Math.min(1, f / 0.08) + 0.001 }; } });
+    moving.push({ geo: wing, pivot: [-0.4, y0 + 5.0, 0.0], anim: (t) => { const a = t * 0.3; return { x: Math.cos(a) * 2.6, z: Math.sin(a) * 2.0, ry: -a - Math.PI / 2, rx: -0.3 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // International Paper: the boxes the online world ships in. Logs come out of the managed pine
