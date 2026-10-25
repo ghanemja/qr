@@ -2830,5 +2830,49 @@ export const HEROES = {
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, 6); return { x: LX - W / 2 + 0.45, z: LZ + 0.6 + Math.sin(f * TAU) * 0.8, ry: Math.cos(f * TAU) > 0 ? -Math.PI / 2 : Math.PI / 2 }; }, { shirt: '#1d1f24', pants: '#1d1f24', y: y0 + 0.06 }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Procter & Gamble: the brands in every cupboard. Bottles fill and cap on the line and stock the
+  // store shelf; next door the washer churns, bubbles drifting up, and clean laundry flaps on the
+  // line in the breeze.
+  pg: { finder: '#003da5', build: () => {
+    const R = rand(53), out = [], y0 = 0.24, BLUE = '#003da5', ORANGE = '#f26b1d';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#a9cf8a', { p: [0, 0.12, 0] }), part(box(5.2, 0.03, 10.2), '#dfe3e8', { p: [-2.5, y0 + 0.015, 0] }));
+    const bottle = (c = ORANGE) => merge(part(lathe([[0, 0], [0.16, 0], [0.18, 0.05], [0.18, 0.38], [0.12, 0.46], [0.07, 0.48], [0, 0.48]], 20), c, { s: [1, 1, 0.75] }), part(rbox(0.2, 0.14, 0.02, 0.02), '#ffd23f', { p: [0, 0.22, 0.135] }), part(torus(0.06, 0.025, TAU, 16), c, { p: [-0.12, 0.38, 0], r: [0, Math.PI / 2, 0] }));
+    // ---- the line: filler, capper and the belt to the store
+    const LZ = -2.6;
+    out.push(part(rbox(5.0, 0.1, 0.5, 0.03), '#9aa1a9', { p: [-2.4, y0 + 0.8, LZ] }), part(box(5.0, 0.02, 0.42), '#c9ced6', { p: [-2.4, y0 + 0.86, LZ] }));
+    for (let i = 0; i < 6; i++) out.push(part(box(0.06, 0.8, 0.4), '#7b828c', { p: [-4.6 + i * 0.9, y0 + 0.4, LZ] }));
+    out.push(part(rbox(1.0, 0.8, 0.7, 0.06), '#f4f5f6', { p: [-3.4, y0 + 1.75, LZ] }), part(cyl(0.6, 0.6, 1.2, 28), '#e9ecef', { p: [-3.4, y0 + 2.75, LZ - 0.6] }), part(cyl(0.62, 0.62, 0.2, 28), ORANGE, { p: [-3.4, y0 + 2.9, LZ - 0.6] }));
+    out.push(part(rbox(0.8, 0.7, 0.6, 0.06), '#f4f5f6', { p: [-1.8, y0 + 1.7, LZ] }));
+    for (const x of [-3.8, -3.0, -2.1, -1.5]) out.push(part(box(0.05, 0.7, 0.05), '#7b828c', { p: [x, y0 + 1.25, LZ - 0.3] }));
+    // ---- the store shelf
+    const SX = -2.2, SZ = 1.6;
+    out.push(part(rbox(3.6, 2.0, 0.6, 0.04), '#e9e4da', { p: [SX, y0 + 1.0, SZ - 0.25] }), part(rbox(3.7, 0.3, 0.7, 0.04), BLUE, { p: [SX, y0 + 2.1, SZ - 0.2] }), part(box(1.4, 0.12, 0.02), '#ffffff', { p: [SX, y0 + 2.1, SZ + 0.16] }));
+    for (let s = 0; s < 3; s++) out.push(part(box(3.5, 0.05, 0.62), '#c9c2b4', { p: [SX, y0 + 0.2 + s * 0.6, SZ] }));
+    const prods = [(x, y) => place(bottle(), { p: [x, y, SZ], s: 0.95 }), (x, y) => part(rbox(0.3, 0.4, 0.25, 0.04), '#7cc4ff', { p: [x, y + 0.2, SZ] }), (x, y) => part(rbox(0.28, 0.36, 0.2, 0.04), '#2f9e6e', { p: [x, y + 0.18, SZ] }), (x, y) => merge(part(rbox(0.12, 0.42, 0.12, 0.03), '#1d2a3a', { p: [x, y + 0.21, SZ] }), part(box(0.08, 0.06, 0.13), '#f2c94c', { p: [x, y + 0.3, SZ] }))];
+    for (let s = 0; s < 2; s++) for (let i = 0; i < 9; i++) out.push(prods[(i + s * 2) % 4](SX - 1.6 + i * 0.4, y0 + 0.24 + s * 0.6));
+    // ---- the laundry corner: a front-loader and a washing line
+    const WX = 2.8, WZ = -1.6;
+    out.push(part(rbox(1.2, 1.3, 1.1, 0.1), '#f4f5f6', { p: [WX, y0 + 0.65, WZ] }), part(cyl(0.42, 0.42, 0.06, 32), '#9aa1a9', { p: [WX, y0 + 0.6, WZ + 0.56], r: [Math.PI / 2, 0, 0] }), part(cyl(0.34, 0.34, 0.07, 32), '#9fd8ff', { p: [WX, y0 + 0.6, WZ + 0.57], r: [Math.PI / 2, 0, 0] }), part(box(0.6, 0.12, 0.02), '#d6d9dd', { p: [WX, y0 + 1.15, WZ + 0.56] }));
+    out.push(place(bottle(), { p: [WX + 0.35, y0 + 1.3, WZ], s: 1.0 }), place(bottle(BLUE), { p: [WX - 0.3, y0 + 1.3, WZ - 0.1], s: 0.8 }));
+    for (const x of [1.4, 4.6]) out.push(part(cyl(0.04, 0.05, 2.0, 8), '#7a5233', { p: [x, y0 + 1.0, 2.6] }), part(box(0.5, 0.04, 0.04), '#7a5233', { p: [x, y0 + 2.0, 2.6] }));
+    out.push(part(tube([[1.4, y0 + 1.95, 2.6], [3.0, y0 + 1.82, 2.6], [4.6, y0 + 1.95, 2.6]], 0.012), '#f4f5f6'));
+    // The laundry, flapping in the breeze.
+    const cloths = [[1.9, '#ffffff', 0.6, 0.7], [2.5, '#e5533d', 0.5, 0.5], [3.1, '#7cc4ff', 0.6, 0.8], [3.7, '#f2c94c', 0.45, 0.55], [4.2, '#ffffff', 0.4, 0.4]];
+    cloths.forEach(([x, c, w, h]) => { const g = new THREE.PlaneGeometry(w, h, hi() ? 6 : 2, hi() ? 6 : 2); out.push(windy(part(g, c, { p: [x, y0 + 1.86 - h / 2, 2.6] }), (px, py) => Math.min(1, (y0 + 1.86 - py) / h) * 1.0)); out.push(windy(part(g, c, { p: [x, y0 + 1.86 - h / 2, 2.6], r: [0, Math.PI, 0] }), (px, py) => Math.min(1, (y0 + 1.86 - py) / h) * 1.0)); });
+    [[4.6, -4.6], [4.6, 0.4], [0.8, 4.7], [-4.6, 4.7]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.7 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // Bottles along the belt: filled under the nozzle, capped, off the end.
+    for (let k = 0; k < 7; k++) moving.push({ geo: place(bottle(), { s: 0.9 }), pivot: [-4.8, y0 + 0.88, LZ], anim: (t) => { const u = cyc(t, 7, k / 7); return { x: u * 4.9, s: Math.min(1, u / 0.05, (1 - u) / 0.05) + 0.001 }; } });
+    moving.push({ geo: part(cyl(0.03, 0.03, 0.4, 8), '#9aa1a9'), pivot: [-3.4, y0 + 1.35, LZ], anim: (t) => ({ y: -Math.max(0, Math.sin(t * 6)) * 0.1 }) });
+    moving.push({ geo: part(cyl(0.1, 0.1, 0.18, 16), ORANGE), pivot: [-1.8, y0 + 1.3, LZ], anim: (t) => ({ y: -Math.max(0, Math.sin(t * 6 + 1)) * 0.12, ry: t * 10 }) });
+    // The drum turning, with suds in it.
+    moving.push({ geo: merge(part(cyl(0.3, 0.3, 0.02, 24), '#d6eefc', { r: [Math.PI / 2, 0, 0] }), ring(5, (a) => part(ball(0.07), '#ffffff', { p: [Math.cos(a) * 0.18, Math.sin(a) * 0.18, 0.01] }))), pivot: [WX, y0 + 0.6, WZ + 0.59], anim: (t) => ({ rz: t * 5 }) });
+    // Bubbles drifting up and away from the washer.
+    for (let k = 0; k < 8; k++) moving.push({ geo: part(ball(0.12), '#dff3ff'), pivot: [WX, y0 + 1.0, WZ + 0.6], anim: (t) => { const f = cyc(t, 4, k / 8); return { x: Math.sin(f * 5 + k) * 0.5, y: f * 2.6, z: f * 0.6, s: (0.5 + Math.sin(k) * 0.3 + f * 0.6) * Math.min(1, (1 - f) / 0.15) + 0.001 }; } });
+    // A shopper taking a bottle off the shelf.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 10), x = SX - 1.8 + (f < 0.5 ? f * 2 : 2 - f * 2) * 3.6; return { x, z: SZ + 0.85, ry: f < 0.5 ? 0 : Math.PI, push: Math.abs(f - 0.25) < 0.05 }; }, { shirt: '#d6336c', pants: '#2b3a55', y: y0 }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

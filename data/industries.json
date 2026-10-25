@@ -81,7 +81,8 @@
   "goldman": "Ring the bell",
   "pfizer": "Made at global scale",
   "comcast": "The wire and the story",
-  "amex": "Membership has its privileges"
+  "amex": "Membership has its privileges",
+  "pg": "In every cupboard"
  },
  "bank": [
   "Citigroup",
@@ -549,7 +550,6 @@
   "Constellation Brands"
  ],
  "care": [
-  "Procter & Gamble",
   "Colgate-Palmolive",
   "Clorox",
   "Kimberly-Clark",
@@ -1625,5 +1625,8 @@
  ],
  "amex": [
   "American Express"
+ ],
+ "pg": [
+  "Procter & Gamble"
  ]
 }
