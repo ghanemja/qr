@@ -1008,24 +1008,93 @@ export const HEROES = {
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 
-  // Disney: storytelling magic. The castle, with fireworks blooming over its spires.
+  // Disney: stories turned into places people travel to see. The castle rises from its moat; the
+  // monorail circles the park, the carousel turns, guests stroll up Main Street past a balloon
+  // seller and the Mickey flower bed, and fireworks bloom over the spires.
   disney: { finder: '#113ccf', build: () => {
-    const tower = (x, z, r, h) => merge(part(cyl(r, r * 1.08, h, 28), '#f4f1ea', { p: [x, h / 2, z] }), part(cone(r * 1.45, h * 0.55, 28), '#3f6fd8', { p: [x, h + h * 0.27, z] }), part(cyl(r * 1.15, r * 1.15, 0.2, 28), '#ffd23f', { p: [x, h, z] }), part(cone(0.07, 0.6, 8), '#ffd23f', { p: [x, h + h * 0.55 + 0.3, z] }), ring(6, (a) => part(box(r * 0.35, 0.3, r * 0.35), '#f4f1ea', { p: [x + Math.cos(a) * r, h + 0.15, z + Math.sin(a) * r] })));
-    const burst = (c) => merge(ring(12, (a, i) => part(ball(0.13), c, { p: [Math.cos(a) * Math.cos(i * 1.3) * 1.2, Math.sin(i * 1.3) * 1.1, Math.sin(a) * Math.cos(i * 1.3) * 1.2] })), ring(12, (a, i) => beam([0, 0, 0], [Math.cos(a) * Math.cos(i * 1.3) * 1, Math.sin(i * 1.3) * 0.95, Math.sin(a) * Math.cos(i * 1.3) * 1], 0.05, c)));
-    return {
-      bare: true, move: () => ({}),
-      geo: merge(part(cyl(4.8, 5, 0.4, 56), '#7cbf5a', { p: [0, 0.2, 0] }), part(cyl(4.9, 4.9, 0.12, 56), 'W', { p: [0, 0.32, 0] }), part(cyl(3.6, 3.7, 0.5, 48), '#cfc6b4', { p: [0, 0.6, 0] }),
-        part(box(5.6, 2.6, 2.6), '#f4f1ea', { p: [0, 2.1, 0] }), ring(9, (a, i) => part(box(0.4, 0.4, 0.4), '#f4f1ea', { p: [-2.6 + i * 0.65, 3.6, 1.15] })),
-        part(extrude([[-0.6, 0], [0.6, 0], [0.6, 1], [0, 1.6], [-0.6, 1]], 0.2), '#3a3f47', { p: [0, 0.85, 1.32] }),
-        tower(-2.6, 0.8, 0.6, 4.2), tower(2.6, 0.8, 0.6, 4.2), tower(-1.4, -0.6, 0.7, 5.6), tower(1.4, -0.6, 0.7, 5.6), tower(0, -0.2, 0.95, 7.2)),
-      moving: [
-        ...[['#ffd23f', -2.5, 10.4], ['#ff5d8f', 2.3, 11], ['#7cf0ff', 0.3, 12.2], ['#b28dff', -1.2, 9.8]].map(([c, x, y], i) => ({ geo: burst(c), pivot: [x, y, -0.5], anim: (t) => {
-          const f = cyc(t, 3.2, i * 0.27);
-          return { s: f < 0.08 ? 0 : easeOut(win(f, 0.08, 0.45)) * 2 * (f > 0.7 ? 1 - win(f, 0.7, 0.95) : 1), y: -win(f, 0.3, 0.95) * 1.2, ry: f * 1.5 };
-        } })),
-        { geo: part(extrude([[0, 0], [1.2, 0.3], [0, 0.6]], 0.04), '#e31837'), pivot: [0, 11.15, -0.2], anim: (t) => ({ ry: Math.sin(t * 2.4) * 0.4, sx: 1 + Math.sin(t * 6) * 0.1 }) },
-      ],
-    };
+    const R = rand(31), out = [], y0 = 0.24, STONE = '#f1ebdf', BLUE = '#3f6fd8', GOLD = '#f2c14e', CZ = -1.7, IY = y0 + 0.4;
+    // A round tower: a gently tapered wall, a gold band, a flared blue spire and a finial with a pennant.
+    const tower = (x, z, r, h, sh) => [
+      part(lathe([[0, 0], [r, 0], [r * 0.94, h], [r * 1.14, h], [r * 1.14, h + 0.14], [0, h + 0.14]], 32), STONE, { p: [x, IY, z] }),
+      part(new THREE.TorusGeometry(r * 1.14, 0.045, 6, hi() ? 40 : 16), GOLD, { p: [x, IY + h + 0.14, z], r: [Math.PI / 2, 0, 0] }),
+      part(lathe([[0, 0], [r * 1.22, 0], [r * 1.05, sh * 0.12], [r * 0.62, sh * 0.45], [r * 0.22, sh * 0.85], [0, sh]], 32), BLUE, { p: [x, IY + h + 0.12, z] }),
+      part(ball(0.07), GOLD, { p: [x, IY + h + sh + 0.12, z] }), part(cyl(0.015, 0.015, 0.5, 6), GOLD, { p: [x, IY + h + sh + 0.4, z] }),
+      windy(part(extrude([[0, 0], [0.42, -0.08], [0, -0.17]], 0.02), '#e31837', { p: [x + 0.01, IY + h + sh + 0.64, z] }), (px) => Math.max(0, px - x) * 2.2),
+      hi() ? [0.6, 0.35].map((k) => part(new THREE.BoxGeometry(r * 0.34, r * 0.6, 0.06), '#2d3f6b', { p: [x, IY + h * k, z + r * (1.0 - 0.06 * k) - 0.01] })) : [],
+    ];
+    const crenels = (x, y, z, w, d) => [...Array(Math.round(w / 0.36))].map((_, i) => part(new THREE.BoxGeometry(0.2, 0.2, 0.2), STONE, { p: [x - w / 2 + 0.18 + i * 0.36, y + 0.1, z + d / 2 - 0.1] }));
+    // ---- the park: lawns, the moat and its island, the paths
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#7cbf5a', { p: [0, 0.12, 0] }));
+    out.push(part(cyl(3.25, 3.25, 0.06, 64), '#b9b2a2', { p: [0, y0 + 0.03, CZ] }), part(cyl(3.1, 3.1, 0.08, 64), 'W', { p: [0, y0 + 0.04, CZ] }));
+    out.push(part(cyl(2.45, 2.55, 0.4, 56), '#cfc6b4', { p: [0, y0 + 0.2, CZ] }), part(cyl(2.3, 2.3, 0.02, 56), '#86c766', { p: [0, IY + 0.005, CZ] }));
+    out.push(part(rbox(1.3, 0.02, 3.0, 0.01), '#e8dcc4', { p: [0, y0 + 0.01, 3.8] }), part(cyl(1.25, 1.25, 0.02, 48), '#e8dcc4', { p: [0, y0 + 0.012, 2.25] }));
+    // The bridge and drawbridge.
+    out.push(part(rbox(1.1, 0.16, 1.3, 0.04), '#b98a5e', { p: [0, y0 + 0.36, 1.05], r: [-0.12, 0, 0] }), ...[-0.55, 0.55].map((x) => part(rbox(0.08, 0.35, 1.3, 0.03), '#cfc6b4', { p: [x, y0 + 0.5, 1.05], r: [-0.12, 0, 0] })));
+    // ---- the castle
+    out.push(part(rbox(3.2, 1.7, 1.8, 0.06), STONE, { p: [0, IY + 0.85, CZ] }), ...crenels(0, IY + 1.7, CZ, 3.2, 1.8));
+    out.push(part(rbox(2.0, 1.1, 1.3, 0.06), STONE, { p: [0, IY + 2.25, CZ - 0.2] }), ...crenels(0, IY + 2.8, CZ - 0.2, 2.0, 1.3));
+    out.push(part(extrude([[-0.45, 0], [0.45, 0], [0.45, 0.8], [0, 1.3], [-0.45, 0.8]], 0.12), '#2d3f6b', { p: [0, IY, CZ + 0.88], s: [1, 0.8, 1] }), part(extrude([[-0.55, 0], [-0.45, 0], [-0.45, 0.8], [0, 1.3], [0.45, 0.8], [0.45, 0], [0.55, 0], [0.55, 0.85], [0, 1.45], [-0.55, 0.85]], 0.14), GOLD, { p: [0, IY, CZ + 0.9], s: [1, 0.8, 1] }));
+    if (hi()) for (const x of [-1.05, -0.6, 0.6, 1.05]) out.push(part(new THREE.BoxGeometry(0.2, 0.42, 0.06), '#2d3f6b', { p: [x, IY + 1.1, CZ + 0.9] }));
+    if (hi()) for (const x of [-0.5, 0, 0.5]) out.push(part(new THREE.BoxGeometry(0.2, 0.42, 0.06), '#2d3f6b', { p: [x, IY + 2.3, CZ + 0.46] }));
+    out.push(part(cyl(0.2, 0.2, 0.08, 32), GOLD, { p: [0, IY + 1.42, CZ + 0.92], r: [Math.PI / 2, 0, 0] }), part(cyl(0.15, 0.15, 0.1, 32), '#e31837', { p: [0, IY + 1.42, CZ + 0.93], r: [Math.PI / 2, 0, 0] }));
+    out.push(tower(-1.75, CZ + 0.85, 0.42, 2.0, 1.2), tower(1.75, CZ + 0.85, 0.42, 2.0, 1.2), tower(-1.75, CZ - 0.85, 0.38, 2.3, 1.1), tower(1.75, CZ - 0.85, 0.38, 2.3, 1.1));
+    out.push(tower(-1.0, CZ - 0.3, 0.38, 3.0, 1.3), tower(1.0, CZ - 0.3, 0.38, 3.0, 1.3), tower(-0.55, CZ + 0.35, 0.26, 2.6, 1.0), tower(0.55, CZ + 0.35, 0.26, 2.6, 1.0));
+    out.push(tower(0, CZ - 0.2, 0.62, 3.5, 2.0));
+    // ---- the hub: a Mickey flower bed, then Main Street with its shops and lamps
+    const bed = (x, z, r) => [part(cyl(r + 0.06, r + 0.06, 0.12, 40), '#cfc6b4', { p: [x, y0 + 0.06, z] }), part(cyl(r, r, 0.14, 40), '#4f8f3a', { p: [x, y0 + 0.08, z] }),
+      hi() ? [...Array(Math.round(r * r * 40))].map(() => { const a = R() * TAU, d = Math.sqrt(R()) * (r - 0.05); return part(new THREE.SphereGeometry(0.05, 6, 4), R() < 0.8 ? '#e31837' : '#ffd23f', { p: [x + Math.cos(a) * d, y0 + 0.17, z + Math.sin(a) * d] }); }) : []];
+    out.push(bed(0, 2.35, 0.55), bed(-0.62, 1.78, 0.3), bed(0.62, 1.78, 0.3));
+    const shop = (x, z, w, c, roof, face) => [part(rbox(w, 1.35, 1.1, 0.04), c, { p: [x, y0 + 0.675, z] }), part(prism(w + 0.1, 0.5, 1.2), roof, { p: [x, y0 + 1.35, z], r: [0, Math.PI / 2, 0] }),
+      part(rbox(w * 0.7, 0.55, 0.05, 0.03), '#2d3f6b', { p: [x + face * 0.56, y0 + 0.5, z], r: [0, Math.PI / 2, 0] }),
+      part(box(0.42, 0.04, w * 0.92), (px, py, pz) => (Math.floor((pz - z + 2) * 6) % 2 ? '#ffffff' : roof), { p: [x + face * 0.72, y0 + 0.98, z], r: [0, 0, face * 0.35] })];
+    out.push(shop(-1.45, 3.5, 1.2, '#f6c6c0', '#c0392b', 1), shop(-1.45, 4.75, 1.1, '#fde3a7', '#3f6fd8', 1), shop(1.45, 3.5, 1.2, '#cfe8d4', '#2f8f5b', -1), shop(1.45, 4.75, 1.1, '#d9d2f2', '#8e5cc4', -1));
+    out.push(lampPost(-0.8, y0, 4.1, 0), lampPost(0.8, y0, 4.1, Math.PI));
+    // The balloon seller's bunch of Mickey balloons.
+    const BX = -1.9, BZ = 2.3;
+    out.push(part(cyl(0.02, 0.02, 1.6, 6), '#5b616b', { p: [BX, y0 + 0.8, BZ] }));
+    [['#e31837', 0, 0], ['#ffd23f', 0.32, 0.1], ['#3f6fd8', -0.3, 0.12], ['#ff8fc7', 0.05, -0.32], ['#7cf0ff', 0.12, 0.3]].forEach(([c, dx, dz], i) => {
+      const hx = BX + dx, hy = y0 + 2.35 + (i % 2) * 0.25, hz = BZ + dz, w = (px, py) => Math.max(0, py - (y0 + 1.6)) * 0.6;
+      out.push(windy(merge(part(new THREE.SphereGeometry(0.2, 18, 12), c, { p: [hx, hy, hz] }), part(new THREE.SphereGeometry(0.11, 12, 8), c, { p: [hx - 0.17, hy + 0.17, hz] }), part(new THREE.SphereGeometry(0.11, 12, 8), c, { p: [hx + 0.17, hy + 0.17, hz] }), part(tube([[BX, y0 + 1.6, BZ], [(BX + hx) / 2, (y0 + 1.6 + hy) / 2, (BZ + hz) / 2], [hx, hy - 0.2, hz]], 0.008), '#d6d9dd')), w));
+    });
+    // Trees and topiary around the lawns.
+    [[-4.4, -4.4], [4.4, -4.4], [-4.3, 0.6], [4.3, 0.8], [-3.6, 4.4], [3.9, 4.5]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.9 + R() * 0.3)));
+    // ---- the monorail beam on its pylons
+    const loop = curve([[-4.5, 0, -3.5], [-3.5, 0, -4.5], [3.5, 0, -4.5], [4.5, 0, -3.5], [4.5, 0, 3.5], [3.5, 0, 4.5], [-3.5, 0, 4.5], [-4.5, 0, 3.5]].map(([x, , z]) => [x, y0 + 2.55, z]), true);
+    loop.curveType = 'centripetal';
+    out.push(part(tubeOn(loop, 0.12, hi() ? 160 : 40), '#e9ecef', { s: [1, 1, 1] }));
+    for (let i = 0; i < 16; i++) { const p = loop.getPointAt(i / 16); out.push(part(cyl(0.09, 0.14, 2.5, 12), '#d6d9dd', { p: [p.x, y0 + 1.25, p.z] })); }
+    // ---- the carousel's fixed parts
+    const KX = 2.9, KZ = 2.0;
+    out.push(part(cyl(1.1, 1.15, 0.16, 40), '#cfc6b4', { p: [KX, y0 + 0.08, KZ] }), part(cyl(0.14, 0.14, 1.9, 16), GOLD, { p: [KX, y0 + 1.0, KZ] }));
+    // ---- moving parts
+    const moving = [];
+    const train = (k) => merge(part(capsule(0.3, 0.75), (px, py) => (py > 0.08 ? '#f4f5f6' : py > -0.04 ? '#2e6fd8' : '#e9ecef'), { r: [0, 0, Math.PI / 2], s: [1, 1, 0.9] }),
+      part(box(0.9, 0.16, 0.56), '#1e2a36', { p: [0, 0.12, 0] }), k === 0 ? part(ball(0.31), '#1e2a36', { p: [0.55, 0.06, 0], s: [0.6, 0.7, 0.85] }) : []);
+    for (let k = 0; k < 4; k++) moving.push({ geo: train(k), pivot: [0, y0 + 2.94, 0], anim: (t) => { const a = along(loop, cyc(t, 16, -k * 0.042)); return { x: a.p.x, z: a.p.z, ry: a.ry }; } });
+    // The carousel: platform, striped canopy, horses that rise and fall.
+    const carousel = moving.length;
+    moving.push({ geo: merge(part(cyl(1.0, 1.0, 0.1, 40), '#b9564a', { p: [0, 0.22, 0] }), part(lathe([[1.12, -0.2], [1.22, -0.2], [1.2, 0], [0.6, 0.32], [0, 0.55]], 40), (px, py, pz) => (Math.floor((Math.atan2(pz, px) / TAU + 0.5) * 16) % 2 ? '#ffffff' : '#e31837'), { p: [0, 1.95, 0] }),
+      part(ball(0.12), GOLD, { p: [0, 2.6, 0] })), pivot: [KX, y0, KZ], anim: (t) => ({ ry: t * 0.9 }) });
+    const cap = (r, l) => new THREE.CapsuleGeometry(r, l, hi() ? 3 : 1, hi() ? 10 : 5);
+    const horse = (c) => merge(part(cap(0.12, 0.3), c, { r: [0, 0, Math.PI / 2] }), part(cap(0.06, 0.18), c, { p: [0.24, 0.16, 0], r: [0, 0, -0.6] }), part(new THREE.BoxGeometry(0.16, 0.1, 0.1), c, { p: [0.33, 0.26, 0] }),
+      [[-0.15, 0.06], [-0.15, -0.06], [0.15, 0.06], [0.15, -0.06]].map(([x, z], i) => part(capsule(0.03, 0.2), c, { p: [x + (i > 1 ? 0.04 : -0.04), -0.18, z], r: [0, 0, i > 1 ? -0.5 : 0.5] })),
+      part(cyl(0.02, 0.02, 1.7, 8), GOLD, { p: [0, 0.35, 0] }), part(new THREE.BoxGeometry(0.14, 0.04, 0.2), '#e31837', { p: [-0.02, 0.13, 0] }));
+    ['#ffffff', '#f6d7a7', '#cfd6e3', '#ffffff', '#e9c6a0', '#d7c0e8'].forEach((c, i) => {
+      const a = (i / 6) * TAU;
+      moving.push({ geo: horse(c), pivot: [Math.cos(a) * 0.78, 0.75, Math.sin(a) * 0.78], parent: carousel, anim: (t) => ({ y: Math.sin(t * 2.2 + i * 2.1) * 0.12, ry: -a - Math.PI / 2 }) });
+    });
+    // Guests strolling up and down Main Street.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 11), z = 5.1 - f * 3.0; return { x: -0.3, z, ry: Math.PI / 2, s: Math.min(1, f / 0.06, (1 - f) / 0.06) }; }, { shirt: '#e31837', pants: '#2b3a55', y: y0 }));
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 13, 0.4), z = 2.2 + f * 2.9; return { x: 0.3, z, ry: -Math.PI / 2, s: Math.min(1, f / 0.06, (1 - f) / 0.06) }; }, { shirt: '#ffd23f', pants: '#3a5a8a', skin: '#c58c66', hair: '#1d1f24', y: y0, carry: part(ball(0.12), '#1d1f24', { p: [0.05, 1.82, 0.12] }) }));
+    moving.push(...walker(moving.length, () => ({ x: BX + 0.25, z: BZ, ry: Math.PI / 2, still: true }), { shirt: '#ffffff', pants: '#2f5f9e', y: y0 }));
+    // Fireworks: a shell climbs, then bursts into trails that spread, fall and fade.
+    const dirs = [...Array(hi() ? 22 : 12)].map((_, i, a) => { const y = 1 - (2 * (i + 0.5)) / a.length, rr = Math.sqrt(1 - y * y), th = i * 2.39996; return new V(Math.cos(th) * rr, y, Math.sin(th) * rr); });
+    const burst = (c, c2) => merge(dirs.map((d, i) => [part(new THREE.CylinderGeometry(0.035, 0.012, 0.55, 5, 1, true), i % 3 ? c : c2, { p: d.clone().multiplyScalar(0.72).toArray(), q: new THREE.Quaternion().setFromUnitVectors(new V(0, 1, 0), d) }), part(new THREE.SphereGeometry(0.07, 6, 4), i % 3 ? c2 : '#ffffff', { p: d.toArray() })]));
+    [['#ffd23f', '#fff2b0', -2.6, 5.6, -3.6], ['#ff5d8f', '#ffd1e3', 2.6, 6.0, -3.2], ['#7cf0ff', '#ffffff', 0.9, 6.4, -4.2], ['#b28dff', '#f2e6ff', -1.2, 5.2, -4.4]].forEach(([c, c2, x, y, z], i) => {
+      moving.push({ geo: burst(c, c2), pivot: [x, y, z], anim: (t) => { const f = cyc(t, 4.2, i * 0.27); return f < 0.25 ? { s: 0.001 } : { s: easeOut(win(f, 0.25, 0.6)) * 1.5 * (1 - easeIn(win(f, 0.7, 1))) + 0.001, y: -win(f, 0.4, 1) * 1.0, ry: f * 1.2 }; } });
+      moving.push({ geo: merge(part(new THREE.SphereGeometry(0.09, 10, 6), c2), part(cone(0.05, 0.7, 8), c, { p: [0, -0.4, 0], r: [Math.PI, 0, 0] })), pivot: [x, y, z], anim: (t) => { const f = cyc(t, 4.2, i * 0.27); return f < 0.25 ? { y: -(y - IY - 0.3) * (1 - easeOut(win(f, 0, 0.25))), s: f < 0.02 ? 0.001 : 1 } : { s: 0.001 }; } });
+    });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
 
   // McDonald's: the system that serves billions. Ingredients drop into place under the golden
