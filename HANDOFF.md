@@ -8,12 +8,12 @@ Notes for the next session working on this repo. Live site: https://ghanemja.git
   - **The first 16, rebuilt to the current quality bar:** amazon, walmart, apple, alphabet, berkshire, spacex, cocacola, exxon, microsoft, nvidia, costco, meta, ford, tesla, disney, mcdonalds.
   - **43 added in the latest session:** jpmorgan, unitedhealth, cvs, boeing, homedepot, netflix, starbucks, visa, chevron, anthropic, openai, gm, verizon, bofa, target, ups, ibm, lilly, caterpillar, pepsico, lockheed, deere, intel, delta, nike, uber, mastercard, att, wellsfargo, goldman, pfizer, comcast, amex, pg, jnj, waymo, airbnb, salesforce, fedex, oracle, cisco, stripe, kroger.
   - Stripe was rebuilt once (as the payments layer under a street of businesses), and Airbnb and Salesforce were strengthened after the user's feedback.
-- Every other company uses one of the **137 shared industry shapes**. **23 of them have been rebuilt as full scenes** (173 companies), and 34 more are queued; see **Shared-shape upgrades** below.
+- Every other company uses one of the **137 shared industry shapes**. **57 of them have been rebuilt as full scenes** (334 companies); the agreed upgrade list is finished. See **Shared-shape upgrades** below.
 
 ## The user's plan, in order
 
 1. **Bespoke models (done for now).** The user will post on LinkedIn next. More heroes are welcome if asked. Candidates: Citigroup, Adobe, Broadcom, Qualcomm, Dell, HP, Marriott, Micron, Databricks, Anduril, Figure AI, Zipline.
-2. **Upgrade the shared shapes** (in progress; see **Shared-shape upgrades** below for what's done, the agreed queue, and what's deliberately skipped).
+2. **Upgrade the shared shapes** (done for the agreed list; see **Shared-shape upgrades** below for what's done and what's deliberately skipped).
 3. **Advertisement video** of the coolest models, set to music "from Equalizer" (the user wants to advertise Equalizer too).
    - Equalizer is the user's own music-making app: https://github.com/ghanemja/equalizer (studio: https://ghanemja.github.io/equalizer/). Every sound is an equation; a song is `{ bpm, bars, tracks: [{ name, equation, params, pattern }] }`, and `examples/render.mjs` renders one headlessly to WAV (no samples, no dependencies). Ready-made tracks live in its `docs/audio/` (for example `hyperbolic-808.mp3`, `four-on-the-floor.mp3`). Plan: compose a custom ad track in Equalizer, render it, cut the video to its beat, and show an end card crediting "Soundtrack made in Equalizer" with its link.
    - **Requested finale:** stack all the models in a grid and do a camera pan, then a zoom-out over all of them.
@@ -43,6 +43,11 @@ The Walmart "falling off the edge" fix (region-view lots kept fully on their pie
   - People and props: `fan`, `bed`, `parasol`, `lifebuoy`.
   - Symbols and weather: `heartGeo`, `shieldGeo`, `anchorGeo`, `jigsaw`, `stethoscope`, `cardGeo`, `tickGeo`, `stormCloud`, `bolt`.
   - Mechanics: `reach2`, two-link arm inverse kinematics; see `industrial:0` or `robot:0` for a full arm.
+  - Added with the second batch of scenes:
+    - Plant and vehicles: `column` (refinery/process column), `tankTruck`, `semi` (tractor-trailer), `jet` (airliner), `fighter`, `heliGeo` + `rotorGeo`, `rocketGeo`, `radarDish`.
+    - Tech: `wafer`, `chipGeo`, `serverRack`, `desk` (desk, chair and laptop), `appBlock`, `whiteboard`.
+    - Small symbols and props: `vial`, `molecule`, `helixGeo`, `crossGeo` (red cross-out), `bugGeo`, `padBody` + `padShackle`.
+  - Gotchas found on the way: shape helpers that return bare geometry (`heartGeo`, `extrude`, `star`, `jigsaw`, `gear`) must be wrapped in `part(..., colour)` before `merge`, or the page crashes in `vertexColor`; a brand band whose top face sits exactly on a roof or plinth top z-fights (sunk it a little); rest bounds use unscaled mover geometry, so pre-scale big movers' `geo` instead of animating `s`.
   - The user asked that smaller shapes **mix and match these pieces** rather than start from scratch.
 - **Dev tools additions:**
   - `node tools/dev/vc.mjs kind:variant` prints vertex counts and the **rest bounds**, plus the prop and topper spots.
@@ -50,48 +55,12 @@ The Walmart "falling off the edge" fix (region-view lots kept fully on their pie
   - Check a real page with `still.cjs <slug>`; it's a different angle from the gallery.
 - **Workflow for a scene:** write it at the end of `SCENES`. Then run `npm run build`, `vc.mjs kind:variant` (fix the bounds), `gal.cjs` at a few times, and `still.cjs` on one of its companies. Look at the images, then `ship.sh`.
 
-### Done (23 scenes, 173 companies; all live on `main`)
+### Done (57 scenes, 334 companies; all live on `main`)
 
-`bank:10` Coin tower · `house:0` Neighborhood · `farm:0` Harvest · `industrial:0` Machine shop · `metal:0` Steelworks · `oil:2` Storage tank · `car:6` Engine · `insurance:0` Rainy-day umbrella · `insurance:1` Shield · `media:0` Showtime · `robot:0` Robot lab · `care:0` Bubbles · `insurance:2` Lifebuoy · `insurance:3` Hourglass · `insurance:5` Anchor · `health:7` Microscope · `chem:0` Lab · `health:1` Heartbeat · `power:2` Light bulb · `software:6` Puzzle pieces · `industrial:3` Excavator · `health:4` Stethoscope · `health:9` Medical supplies
+- **First batch (23):** `bank:10` Coin tower · `house:0` Neighborhood · `farm:0` Harvest · `industrial:0` Machine shop · `metal:0` Steelworks · `oil:2` Storage tank · `car:6` Engine · `insurance:0` Rainy-day umbrella · `insurance:1` Shield · `media:0` Showtime · `robot:0` Robot lab · `care:0` Bubbles · `insurance:2` Lifebuoy · `insurance:3` Hourglass · `insurance:5` Anchor · `health:7` Microscope · `chem:0` Lab · `health:1` Heartbeat · `power:2` Light bulb · `software:6` Puzzle pieces · `industrial:3` Excavator · `health:4` Stethoscope · `health:9` Medical supplies
+- **Second batch (the agreed queue of 34, 161 companies):** `oil:4` Refinery · `bank:11` Ticker board · `rocket:0` Launch pad · `health:3` Hospital · `health:5` Syringe · `insurance:4` Padlock · `chip:0` Silicon · `software:3` Terminal · `computer:0` Laptop · `ai:5` Bright idea · `plane:0` Control tower · `plane:1` Airliner · `software:2` App blocks · `rocket:1` Fighter jet · `chip:1` Graphics card · `bank:9` Briefcase · `power:0` Wind turbine · `chip:2` Memory · `parcel:0` Parcels on the move · `power:5` Plug and socket · `power:1` Power lines · `bank:8` Rising chart · `power:3` Solar farm · `oil:5` Tanker · `payments:3` Crypto coin · `industrial:5` Garbage truck · `parcel:1` Delivery van · `industrial:4` Paint · `parcel:2` Parcel with wings · `industrial:1` Tower crane · `software:4` Dashboard · `industrial:2` Hard hat · `industrial:6` Packaging line · `software:5` Email
 
-### Agreed queue (34 shapes, 161 companies), in this order
-
-The user wants scenes only for shapes carrying companies people actually search for. These were chosen together; the named companies are why each shape is in.
-
-1. `oil:4` Refinery: Valero, Phillips 66, Marathon Petroleum, PBF
-2. `bank:11` Ticker board: Blackstone, S&P Global, StoneX, Jefferies, Icahn
-3. `rocket:0` Launch pad: RTX, Anduril, Shield AI, L3Harris
-4. `health:3` Hospital: HCA Healthcare (+ Tenet, UHS, DaVita, CHS)
-5. `health:5` Syringe: Merck, AbbVie, Bristol-Myers Squibb, Zoetis
-6. `insurance:4` Padlock: Nationwide, Travelers, Aflac, Guardian, W.R. Berkley, Oscar
-7. `chip:0` Silicon: Broadcom, AMD, Amphenol, Corning, Western Digital, Cerebras
-8. `software:3` Terminal: Cursor, Vercel, Replit, ServiceNow, CACI
-9. `computer:0` Laptop: HPE (+ TD Synnex, Avnet, Insight)
-10. `ai:5` Bright idea: Safe Superintelligence, Thinking Machines Lab, Liquid AI, Lila Sciences
-11. `plane:0` Control tower: United Airlines, Booking Holdings, JetBlue, Alaska Air
-12. `plane:1` Airliner: American Airlines, Expedia, Hilton, Howmet
-13. `software:2` App blocks: Notion, Palo Alto Networks, Glean, Amentum
-14. `rocket:1` Fighter jet: General Dynamics, Textron (+ Saronic, Relativity Space)
-15. `chip:1` Graphics card: Qualcomm, Jabil, Lam Research, KLA, Marvell
-16. `bank:9` Briefcase: BNY, Edward Jones (+ State Street, Northern Trust)
-17. `power:0` Wind turbine: GE Vernova, Vistra (+ Sempra, PSEG, WEC)
-18. `chip:2` Memory: Micron, Texas Instruments, Applied Materials, Analog Devices, Sanmina
-19. `parcel:0` Parcels on the move: eBay, Zipline, Coupang, Grainger, GXO, Norfolk Southern
-20. `power:5` Plug and socket: Duke Energy, PG&E (+ Southern, Con Edison, CMS)
-21. `power:1` Power lines: American Electric Power (+ Quanta, Xcel, FirstEnergy, PPL)
-22. `bank:8` Rising chart: Charles Schwab, BlackRock, Ameriprise, Raymond James, Voya
-23. `power:3` Solar farm: Vertiv (+ NextEra, Edison, AES, Ameren)
-24. `oil:5` Tanker: HF Sinclair (+ Cheniere, Expand Energy, Ovintiv)
-25. `payments:3` Crypto coin: Ripple, BitGo, Brex, Chainalysis
-26. `industrial:5` Garbage truck: Waste Management (+ Republic, Xylem, Ingersoll Rand)
-27. `parcel:1` Delivery van: Wayfair, Union Pacific, CSX, Expeditors, Flexport, Graybar
-28. `industrial:4` Paint: Sherwin-Williams, PPG, Comfort Systems, Sonoco, Masco
-29. `parcel:2` Parcel with wings: J.B. Hunt (+ WESCO, C.H. Robinson, Ryder, Prologis, XPO)
-30. `industrial:1` Tower crane: Otis, Carrier, Wabtec, APi Group, Primoris
-31. `software:4` Dashboard: ADP (+ Roper, Clay, Podium, Outreach)
-32. `industrial:2` Hard hat: Whirlpool, Builders FirstSource, Owens Corning, Mohawk
-33. `industrial:6` Packaging line: Stanley Black & Decker, Ball, Avery Dennison (+ Crown, Packaging Corp., Graphic Packaging)
-34. `software:5` Email: Calendly (+ Gusto, Concentrix, KBR)
+No more shared shapes are queued. Further upgrades only if the user asks (see the next list for what was deliberately left).
 
 ### Deliberately NOT upgraded (they keep their current models)
 
@@ -116,7 +85,7 @@ The user wants scenes only for shapes carrying companies people actually search 
   - Materials and mining: International Paper, Newmont.
   - Startups: Databricks, Perplexity, Neuralink, Scale AI, Hugging Face, Runway, Discord, Plaid, Ramp, Nuro.
 
-After the queue: give the user a short status (what's done, how many companies have upgraded scenes, the hero-candidate list). Then move on to plan item 4 (the "Access 3D asset library" button) and item 3 (the ad video).
+Next: plan item 4 (the "Access 3D asset library" button), then item 3 (the ad video).
 
 ## How the models work
 
