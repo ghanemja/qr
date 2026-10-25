@@ -72,7 +72,8 @@
   "lockheed": "Only a few can build it",
   "deere": "Farms that steer themselves",
   "intel": "Designed and made in-house",
-  "delta": "The hub that runs on time"
+  "delta": "The hub that runs on time",
+  "nike": "Just do it"
  },
  "bank": [
   "Wells Fargo",
@@ -327,7 +328,6 @@
   "Advance Auto Parts",
   "Qurate Retail",
   "Casey's General Stores",
-  "Nike",
   "VF",
   "PVH",
   "Ralph Lauren",
@@ -1192,7 +1192,6 @@
   "Lowe's": 6,
   "Tractor Supply": 6,
   "Best Buy": 7,
-  "Nike": 8,
   "Foot Locker": 8,
   "Dick's Sporting Goods": 8,
   "Ulta Beauty": 9,
@@ -1602,5 +1601,8 @@
  ],
  "delta": [
   "Delta Air Lines"
+ ],
+ "nike": [
+  "Nike"
  ]
 }

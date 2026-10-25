@@ -2458,5 +2458,43 @@ export const HEROES = {
     for (let k = 0; k < 4; k++) moving.push({ geo: k === 0 ? merge(part(rbox(0.5, 0.3, 0.35, 0.05), RED, { p: [0, 0.25, 0] }), part(rbox(0.2, 0.2, 0.3, 0.04), '#26323f', { p: [-0.1, 0.45, 0] })) : merge(part(box(0.5, 0.06, 0.35), '#7b828c', { p: [0, 0.15, 0] }), part(rbox(0.22, 0.2, 0.3, 0.04), '#c99a62', { p: [-0.1, 0.28, 0] }), part(rbox(0.2, 0.25, 0.28, 0.04), '#3d6ea8', { p: [0.13, 0.3, 0] })), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 10, -k * 0.035), a = along(bags, u); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry, s: Math.min(1, u / 0.04, (1 - u) / 0.04) + 0.001 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Nike: the brand athletes are proud to wear. Runners lap the track, a player shoots at the
+  // court, the giant sneaker's Air bubble pulses with every stride, and the swoosh stands over it all.
+  nike: { finder: '#111111', build: () => {
+    const R = rand(23), out = [], y0 = 0.24, INK = '#111111', VOLT = '#d4ff00';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#7fbf5a', { p: [0, 0.12, 0] }));
+    // ---- the running track: a stadium oval of red lanes round a green infield
+    const ring2 = (a1, b1, a2, b2, c, y) => { const n = hi() ? 96 : 32, tri = []; for (let i = 0; i < n; i++) { const u = (i / n) * TAU, v = ((i + 1) / n) * TAU; const A0 = [Math.cos(u) * a1, y, Math.sin(u) * b1], A1 = [Math.cos(u) * a2, y, Math.sin(u) * b2], B0 = [Math.cos(v) * a1, y, Math.sin(v) * b1], B1 = [Math.cos(v) * a2, y, Math.sin(v) * b2]; tri.push(...A0, ...B0, ...A1, ...A1, ...B0, ...B1); } const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(tri, 3)); g.computeVertexNormals(); return part(g, c); };
+    const TX = -0.8, TZ = 1.4;
+    out.push(place(ring2(3.4, 2.4, 4.2, 3.2, '#c8553d', 0), { p: [TX, y0 + 0.012, TZ] }), place(ring2(0.01, 0.01, 3.4, 2.4, '#5fae45', 0), { p: [TX, y0 + 0.01, TZ] }));
+    for (const k of [0.25, 0.5, 0.75]) out.push(place(ring2(3.4 + k * 0.8 - 0.012, 2.4 + k * 0.8 - 0.012, 3.4 + k * 0.8 + 0.012, 2.4 + k * 0.8 + 0.012, '#f4f1ea', 0), { p: [TX, y0 + 0.016, TZ] }));
+    // ---- the court, back right
+    const KX = 3.0, KZ = -3.0;
+    out.push(part(box(3.4, 0.03, 3.0), '#c48a55', { p: [KX, y0 + 0.015, KZ] }), part(box(3.42, 0.005, 0.05), '#ffffff', { p: [KX, y0 + 0.033, KZ + 1.48] }), part(new THREE.RingGeometry(0.85, 0.9, 32, 1, 0, Math.PI).rotateX(-Math.PI / 2), '#ffffff', { p: [KX, y0 + 0.034, KZ - 1.4] }));
+    out.push(part(cyl(0.06, 0.06, 2.2, 10), '#3a3f47', { p: [KX, y0 + 1.1, KZ - 1.6] }), part(rbox(0.9, 0.6, 0.05, 0.02), '#ffffff', { p: [KX, y0 + 2.1, KZ - 1.5] }), part(torus(0.2, 0.025, TAU, 20), '#e5533d', { p: [KX, y0 + 1.85, KZ - 1.25], r: [Math.PI / 2, 0, 0] }));
+    // ---- the swoosh sculpture, back left
+    const sw = new THREE.Shape(); sw.moveTo(-1.2, 0.35); sw.quadraticCurveTo(-1.5, -0.35, -0.6, -0.3); sw.quadraticCurveTo(0.2, -0.25, 1.5, 0.45); sw.quadraticCurveTo(0.1, -0.05, -0.55, 0.0); sw.quadraticCurveTo(-1.05, 0.05, -1.2, 0.35);
+    out.push(part(new THREE.ExtrudeGeometry(sw, { depth: 0.18, bevelEnabled: true, bevelThickness: 0.04, bevelSize: 0.04, bevelSegments: hi() ? 3 : 1, curveSegments: hi() ? 16 : 5 }), INK, { p: [-3.0, y0 + 2.12, -3.4], r: [0, Math.PI / 4, 0], s: 1.3 }), part(rbox(1.2, 1.6, 0.6, 0.06), '#d6d0c4', { p: [-3.0, y0 + 0.8, -3.4], r: [0, Math.PI / 4, 0] }));
+    [[4.6, 1.4], [4.6, 4.6], [-4.7, -1.2], [0.6, -4.6], [-1.4, -4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.7 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // The giant sneaker in the infield, rocking heel to toe; its Air bubble pulses.
+    const sole = new THREE.Shape(); sole.moveTo(-1.1, 0); sole.lineTo(1.1, 0); sole.quadraticCurveTo(1.35, 0.05, 1.3, 0.3); sole.lineTo(-1.15, 0.32); sole.quadraticCurveTo(-1.3, 0.15, -1.1, 0);
+    const upper = new THREE.Shape(); upper.moveTo(-1.1, 0.3); upper.lineTo(1.25, 0.3); upper.quadraticCurveTo(1.2, 0.65, 0.5, 0.75); upper.lineTo(-0.2, 1.05); upper.lineTo(-0.85, 1.2); upper.quadraticCurveTo(-1.25, 1.0, -1.1, 0.3);
+    const shoe = moving.length;
+    moving.push({ geo: merge(part(new THREE.ExtrudeGeometry(sole, { depth: 0.8, bevelEnabled: true, bevelThickness: 0.06, bevelSize: 0.05, bevelSegments: hi() ? 3 : 1, curveSegments: 6 }).translate(0, 0, -0.4), '#f4f4f0'),
+      part(new THREE.ExtrudeGeometry(upper, { depth: 0.72, bevelEnabled: true, bevelThickness: 0.08, bevelSize: 0.06, bevelSegments: hi() ? 3 : 1, curveSegments: 6 }).translate(0, 0, -0.36), '#f4f4f0'),
+      part(new THREE.ExtrudeGeometry(sw, { depth: 0.04, bevelEnabled: false, curveSegments: hi() ? 12 : 4 }), INK, { p: [0.05, 0.62, 0.43], s: 0.42 }), part(new THREE.ExtrudeGeometry(sw, { depth: 0.04, bevelEnabled: false, curveSegments: hi() ? 12 : 4 }), INK, { p: [0.05, 0.62, -0.47], s: 0.42 }),
+      part(rbox(1.6, 0.1, 0.84, 0.04), VOLT, { p: [0.05, 0.05, 0] }), [0, 1, 2, 3].map((i) => part(box(0.04, 0.04, 0.5), '#ffffff', { p: [0.55 - i * 0.18, 0.72 + i * 0.1, 0] }))),
+      pivot: [TX, y0 + 0.08, TZ], anim: (t) => ({ ry: Math.PI / 4 + Math.sin(t * 0.4) * 0.25, rz: Math.sin(t * 2.4) * 0.06, y: Math.max(0, Math.sin(t * 2.4)) * 0.15, s: 1.15 }) });
+    moving.push({ geo: part(capsule(0.12, 0.35, 8), '#9fd8ff', { r: [0, 0, Math.PI / 2] }), pivot: [-0.75, 0.16, 0.43], parent: shoe, anim: (t) => ({ sy: 1 - Math.max(0, Math.sin(t * 2.4)) * 0.35, sz: 0.3 }) });
+    // Runners lapping the track in the outer lanes.
+    [['#e5533d', 3.6, 2.6, 7], ['#3d7be0', 3.8, 2.8, 7.6], [VOLT, 4.0, 3.0, 8.3]].forEach(([shirt, a, b, P], i) => moving.push(...walker(moving.length, (t) => { const u = cyc(t, P, i * 0.2) * TAU; return { x: TX + Math.cos(u) * a, z: TZ + Math.sin(u) * b, ry: Math.atan2(-Math.cos(u) * b, -Math.sin(u) * a) }; }, { shirt, pants: INK, skin: ['#8d5a3b', '#e9b98f', '#c58c66'][i], hair: '#1d1f24', y: y0 })));
+    // The player and the ball: dribble, jump shot, swish.
+    const P = 3.2;
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P); return { x: KX + 0.2, z: KZ + 0.6, ry: Math.PI / 2, still: true, y: f > 0.35 && f < 0.6 ? hop(win(f, 0.35, 0.6)) * 0.35 : 0, push: f > 0.3 && f < 0.5 }; }, { shirt: '#e5533d', pants: INK, skin: '#8d5a3b', hair: '#1d1f24', y: y0 }));
+    moving.push({ geo: merge(part(ball(0.13), '#e07a2e'), part(torus(0.13, 0.008, TAU, 20), INK)), pivot: [KX + 0.2, y0, KZ + 0.6], anim: (t) => { const f = cyc(t, P); if (f < 0.35) { const d = Math.abs(Math.sin(f / 0.35 * Math.PI * 3)); return { x: 0.25, y: 0.15 + d * 0.65, rz: f * 20 }; } if (f < 0.8) { const k = win(f, 0.4, 0.75); return { x: 0, y: 1.9 + hop(k) * 0.9 - k * 0.2, z: -k * 1.85, rx: k * 8 }; } const k = win(f, 0.8, 1); return { x: 0, y: 1.7 - k * 1.55, z: -1.85 + k * 0.3 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
