@@ -1706,4 +1706,36 @@ export const HEROES2 = {
     moving.push({ geo: place(sedan(TEAL), { s: 0.45 }), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P); if (f < 0.3) return { x: VX + Math.cos(a0) * 0.7, y: y0 + 0.45 + 3 * LH, z: VZ + Math.sin(a0) * 0.7, ry: -a0 }; if (f < 0.38) { const u = easeIO(win(f, 0.3, 0.38)); return { x: VX + Math.cos(a0) * 0.7 * (1 - u), y: y0 + 0.45 + 3 * LH, z: VZ + Math.sin(a0) * 0.7 * (1 - u), ry: -a0 }; } if (f < 0.58) return { x: VX, y: y0 + 0.45 + liftY(f), z: VZ, ry: -a0 }; const u = easeIO(win(f, 0.6, 0.85)), path = curve([[VX, 0, VZ], [VX + 1.6, 0, VZ + 1.6], [0.8, 0, 1.6], [0.8, 0, 3.6]]), a = along(path, u); return { x: a.p.x, y: y0 + 0.45 * (1 - Math.min(1, u * 8)) + 0.02, z: a.p.z, ry: a.ry, s: f > 0.95 ? 1 - win(f, 0.95, 1) + 0.001 : 1 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // CarMax: the no-haggle used car, done at scale. A car comes in to be appraised, goes through
+  // the reconditioning bay (washed, fixed, inspected), gets its one fixed price, and drives off
+  // with its new owner.
+  carmax: { finder: '#053361', build: () => {
+    const R = rand(151), out = [], NAVY = '#053361', YEL = '#ffd520';
+    out.push(ground('#5b616b'), part(box(10.2, 0.02, 10.2), '#6a7079', { p: [0, y0 + 0.01, 0] }));
+    // ---- the store, back left, and the reconditioning bay, back right
+    out.push(part(rbox(4.0, 1.8, 2.2, 0.05), '#eef0f2', { p: [-2.6, y0 + 0.9, -3.4] }), part(box(4.02, 0.4, 2.22), NAVY, { p: [-2.6, y0 + 1.6, -3.4] }), place(pixText('CARMAX', 0.08, YEL, 0.03), { p: [-2.6, y0 + 1.6, -2.28] }), part(box(2.0, 0.9, 0.04), '#9cc3e0', { p: [-2.6, y0 + 0.6, -2.28] }));
+    out.push(part(rbox(3.2, 1.8, 2.2, 0.05), '#d8dde3', { p: [2.6, y0 + 0.9, -3.4] }), part(box(1.8, 1.3, 0.04), '#3a3f47', { p: [2.6, y0 + 0.65, -2.28] }), part(box(3.22, 0.3, 2.22), YEL, { p: [2.6, y0 + 1.65, -3.4] }));
+    // ---- the lot: rows of cars with price stickers
+    const lot = [];
+    for (let r = 0; r < 2; r++) for (let k = 0; k < 4; k++) lot.push([-4.0 + k * 1.3, 1.0 + r * 2.2]);
+    lot.forEach(([x, z], i) => out.push(place(sedan(['#e5533d', '#3d7be0', '#f4f5f6', '#1d1f24', '#2f9e6e', '#9aa1a9', '#f2c94c', '#8a1538'][i]), { p: [x, y0, z], r: [0, Math.PI / 2, 0], s: 0.85 }), part(box(0.4, 0.3, 0.02), YEL, { p: [x, y0 + 0.75, z + 1.0] })));
+    for (let k = 0; k < 5; k++) out.push(part(box(0.05, 0.012, 2.0), K.white, { p: [-4.65 + k * 1.3, y0 + 0.02, 1.0] }));
+    out.push(trees(R, [[4.6, 4.6], [4.6, 1.4], [0.4, -4.6]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 12;
+    // The car: drives in, appraised, into the bay, out clean with its price, sold and away.
+    const path = curve([[5.6, 0, 0.3], [3.0, 0, 0.3], [2.6, 0, -1.6], [2.6, 0, -2.6], [2.6, 0, -1.6], [1.6, 0, 0.0], [1.2, 0, 2.4], [1.4, 0, 5.6]]);
+    const pos = (f) => (f < 0.15 ? win(f, 0, 0.15) * 0.25 : f < 0.25 ? 0.25 : f < 0.35 ? 0.25 + win(f, 0.25, 0.35) * 0.18 : f < 0.55 ? 0.43 : f < 0.85 ? 0.43 + easeIO(win(f, 0.55, 0.85)) * 0.4 : 0.83 + win(f, 0.85, 1) * 0.17);
+    const car = moving.length;
+    moving.push({ geo: sedan('#c97b5a'), pivot: [0, y0, 0], anim: (t) => { const f = cyc(t, P), a = along(path, pos(f)); return { x: a.p.x, z: a.p.z, ry: f > 0.35 && f < 0.55 ? Math.PI / 2 : a.ry + (f > 0.35 && f < 0.56 ? Math.PI : 0), s: clamp01((5.3 - Math.max(Math.abs(a.p.x), Math.abs(a.p.z))) / 0.5) * 0.85 + 0.001 }; } });
+    // A dull coat that washes off in the bay, and the price sticker that appears after.
+    moving.push({ geo: part(box(1.8, 0.04, 1.0), '#8a7a5a', { p: [0, 1.15, 0] }), pivot: [0, 0, 0], parent: car, anim: (t) => { const f = cyc(t, P); return f < 0.45 ? { s: 1 } : { s: 0.001 }; } });
+    moving.push({ geo: merge(part(box(0.5, 0.36, 0.03), YEL), pixText('$', 0.05, NAVY, 0.04)), pivot: [0.2, 0.85, 0.53], parent: car, anim: (t) => { const f = cyc(t, P); return f > 0.55 ? { s: back(win(f, 0.55, 0.62)) } : { s: 0.001 }; } });
+    // The appraiser with a clipboard, and suds in the bay.
+    moving.push(...walker(moving.length, () => ({ x: 3.0, z: 1.3, ry: Math.PI / 2, still: true }), { shirt: NAVY, pants: '#2b3a55', y: y0 }));
+    for (let k = 0; k < 4; k++) moving.push({ geo: bubbleGeo(0.18), pivot: [2.6 + (k - 1.5) * 0.4, y0 + 1.0, -2.0], anim: (t) => { const f = cyc(t, P), u = cyc(t, 1, k / 4); return f > 0.35 && f < 0.55 ? { y: u * 0.8, s: 1 - u + 0.001 } : { s: 0.001 }; } });
+    // The new owner, walking out to it.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.6, 0.8)); return { x: -1.6 + u * 2.8, z: -2.0 + u * 2.2, ry: -Math.PI / 4, s: f > 0.8 || f < 0.58 ? 0.001 : 1 }; }, { shirt: '#d6336c', pants: '#2b3a55', y: y0 }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

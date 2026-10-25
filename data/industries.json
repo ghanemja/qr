@@ -138,7 +138,8 @@
   "lasvegassands": "The integrated resort: Marina Bay Sands and its SkyPark",
   "mgm": "The Strip's biggest landlord, and BetMGM in every pocket",
   "caesars": "One rewards card across a whole Strip of casinos",
-  "carvana": "Buy it on your phone, pick it up from the vending machine"
+  "carvana": "Buy it on your phone, pick it up from the vending machine",
+  "carmax": "The no-haggle used car, reconditioned and priced at scale"
  },
  "bank": [
   "PNC Financial Services",
@@ -412,7 +413,6 @@
   "Group 1 Automotive",
   "Sonic Automotive",
   "Asbury Automotive Group",
-  "CarMax",
   "Autoliv",
   "Dana",
   "American Axle & Manufacturing",
@@ -1780,5 +1780,8 @@
  ],
  "carvana": [
   "Carvana"
+ ],
+ "carmax": [
+  "CarMax"
  ]
 }
