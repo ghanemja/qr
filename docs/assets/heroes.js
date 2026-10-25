@@ -2748,5 +2748,43 @@ export const HEROES = {
     [[-2.4, 2.1], [1.0, 2.1]].forEach(([x, z], i) => moving.push(...walker(moving.length, (t) => { const f = cyc(t, 8, i * 0.5), xx = x + Math.sin(f * TAU) * 0.9; return { x: xx, z, ry: Math.cos(f * TAU) > 0 ? 0 : Math.PI }; }, { shirt: '#f4f5f6', pants: '#2b3a55', skin: ['#e9b98f', '#8d5a3b'][i], hair: ['#3a2a20', '#1d1f24'][i], y: y0 })));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Comcast: the wire into the home and the stories that run down it. A coaster train screams
+  // round its loop in the theme park, the NBC peacock fans its tail over the studio, and an
+  // Xfinity van wires up a house down the street.
+  comcast: { finder: '#6138f5', build: () => {
+    const R = rand(97), out = [], y0 = 0.24, PURP = '#6138f5';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#86c766', { p: [0, 0.12, 0] }));
+    // ---- the coaster: a circuit with a big vertical loop, on its supports
+    const pts = [];
+    for (let i = 0; i < 48; i++) { const u = i / 48; let x, y, z; if (u < 0.3) { const k = u / 0.3; x = -4.0 + k * 5.6; z = -1.0; y = 0.5 + Math.sin(k * Math.PI) * 2.2; } else if (u < 0.55) { const k = (u - 0.3) / 0.25, a = -Math.PI / 2 + k * TAU; x = 1.6 + Math.cos(a) * 1.1 + k * 0.3; y = 1.6 + Math.sin(a) * 1.1; z = -1.0 - k * 0.6; } else { const k = (u - 0.55) / 0.45, a = k * Math.PI; x = 1.9 - (1 - Math.cos(a)) * 2.95; z = -1.6 - Math.sin(a) * 2.2; y = 0.5 + Math.sin(k * Math.PI * 2) * 0.4 + 0.1; } pts.push([x, y0 + y, z]); }
+    const track = curve(pts, true);
+    track.curveType = 'centripetal';
+    out.push(part(tubeOn(track, 0.05, hi() ? 260 : 60), '#e5533d'), part(tubeOn(track, 0.03, hi() ? 260 : 60), '#c0392b', { p: [0, -0.12, 0] }));
+    for (let i = 0; i < 26; i++) { const p = track.getPointAt(i / 26); if (p.y - y0 > 0.35) out.push(part(cyl(0.04, 0.05, p.y - y0 - 0.1, 8), '#f4f5f6', { p: [p.x, y0 + (p.y - y0 - 0.1) / 2, p.z] })); }
+    out.push(part(rbox(1.2, 0.4, 0.8, 0.04), '#f2c94c', { p: [-3.6, y0 + 0.2, -1.6] }), part(prism(1.3, 0.4, 0.9), PURP, { p: [-3.6, y0 + 0.4, -1.6], r: [0, Math.PI / 2, 0] }));
+    // ---- the studio with the peacock over it
+    const SX = 2.8, SZ = 2.4;
+    out.push(part(rbox(2.6, 1.4, 1.8, 0.05), '#e9e4da', { p: [SX, y0 + 0.7, SZ] }), part(rbox(2.66, 0.12, 1.86, 0.03), '#c9c2b4', { p: [SX, y0 + 1.4, SZ] }), part(rbox(1.0, 0.8, 0.06, 0.03), '#2a3c50', { p: [SX, y0 + 0.4, SZ + 0.91] }));
+    // ---- the street with the house the van wires up
+    out.push(part(box(10.4, 0.02, 0.9), '#5c6068', { p: [0, y0 + 0.01, 4.3] }));
+    const HX = -2.2, HZ = 2.6;
+    out.push(part(rbox(1.4, 1.0, 1.1, 0.04), '#f6e7c8', { p: [HX, y0 + 0.5, HZ] }), part(prism(1.5, 0.6, 1.2), '#4a5d74', { p: [HX, y0 + 1.0, HZ], r: [0, Math.PI / 2, 0] }), part(rbox(0.6, 0.4, 0.04, 0.02), '#2a3c50', { p: [HX + 0.3, y0 + 0.55, HZ + 0.56] }));
+    out.push(part(cyl(0.06, 0.07, 2.4, 10), '#7a5233', { p: [HX + 1.6, y0 + 1.2, 3.7] }), part(box(0.8, 0.06, 0.06), '#7a5233', { p: [HX + 1.6, y0 + 2.2, 3.7] }), part(tube([[HX + 1.6, y0 + 2.15, 3.7], [HX + 0.9, y0 + 1.6, 3.3], [HX + 0.5, y0 + 0.9, HZ + 0.56]], 0.015), '#1d1f24'));
+    [[-4.6, 4.7], [4.6, 4.7], [4.6, -4.6], [-4.6, -4.4], [0.0, -4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.7 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // The coaster train: four cars following the track, each oriented along it.
+    const carGeo = (c) => merge(part(rbox(0.45, 0.22, 0.36, 0.06), c, { p: [0, 0.12, 0] }), part(ball(0.07), '#e9b98f', { p: [0.0, 0.3, 0.08] }), part(ball(0.07), '#c58c66', { p: [0.0, 0.3, -0.08] }));
+    for (let k = 0; k < 4; k++) moving.push({ geo: carGeo(['#f2c94c', PURP, '#2f9e6e', '#3d7be0'][k]), pivot: [0, 0, 0], anim: (t) => { const u = ((t / 7 - k * 0.018) % 1 + 1) % 1, p = track.getPointAt(u), d = track.getTangentAt(u), side = new V(0, 1, 0).cross(d).normalize(); if (side.lengthSq() < 0.01) side.set(0, 0, 1); const q = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(d, new V().crossVectors(side, d).normalize(), side)); return { x: p.x, y: p.y, z: p.z, q }; } });
+    // The peacock: six feathers fanning open and closed.
+    const cols = ['#fccc12', '#ff7112', '#ef1541', '#6e55dc', '#069de0', '#05ac3f'];
+    cols.forEach((c, i) => moving.push({ geo: part(capsule(0.24, 1.1), c, { p: [0, 0.78, 0], s: [1, 1, 0.4] }), pivot: [SX, y0 + 1.6, SZ + 0.6], anim: (t) => { const f = 0.5 + 0.5 * Math.sin(t * 0.9), a = (i - 2.5) * 0.36 * (0.35 + 0.65 * f); return { q: new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 4, -a, 'YXZ')) }; } }));
+    moving.push({ geo: merge(part(ball(0.2), '#ffffff', { p: [0, 0.4, 0] }), part(cone(0.07, 0.16, 6), '#f2c94c', { p: [0.19, 0.42, 0], r: [0, 0, -Math.PI / 2] })), pivot: [SX, y0 + 1.6, SZ + 0.7], anim: () => ({ ry: Math.PI / 4 }) });
+    // The Xfinity van pulls up; the tech carries the line to the house.
+    moving.push({ geo: merge(part(rbox(1.7, 0.95, 0.9, 0.08), '#f4f5f6', { p: [-0.15, 0.65, 0] }), part(rbox(0.5, 0.65, 0.88, 0.14), '#f4f5f6', { p: [0.85, 0.5, 0] }), part(box(0.04, 0.3, 0.75), '#26323f', { p: [1.1, 0.7, 0] }), part(box(1.2, 0.2, 0.02), PURP, { p: [-0.2, 0.75, 0.46] }), part(box(1.6, 0.06, 0.4), '#9aa1a9', { p: [-0.1, 1.15, 0] }), [[-0.6, 0.42], [0.7, 0.42], [-0.6, -0.42], [0.7, -0.42]].map(([x, z]) => part(new THREE.CylinderGeometry(0.18, 0.18, 0.12, 14), '#1d1f24', { p: [x, 0.18, z], r: [Math.PI / 2, 0, 0] }))),
+      pivot: [0, y0, 4.3], anim: (t) => { const f = cyc(t, 12), x = f < 0.25 ? 5.6 - 5.0 * easeOut(f / 0.25) : f < 0.75 ? 0.6 : 0.6 - 6.2 * easeIn(win(f, 0.75, 1)); return { x, ry: Math.PI, s: clamp01((5.3 - Math.abs(x)) / 0.4) * 0.85 + 0.001 }; } });
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 12), k = f < 0.3 || f > 0.7 ? 0 : Math.sin(win(f, 0.3, 0.7) * Math.PI); return { x: 0.2 - k * 1.2, z: 3.8 - k * 0.6, ry: f < 0.5 ? Math.PI * 0.85 : -Math.PI * 0.15, s: f > 0.27 && f < 0.73 ? 1 : 0.001, still: k > 0.95 }; }, { shirt: PURP, pants: '#2b3a55', y: y0 }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

@@ -79,7 +79,8 @@
   "att": "Fibre to the door",
   "wellsfargo": "Since 1852",
   "goldman": "Ring the bell",
-  "pfizer": "Made at global scale"
+  "pfizer": "Made at global scale",
+  "comcast": "The wire and the story"
  },
  "bank": [
   "Citigroup",
@@ -496,7 +497,6 @@
  ],
  "comms": [
   "Charter Communications",
-  "Comcast",
   "CenturyLink",
   "Frontier Communications",
   "Windstream Holdings",
@@ -1471,7 +1471,6 @@
   "American Tower": 1,
   "DISH Network": 2,
   "Charter Communications": 2,
-  "Comcast": 3,
   "Altice USA": 3,
   "Frontier Communications": 3,
   "Windstream Holdings": 3,
@@ -1620,5 +1619,8 @@
  ],
  "pfizer": [
   "Pfizer"
+ ],
+ "comcast": [
+  "Comcast"
  ]
 }
