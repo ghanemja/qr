@@ -2960,5 +2960,45 @@ export const HEROES = {
     moving.push({ geo: taxi, pivot: [0, y0 + 0.02, 0], anim: (t) => { const u = cyc(t, 20, 0.2), a = along(loop, u); return { x: a.p.x, z: a.p.z, ry: a.ry, s: 0.9 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Airbnb: millions of homes no hotel could offer. A treehouse, an A-frame, a houseboat, a
+  // dome and a windmill share the island; a guest rolls a suitcase up to the treehouse and the host
+  // hands over the key; the Bélo pin floats over it all.
+  airbnb: { finder: '#ff5a5f', build: () => {
+    const R = rand(83), out = [], y0 = 0.24, CORAL = '#ff5a5f';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#86c766', { p: [0, 0.12, 0] }));
+    // A lake in the front-right corner for the houseboat.
+    const lake = new THREE.Shape(new THREE.SplineCurve([[1.0, 5.1], [5.1, 5.1], [5.1, 1.0], [3.4, 0.9], [2.0, 2.0], [1.0, 3.4], [1.0, 5.1]].map(([x, z]) => new THREE.Vector2(x, -z))).getPoints(hi() ? 48 : 14));
+    out.push(part(new THREE.ExtrudeGeometry(lake, { depth: 0.05, bevelEnabled: false }).rotateX(-Math.PI / 2), 'W', { p: [0, y0 + 0.01, 0] }));
+    // Paths of stepping stones.
+    if (hi()) for (let i = 0; i < 14; i++) { const u = i / 13, x = -3.8 + u * 5.0, z = 2.6 - Math.sin(u * Math.PI) * 1.4; out.push(part(cyl(0.16, 0.16, 0.03, 12), '#d9cdb8', { p: [x, y0 + 0.015, z] })); }
+    // ---- the treehouse: a big tree with a cabin and a ladder
+    const TX = -3.0, TZ = -2.6;
+    out.push(part(taper([[TX, y0, TZ], [TX + 0.1, y0 + 1.6, TZ], [TX - 0.05, y0 + 2.8, TZ + 0.1]], 0.35, 0.18, 12), '#7a5233'));
+    out.push(part(rbox(1.6, 0.1, 1.4, 0.03), '#8a5a3a', { p: [TX, y0 + 1.6, TZ] }), part(rbox(1.1, 0.8, 0.9, 0.04), '#c49a68', { p: [TX + 0.1, y0 + 2.05, TZ] }), part(prism(1.25, 0.5, 1.0), '#5a7a4a', { p: [TX + 0.1, y0 + 2.45, TZ], r: [0, Math.PI / 2, 0] }), part(box(0.3, 0.28, 0.04), '#ffe9a8', { p: [TX + 0.3, y0 + 2.1, TZ + 0.46] }));
+    for (const s of [-1, 1]) out.push(part(box(0.04, 1.6, 0.04), '#7a5233', { p: [TX + 0.85, y0 + 0.8, TZ + 0.5 + s * 0.15], r: [0, 0, 0.15] }));
+    for (let i = 0; i < 6; i++) out.push(part(box(0.04, 0.04, 0.32), '#7a5233', { p: [TX + 0.95 - i * 0.04, y0 + 0.2 + i * 0.25, TZ + 0.5] }));
+    if (hi()) { const leaf = leafShape(0); for (let i = 0; i < 70; i++) { const d = new V(R() * 2 - 1, R() * 1.5 - 0.3, R() * 2 - 1).normalize(), at = new V(TX, y0 + 3.2, TZ).addScaledVector(d, 0.9 + R() * 0.5); out.push(windy(part(leaf, shade(['#6fbf4c', '#86cc5f', '#5fae45'][i % 3], 0.8 + d.y * 0.2), { p: at.toArray(), q: new THREE.Quaternion().setFromUnitVectors(new V(0, 0, 1), d), s: 0.45 }), 0.5)); } } else out.push(part(ball(1.2), '#6fbf4c', { p: [TX, y0 + 3.2, TZ] }));
+    // ---- the A-frame cabin
+    out.push(part(prism(1.8, 1.9, 1.6), '#3a2a20', { p: [0.2, y0, -3.4], r: [0, 0, 0] }), part(extrude([[-0.7, 0], [0.7, 0], [0, 1.5]], 0.05), '#c49a68', { p: [0.2, y0 + 0.02, -2.6] }), part(extrude([[-0.45, 0.05], [0.45, 0.05], [0, 0.8]], 0.04), '#ffe9a8', { p: [0.2, y0 + 0.1, -2.55] }));
+    // ---- the dome and the windmill
+    out.push(part(new THREE.SphereGeometry(1.0, hi() ? 24 : 10, hi() ? 12 : 6, 0, TAU, 0, Math.PI / 2), '#e9ecef', { p: [3.4, y0, -3.2] }));
+    out.push(part(lathe([[0.55, 0], [0.4, 2.0], [0, 2.4]], 8), '#f4f1ea', { p: [-3.8, y0, 1.0] }), part(box(0.3, 0.4, 0.04), '#3a2a20', { p: [-3.8, y0 + 0.2, 1.5] }));
+    // ---- the houseboat on the lake
+    out.push(part(rbox(1.8, 0.3, 0.9, 0.1), '#7a5233', { p: [3.4, y0 + 0.12, 3.4], r: [0, -0.6, 0] }), part(rbox(1.2, 0.6, 0.7, 0.05), '#d9e7f2', { p: [3.3, y0 + 0.55, 3.45], r: [0, -0.6, 0] }), part(prism(1.3, 0.3, 0.8), CORAL, { p: [3.3, y0 + 0.85, 3.45], r: [0, -0.6 + Math.PI / 2, 0] }));
+    [[-4.7, -4.7], [-1.4, -4.6], [4.7, -1.0], [-4.7, 4.7], [-1.6, 4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.65 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // The Bélo pin floating and turning.
+    const belo = new THREE.Shape(); belo.moveTo(0, 0); belo.bezierCurveTo(-0.3, 0.35, -0.6, 0.75, -0.45, 1.05); belo.bezierCurveTo(-0.3, 1.35, 0.3, 1.35, 0.45, 1.05); belo.bezierCurveTo(0.6, 0.75, 0.3, 0.35, 0, 0);
+    const hole = new THREE.Path(); hole.moveTo(0, 0.45); hole.bezierCurveTo(-0.2, 0.7, -0.3, 0.85, -0.2, 0.98); hole.bezierCurveTo(-0.1, 1.1, 0.1, 1.1, 0.2, 0.98); hole.bezierCurveTo(0.3, 0.85, 0.2, 0.7, 0, 0.45); belo.holes.push(hole);
+    moving.push({ geo: part(new THREE.ExtrudeGeometry(belo, { depth: 0.16, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.04, bevelSegments: hi() ? 3 : 1, curveSegments: hi() ? 16 : 5 }).translate(0, -0.6, -0.08), CORAL), pivot: [1.4, y0 + 3.2, 0.2], anim: (t) => ({ ry: t * 0.8, y: Math.sin(t * 1.4) * 0.15, s: 1.2 }) });
+    // The windmill's sails, the houseboat bobbing.
+    moving.push({ geo: merge(ring(4, (a) => part(box(0.12, 1.0, 0.03), '#c49a68', { p: [Math.cos(a) * 0.5, Math.sin(a) * 0.5, 0], r: [0, 0, a - Math.PI / 2] }))), pivot: [-3.8, y0 + 2.0, 1.45], anim: (t) => ({ rz: t * 1.2 }) });
+    // The guest with a suitcase, walking to the treehouse; the host waiting with a key.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 12), k = easeIO(win(f, 0, 0.6)), x = 1.2 - k * 3.0, z = 2.6 - k * 3.4; return { x, z, ry: Math.atan2(3.4, -3.0), still: f > 0.6, s: f > 0.95 ? 0.001 : 1 }; }, { shirt: '#3d7be0', pants: '#2b3a55', y: y0, carry: merge(part(rbox(0.3, 0.42, 0.18, 0.05), CORAL, { p: [-0.35, 0.3, 0.25] }), part(cyl(0.015, 0.015, 0.35, 6), '#3a3f47', { p: [-0.2, 0.62, 0.25], r: [0, 0, 0.5] })) }));
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 12); return { x: -2.2, z: -1.4, ry: -Math.PI * 0.25, still: true, push: f > 0.58 && f < 0.7 }; }, { shirt: CORAL, pants: '#5a3a2a', skin: '#c58c66', hair: '#1d1f24', y: y0 }));
+    moving.push({ geo: merge(part(torus(0.05, 0.015, TAU, 12), '#d4a640'), part(box(0.14, 0.02, 0.03), '#d4a640', { p: [0.1, 0, 0] })), pivot: [-2.0, y0 + 1.25, -1.2], anim: (t) => { const f = cyc(t, 12); return f > 0.58 && f < 0.75 ? { x: win(f, 0.6, 0.7) * 0.25, z: win(f, 0.6, 0.7) * 0.15, ry: t * 4 } : { s: 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 

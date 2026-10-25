@@ -84,7 +84,8 @@
   "amex": "Membership has its privileges",
   "pg": "In every cupboard",
   "jnj": "Medicine and the surgeon's hand",
-  "waymo": "The car drives itself"
+  "waymo": "The car drives itself",
+  "airbnb": "Belong anywhere"
  },
  "bank": [
   "Citigroup",
@@ -1634,5 +1635,8 @@
  ],
  "waymo": [
   "Waymo"
+ ],
+ "airbnb": [
+  "Airbnb"
  ]
 }
