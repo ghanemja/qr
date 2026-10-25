@@ -145,7 +145,8 @@
   "paccar": "The premium trucks drivers ask for, and the parts that keep them running",
   "northrop": "The planes and telescopes no one else can build",
   "internationalpaper": "The boxes the online world ships in, from the managed forest",
-  "newmont": "The world's biggest gold miner, decades of ore in the ground"
+  "newmont": "The world's biggest gold miner, decades of ore in the ground",
+  "databricks": "The lakehouse: every kind of data in one lake, turned into answers"
  },
  "bank": [
   "PNC Financial Services",
@@ -686,9 +687,7 @@
  ],
  "search": [],
  "vr": [],
- "bricks": [
-  "Databricks"
- ],
+ "bricks": [],
  "_looks": {
   "JPMorgan Chase": {
    "v": 0,
@@ -1799,5 +1798,8 @@
  ],
  "newmont": [
   "Newmont Goldcorp"
+ ],
+ "databricks": [
+  "Databricks"
  ]
 }

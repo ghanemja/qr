@@ -1908,4 +1908,38 @@ export const HEROES2 = {
     moving.push({ geo: part(extrude([[-0.22, 0], [0.22, 0], [0.17, 0.14], [-0.17, 0.14]], 0.22), '#ffcf3f'), pivot: [3.4, y0 + 0.02, 2.4], anim: (t) => { const f = cyc(t, 4), u = easeIO(win(f, 0.5, 0.9)); return { x: u * -0.5, z: u * 0.6, s: f < 0.1 ? f / 0.1 + 0.001 : f > 0.92 ? 0.001 : 1 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Databricks: the lakehouse. Data of every kind pours into one lake, and the house built on
+  // it, stacked red bricks, turns it into the tables, charts and AI models a company runs on.
+  databricks: { finder: '#ff3621', build: () => {
+    const R = rand(158), out = [], RED = '#ff3621', NAVY = '#1b3139';
+    out.push(ground('#8fc66f'), part(cyl(3.2, 3.2, 0.06, 64), 'W', { p: [-0.6, y0 + 0.03, -0.6], s: [1, 1, 0.85] }), part(torus(3.2, 0.1, TAU, 64), '#c9c4b8', { p: [-0.6, y0 + 0.05, -0.6], r: [Math.PI / 2, 0, 0], s: [1, 0.85, 1] }));
+    // ---- the lakehouse: stilts, a deck, and the stacked-brick logo as the house
+    const HX = -0.6, HZ = -0.6;
+    [[-0.9, -0.9], [0.9, -0.9], [-0.9, 0.9], [0.9, 0.9]].forEach(([x, z]) => out.push(part(cyl(0.08, 0.08, 0.7, 10), '#7b828c', { p: [HX + x, y0 + 0.35, HZ + z] })));
+    out.push(part(rbox(2.4, 0.14, 2.4, 0.04), '#c9a36b', { p: [HX, y0 + 0.75, HZ] }));
+    const brick = (s) => merge(part(extrude([[0, -0.5], [1, 0], [0, 0.5], [-1, 0]], 0.28), RED, { r: [Math.PI / 2, 0, 0] })).scale(s, 1, s);
+    for (let k = 0; k < 4; k++) out.push(place(brick(1.0 - k * 0.05), { p: [HX, y0 + 1.0 + k * 0.42, HZ], r: [0, Math.PI / 4, 0] }));
+    // ---- the sources round the shore: an app, a sensor mast, a stack of files, a shop till
+    const srcs = [[3.4, -3.6], [3.8, 0.4], [2.6, 3.6], [-3.4, 3.6]];
+    out.push(part(rbox(0.9, 1.5, 0.12, 0.12), NAVY, { p: [3.4, y0 + 0.9, -3.6], r: [0, Math.PI / 4, 0] }), part(rbox(0.78, 1.3, 0.02, 0.08), '#9cc3e0', { p: [3.44, y0 + 0.9, -3.56], r: [0, Math.PI / 4, 0] }));
+    out.push(part(cyl(0.05, 0.06, 2.0, 8), '#9aa1a9', { p: [3.8, y0 + 1.0, 0.4] }), part(rbox(0.3, 0.3, 0.3, 0.05), K.white, { p: [3.8, y0 + 2.0, 0.4] }), part(ball(0.08), '#62d35f', { p: [3.8, y0 + 2.2, 0.4] }));
+    for (let k = 0; k < 5; k++) out.push(part(rbox(0.7, 0.08, 0.5, 0.02), ['#f4f5f6', '#fbf3e3', '#e8eef4'][k % 3], { p: [2.6, y0 + 0.05 + k * 0.09, 3.6], r: [0, k * 0.1, 0] }));
+    out.push(part(rbox(1.0, 0.8, 0.6, 0.04), '#8a5a36', { p: [-3.4, y0 + 0.4, 3.6] }), part(rbox(0.3, 0.25, 0.04, 0.03), '#1d1f24', { p: [-3.4, y0 + 0.95, 3.6], r: [-0.3, 0, 0] }));
+    // ---- what comes out: a dashboard board and a model chip, back left
+    out.push(part(rbox(2.0, 1.3, 0.1, 0.05), K.white, { p: [-3.2, y0 + 1.6, -3.6], r: [0, Math.PI / 4, 0] }), part(box(0.08, 0.95, 0.08), '#9aa1a9', { p: [-3.2, y0 + 0.47, -3.6] }));
+    out.push(trees(R, [[4.6, 4.6], [-4.6, 0.6], [0.6, 4.6], [0.6, -4.6]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 6;
+    // Data from every source down into the lake.
+    const kinds = [(c) => part(new THREE.BoxGeometry(0.18, 0.18, 0.18), c), (c) => part(new THREE.SphereGeometry(0.11, 10, 7), c), (c) => part(new THREE.BoxGeometry(0.24, 0.04, 0.18), c), (c) => part(new THREE.CylinderGeometry(0.09, 0.09, 0.16, 10), c)];
+    const hs = [[3.4, 1.8, -3.6], [3.8, 2.3, 0.4], [2.6, 0.7, 3.6], [-3.4, 1.2, 3.6]];
+    hs.forEach(([x, y, z], i) => { const path = curve([[x, y0 + y, z], [(x + HX) / 2, y0 + 2.6, (z + HZ) / 2], [HX + (x > HX ? 1 : -1) * 0.6, y0 + 0.2, HZ + (z > HZ ? 1 : -1) * 0.6]]); for (let k = 0; k < 2; k++) moving.push(rider(kinds[i](['#3d7be0', '#62d35f', '#f2c94c', '#d6336c'][i]), path, P / 2, i / 4 + k / 2, 0, 0.9, (t) => ({ rx: t * 3 }))); });
+    // Ripples where it lands.
+    hs.forEach(([x, , z], i) => moving.push(pulse(HX + (x > HX ? 1 : -1) * 0.6, y0 + 0.07, HZ + (z > HZ ? 1 : -1) * 0.6, '#d6f0fb', P / 2, i / 4 + 0.45, 0.3)));
+    // The house's top brick pulsing as it works, and bars on the board climbing.
+    moving.push({ geo: brick(0.9), pivot: [HX, y0 + 2.7, HZ], anim: (t) => ({ ry: Math.PI / 4, y: Math.sin(t * 2) * 0.05, s: 1 + Math.sin(t * 4) * 0.03 }) });
+    const BQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 4, 0));
+    for (let k = 0; k < 5; k++) { const v = new V(-0.7 + k * 0.35, 0, 0.07).applyQuaternion(BQ); moving.push({ geo: part(box(0.22, 1.0, 0.02), [RED, '#3d7be0', '#f2c94c', '#2f9e6e', RED][k], { p: [0, 0.5, 0] }), pivot: [-3.2 + v.x, y0 + 1.05, -3.6 + v.z], anim: (t) => ({ q: BQ, sy: 0.2 + 0.8 * (0.4 + 0.6 * Math.abs(Math.sin(t * 0.6 + k))) * (0.4 + k * 0.12) }) }); }
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
