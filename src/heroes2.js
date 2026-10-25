@@ -2276,29 +2276,40 @@ export const HEROES2 = {
     [0, 0.5].forEach((o, i) => moving.push(...walker(moving.length, (t) => { const u = cyc(t, 12, o) * TAU; return { x: Math.cos(u) * 2.6, z: Math.sin(u) * 2.6, ry: -u - Math.PI / 2 }; }, { shirt: ['#3d7be0', '#d6336c'][i], pants: INK, y: y0 })));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // Nuro: delivery with no one in the driver's seat. The narrow electric pod pulls away from the
-  // grocery, rolls down the street by itself, stops at the house and lifts its door for the
-  // customer to take the bags.
+  // Nuro: delivery with no one at the wheel. Driverless pods leave the grocer and the pizza place,
+  // spin their sensors as they stop for the person at the crosswalk, pull up at the homes and lift
+  // their doors for the customers to take their orders.
   nuro: { finder: '#00b2a9', build: () => {
-    const R = rand(167), out = [], TEAL = '#00b2a9';
-    out.push(ground('#8fc66f'), part(box(10.2, 0.03, 1.3), '#5b616b', { p: [0, y0 + 0.015, 0.6] }), part(box(10.2, 0.06, 0.6), '#d8d4ca', { p: [0, y0 + 0.03, 1.6] }), part(box(10.2, 0.06, 0.6), '#d8d4ca', { p: [0, y0 + 0.03, -0.4] }));
-    // ---- the grocery store, back left; the houses, front right
-    out.push(part(rbox(3.2, 1.5, 2.2, 0.05), '#f4efe6', { p: [-2.8, y0 + 0.75, -2.4] }), part(box(3.22, 0.3, 2.22), '#2f9e6e', { p: [-2.8, y0 + 1.4, -2.4] }), part(box(1.6, 0.8, 0.04), '#9cc3e0', { p: [-2.8, y0 + 0.5, -1.28] }), place(pixText('GROCER', 0.05, K.white, 0.02), { p: [-2.8, y0 + 1.4, -1.28] }));
-    out.push(place(house2('#fbf3e3', '#5b6b7d', '#3d7be0'), { p: [2.2, y0, 3.2], r: [0, Math.PI, 0], s: 0.75 }), place(home('#e8eef4', '#a35a3c', 1.5, 1.3, 1.0), { p: [-1.6, y0, 3.4], r: [0, Math.PI, 0] }), place(home('#f6e7e1', '#3f6f8f', 1.5, 1.3, 1.0), { p: [2.8, y0, -2.6] }));
-    out.push(part(box(0.8, 0.04, 1.0), '#d8d4ca', { p: [2.2, y0 + 0.03, 2.2] }));
-    out.push(trees(R, [[-4.6, 3.4], [4.6, 3.6], [0.4, 3.6], [0.4, -2.6], [4.6, -4.4], [-0.6, -4.6]], 0.55));
+    const R = rand(233), out = [], TEAL = '#00b2a9';
+    out.push(ground('#8fc66f'));
+    // ---- the streets: a loop round the block, with a crosswalk
+    const RD = 2.6;
+    [[0, -RD, 6.2, 1.0], [0, RD, 6.2, 1.0], [-RD, 0, 1.0, 6.2], [RD, 0, 1.0, 6.2]].forEach(([x, z, w, d]) => out.push(part(box(w, 0.03, d), '#5b616b', { p: [x, y0 + 0.015, z] })));
+    for (let k = 0; k < 6; k++) out.push(part(box(0.14, 0.012, 0.9), K.white, { p: [-0.6 + k * 0.26, y0 + 0.035, RD] }));
+    // The middle of the block: a park; the pickup places on the back street; homes round the outside.
+    out.push(part(rbox(4.0, 0.08, 4.0, 0.05), '#7fbf5a', { p: [0, y0 + 0.04, 0] }));
+    out.push(part(rbox(2.0, 1.4, 1.4, 0.05), '#f4efe6', { p: [-1.2, y0 + 0.7, -4.3] }), part(box(2.02, 0.3, 1.42), '#2f9e6e', { p: [-1.2, y0 + 1.3, -4.3] }), place(pixText('GROCER', 0.045, K.white, 0.02), { p: [-1.2, y0 + 1.3, -3.58] }));
+    out.push(part(rbox(1.6, 1.2, 1.2, 0.05), '#f4efe6', { p: [1.8, y0 + 0.6, -4.3] }), part(box(1.62, 0.3, 1.22), '#e5533d', { p: [1.8, y0 + 1.1, -4.3] }), place(pixText('PIZZA', 0.045, K.white, 0.02), { p: [1.8, y0 + 1.1, -3.68] }));
+    const homes = [[-4.3, -1.0], [-4.3, 1.8], [-1.4, 4.3], [1.6, 4.3], [4.3, 1.4], [4.3, -1.6]];
+    homes.forEach(([x, z], i) => out.push(place(home(['#fbf3e3', '#e8eef4', '#f6e7e1', '#eef3e6', '#f1e2c6', '#fbf3e3'][i], ['#8a5a36', '#5b6b7d', '#a35a3c', '#3f6f8f', '#6f4a2c', '#5b6b7d'][i], 1.2, 1.0, 0.85), { p: [x, y0, z], r: [0, Math.abs(x) > 4 ? (x < 0 ? Math.PI / 2 : -Math.PI / 2) : 0, 0] })));
+    out.push(trees(R, [[-1.0, -0.8], [1.0, 0.8], [0.8, -1.0], [-0.8, 1.0], [-4.6, -4.6], [4.6, -4.6]], 0.6));
     // ---- moving parts
-    const moving = [], P = 12;
-    // The pod: tall, narrow, rounded, no cabin, with its two compartment doors.
-    const pod = merge(part(rbox(1.7, 1.2, 0.95, 0.25), K.white, { p: [0, 0.8, 0] }), part(rbox(1.72, 0.3, 0.97, 0.12), TEAL, { p: [0, 0.35, 0] }), part(rbox(0.06, 0.4, 0.8, 0.1), '#26323f', { p: [0.86, 1.05, 0] }), part(rbox(0.3, 0.12, 0.3, 0.05), '#3a3f47', { p: [0.2, 1.46, 0] }), part(cyl(0.08, 0.08, 0.1, 12), '#4fc3f7', { p: [0.2, 1.56, 0] }), [[-0.55, 0.47], [0.55, 0.47], [-0.55, -0.47], [0.55, -0.47]].map(([x, z]) => part(new THREE.CylinderGeometry(0.22, 0.22, 0.14, 14), '#1d1f24', { p: [x, 0.22, z], r: [Math.PI / 2, 0, 0] })));
-    const xAt = (f) => (f < 0.08 ? -2.4 : f < 0.4 ? -2.4 + easeIO(win(f, 0.08, 0.4)) * 4.6 : f < 0.7 ? 2.2 : 2.2 + easeIn(win(f, 0.7, 1)) * 3.6);
-    const pi = moving.length;
-    moving.push({ geo: pod, pivot: [0, y0, 0.6], anim: (t) => { const f = cyc(t, P), x = xAt(f); return { x, s: clamp01((5.2 - Math.abs(x)) / 0.6) + 0.001 }; } });
-    moving.push({ geo: part(rbox(0.7, 0.55, 0.04, 0.05), '#e9ecef'), pivot: [0.2, 0.75 + 0.27, 0.49], parent: pi, anim: (t) => { const f = cyc(t, P); return { y: 0.5 * (easeIO(win(f, 0.42, 0.48)) - easeIO(win(f, 0.62, 0.68))) }; } });
-    moving.push({ geo: merge(part(rbox(0.28, 0.32, 0.2, 0.03), '#d8c6a5', { p: [0.0, 0.16, 0] }), part(rbox(0.26, 0.3, 0.2, 0.03), '#d8c6a5', { p: [0.3, 0.15, 0] }), part(new THREE.SphereGeometry(0.06, 8, 6), '#e5533d', { p: [0.05, 0.35, 0] })), pivot: [0.05, 0.6, 0.25], parent: pi, anim: (t) => { const f = cyc(t, P); return f < 0.58 ? {} : { s: 0.001 }; } });
-    // The customer comes down the path, takes the bags, goes back in.
-    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.4, 0.5)) - easeIO(win(f, 0.6, 0.7)); return { x: 2.4, z: 2.4 - u * 0.9, ry: u > 0 && f < 0.55 ? Math.PI / 2 : -Math.PI / 2, still: f > 0.5 && f < 0.6, s: f < 0.38 || f > 0.72 ? 0.001 : 1 }; }, { shirt: '#d6336c', pants: '#2b3a55', y: y0, carry: null }));
-    moving.push({ geo: part(rbox(0.28, 0.32, 0.2, 0.03), '#d8c6a5'), pivot: [2.4, y0 + 0.9, 1.75], anim: (t) => { const f = cyc(t, P), u = easeIO(win(f, 0.6, 0.7)); return f > 0.58 && f < 0.72 ? { z: u * 0.9 } : { s: 0.001 }; } });
+    const moving = [], P = 14;
+    const pod = (c) => merge(part(rbox(1.6, 1.15, 0.9, 0.25), K.white, { p: [0, 0.78, 0] }), part(rbox(1.62, 0.28, 0.92, 0.12), c, { p: [0, 0.34, 0] }), part(rbox(0.06, 0.38, 0.75, 0.1), '#26323f', { p: [0.81, 1.0, 0] }), part(rbox(0.6, 0.5, 0.02, 0.06), '#e9ecef', { p: [0.15, 0.85, 0.46] }), [[-0.5, 0.45], [0.5, 0.45], [-0.5, -0.45], [0.5, -0.45]].map(([x, z]) => part(new THREE.CylinderGeometry(0.21, 0.21, 0.12, 14), '#1d1f24', { p: [x, 0.21, z], r: [Math.PI / 2, 0, 0] })));
+    const loop = curve([[-RD, y0, -RD], [RD, y0, -RD], [RD, y0, RD], [-RD, y0, RD]], true);
+    // Two pods round the block; each stops at the crosswalk and at a door.
+    [[0, TEAL], [0.5, '#3d7be0']].forEach(([o, c], i) => {
+      const uOf = (t) => { const f = cyc(t, P, o); return f < 0.3 ? f / 0.3 * 0.42 : f < 0.42 ? 0.42 : f < 0.62 ? 0.42 + (f - 0.42) / 0.2 * 0.2 : f < 0.78 ? 0.62 : 0.62 + (f - 0.78) / 0.22 * 0.38; };
+      const pi = moving.length;
+      moving.push({ geo: pod(c), pivot: [0, 0, 0], anim: (t) => { const a = along(loop, uOf(t) % 1); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry }; } });
+      moving.push({ geo: merge(part(cyl(0.16, 0.16, 0.14, 14), '#3a3f47'), part(box(0.05, 0.06, 0.3), '#4fc3f7', { p: [0, 0.03, 0] })), pivot: [0.2, 1.45, 0], parent: pi, anim: (t) => ({ ry: t * 6 }) });
+      moving.push({ geo: part(torus(0.9, 0.025, TAU, 32), '#4fc3f7', { r: [Math.PI / 2, 0, 0] }), pivot: [0.2, 1.5, 0], parent: pi, anim: (t) => { const u = cyc(t, 1.2); return { s: 0.5 + u * 1.2, y: -u * 1.2 }; } });
+      moving.push({ geo: part(rbox(0.6, 0.5, 0.04, 0.06), '#e9ecef'), pivot: [0.15, 0.85, 0.48], parent: pi, anim: (t) => { const f = cyc(t, P, o); return { y: 0.55 * (easeIO(win(f, 0.64, 0.68)) - easeIO(win(f, 0.74, 0.78))) }; } });
+    });
+    // The pedestrian on the crosswalk the pods wait for.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, P / 2), u = easeIO(win(f, 0.1, 0.5)); return { x: 0.0, z: RD + 0.6 - u * 1.2, ry: Math.PI / 2, s: f > 0.55 ? 0.001 : 1 }; }, { shirt: '#f29a3a', pants: '#2b3a55', y: y0 }));
+    // Customers stepping out to their doors.
+    [[4.3, 1.4, -1], [-1.4, 4.3, 0]].forEach(([x, z, s], i) => moving.push(...walker(moving.length, (t) => { const f = cyc(t, P, i * 0.5), u = easeIO(win(f, 0.6, 0.66)) - easeIO(win(f, 0.76, 0.82)); return s ? { x: x - 0.7 - u * 0.4, z, ry: Math.PI, still: true, s: f > 0.58 && f < 0.84 ? 1 : 0.001 } : { x, z: z - 0.7 - u * 0.4, ry: Math.PI / 2, still: true, s: f > 0.58 && f < 0.84 ? 1 : 0.001 }; }, { shirt: ['#d6336c', '#3d7be0'][i], pants: '#2b3a55', y: y0 })));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // Figure AI: humanoids at work in a car plant. Car bodies move down the line; the robots walk
