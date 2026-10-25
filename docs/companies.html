@@ -17,7 +17,10 @@
 <body class="page">
 <header class="topbar">
   <a class="brand" href="index.html"><img src="assets/icon.svg" alt="" width="22" height="22"><span>QR&nbsp;Compass</span></a>
-  
+  <div class="search" role="search" data-sitesearch>
+    <input type="search" placeholder="Search companies…" autocomplete="off" spellcheck="false" aria-label="Search companies" aria-expanded="false">
+    <ul class="ss-results" role="listbox" hidden></ul>
+  </div>
   <nav class="nav"><a href="index.html">QR world</a><a href="map.html">Flat map</a><a href="companies.html">Directory</a></nav>
 </header>
 <main class="directory">
@@ -598,5 +601,6 @@
   </table>
 </main>
 <script src="assets/directory.js"></script>
+<script src="assets/sitesearch.js"></script>
 </body>
 </html>

@@ -46,6 +46,25 @@ small { color: var(--muted); font-size: 0.8em; }
 }
 .qw-nav a:hover { background: var(--sand); text-decoration: none; }
 
+/* Site-wide company search at the top of the stage (src/sitesearch.js). */
+.qw-find { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 6; width: min(420px, calc(100% - 520px)); }
+.qw-find input {
+  width: 100%; height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(253, 248, 240, 0.92);
+  font: 15px var(--font); color: var(--ink); backdrop-filter: blur(6px);
+}
+.qw-find input:focus { outline: none; border-color: var(--brown); background: var(--cream-2); }
+.ss-results {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0; min-width: 260px; margin: 0; padding: 6px; list-style: none; max-height: 60vh; overflow: auto;
+  background: var(--cream-2); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow);
+}
+.ss-results li { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 9px; cursor: pointer; }
+.ss-results li[aria-selected="true"], .ss-results li:hover { background: var(--sand); }
+.ss-results .r-meta { overflow: hidden; text-overflow: ellipsis; }
+.dot-i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--f500); flex: none; }
+.dot-i.tech { background: var(--tech); }
+.dot-i.startup { background: var(--startup); }
+@media (max-width: 900px) { .qw-find { left: 240px; right: 170px; width: auto; transform: none; } }
+
 .qw-title { position: absolute; top: 96px; left: 0; right: 0; z-index: 3; text-align: center; pointer-events: none; padding: 0 16px; }
 .qw-title h1 { margin: 0; font-size: clamp(26px, 4.6vw, 46px); letter-spacing: -0.03em; line-height: 1.05; text-shadow: 0 0 12px var(--cream), 0 0 4px var(--cream); }
 .qw-title p { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
@@ -132,6 +151,10 @@ i.dot.startup { background: var(--startup); }
   .qw-nav a { padding: 5px 10px; font-size: 12px; }
   .qw-nav a:nth-child(3) { display: none; }
   .qw-title { top: 84px; }
+  .qw-company .qw-word { display: none; }
+  .qw-find { top: 12px; left: 56px; right: 146px; }
+  .qw-find input { height: 34px; font-size: 16px; }
+  .ss-results { right: auto; width: calc(100vw - 24px); left: -44px; }
   .qw-tabs button { font-size: 11px; gap: 3px; flex-direction: column; height: 52px; padding: 0 4px; min-width: 0; }
   .qw-tabs .sig { grid-column: span 1; }
   .qw-hint { bottom: 212px; }
@@ -231,7 +254,12 @@ i.dot.startup { background: var(--startup); }
 .hm-intro p { margin: 8px 0 0; color: var(--muted); font-size: 15px; text-shadow: 0 0 8px var(--cream); }
 .hm-dock { transition: opacity 0.4s; }
 body.hm-exploding .hm-intro, body.hm-exploding .hm-dock { opacity: 0; pointer-events: none; }
-body.hm-in-region .hm-intro, body.hm-in-region .hm-dock { display: none; }
+body.hm-in-region .hm-intro { display: none; }
+/* In a region the search moves to the top strip, like the company pages' search. */
+body.hm-in-region .hm-dock { top: 16px; bottom: auto; z-index: 6; grid-template-columns: minmax(0, 1fr); width: clamp(220px, calc(100% - 640px), 420px); }
+body.hm-in-region .hm-dock .qw-play { display: none; }
+body.hm-in-region .hm-dock input { height: 40px; border-radius: 999px; font-size: 15px; background: rgba(253, 248, 240, 0.92); }
+body.hm-in-region .hm-dock #results { top: calc(100% + 6px); bottom: auto; right: 0; min-width: 260px; }
 .qw-play .i-stop, body.hm-touring .qw-play .i-play { display: none; }
 body.hm-touring .qw-play .i-stop { display: block; }
 .hm-labels { position: absolute; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
@@ -290,6 +318,10 @@ body.hm-touring #r-stop { display: inline-flex; }
 .hm-pills button[aria-pressed="true"] { background: var(--pill); }
 @media (max-width: 760px) {
   .hm-intro { top: 70px; left: 16px; right: 16px; }
+  body.hm-in-region .qw-word { display: none; }
+  body.hm-in-region .hm-dock { top: 12px; left: 56px; right: 84px; width: auto; transform: none; }
+  body.hm-in-region .hm-dock input { height: 34px; font-size: 16px; }
+  body.hm-in-region .hm-dock #results { left: -44px; right: auto; width: calc(100vw - 24px); }
   .hm-intro p { font-size: 13px; }
   .hm-region { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr auto; padding: 62px 10px 10px; gap: 8px; }
   .hm-r-head { grid-row: 1; padding: 7px 12px; gap: 0; max-width: calc(100% - 128px); }

@@ -336,6 +336,11 @@ const head = ({ title, description, path, depth }) => {
 </head>`;
 };
 
+// The site-wide company search (src/sitesearch.js); `cls` styles it for the page's stylesheet.
+const siteSearch = (cls) => `<div class="${cls}" role="search" data-sitesearch>
+    <input type="search" placeholder="Search companies…" autocomplete="off" spellcheck="false" aria-label="Search companies" aria-expanded="false">
+    <ul class="ss-results" role="listbox" hidden></ul>
+  </div>`;
 const topbar = (depth, extra = '') => {
   const up = '../'.repeat(depth);
   return `<header class="topbar">
@@ -375,6 +380,7 @@ const qwTop = (depth) => {
   return `<div class="qw-brand">
     <a class="qw-logo" href="${up}index.html" aria-label="QR Compass home">${LOGO}</a>
   </div>
+  ${depth ? siteSearch('qw-find') : ''}
   <nav class="qw-nav">${depth ? `<a href="${up}index.html">← Map</a>` : ''}<a href="${up}about.html">About</a></nav>`;
 };
 const ICONS = {
@@ -473,6 +479,7 @@ function companyPage(c, prev, next) {
 <script>window.COMPANY=${JSON.stringify(data)};</script>
 <script src="../assets/qrcode.js"></script>
 <script src="../assets/qr-card.js"></script>
+<script src="../assets/sitesearch.js"></script>
 <script type="module" src="../assets/company3d.js"></script>
 </body>
 </html>
@@ -659,7 +666,7 @@ function directoryPage() {
   const description = `Directory of all ${f500.length} companies on the ${LIST_YEAR} Fortune 500 and ${startups.length} startups, each with a shareable QR page.`;
   return `${head({ title: 'Directory · QR Compass', description, path: 'companies.html', depth: 0 })}
 <body class="page">
-${topbar(0)}
+${topbar(0, siteSearch('search'))}
 <main class="directory">
   <h1>Directory</h1>
   <p class="lede">${esc(description)}</p>
@@ -680,6 +687,7 @@ ${rows.map((c) => `<tr data-k="${c.kind}" data-t="${c.tech ? 1 : 0}" data-q="${e
   </table>
 </main>
 <script src="assets/directory.js"></script>
+<script src="assets/sitesearch.js"></script>
 </body>
 </html>
 `;
@@ -688,7 +696,7 @@ ${rows.map((c) => `<tr data-k="${c.kind}" data-t="${c.tech ? 1 : 0}" data-q="${e
 function aboutPage() {
   return `${head({ title: 'About the data · QR Compass', description: 'Sources and caveats for the QR Compass company map.', path: 'about.html', depth: 0 })}
 <body class="page">
-${topbar(0)}
+${topbar(0, siteSearch('search'))}
 <main class="prose">
   <h1>About the data</h1>
   <p>QR Compass gives every company a page with its own 3D model. Tap it, or press “Turn into QR code”, and the model breaks into pixels that settle into a QR code that scans back to that page, so a post or slide about a company can point to one stable link.</p>
@@ -703,6 +711,7 @@ ${topbar(0)}
   <h2>Corrections</h2>
   <p>Edit <code>data/fortune500.json</code> or <code>data/startups.json</code> and run <code>npm run build</code>.</p>
 </main>
+<script src="assets/sitesearch.js"></script>
 </body>
 </html>
 `;
@@ -712,13 +721,19 @@ ${topbar(0)}
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(join(OUT, 'c'), { recursive: true });
 mkdirSync(join(OUT, 'assets'), { recursive: true });
-for (const f of ['site.css', 'qrworld.css', 'atlas.js', 'qr-card.js', 'directory.js', 'icon.svg', 'qrworld.js', 'models.js', 'qrsculpture.js', 'company3d.js', 'home.js', 'BufferGeometryUtils.js', 'RoundedBoxGeometry.js', 'kit.js', 'heroes.js']) copyFileSync(join(ROOT, 'src', f), join(OUT, 'assets', f));
+for (const f of ['site.css', 'qrworld.css', 'atlas.js', 'qr-card.js', 'directory.js', 'icon.svg', 'qrworld.js', 'models.js', 'qrsculpture.js', 'company3d.js', 'home.js', 'BufferGeometryUtils.js', 'RoundedBoxGeometry.js', 'kit.js', 'heroes.js', 'sitesearch.js']) copyFileSync(join(ROOT, 'src', f), join(OUT, 'assets', f));
 
 copyFileSync(join(ROOT, 'node_modules/qrcode-generator/qrcode.js'), join(OUT, 'assets/qrcode.js'));
 copyFileSync(join(ROOT, 'node_modules/three/build/three.module.min.js'), join(OUT, 'assets/three.module.min.js'));
 copyFileSync(join(ROOT, 'node_modules/three/examples/jsm/controls/OrbitControls.js'), join(OUT, 'assets/OrbitControls.js'));
 copyFileSync(join(ROOT, 'node_modules/three/examples/jsm/environments/RoomEnvironment.js'), join(OUT, 'assets/RoomEnvironment.js'));
 writeFileSync(join(OUT, 'assets/map.svg'), MAP_SVG);
+// The site-wide search index (src/sitesearch.js): [slug, name, place, kind, tech, rank, listed name].
+writeFileSync(join(OUT, 'assets/search.json'), JSON.stringify(companies.map((c) => {
+  const row = [c.slug, c.name, place(c), c.kind === 'f500' ? 0 : 1, c.tech ? 1 : 0, c.rank || 0];
+  if (c.listedName && c.listedName !== c.name) row.push(c.listedName);
+  return row;
+})));
 writeFileSync(join(OUT, 'map.html'), indexPage());
 writeFileSync(join(OUT, 'index.html'), worldPage());
 writeFileSync(join(OUT, 'companies.html'), directoryPage());
