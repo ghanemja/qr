@@ -1008,42 +1008,43 @@ export const HEROES2 = {
     moving.push({ geo: place(semi(YEL, K.white, '#1d1f24'), { s: 0.45 }), pivot: [0, 0, 0], anim: (t) => { const a = along(loop, cyc(t, 10)); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: a.ry }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // Dollar Tree: one low price on everything. Candy, party plates, cleaner, a toy and a helium
-  // balloon all drop into the giant basket under the same green tag, and the balloons float
-  // over the party aisle.
+  // Dollar Tree: one price on everything. Down the checkout belt rolls a parade of completely
+  // different things, candy, a mop, party plates, a toy, a balloon, and each gets the same green
+  // tag as it passes the scanner, under the store's giant price tag and its aisles of everything.
   dollartree: { finder: '#00953a', build: () => {
-    const R = rand(129), out = [], GREEN = '#00953a';
-    out.push(ground('#8fc66f'), part(rbox(7.2, 0.08, 6.4, 0.03), '#eef0e8', { p: [-0.6, y0 + 0.04, -1.0] }));
-    // ---- the store walls with the sign
-    out.push(part(rbox(7.2, 2.4, 0.2, 0.03), '#e8f2e6', { p: [-0.6, y0 + 1.2, -4.2] }), part(rbox(0.2, 2.4, 6.4, 0.03), '#e1eddf', { p: [-4.2, y0 + 1.2, -1.0] }), part(box(7.22, 0.34, 0.22), GREEN, { p: [-0.6, y0 + 2.22, -4.2] }), place(pixText('DOLLAR TREE', 0.065, K.white, 0.03), { p: [-0.6, y0 + 2.22, -4.08] }));
-    // ---- the giant price tag on the back wall
-    const tag = merge(part(extrude([[-1.0, -0.55], [0.8, -0.55], [1.2, 0], [0.8, 0.55], [-1.0, 0.55]], 0.12), GREEN), part(cyl(0.08, 0.08, 0.14, 14), K.white, { p: [0.85, 0, 0], r: [Math.PI / 2, 0, 0] }), pixText('$1.25', 0.1, K.white, 0.16).translate(-0.12, 0, 0));
-    out.push(place(tag, { p: [0.6, y0 + 1.3, -4.0] }));
-    // ---- shelves of everything along the left wall
-    for (let r = 0; r < 3; r++) { out.push(part(box(0.4, 0.05, 5.0), K.white, { p: [-3.9, y0 + 0.5 + r * 0.55, -1.2] })); for (let k = 0; k < 14; k++) out.push(part(rbox(0.25, 0.3, 0.25, 0.04), ['#e5533d', '#f2c94c', '#3d7be0', '#d6336c', '#8a6cf0', '#3fb8a8', '#f29a3a'][(k + r * 2) % 7], { p: [-3.85, y0 + 0.68 + r * 0.55, -3.4 + k * 0.33] })); }
-    // ---- the basket in the middle
-    const BX = 0.4, BZ = -0.6;
-    const basket = merge(part(new THREE.CylinderGeometry(1.25, 1.0, 1.1, hi() ? 32 : 12, 1, true), (x, y, z) => (Math.floor((Math.atan2(z, x) + Math.PI) * 4) % 2 ? GREEN : '#0b7a30'), { p: [0, 0.55, 0] }), part(cyl(1.0, 1.0, 0.06, 32), '#0b7a30', { p: [0, 0.03, 0] }), part(torus(1.25, 0.06, TAU, 40), '#0b7a30', { p: [0, 1.1, 0], r: [Math.PI / 2, 0, 0] }), part(torus(1.1, 0.06, Math.PI, 32), '#0b7a30', { p: [0, 1.1, 0], r: [0, Math.PI / 4, 0] }));
-    out.push(place(basket, { p: [BX, y0 + 0.08, BZ] }));
-    out.push(trees(R, [[4.6, -4.6], [4.6, -1.6], [-4.6, 4.6], [1.6, 4.6], [4.4, 4.4]]));
+    const R = rand(230), out = [], GREEN = '#00953a';
+    out.push(ground('#8fc66f'), part(rbox(9.6, 0.06, 9.0, 0.03), '#eef0e8', { p: [-0.2, y0 + 0.03, -0.5] }));
+    out.push(part(rbox(9.6, 2.8, 0.2, 0.03), '#e8f2e6', { p: [-0.2, y0 + 1.4, -4.9] }), part(rbox(0.2, 2.8, 9.0, 0.03), '#e1eddf', { p: [-4.9, y0 + 1.4, -0.5] }), part(box(9.62, 0.34, 0.22), GREEN, { p: [-0.2, y0 + 2.65, -4.9] }), place(pixText('DOLLAR TREE', 0.08, K.white, 0.03), { p: [-0.6, y0 + 2.65, -4.77] }));
+    // The giant price tag on the back wall.
+    const tag = merge(part(extrude([[-1.2, -0.6], [1.0, -0.6], [1.45, 0], [1.0, 0.6], [-1.2, 0.6]], 0.12), GREEN), part(cyl(0.09, 0.09, 0.14, 14), K.white, { p: [1.05, 0, 0], r: [Math.PI / 2, 0, 0] }), pixText('$1.25', 0.12, K.white, 0.16).translate(-0.15, 0, 0));
+    out.push(place(tag, { p: [2.6, y0 + 1.6, -4.7] }));
+    // ---- aisles of everything: four gondolas, fully stocked
+    const gc = ['#e5533d', '#f2c94c', '#3d7be0', '#d6336c', '#8a6cf0', '#3fb8a8', '#f29a3a', K.white];
+    [-3.8, -2.4, -1.0, 0.4].forEach((x, a) => { out.push(part(rbox(0.7, 1.7, 3.2, 0.03), '#d8dde3', { p: [x, y0 + 0.88, -2.8] })); for (let r = 0; r < 4; r++) for (let k = 0; k < 8; k++) [-1, 1].forEach((s) => out.push(part(rbox(0.14, 0.28, 0.3, 0.03), gc[(a * 2 + r * 3 + k + (s > 0 ? 4 : 0)) % 8], { p: [x + s * 0.38, y0 + 0.35 + r * 0.4, -4.2 + k * 0.4] }))); });
+    // The party corner: balloons over a table of plates.
+    out.push(part(rbox(1.6, 0.8, 1.2, 0.05), K.white, { p: [3.4, y0 + 0.4, -2.8] }));
+    // ---- the checkout: a long belt, the scanner arch, the cashier
+    const BZ = 0.6;
+    out.push(part(rbox(5.6, 0.8, 0.9, 0.04), '#5b616b', { p: [0.2, y0 + 0.4, BZ] }), part(box(5.5, 0.03, 0.8), '#2b2f36', { p: [0.2, y0 + 0.81, BZ] }), part(rbox(0.12, 0.8, 0.9, 0.03), GREEN, { p: [1.2, y0 + 1.2, BZ] }), part(rbox(0.12, 0.8, 0.9, 0.03), GREEN, { p: [1.6, y0 + 1.2, BZ] }), part(rbox(0.6, 0.12, 0.9, 0.03), GREEN, { p: [1.4, y0 + 1.6, BZ] }));
+    out.push(trees(R, [[-4.6, 4.6], [1.0, 4.6], [4.6, 4.6]], 0.45));
     // ---- moving parts
     const moving = [], P = 10;
-    // Items drop into the basket one after another, each tagged the same.
-    const minitag = merge(part(rbox(0.32, 0.18, 0.02, 0.03), GREEN), part(box(0.2, 0.03, 0.025), K.white));
+    moving.push(...walker(moving.length, (t) => ({ x: 1.4, z: BZ - 0.9, ry: -Math.PI / 2, still: true, push: Math.sin(t * 4) > 0.5 }), { shirt: GREEN, pants: '#2b3a55', y: y0 + 0.03 }));
+    const minitag = merge(part(extrude([[-0.2, -0.1], [0.15, -0.1], [0.24, 0], [0.15, 0.1], [-0.2, 0.1]], 0.03), GREEN), part(box(0.2, 0.04, 0.035), K.white, { p: [-0.02, 0, 0] }));
     const items = [
-      merge(part(rbox(0.5, 0.35, 0.3, 0.06), '#e5533d'), part(box(0.52, 0.1, 0.32), '#f2c94c')),
-      merge(part(cyl(0.35, 0.35, 0.12, 20), K.white), part(cyl(0.25, 0.25, 0.13, 20), '#d6336c')),
-      place(bottle(0.7, '#3d7be0', K.white), { p: [0, -0.3, 0] }),
-      merge(part(rbox(0.5, 0.3, 0.3, 0.08), '#f29a3a'), part(ball(0.12), '#1d1f24', { p: [0.15, 0.18, 0] })),
-      merge(part(rbox(0.6, 0.12, 0.4, 0.04), '#8a6cf0'), part(box(0.5, 0.13, 0.08), K.white)),
+      merge(part(rbox(0.5, 0.35, 0.35, 0.06), '#e5533d', { p: [0, 0.18, 0] }), part(box(0.52, 0.1, 0.37), '#f2c94c', { p: [0, 0.18, 0] })),
+      merge(part(cyl(0.04, 0.04, 1.2, 8), '#9aa1a9', { p: [0, 0.2, 0], r: [0, 0, Math.PI / 2] }), part(rbox(0.2, 0.25, 0.4, 0.04), '#3d7be0', { p: [0.65, 0.12, 0] })),
+      merge(part(cyl(0.35, 0.35, 0.12, 20), K.white, { p: [0, 0.06, 0] }), part(cyl(0.25, 0.25, 0.13, 20), '#d6336c', { p: [0, 0.06, 0] })),
+      merge(part(rbox(0.4, 0.35, 0.3, 0.08), '#f29a3a', { p: [0, 0.18, 0] }), part(ball(0.12), '#1d1f24', { p: [0.1, 0.42, 0] })),
+      merge(place(bottle(0.6, '#3fb8a8', K.white), {})),
+      merge(part(new THREE.SphereGeometry(0.28, 16, 12), '#8a6cf0', { p: [0, 1.2, 0], s: [1, 1.15, 1] }), part(cyl(0.01, 0.01, 1.0, 4), '#9aa1a9', { p: [0, 0.5, 0] }), part(box(0.1, 0.06, 0.1), '#3a3f47', { p: [0, 0.03, 0] })),
     ];
-    items.forEach((g, k) => moving.push({ geo: merge(g, minitag.clone().translate(0.2, 0.3, 0.2)), pivot: [BX + Math.cos(k * 1.3) * 0.4, y0 + 1.0, BZ + Math.sin(k * 1.3) * 0.4], anim: (t) => { const f = cyc(t, P), a = k * 0.15; if (f < a || f > 0.95) return { s: 0.001 }; const u = win(f, a, a + 0.12); return { y: (1 - easeIn(u)) * 3.2 + (u >= 1 ? 0 : 0), rx: (1 - u) * 3, rz: (1 - u) * 2 }; } }));
-    // Helium balloons bobbing over the party aisle, front right.
-    const bal = (c) => merge(part(new THREE.SphereGeometry(0.32, hi() ? 18 : 8, hi() ? 14 : 6), c, { s: [1, 1.15, 1] }), part(cone(0.06, 0.08, 8), c, { p: [0, -0.38, 0], r: [Math.PI, 0, 0] }), part(cyl(0.008, 0.008, 1.6, 4), '#9aa1a9', { p: [0, -1.2, 0] }));
-    [[2.4, 1.6, '#e5533d'], [3.0, 2.0, '#f2c94c'], [2.6, 2.6, '#3d7be0'], [3.4, 1.2, '#d6336c'], [3.6, 2.8, '#8a6cf0'], [2.0, 2.4, '#3fb8a8']].forEach(([x, z, c], i) => moving.push({ geo: bal(c), pivot: [x, y0 + 2.3, z], anim: (t) => ({ y: Math.sin(t * 1.3 + i) * 0.12, rz: Math.sin(t * 0.9 + i) * 0.08 }) }));
-    out.push(part(rbox(1.8, 0.7, 1.8, 0.05), '#f4f1ea', { p: [2.8, y0 + 0.35, 2.0] }), [0, 1, 2, 3].map((k) => part(cyl(0.25, 0.25, 0.05, 16), ['#e5533d', '#f2c94c', '#3d7be0', '#d6336c'][k], { p: [2.3 + k * 0.33, y0 + 0.73 + k * 0.02, 1.7 + (k % 2) * 0.4] })));
-    // Shoppers with full baskets.
-    [0, 0.5].forEach((o, i) => moving.push(...walker(moving.length, (t) => { const f = cyc(t, P, o), u = win(f, 0, 0.9); return { x: -2.4 + u * 2.0, z: 1.0 + u * 3.4, ry: -1.1, s: Math.min(1, u / 0.05, (1 - u) / 0.05) }; }, { shirt: ['#e5533d', '#3d7be0'][i], pants: '#2b3a55', y: y0, carry: part(rbox(0.4, 0.3, 0.3, 0.04), GREEN, { p: [0.2, 0.75, 0.32] }) })));
+    items.forEach((g, k) => { const it = moving.length; moving.push({ geo: g, pivot: [0, y0 + 0.83, BZ], anim: (t) => { const u = cyc(t, P, k / items.length), x = -2.4 + u * 5.2; return { x, s: Math.min(1, u / 0.05, (1 - u) / 0.05) + 0.001 }; } });
+      moving.push({ geo: minitag, pivot: [0.1, 0.55, 0.3], parent: it, anim: (t) => { const u = cyc(t, P, k / items.length), x = -2.4 + u * 5.2; return x > 1.4 ? { s: back(clamp01((x - 1.4) / 0.3)) } : { s: 0.001 }; } }); });
+    // The balloon bouquet over the party table.
+    [[3.0, -3.0, '#e5533d'], [3.5, -2.6, '#f2c94c'], [3.8, -3.2, '#3d7be0'], [3.2, -2.4, '#d6336c'], [3.9, -2.5, '#8a6cf0'], [3.4, -3.3, '#3fb8a8']].forEach(([x, z, c], i) => moving.push({ geo: merge(part(new THREE.SphereGeometry(0.3, hi() ? 18 : 8, hi() ? 14 : 6), c, { s: [1, 1.15, 1] }), part(cyl(0.008, 0.008, 1.2, 4), '#9aa1a9', { p: [0, -0.9, 0] })), pivot: [x, y0 + 2.4, z], anim: (t) => ({ y: Math.sin(t * 1.3 + i) * 0.12, rz: Math.sin(t * 0.9 + i) * 0.08 }) }));
+    // Shoppers with baskets heading for the till.
+    [0, 0.5].forEach((o, i) => moving.push(...walker(moving.length, (t) => { const f = cyc(t, P, o), u = win(f, 0, 0.9); return { x: -3.2 + u * 1.6, z: -0.8 + u * 3.2, ry: -1.1, s: Math.min(1, u / 0.05, (1 - u) / 0.05) }; }, { shirt: ['#e5533d', '#3d7be0'][i], pants: '#2b3a55', y: y0 + 0.03, carry: part(rbox(0.4, 0.3, 0.3, 0.04), GREEN, { p: [0.2, 0.75, 0.32] }) })));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // AutoZone: the right part, today. Inside the cut-away store the shelves run floor to ceiling;
