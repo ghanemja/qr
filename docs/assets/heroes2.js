@@ -167,4 +167,48 @@ export const HEROES2 = {
     stops.forEach((a, i) => { const [x, z] = at(a, RR); moving.push(pulse(x, y0 + 0.16, z, '#ffd479', 1.5, i * 0.2, 0.35)); });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // U.S. Bancorp: deposits from Main Street, loans back to it. Shops along the street take card
+  // payments on their terminals and bank the takings in the columned branch; the bank lends them
+  // out, and across the road a family's house goes up.
+  usbancorp: { finder: '#0c2074', build: () => {
+    const R = rand(104), out = [], NAVY = '#0c2074', RED = '#d52b1e';
+    out.push(ground('#90c46e'), part(box(10.4, 0.03, 1.5), '#5b616b', { p: [0, y0 + 0.015, -0.6] }), part(box(10.4, 0.05, 0.4), '#d8d4ca', { p: [0, y0 + 0.025, -1.55] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(0.6, 0.01, 0.06), '#f2c94c', { p: [-4.6 + i * 1.3, y0 + 0.035, -0.6] }));
+    // ---- the branch: steps, columns, a pediment and the frieze with its name
+    const BX = -2.6, BZ = -3.4;
+    out.push(part(rbox(3.6, 0.3, 0.6, 0.04), '#e6e1d6', { p: [BX, y0 + 0.15, BZ + 1.55] }), part(rbox(3.8, 0.15, 0.85, 0.04), '#e6e1d6', { p: [BX, y0 + 0.07, BZ + 1.6] }));
+    out.push(part(rbox(3.4, 2.4, 2.4, 0.05), '#efe9dc', { p: [BX, y0 + 1.5, BZ] }), part(rbox(1.0, 1.4, 0.06, 0.03), '#5b4a3a', { p: [BX, y0 + 1.0, BZ + 1.23] }));
+    for (let i = 0; i < 6; i++) out.push(part(cyl(0.13, 0.15, 2.0, 20), K.white, { p: [BX - 1.5 + i * 0.6, y0 + 1.3, BZ + 1.45] }));
+    out.push(part(rbox(3.6, 0.4, 0.4, 0.04), NAVY, { p: [BX, y0 + 2.5, BZ + 1.4] }), pixText('US BANK', 0.06, K.white, 0.03).translate(BX, y0 + 2.5, BZ + 1.61));
+    out.push(part(prism(3.7, 0.8, 2.7), '#efe9dc', { p: [BX, y0 + 2.7, BZ + 0.1] }), part(prism(3.4, 0.62, 0.1), '#e2dccd', { p: [BX, y0 + 2.75, BZ + 1.43], r: [0, 0, 0] }));
+    // The flag beside it.
+    out.push(part(cyl(0.04, 0.05, 4.4, 10), '#c9ced6', { p: [-4.6, y0 + 2.2, -2.0] }), part(box(0.9, 0.55, 0.02), (x, y) => (y > y0 + 4.05 && x < -4.15 + 0.0 ? '#3c3b6e' : Math.floor((y - y0) * 13) % 2 ? RED : K.white), { p: [-4.1, y0 + 4.1, -2.0] }));
+    // ---- the shops along the street, each with its card terminal
+    const shops = [[0.6, '#e5533d'], [2.1, '#2f9e6e'], [3.6, '#f29a3a']];
+    shops.forEach(([x, c]) => {
+      out.push(part(rbox(1.3, 1.5, 1.6, 0.05), '#f4efe6', { p: [x, y0 + 0.75, -3.6] }), part(box(1.0, 0.7, 0.04), '#9cc3e0', { p: [x, y0 + 0.6, -2.79] }), [0, 1, 2].map((i) => part(box(0.43, 0.05, 0.4), i % 2 ? K.white : c, { p: [x - 0.43 + i * 0.43, y0 + 1.25, -2.62], r: [0.45, 0, 0] })));
+      out.push(part(rbox(0.5, 0.6, 0.3, 0.04), '#8a5a36', { p: [x + 0.35, y0 + 0.3, -2.45] }), part(rbox(0.16, 0.24, 0.1, 0.03), '#2b2f36', { p: [x + 0.35, y0 + 0.72, -2.45], r: [-0.4, 0, 0] }));
+    });
+    // ---- the family's plot across the road: the frame going up
+    const HX = 1.6, HZ = 2.6;
+    out.push(part(box(3.6, 0.03, 2.9), '#7fb35a', { p: [HX, y0 + 0.015, HZ] }), part(box(0.8, 0.03, 1.2), '#d8d4ca', { p: [HX - 0.1, y0 + 0.03, HZ + 1.5] }));
+    trees(R, [[-4.6, 1.4], [-4.4, 4.4], [4.7, 0.9], [4.6, 4.6], [-1.6, 3.2]]);
+    out.push(place(home('#eef3e6', '#5b6b7d', 1.5, 1.3, 1.0), { p: [-3.0, y0, 2.8] }));
+    // ---- moving parts
+    const moving = [], P = 10;
+    // Takings from each shop into the bank.
+    const coinG = place(coin(0.2, 0.07), { r: [Math.PI / 2, 0, 0] });
+    shops.forEach(([x], i) => {
+      moving.push(pulse(x + 0.35, y0 + 0.88, -2.45, '#62d35f', P / 3, i / 9, 0.18));
+      const path = curve([[x + 0.35, y0 + 1.0, -2.45], [(x + BX) / 2 + 0.5, y0 + 2.6, -1.9], [BX + 0.6, y0 + 1.2, BZ + 1.7], [BX, y0 + 0.9, BZ + 1.3]]);
+      moving.push(rider(coinG, path, P / 3, i / 9 + 0.05, 0, 0.6, (t) => ({ ry: t * 4 })));
+    });
+    // The loan going out across the road to the plot.
+    const loan = curve([[BX + 0.6, y0 + 1.2, BZ + 1.7], [BX + 1.5, y0 + 3.0, 0.0], [HX - 0.4, y0 + 2.6, HZ - 0.4], [HX, y0 + 1.2, HZ]]);
+    moving.push(rider(merge(part(rbox(0.6, 0.3, 0.06, 0.03), '#7cbf7d'), part(cyl(0.08, 0.08, 0.065, 12), '#4f9258', { r: [Math.PI / 2, 0, 0] })), loan, P, 0, 0.05, 0.3, (t) => ({ rx: 0.2 })));
+    // The house: frame first, then the finished home rises out of it.
+    moving.push({ geo: frame(2.2, 1.8, 1.6), pivot: [HX, y0, HZ], anim: (t) => { const f = cyc(t, P); return { s: f < 0.6 ? 1 : 0.001 }; } });
+    moving.push({ geo: house2('#fbf3e3', '#a35a3c', NAVY), pivot: [HX, y0, HZ], anim: (t) => { const f = cyc(t, P); return f < 0.55 ? { s: 0.001 } : { sy: easeOut(win(f, 0.55, 0.7)) * Math.min(1, (1 - f) / 0.04) + 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
