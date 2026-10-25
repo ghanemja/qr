@@ -2969,4 +2969,58 @@ export const SCENES = {
     moving.push({ geo: tickGeo(0.26), pivot: [D1.x, y0 + 2.0, D1.z], anim: (t) => { const f = F(t); return { y: easeOut(win(f, 0.7, 0.75)) * 0.3, ry: Math.PI / 4, s: life(f, 0.7, 0.73, 0.8, 0.84) }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.7, y0, -1.6], topAt: [HX - 1.2, y0 + 1.6, HZ] };
   },
+
+  // Plug and socket (regulated electric and gas utilities): power at every outlet, every day. The
+  // giant plug pushes home into the giant socket; power runs out along the pole line to the street,
+  // where the porch lights and street lamps come on and the car in the drive charges; and the line
+  // crew's bucket rises to keep a pole in good order.
+  'power:5': () => {
+    const R = rand(4301), out = [], moving = [];
+    out.push(slab('#a9d384'));
+    out.push(part(box(10.4, 0.03, 1.1), '#6b7078', { p: [0, y0 + 0.015, 2.2] }), part(box(10.4, 0.05, 0.5), '#e6dcc8', { p: [0, y0 + 0.025, 3.0] }));
+    for (let i = 0; i < 9; i++) out.push(part(box(0.5, 0.012, 0.06), K.white, { p: [-4.4 + i * 1.1, y0 + 0.035, 2.2] }));
+    // ---- the giant socket (back left) facing the camera
+    const OX = -2.8, OZ = -3.0, OA = Math.PI / 4, q = new THREE.Quaternion().setFromAxisAngle(new V(0, 1, 0), OA), nrm = new V(0, 0, 1).applyQuaternion(q), OW = 2.6, OH = 3.4, OY = y0 + 0.3;
+    const plate = [part(rbox(OW + 0.4, OH + 0.4, 0.5, 0.2), K.stone, { p: [0, OY + OH / 2, -0.15] }), part(rbox(OW, OH, 0.2, 0.25), K.white, { p: [0, OY + OH / 2, 0.15] })];
+    [OY + OH * 0.68, OY + OH * 0.3].forEach((y) => { [-0.35, 0.35].forEach((x) => plate.push(part(box(0.12, 0.42, 0.06), '#2b2f36', { p: [x, y, 0.26] }))); plate.push(part(new THREE.CylinderGeometry(0.1, 0.1, 0.06, 14, 1, false, 0, Math.PI), '#2b2f36', { p: [0, y - 0.38, 0.26], r: [Math.PI / 2, 0, 0] })); });
+    [OY + 0.25, OY + OH - 0.25].forEach((y) => plate.push(part(cyl(0.09, 0.09, 0.05, 14), 'A', { p: [0, y, 0.27], r: [Math.PI / 2, 0, 0] })));
+    out.push(place(merge(plate), { p: [OX, 0, OZ], r: [0, OA, 0] }));
+    // ---- the pole line: from beside the socket along the street to the homes
+    const poles = [new V(-0.6, 0, 0.9), new V(1.8, 0, 0.9), new V(4.2, 0, 0.9)], PH = 2.6;
+    poles.forEach((p) => out.push(part(cyl(0.07, 0.09, PH, 10), K.wood, { p: [p.x, y0 + PH / 2, p.z] }), part(box(0.08, 0.08, 0.9), K.woodDk, { p: [p.x, y0 + PH - 0.2, p.z] }), part(cyl(0.18, 0.18, 0.4, 12), '#9aa1a9', { p: [p.x + 0.2, y0 + PH - 0.6, p.z] })));
+    const plugBack = new V(0, 0, 1.3).applyQuaternion(q).add(new V(OX, OY + OH * 0.5, OZ));
+    const feed = curve([plugBack.toArray(), [plugBack.x + 0.6, y0 + 0.4, plugBack.z + 0.6], [-1.8, y0 + 0.2, 0.2], [poles[0].x, y0 + 0.3, poles[0].z - 0.1], [poles[0].x, y0 + PH - 0.15, poles[0].z]]);
+    out.push(part(tubeOn(feed, 0.12), '#2b2f36'));
+    const lines = [];
+    [-0.35, 0.35].forEach((dz) => { const c = curve([[poles[0].x, y0 + PH - 0.15, poles[0].z + dz], [(poles[0].x + poles[1].x) / 2, y0 + PH - 0.45, poles[0].z + dz], [poles[1].x, y0 + PH - 0.15, poles[1].z + dz], [(poles[1].x + poles[2].x) / 2, y0 + PH - 0.45, poles[1].z + dz], [poles[2].x, y0 + PH - 0.15, poles[2].z + dz]]); lines.push(c); out.push(part(tubeOn(c, 0.025), K.dark)); });
+    // ---- the homes across the street, a car on the charger
+    const homes = [new V(0.4, 0, 4.1), new V(3.0, 0, 4.0)];
+    homes.forEach((h, i) => out.push(place(home(['#f3ead8', '#e4ecf0'][i], ['#7d6a5a', 'Bd'][i], 1.6, 1.3, 1.0), { p: [h.x, y0, h.z], r: [0, 0, 0] })));
+    out.push(part(rbox(1.0, 0.03, 1.4, 0.03), '#b9b4aa', { p: [1.8, y0 + 0.02, 3.8] }), part(rbox(0.2, 0.7, 0.16, 0.04), K.white, { p: [2.3, y0 + 0.35, 4.4] }), place(sedan('B'), { p: [1.75, y0, 3.9], r: [0, Math.PI / 2, 0], s: [0.65, 0.65, 0.65] }));
+    const lamps = [[-1.8, 3.0], [3.9, 3.0]];
+    lamps.forEach(([x, z]) => out.push(lampPost(x, y0, z, -Math.PI / 2)));
+    [[-4.6, 1.0], [-4.4, 3.8], [4.6, -1.8], [0.6, -3.6], [2.6, -4.2]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.55 + R() * 0.15)));
+    // ---- moving parts (one 10 s cycle)
+    const P = 10, F = (t) => cyc(t, P), on = (f) => win(f, 0.2, 0.24) * (1 - win(f, 0.92, 0.96));
+    // The plug: drawn back, then pushed home.
+    const plug = merge(part(rbox(1.6, 1.4, 0.9, 0.25), '#2b2f36', { p: [0, 0, 0.75] }), part(rbox(1.7, 0.2, 0.92, 0.06), 'A', { p: [0, 0.3, 0.75] }), part(cyl(0.18, 0.22, 0.4, 16), '#2b2f36', { p: [0, 0, 1.35], r: [Math.PI / 2, 0, 0] }),
+      [-0.35, 0.35].map((x) => part(box(0.1, 0.38, 0.6), '#d9b35a', { p: [x, 0.18, 0.1] })), part(cyl(0.08, 0.08, 0.6, 12), '#d9b35a', { p: [0, -0.2, 0.1], r: [Math.PI / 2, 0, 0] })).applyQuaternion(q);
+    moving.push({ geo: plug, pivot: new V(0, 0, 0.2).applyQuaternion(q).add(new V(OX, OY + OH * 0.68 - 0.18, OZ)).toArray(), anim: (t) => { const f = F(t), d = (1 - easeIO(win(f, 0.08, 0.2))) * 0.9 + easeIO(win(f, 0.92, 1)) * 0.9; return { x: nrm.x * d, z: nrm.z * d }; } });
+    // A spark at the moment of contact.
+    moving.push({ geo: part(star(0.5, 0.06), K.yellow), pivot: new V(0.9, 0, 0.5).applyQuaternion(q).add(new V(OX, OY + OH * 0.68, OZ)).toArray(), anim: (t) => { const f = F(t); return { rz: t * 4, s: life(f, 0.2, 0.22, 0.25, 0.28) + 0.001 }; } });
+    // Power along the feed and the lines.
+    for (let k = 0; k < 4; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.12, 10, 8), '#ffd23f'), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 1.5, k / 4), p = feed.getPointAt(u); return { x: p.x, y: p.y, z: p.z, s: on(F(t)) * 0.999 + 0.001 }; } });
+    lines.forEach((c, i) => { for (let k = 0; k < 3; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.07, 8, 6), '#ffd23f'), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 1.8, k / 3 + i * 0.15), p = c.getPointAt(u); return { x: p.x, y: p.y, z: p.z, s: on(F(t)) * 0.999 + 0.001 }; } }); });
+    // Porch lights, the street lamps' glow and the charger's light come on.
+    homes.forEach((h) => moving.push({ geo: part(rbox(0.38, 0.32, 0.06, 0.02), '#ffe066'), pivot: [h.x + 0.32, y0 + 0.62, h.z + 0.53], anim: (t) => ({ s: on(F(t)) > 0.5 ? 1 : 0.001 }) }));
+    lamps.forEach(([x, z]) => moving.push({ geo: part(cyl(0.7, 0.7, 0.02, 24), '#fff3b0'), pivot: [x, y0 + 0.02, z - 0.75], anim: (t) => ({ s: on(F(t)) > 0.5 ? 1 : 0.001, sy: 1 }) }));
+    for (let k = 0; k < 3; k++) moving.push({ geo: part(box(0.1, 0.08, 0.02), '#62d35f'), pivot: [2.3, y0 + 0.4 + k * 0.1, 4.31], anim: (t) => { const f = F(t); return { s: on(f) > 0.5 && cyc(t, 1.2) > k / 3 ? 1 : 0.001 }; } });
+    // The line crew: a bucket truck by the middle pole, the lineman's bucket rising.
+    const BT = new V(poles[1].x - 0.4, 0, 1.9);
+    out.push(part(rbox(1.0, 0.8, 0.95, 0.08), K.white, { p: [BT.x + 1.0, y0 + 0.6, BT.z] }), part(rbox(1.6, 0.4, 0.95, 0.05), K.white, { p: [BT.x - 0.2, y0 + 0.45, BT.z] }), part(box(2.6, 0.12, 0.97), K.orange, { p: [BT.x + 0.3, y0 + 0.62, BT.z] }), [[-0.6, 0.45], [0.9, 0.45], [-0.6, -0.45], [0.9, -0.45]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.12, 14), '#1d1f24', { p: [BT.x + x, y0 + 0.2, BT.z + z], r: [Math.PI / 2, 0, 0] })));
+    const boom = moving.length, lift = (f) => easeIO(win(f, 0.35, 0.5)) * (1 - easeIO(win(f, 0.8, 0.92)));
+    moving.push({ geo: merge(part(box(2.0, 0.14, 0.14), '#e9ecef', { p: [1.0, 0, 0] }), part(cyl(0.12, 0.12, 0.2, 12), K.dark, { r: [Math.PI / 2, 0, 0] })), pivot: [BT.x - 0.5, y0 + 0.75, BT.z], anim: (t) => ({ rz: 0.15 + lift(F(t)) * 0.7, ry: Math.PI - 0.15 }) });
+    moving.push({ geo: merge(part(rbox(0.5, 0.5, 0.5, 0.06), K.orange, { p: [0, -0.1, 0] }), part(capsule(0.12, 0.2), '#f2c94c', { p: [0, 0.35, 0] }), part(new THREE.SphereGeometry(0.12, 12, 8), '#e9b98f', { p: [0, 0.62, 0] }), part(new THREE.SphereGeometry(0.13, 12, 8, 0, TAU, 0, Math.PI / 2), K.white, { p: [0, 0.66, 0] })), pivot: [2.0, 0, 0], parent: boom, anim: (t) => ({ rz: -(0.15 + lift(F(t)) * 0.7) }) });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [2.4, y0, -1.6], topAt: [BT.x + 1.0, y0 + 1.0, BT.z] };
+  },
 };
