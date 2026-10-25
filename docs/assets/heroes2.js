@@ -252,4 +252,51 @@ export const HEROES2 = {
     moving.push({ geo: part(cone(0.16, 0.36, 3), '#1d1f24', { r: [0, 0, -Math.PI / 2] }), pivot: [SX - 0.53, 0, SZ + 0.81], anim: (t) => { const s = t / T, i = (((1 - Math.floor(s - 0.66)) % 5) + 5) % 5; return { y: y0 + 3.9 - i * 0.62, ry: Math.PI / 4 }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Nasdaq: where the next big company lists. On the stage the founders press the button, the
+  // new company's tile rises into the wall of the giants already listed, confetti flies, and the
+  // ticker wraps round the MarketSite tower in Times Square.
+  nasdaq: { finder: '#0090ba', build: () => {
+    const R = rand(109), out = [], BLUE = '#0090ba', INK = '#121b2b';
+    out.push(ground('#4a4f57'), part(box(10.2, 0.02, 10.2), '#5b616b', { p: [0, y0 + 0.01, 0] }));
+    for (let i = 0; i < 7; i++) out.push(part(box(0.5, 0.01, 1.6), '#e9e6df', { p: [-1.2 + i * 0.75, y0 + 0.025, 4.0] }));
+    // ---- the MarketSite tower: a dark drum with screens, back left
+    const TX = -3.3, TZ = -3.3;
+    out.push(part(cyl(1.3, 1.3, 5.8, 40), INK, { p: [TX, y0 + 2.9, TZ] }), part(cyl(1.36, 1.36, 0.2, 40), '#3a4656', { p: [TX, y0 + 5.85, TZ] }), part(cyl(1.36, 1.36, 0.12, 40), '#3a4656', { p: [TX, y0 + 1.2, TZ] }));
+    out.push(place(merge(part(rbox(2.0, 0.5, 0.08, 0.04), BLUE), pixText('NASDAQ', 0.065, K.white, 0.03).translate(0, 0, 0.05)), { p: [TX + 0.95, y0 + 5.2, TZ + 0.95], r: [0, Math.PI / 4, 0] }));
+    for (let i = 0; i < 10; i++) { const a = (i / 10) * TAU; out.push(part(box(0.5, 0.7, 0.04), ['#3d7be0', '#e5533d', '#f2c94c', '#2f9e6e', '#8a6cf0'][i % 5], { p: [TX + Math.cos(a) * 1.31, y0 + 4.2, TZ + Math.sin(a) * 1.31], r: [0, -a + Math.PI / 2, 0] })); }
+    // ---- the wall of listed companies, centre back, facing the camera
+    const WX = 0.4, WZ = -1.6, cols = 5, rows = 3, cell = 0.85, logos = ['#a2aaad', '#4285f4', '#f25022', '#76b900', '#1877f2', '#e50914', '#ff9900', '#cc0000', '#00a1e0', '#635bff', '#e31937', '#1db954', '#ff5a5f', '#6264a7'];
+    const wallQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 4, 0)), wallAt = (c, r) => { const v = new V(-((cols - 1) / 2) * cell + c * cell, 0.9 + r * cell, 0).applyQuaternion(wallQ); return [WX + v.x, y0 + v.y, WZ + v.z]; };
+    out.push(part(rbox(cols * cell + 0.4, rows * cell + 0.5, 0.2, 0.05), '#2b3440', { p: [WX, y0 + 0.9 + cell + 0.05, WZ], r: [0, Math.PI / 4, 0] }).translate(-0.08, 0, -0.08), part(rbox(1.2, 0.6, 0.6, 0.05), '#2b3440', { p: [WX - 0.08, y0 + 0.3, WZ - 0.08] }));
+    let li = 0;
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) { if (r === rows - 1 && c === cols - 1) continue; const p = wallAt(c, r), col = logos[li++ % logos.length]; out.push(part(rbox(0.7, 0.7, 0.08, 0.12), col, { p, q: wallQ }), part(new THREE.SphereGeometry(0.16, 12, 8), K.white, { p: [p[0] + 0.03, p[1], p[2] + 0.03], s: [1, 1, 0.3] })); }
+    // ---- the stage, front right: podium, the button, and the founders
+    const SX = 2.6, SZ = 2.0;
+    out.push(part(rbox(3.0, 0.3, 2.2, 0.06), '#1d2733', { p: [SX, y0 + 0.15, SZ] }), part(box(3.02, 0.06, 2.22), BLUE, { p: [SX, y0 + 0.31, SZ] }), part(rbox(0.6, 0.9, 0.4, 0.05), K.white, { p: [SX - 0.6, y0 + 0.75, SZ - 0.4] }), part(cyl(0.12, 0.12, 0.06, 16), '#e5533d', { p: [SX - 0.6, y0 + 1.23, SZ - 0.4] }));
+    [['#3d7be0', -0.1, 0.1], ['#d6336c', 0.5, -0.2], ['#2f9e6e', 0.9, 0.4], ['#f29a3a', 0.3, 0.6]].forEach(([c, dx, dz]) => out.push(place(fan(c), { p: [SX + dx, y0 + 0.34, SZ + dz], s: 1.4 })));
+    out.push(part(rbox(0.9, 0.06, 0.9, 0.03), '#7b828c', { p: [SX - 1.0, y0 + 0.35, SZ + 0.5] }));
+    // Times Square around it: towers wrapped in billboards, and the street with its taxis.
+    [[2.9, -3.7, 1.8, 3.6, '#e5533d'], [-4.1, 0.4, 1.4, 3.0, '#f2c94c'], [0.2, -4.3, 1.4, 2.4, '#8a6cf0']].forEach(([x, z, w, h, c], i) => out.push(place(block(w, h, w, '#d9dde3', '#4a5a70', 0.3), { p: [x, y0, z] }), part(box(w * 0.8, h * 0.35, 0.04), c, { p: [x, y0 + h * 0.6, z + w / 2 + 0.03] }), part(box(0.04, h * 0.3, w * 0.7), ['#3d7be0', '#2f9e6e', '#e5533d'][i], { p: [x + w / 2 + 0.03, y0 + h * 0.45, z] })));
+    out.push(part(box(10.2, 0.012, 0.06), '#f2c94c', { p: [0, y0 + 0.03, 4.0] }));
+    out.push(trees(R, [[4.6, -1.6], [-4.6, 2.6], [4.6, 0.2]]));
+    // ---- moving parts
+    const moving = [], P = 8;
+    // The ticker band wrapping round the tower.
+    const tick = ['#62d35f', '#ff6b5b', K.white, '#62d35f', '#62d35f', '#ff6b5b'];
+    moving.push({ geo: part(new THREE.CylinderGeometry(1.33, 1.33, 0.32, hi() ? 72 : 24, 1, true), (x, y, z) => tick[Math.floor((Math.atan2(z, x) + Math.PI) / TAU * 36) % tick.length]), pivot: [TX, y0 + 2.2, TZ], anim: (t) => ({ ry: t * 0.6 }) });
+    moving.push({ geo: part(new THREE.CylinderGeometry(1.33, 1.33, 0.32, hi() ? 72 : 24, 1, true), (x, y, z) => tick[(Math.floor((Math.atan2(z, x) + Math.PI) / TAU * 30) + 2) % tick.length]), pivot: [TX, y0 + 3.0, TZ], anim: (t) => ({ ry: -t * 0.45 }) });
+    // The button pressed, and the new company's tile rising from the stage into the empty slot.
+    moving.push({ geo: part(cyl(0.1, 0.1, 0.05, 16), '#ff2d2d'), pivot: [SX - 0.6, y0 + 1.27, SZ - 0.4], anim: (t) => ({ y: cyc(t, P) < 0.08 ? -0.03 : 0 }) });
+    const slot = wallAt(cols - 1, rows - 1), from = [SX - 1.0, y0 + 0.75, SZ + 0.5];
+    const rise = curve([from, [from[0], y0 + 3.2, from[2]], [(from[0] + slot[0]) / 2 + 0.4, y0 + 4.2, (from[2] + slot[2]) / 2 + 0.4], [slot[0] + 0.3, slot[1] + 0.2, slot[2] + 0.3], slot]);
+    moving.push({ geo: merge(part(rbox(0.7, 0.7, 0.08, 0.12), BLUE), part(cone(0.16, 0.36, 3), K.white, { p: [0, 0, 0.05], r: [Math.PI / 2, 0, 0] }).rotateX(-Math.PI / 2).translate(0, 0, 0.04)), pivot: [0, 0, 0], anim: (t) => {
+      const f = cyc(t, P); if (f < 0.06 || f > 0.97) return { s: 0.001 }; const u = easeIO(win(f, 0.1, 0.5)), p = rise.getPointAt(u);
+      return { x: p.x, y: p.y, z: p.z, q: wallQ, s: Math.min(1, win(f, 0.06, 0.12) + 0.001, (1 - f) / 0.03) * (1 + bump(f, 0.53, 0.03) * 0.25) }; } });
+    // Confetti as it lands.
+    for (let k = 0; k < (hi() ? 24 : 6); k++) { const a = R() * TAU, d = 0.4 + R() * 1.6, c = ['#f2c94c', '#e5533d', '#3d7be0', '#2f9e6e', K.white][k % 5];
+      moving.push({ geo: part(new THREE.BoxGeometry(0.1, 0.02, 0.06), c), pivot: [SX + Math.cos(a) * d * 0.7, y0 + 3.2, SZ + Math.sin(a) * d * 0.6], anim: (t) => { const f = cyc(t, P), u = win(f, 0.5, 0.95); return f < 0.5 || f > 0.95 ? { s: 0.001 } : { y: -u * 2.6, x: Math.sin(u * 9 + k) * 0.2, rx: u * 12 + k, rz: u * 7 }; } }); }
+    // Yellow cabs along the street.
+    [0, 0.5].forEach((o, i) => moving.push({ geo: merge(sedan('#f6c437'), part(rbox(0.3, 0.12, 0.2, 0.03), K.white, { p: [-0.1, 1.17, 0] })), pivot: [0, y0, 4.0 + (i ? 0.45 : -0.45)], anim: (t) => { const f = cyc(t, 7, o), x = i ? 5.6 - f * 11.2 : -5.6 + f * 11.2; return { x, ry: i ? Math.PI : 0, s: clamp01((5.2 - Math.abs(x)) / 0.5) * 0.6 + 0.001 }; } }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

@@ -96,7 +96,8 @@
   "morganstanley": "Wealth that stays: families' savings, guided by an advisor, compounding",
   "capitalone": "A bank run on data, with its own payments network",
   "usbancorp": "Main Street deposits in, loans back out to build homes",
-  "moodys": "No bond sells without a grade: every issue passes under Moody's stamp"
+  "moodys": "No bond sells without a grade: every issue passes under Moody's stamp",
+  "nasdaq": "Where the next big company lists, beside the giants already there"
  },
  "bank": [
   "PNC Financial Services",
@@ -1669,5 +1670,8 @@
  ],
  "moodys": [
   "Moody's"
+ ],
+ "nasdaq": [
+  "Nasdaq"
  ]
 }
