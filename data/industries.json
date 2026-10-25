@@ -60,7 +60,8 @@
   "chevron": "Barrels from the Permian",
   "anthropic": "Helpful, honest, harmless",
   "openai": "Ask anything",
-  "gm": "One platform, every vehicle"
+  "gm": "One platform, every vehicle",
+  "verizon": "Can you hear me now?"
  },
  "bank": [
   "Bank of America",
@@ -490,7 +491,6 @@
  ],
  "comms": [
   "AT&T",
-  "Verizon Communications",
   "Charter Communications",
   "Comcast",
   "CenturyLink",
@@ -1473,7 +1473,6 @@
   "Performance Food Group": 0,
   "Aramark": 2,
   "American Tower": 1,
-  "Verizon Communications": 1,
   "DISH Network": 2,
   "Charter Communications": 2,
   "Comcast": 3,
@@ -1570,5 +1569,8 @@
  ],
  "gm": [
   "General Motors"
+ ],
+ "verizon": [
+  "Verizon Communications"
  ]
 }

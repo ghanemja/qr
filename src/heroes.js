@@ -1900,5 +1900,52 @@ export const HEROES = {
     for (let k = 0; k < 2; k++) moving.push({ geo: k ? sedan('#f4f5f6') : vette, pivot: [0, y0 + 0.02, 0], anim: (t) => { const a = along(track, cyc(t, k ? 11 : 7, k * 0.5)); return { x: a.p.x, z: a.p.z, ry: a.ry }; } });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Verizon: the network people trust to work. The tower on the hill pulses its signal over the
+  // town, fibre carries light underground to a 5G small cell downtown, and the test man walks
+  // the streets asking if you can hear him now.
+  verizon: { finder: '#cd040b', build: () => {
+    const R = rand(37), out = [], y0 = 0.24, RED = '#cd040b', INK = '#1d1f24';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#8cc56a', { p: [0, 0.12, 0] }));
+    // ---- the hill with its tower
+    const HX = -2.6, HZ = -2.4, HH = 1.3;
+    out.push(part(lathe([[0, 0], [2.6, 0], [2.2, 0.35], [1.4, 0.95], [0.6, HH], [0, HH]], 48), (px, py) => (py > 0.2 + y0 ? '#7db85a' : '#6aa84f'), { p: [HX, y0, HZ] }));
+    if (hi()) for (let i = 0; i < 9; i++) { const a = R() * TAU, r = 1.5 + R() * 0.9; out.push(miniTree(R, HX + Math.cos(a) * r, y0 + 0.2 + (2.6 - r) * 0.35, HZ + Math.sin(a) * r, 0.5 + R() * 0.2)); }
+    const TY = y0 + HH, TH = 4.0;
+    for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) out.push(beam([HX + sx * 0.45, TY, HZ + sz * 0.45], [HX + sx * 0.1, TY + TH, HZ + sz * 0.1], 0.035, '#c9ced6'));
+    for (let j = 1; j < 9; j++) { const k = j / 9, w = 0.45 - 0.35 * k, y = TY + TH * k; for (const [a, b] of [[[-w, -w], [w, -w]], [[w, -w], [w, w]], [[w, w], [-w, w]], [[-w, w], [-w, -w]]]) out.push(beam([HX + a[0], y, HZ + a[1]], [HX + b[0], y, HZ + b[1]], 0.015, '#c9ced6')); }
+    for (const [y, n] of [[TY + TH - 0.2, 3], [TY + TH - 0.9, 3]]) for (let i = 0; i < n; i++) { const a = (i / n) * TAU + 0.5; out.push(part(rbox(0.12, 0.55, 0.06, 0.03), '#f4f5f6', { p: [HX + Math.cos(a) * 0.28, y, HZ + Math.sin(a) * 0.28], r: [0, -a + Math.PI / 2, 0] })); }
+    out.push(part(cyl(0.02, 0.02, 0.5, 6), '#c9ced6', { p: [HX, TY + TH + 0.25, HZ] }), part(ball(0.06), RED, { p: [HX, TY + TH + 0.52, HZ] }), part(rbox(0.6, 0.45, 0.45, 0.04), '#e9ecef', { p: [HX + 0.9, TY + 0.22, HZ + 0.3] }));
+    // ---- the town: streets, houses and a little downtown
+    out.push(part(box(10.2, 0.02, 0.9), '#5c6068', { p: [0, y0 + 0.01, 2.0] }), part(box(0.9, 0.02, 7.0), '#5c6068', { p: [1.2, y0 + 0.01, 1.6] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(0.4, 0.006, 0.05), '#f2c94c', { p: [-4.6 + i * 1.3, y0 + 0.022, 2.0] }));
+    const house = (x, z, c, roof, ry) => [part(rbox(0.9, 0.7, 0.8, 0.04), c, { p: [x, y0 + 0.35, z], r: [0, ry, 0] }), part(prism(1.0, 0.45, 0.9), roof, { p: [x, y0 + 0.7, z], r: [0, ry + Math.PI / 2, 0] }), part(box(0.2, 0.2, 0.04), '#ffe9a8', { p: [x + Math.sin(ry) * 0.41, y0 + 0.42, z + Math.cos(ry) * 0.41], r: [0, ry, 0] })];
+    [[-3.8, 3.3, '#f6e7c8', '#b8452f'], [-2.5, 3.4, '#d9e7f2', '#4a5d74'], [-1.2, 3.3, '#f2d0c9', '#6b4f3a'], [-3.8, 0.8, '#e7f2d9', '#5a3a2a'], [-1.4, 0.8, '#f6e7c8', '#4a5d74']].forEach(([x, z, c, r]) => out.push(house(x, z, c, r, 0)));
+    const block = (x, z, w, d, h, c) => { out.push(part(rbox(w, h, d, 0.04), c, { p: [x, y0 + h / 2, z] })); if (hi()) for (let j = 0; j < Math.floor(h / 0.4); j++) for (let i = 0; i < Math.floor(w / 0.3); i++) out.push(part(box(0.16, 0.2, 0.02), '#2a3c50', { p: [x - w / 2 + 0.2 + i * 0.3, y0 + 0.3 + j * 0.4, z + d / 2 + 0.01] })); };
+    block(2.6, 0.4, 1.3, 1.1, 2.2, '#d6d0c4'); block(3.9, 0.6, 1.1, 1.0, 1.6, '#c4b59d'); block(2.6, 3.3, 1.2, 1.0, 1.4, '#e3d8c4'); block(4.1, 3.4, 1.3, 1.1, 2.6, '#bfc6cf'); block(3.8, -1.6, 1.4, 1.2, 1.2, '#e8e1d2');
+    // The billboard with the red check.
+    out.push(part(box(0.08, 1.0, 0.08), '#5b616b', { p: [0.0, y0 + 0.5, -0.6] }), part(rbox(1.6, 0.8, 0.08, 0.04), '#ffffff', { p: [0.0, y0 + 1.35, -0.6], r: [0, Math.PI / 4, 0] }));
+    out.push(part(extrude([[-0.25, 0.05], [-0.12, -0.12], [0.3, 0.3], [0.25, 0.35], [-0.12, 0.0], [-0.2, 0.1]], 0.04), RED, { p: [0.03, y0 + 1.32, -0.57], r: [0, Math.PI / 4, 0] }));
+    // The 5G small cell on a downtown lamp post, and the fibre trench to it.
+    out.push(part(cyl(0.05, 0.06, 2.2, 10), '#5b616b', { p: [1.85, y0 + 1.1, 1.3] }), part(cyl(0.12, 0.12, 0.45, 16), '#e9ecef', { p: [1.85, y0 + 2.4, 1.3] }));
+    const fibre = curve([[HX + 0.9, y0 + 0.02, HZ + 0.5], [-1.0, y0 + 0.02, -1.6], [0.6, y0 + 0.02, -0.2], [1.85, y0 + 0.02, 1.3]]);
+    out.push(part(tubeOn(fibre, 0.05, hi() ? 48 : 12), '#e8c08a'));
+    [[-4.6, -4.6], [4.6, -4.4], [0.6, -4.4], [-0.2, 4.6], [-4.6, 4.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.75 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // Signal rings spreading from the tower top, from both antenna levels.
+    for (let k = 0; k < 4; k++) moving.push({ geo: part(new THREE.TorusGeometry(1, 0.012, 4, hi() ? 64 : 24), RED), pivot: [HX, TY + TH - 0.5 - (k % 2) * 0.5, HZ], anim: (t) => { const f = cyc(t, 3, k / 4); return { rx: Math.PI / 2, s: (0.3 + f * 3.6) * Math.min(1, (1 - f) / 0.25) + 0.001, y: -f * 1.2 }; } });
+    for (let k = 0; k < 2; k++) moving.push({ geo: part(new THREE.TorusGeometry(1, 0.015, 4, hi() ? 48 : 16), RED), pivot: [1.85, y0 + 2.4, 1.3], anim: (t) => { const f = cyc(t, 1.6, k / 2); return { rx: Math.PI / 2, s: (0.2 + f * 1.2) * Math.min(1, (1 - f) / 0.3) + 0.001, y: -f * 0.4 }; } });
+    // Light pulses along the fibre.
+    for (let k = 0; k < 5; k++) moving.push({ geo: part(ball(0.08), '#ffffff'), pivot: [0, 0.06, 0], anim: (t) => { const p = fibre.getPointAt(cyc(t, 2, k / 5)); return { x: p.x, y: p.y, z: p.z }; } });
+    // Phones lighting up in the windows.
+    [[-3.8, 3.3], [-2.5, 3.4], [-1.2, 3.3], [-3.8, 0.8], [-1.4, 0.8]].forEach(([x, z], i) => moving.push({ geo: part(rbox(0.1, 0.16, 0.02, 0.02), '#7cf0ff'), pivot: [x + 0.2, y0 + 0.95, z + 0.42], anim: (t) => ({ s: Math.sin(t * 2 + i * 1.7) > 0.3 ? 1 : 0.001, y: Math.sin(t * 3 + i) * 0.03 }) }));
+    // The test man, walking the street with his phone held up.
+    const tm = moving.length;
+    moving.push(...walker(tm, (t) => { const f = cyc(t, 12), x = -4.6 + (f < 0.5 ? f * 2 : 2 - f * 2) * 5.0; return { x, z: 1.55, ry: f < 0.5 ? 0 : Math.PI, still: Math.abs(f - 0.25) < 0.04 || Math.abs(f - 0.75) < 0.04 }; }, { shirt: '#5b616b', pants: '#2b3a55', y: y0, carry: merge(part(rbox(0.08, 0.16, 0.03, 0.02), INK, { p: [0.05, 1.55, 0.2] }), part(box(0.2, 0.04, 0.02), INK, { p: [0.17, 1.6, 0] })) }));
+    moving.push({ geo: merge(part(rbox(0.9, 0.4, 0.05, 0.12), '#ffffff'), part(cone(0.08, 0.16, 3), '#ffffff', { p: [-0.25, -0.24, 0], r: [0, 0, Math.PI] }), [-0.25, -0.05, 0.15, 0.32].map((x, i) => part(box(0.12, 0.05, 0.02), i === 3 ? RED : INK, { p: [x, 0, 0.03] }))), pivot: [0, 2.3, 0], parent: tm, anim: (t) => { const f = cyc(t, 12); const on = Math.abs(f - 0.25) < 0.06 || Math.abs(f - 0.75) < 0.06; return on ? { s: 1, ry: (f < 0.5 ? 0 : Math.PI) + Math.PI / 4 * (f < 0.5 ? 1 : -1) } : { s: 0.001 }; } });
+    // A car on the main street.
+    moving.push({ geo: sedan('#3d6ea8'), pivot: [0, y0, 2.0], anim: (t) => { const f = cyc(t, 9), x = 5.6 - f * 11.2; return { x, ry: Math.PI, s: clamp01((5.2 - Math.abs(x)) / 0.5) + 0.001 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
