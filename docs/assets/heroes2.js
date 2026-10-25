@@ -658,4 +658,49 @@ export const HEROES2 = {
     moving.push({ geo: part(new THREE.SphereGeometry(1.0, hi() ? 32 : 12, hi() ? 16 : 6, 0, TAU, 0, Math.PI / 2), '#ffd27a'), pivot: [-2.3, y0 + 0.2, -2.6], anim: (t) => ({ s: 0.95 + Math.sin(t * 1.5) * 0.05 }) });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Motorola Solutions: the radios that first responders bet their lives on. A house catches
+  // fire; the call reaches the 911 centre, the tower carries the dispatch, and the fire truck,
+  // the police car and the ambulance all hear it and roll.
+  motorolasolutions: { finder: '#0057b8', build: () => {
+    const R = rand(119), out = [], BLUE = '#0057b8';
+    out.push(ground('#8fc66f'), part(box(10.2, 0.03, 1.3), '#5b616b', { p: [0, y0 + 0.015, 1.6] }), part(box(1.3, 0.03, 4.0), '#5b616b', { p: [1.2, y0 + 0.015, -1.6] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(0.6, 0.01, 0.06), '#f2c94c', { p: [-4.6 + i * 1.3, y0 + 0.035, 1.6] }));
+    // ---- the radio tower, back left
+    const TX = -3.6, TZ = -3.6, TH = 6.0;
+    for (let i = 0; i < 3; i++) { const a = i * TAU / 3 + 0.3; out.push(beam([TX + Math.cos(a) * 0.5, y0, TZ + Math.sin(a) * 0.5], [TX + Math.cos(a) * 0.12, y0 + TH, TZ + Math.sin(a) * 0.12], 0.06, i ? '#e5533d' : K.white)); }
+    if (hi()) for (let y = 0.5; y < TH; y += 0.5) { const r = 0.5 - (y / TH) * 0.38; out.push(part(torus(r, 0.02, TAU, 12), '#c9ced6', { p: [TX, y0 + y, TZ], r: [Math.PI / 2, 0, 0] })); }
+    out.push(part(rbox(0.3, 0.6, 0.2, 0.05), K.white, { p: [TX + 0.15, y0 + 4.8, TZ + 0.1] }), part(ball(0.1), '#e5533d', { p: [TX, y0 + TH + 0.1, TZ] }));
+    // ---- the 911 dispatch centre, back right
+    const DX = 3.2, DZ = -3.2;
+    out.push(place(block(2.6, 1.8, 2.0, '#eef0f2', '#4a6a9a', 0.4), { p: [DX, y0, DZ] }), part(box(2.64, 0.3, 2.04), BLUE, { p: [DX, y0 + 1.7, DZ] }), place(pixText('911', 0.08, K.white, 0.03), { p: [DX, y0 + 1.7, DZ + 1.03] }), place(radarDish(0.4), { p: [DX + 0.6, y0 + 1.85, DZ - 0.4] }));
+    // ---- the station: fire house with its bay, left of the road
+    const SX = -2.0, SZ = -0.6;
+    out.push(part(rbox(2.4, 1.6, 1.4, 0.05), '#c0392b', { p: [SX, y0 + 0.8, SZ - 0.2] }), part(box(0.9, 1.0, 0.04), '#e9ecef', { p: [SX - 0.5, y0 + 0.55, SZ + 0.52] }), part(box(0.9, 1.0, 0.04), '#e9ecef', { p: [SX + 0.6, y0 + 0.55, SZ + 0.52] }), part(prism(2.6, 0.5, 1.6), '#7b2a20', { p: [SX, y0 + 1.6, SZ - 0.2] }));
+    // ---- the house, front right, where the fire is
+    const HX = 3.4, HZ = 3.6;
+    out.push(place(home('#fbf3e3', '#5b6b7d', 1.6, 1.4, 1.0), { p: [HX, y0, HZ], r: [0, -Math.PI / 2, 0] }), part(cyl(0.05, 0.05, 0.6, 8), '#e5533d', { p: [HX - 1.4, y0 + 0.3, HZ - 0.8] }));
+    // ---- the big radio, front left: the APX handheld as a monument
+    const RX = -3.6, RZ = 3.4, RQ = Math.PI / 4;
+    out.push(part(rbox(0.9, 1.9, 0.55, 0.15), '#1d1f24', { p: [RX, y0 + 1.15, RZ], r: [0, RQ, 0] }), part(rbox(0.7, 0.45, 0.05, 0.05), '#4fc3f7', { p: [RX + 0.2, y0 + 1.6, RZ + 0.2], r: [0, RQ, 0] }), part(cyl(0.07, 0.09, 1.2, 12), '#2b2f36', { p: [RX - 0.15, y0 + 2.6, RZ - 0.15] }), part(cyl(0.1, 0.1, 0.12, 14), '#f2c94c', { p: [RX + 0.15, y0 + 2.15, RZ + 0.0] }), part(rbox(1.2, 0.2, 1.0, 0.05), '#c9ced6', { p: [RX, y0 + 0.1, RZ], r: [0, RQ, 0] }));
+    for (let k = 0; k < 3; k++) out.push(part(box(0.5, 0.04, 0.05), '#3a3f47', { p: [RX + 0.2, y0 + 1.0 - k * 0.12, RZ + 0.2], r: [0, RQ, 0] }));
+    out.push(trees(R, [[0.4, -4.6], [-0.6, -2.4], [4.6, 0.4], [-0.4, 4.4], [2.0, 4.6]]));
+    // ---- moving parts
+    const moving = [], P = 12;
+    // The fire, flaring then put out.
+    moving.push({ geo: place(flameGeo(), { r: [Math.PI, 0, 0] }), pivot: [HX, y0 + 1.6, HZ], anim: (t) => { const f = cyc(t, P), s = f < 0.05 ? win(f, 0, 0.05) : f < 0.75 ? 1 : 1 - win(f, 0.75, 0.9); return { s: s * (0.45 + Math.sin(t * 13) * 0.04) + 0.001 }; } });
+    // The call to 911, then the tower's dispatch rings.
+    moving.push(rider(part(new THREE.SphereGeometry(0.14, 12, 8), '#ff5252'), curve([[HX, y0 + 2.0, HZ], [3.8, y0 + 3.2, 0.4], [DX, y0 + 2.2, DZ]]), P, 0, 0.05, 0.18));
+    moving.push(rider(part(new THREE.SphereGeometry(0.14, 12, 8), '#4fc3f7'), curve([[DX, y0 + 2.2, DZ], [0, y0 + 5.0, -4.2], [TX, y0 + TH - 0.4, TZ]]), P, 0, 0.18, 0.28));
+    for (let k = 0; k < 3; k++) moving.push({ geo: part(torus(1, 0.03, TAU, 48), '#4fc3f7', { r: [Math.PI / 2, 0, 0] }), pivot: [TX, y0 + TH - 0.6, TZ], anim: (t) => { const f = cyc(t, P), u = win(f, 0.28 + k * 0.06, 0.55 + k * 0.06); return u <= 0 || u >= 1 ? { s: 0.001 } : { s: 0.4 + u * 3.2, y: -u * 2.0 }; } });
+    // The responders: lights flashing, each rolling toward the fire.
+    const lightbar = (c1, c2) => merge(part(box(0.12, 0.08, 0.3), c1, { p: [0, 0, -0.16] }), part(box(0.12, 0.08, 0.3), c2, { p: [0, 0, 0.16] }));
+    const truck = merge(part(rbox(2.2, 0.8, 0.9, 0.08), '#c0392b', { p: [0, 0.6, 0] }), part(rbox(0.6, 0.6, 0.86, 0.08), '#c0392b', { p: [1.3, 0.55, 0] }), part(box(0.04, 0.3, 0.7), '#26323f', { p: [1.6, 0.7, 0] }), part(box(1.9, 0.08, 0.25), '#c9ced6', { p: [-0.1, 1.08, 0] }), [[-0.7, 0.42], [0.9, 0.42], [-0.7, -0.42], [0.9, -0.42]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.12, 14), '#1d1f24', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] })));
+    const go = (from, to, a, b) => (t) => { const f = cyc(t, P), u = easeIO(win(f, a, b)) - easeIO(win(f, 0.9, 1)); return { x: from[0] + (to[0] - from[0]) * u, z: from[1] + (to[1] - from[1]) * u }; };
+    const fireGo = go([SX - 0.5, 1.6], [2.0, 1.6], 0.35, 0.6), copGo = go([-4.2, 1.85], [1.2, 1.85], 0.32, 0.55), ambGo = go([1.2, -3.0], [1.2, 0.9], 0.35, 0.62);
+    const veh = (geo, fn, ry, light) => { const i = moving.length; moving.push({ geo, pivot: [0, y0, 0], anim: (t) => ({ ...fn(t), ry }) }); moving.push({ geo: lightbar(light, '#3d7be0'), pivot: light === '#e5533d' ? [0.2, 1.2, 0] : [0, 1.2, 0], parent: i, anim: (t) => ({ s: cyc(t, P) > 0.3 && cyc(t, P) < 0.9 ? (Math.sin(t * 20) > 0 ? 1 : 0.6) : 0.001 }) }); };
+    veh(place(truck, { s: 0.75 }), fireGo, 0, '#e5533d');
+    veh(merge(sedan('#f4f5f6'), part(box(1.0, 0.14, 1.04), '#1d1f24', { p: [0.1, 0.5, 0] })), copGo, 0, '#e5533d');
+    veh(place(van(K.white, '#e5533d'), { s: 0.9 }), ambGo, -Math.PI / 2, '#e5533d');
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

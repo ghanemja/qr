@@ -106,7 +106,8 @@
   "supermicro": "First to ship the newest AI servers: building blocks, liquid-cooled",
   "adobe": "The tools every creative works in: layers, PDFs and the red A",
   "intuit": "The money software for households and small businesses: refunds and books",
-  "workday": "One system for a company's people and its pay"
+  "workday": "One system for a company's people and its pay",
+  "motorolasolutions": "The radios first responders bet their lives on"
  },
  "bank": [
   "PNC Financial Services",
@@ -509,7 +510,6 @@
   "Windstream Holdings",
   "Altice USA",
   "DISH Network",
-  "Motorola Solutions",
   "American Tower",
   "Discord"
  ],
@@ -1475,7 +1475,6 @@
   "Frontier Communications": 3,
   "Windstream Holdings": 3,
   "CenturyLink": 3,
-  "Motorola Solutions": 4,
   "Discord": 0,
   "Carvana": 1
  },
@@ -1700,5 +1699,8 @@
  ],
  "workday": [
   "Workday"
+ ],
+ "motorolasolutions": [
+  "Motorola Solutions"
  ]
 }
