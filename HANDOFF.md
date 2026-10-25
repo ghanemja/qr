@@ -18,7 +18,7 @@ Notes for the next session working on this repo. Live site: https://ghanemja.git
    - Equalizer is the user's own music-making app: https://github.com/ghanemja/equalizer (studio: https://ghanemja.github.io/equalizer/). Every sound is an equation; a song is `{ bpm, bars, tracks: [{ name, equation, params, pattern }] }`, and `examples/render.mjs` renders one headlessly to WAV (no samples, no dependencies). Ready-made tracks live in its `docs/audio/` (for example `hyperbolic-808.mp3`, `four-on-the-floor.mp3`). Plan: compose a custom ad track in Equalizer, render it, cut the video to its beat, and show an end card crediting "Soundtrack made in Equalizer" with its link.
    - **Requested finale:** stack all the models in a grid and do a camera pan, then a zoom-out over all of them.
    - **Possible approach:** a Playwright-driven headless page that renders heroes, captured frame by frame, then encoded with ffmpeg if it's available.
-4. **"Access 3D asset library" button** next to **About** in the header.
+4. **"Access 3D asset library" button** next to **About** in the header. **Done** (see **3D asset library** below).
    - It should open a page where people can download the 3D models (for example GLB via three's `GLTFExporter`).
    - Every model file must **credit the project and authors** and **embed the open-source licence**. In GLB, use `asset.copyright` and `asset.extras`, and add a LICENSE text alongside. The repo is MIT-licensed (`LICENSE`, chosen by the user); embed that text and the copyright line.
 5. **Small fixes:** tidy the Apple Watch strap; tree shadows don't sway with the leaves.
@@ -85,7 +85,14 @@ No more shared shapes are queued. Further upgrades only if the user asks (see th
   - Materials and mining: International Paper, Newmont.
   - Startups: Databricks, Perplexity, Neuralink, Scale AI, Hugging Face, Runway, Discord, Plaid, Ramp, Nuro.
 
-Next: plan item 4 (the "Access 3D asset library" button), then item 3 (the ad video).
+Next: item 3 (the ad video).
+
+## 3D asset library (`docs/library.html`)
+
+- Built by `libraryPage()` in `tools/build.mjs` from every model id: the 60 signature models plus all 137 shared shapes (`kind:variant`), with labels from `data/industries.json` and the companies that use each look. The browser code is `src/library.js`.
+- Export happens in the browser with three's `GLTFExporter` (copied with its `TextureUtils.js` helper into `docs/assets/` by the build). `buildModel()` in `models.js` builds a model uncached; the library bakes brand slots into vertex colours, turns `'W'` water into a plain glossy "Water" material, merges vertices, and poses movers at t = 0 (parts hidden at t = 0 are left out). "Include its animation" samples the movers into a 12 s clip.
+- Every GLB gets `asset.copyright` ("© 2026 ghanemja — QR Compass, MIT License") and `asset.extras` { title, project, url, page, author, license, copyright, licenseText }; the same credit is the scene's extras. The .zip download (a tiny stored-zip writer, no dependency) adds `LICENSE.txt` and `README.txt`. `window.QRLibrary.exportGLB('amazon:0')` exports without a download (for tests).
+- Licence: `LICENSE` is copied to `docs/LICENSE` and `docs/LICENSE.txt`; the footer (`footer()` in the build), the About page and company pages credit it. Project source files carry an `SPDX-License-Identifier: MIT` header; vendored three.js files (`BufferGeometryUtils.js`, `RoundedBoxGeometry.js`, etc.) keep their own.
 
 ## How the models work
 
@@ -113,11 +120,11 @@ The software renderer in a cloud container is slow (about 1.5 fps), so timed fra
 
 | Command | What it does |
 |---|---|
-| `tools/dev/serve.sh &` | Serves `docs/` at `http://localhost:8123/qr/` and the gallery at `/gallery/`. Run `npm run build` first. |
+| `tools/dev/serve.sh &` | Serves `docs/` at `http://localhost:8123/qr/` and the gallery at `/gallery/`. Run `npm run build` first. `PORT=8137 DEV_OUT=/tmp/x tools/dev/serve.sh` runs a second copy (smoke/still/gal also read `PORT`). |
 | `node tools/dev/vc.mjs <id or kind:variant>` | Prints vertex counts at high and low detail, and the rest bounds (keep x/z within ±5.2, height ≤ 6.8). |
 | `node tools/dev/still.cjs <slug> <out> 1300 1100` | Screenshots a company page to `/tmp/qr-dev/<out>.png`. |
 | `node tools/dev/gal.cjs "<id,id:variant>" <out> <cols> "<t1,t2>" 500` | Renders a hero or a shape variant at the given animation times. An optional 7th argument `prop.topper` (e.g. `3.2`) also draws a prop and topper. |
-| `node tools/dev/smoke.cjs` | Loads 5 pages and reports errors and 404s. |
+| `node tools/dev/smoke.cjs` | Loads 6 pages (including the library) and reports errors and 404s. |
 | `python3 tools/dev/addhero.py <id> "<label>" "<Company key>"` | Assigns a company to a new hero (removes it from its old group). |
 | `tools/dev/ship.sh "<message>"` | Smoke test, commit, rebase onto `origin/main`, rebuild `docs`, push. |
 

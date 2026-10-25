@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
 // Site-wide company search: every [data-sitesearch] box (an input and a results list) jumps to
 // the chosen company's page. The index (assets/search.json, written by tools/build.mjs) loads on
 // first use, so pages that never search never fetch it.

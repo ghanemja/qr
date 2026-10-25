@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT
+   Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/ */
 :root {
   --bg: #f3f5f8;
   --surface: #ffffff;
@@ -66,6 +68,11 @@ small { color: var(--muted); font-size: 0.8em; }
 .nav { display: flex; gap: 14px; margin-left: auto; font-size: 14px; }
 .nav a { color: var(--muted); }
 .nav a:hover { color: var(--text); text-decoration: none; }
+.nav a.lib-link { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; margin: -3px 0; border: 1px solid var(--line); border-radius: 999px; color: var(--text); font-weight: 600; }
+.nav a.lib-link:hover { background: var(--surface-2); }
+.lib-link .l-short { display: none; }
+@media (max-width: 1080px) { .lib-link .l-long { display: none; } .lib-link .l-short { display: inline; } }
+.site-foot { max-width: 1040px; margin: 0 auto; padding: 18px 16px 32px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding: 0 14px;
@@ -224,7 +231,8 @@ body.atlas { height: 100vh; height: 100dvh; display: flex; flex-direction: colum
 
 @media (max-width: 720px) {
   .topbar { gap: 10px; padding: 8px 12px; }
-  .brand span, .nav { display: none; }
+  .brand span, .nav a:not(.keep) { display: none; }
+  .nav { gap: 10px; font-size: 13px; }
   .filters { top: 8px; left: 8px; right: 52px; }
   .filters button { height: 30px; padding: 0 10px; font-size: 12px; }
   .zoom { top: 8px; right: 8px; }
@@ -290,3 +298,41 @@ body.page main { max-width: 1040px; margin: 0 auto; padding: 28px 16px 64px; }
 .prose h2 { margin-top: 28px; font-size: 20px; }
 .prose li { margin: 4px 0; }
 .prose code { font-family: var(--mono); font-size: 0.9em; background: var(--surface-2); padding: 1px 5px; border-radius: 5px; }
+
+/* ---------- 3D asset library ---------- */
+.library h1 { font-size: clamp(30px, 5vw, 42px); letter-spacing: -0.03em; margin: 0; }
+.lib-viewer { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; align-items: stretch; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px; box-shadow: var(--shadow); scroll-margin-top: 12px; }
+.lib-canvas { position: relative; aspect-ratio: 1 / 1; max-height: 520px; width: 100%; border-radius: 12px; overflow: hidden; background: radial-gradient(circle at 50% 40%, #fdf8f0, #efe7d8); }
+.lib-canvas canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+.lib-nogl { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: #5b6778; margin: 0; }
+.lib-panel { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.lib-panel h2 { margin: 4px 0 0; font-size: 26px; letter-spacing: -0.02em; line-height: 1.15; }
+.lib-sub { margin: 0; color: var(--muted); font-weight: 600; }
+.lib-users { margin: 0; font-size: 14px; }
+.lib-users:empty { display: none; }
+.lib-colors { display: flex; gap: 14px; flex-wrap: wrap; font-size: 14px; }
+.lib-colors label, .lib-check { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
+.lib-colors input { width: 34px; height: 28px; padding: 0; border: 1px solid var(--line); border-radius: 6px; background: none; }
+.lib-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.lib-actions .btn small { color: inherit; opacity: 0.7; font-weight: 500; }
+.lib-actions .btn:disabled { opacity: 0.6; cursor: progress; }
+.lib-status { margin: 0; min-height: 1.5em; font-size: 13px; color: var(--muted); }
+.lib-fine { margin: auto 0 0; font-size: 12px; color: var(--muted); }
+.lib-fine code { font-family: var(--mono); font-size: 0.95em; }
+.lib-tools { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 16px 0 8px; }
+.lib-tools input { width: 100%; height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font: inherit; }
+.lib-group h2 { font-size: 20px; margin: 22px 0 2px; }
+.lib-group h2 small { font-size: 14px; font-weight: 500; }
+.lib-note { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+.lib-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.lib-card { width: 100%; display: grid; gap: 2px; padding: 8px; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; cursor: pointer; }
+.lib-card:hover { border-color: var(--accent); }
+.lib-card[aria-current="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
+.lib-thumb { display: block; aspect-ratio: 1 / 1; border-radius: 8px; background: radial-gradient(circle at 50% 40%, #fdf8f0, #efe7d8); overflow: hidden; margin-bottom: 4px; }
+.lib-thumb img { display: block; width: 100%; height: 100%; }
+.lib-card b { font-size: 14px; line-height: 1.25; }
+.lib-card small { font-size: 12px; line-height: 1.3; }
+@media (max-width: 760px) {
+  .lib-viewer { grid-template-columns: 1fr; padding: 12px; }
+  .lib-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+}

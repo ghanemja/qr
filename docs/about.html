@@ -21,7 +21,7 @@
     <input type="search" placeholder="Search companies…" autocomplete="off" spellcheck="false" aria-label="Search companies" aria-expanded="false">
     <ul class="ss-results" role="listbox" hidden></ul>
   </div>
-  <nav class="nav"><a href="index.html">QR world</a><a href="map.html">Flat map</a><a href="companies.html">Directory</a></nav>
+  <nav class="nav"><a href="index.html">QR world</a><a href="map.html">Flat map</a><a href="companies.html">Directory</a><a class="keep" href="about.html">About</a><a class="keep lib-link" href="library.html"><svg class="i-cube" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 2.8 20 7.4v9.2l-8 4.6-8-4.6V7.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 7.4l8 4.6 8-4.6M12 12v9.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg><span class="l-long">Access 3D asset library</span><span class="l-short">3D library</span></a></nav>
 </header>
 <main class="prose">
   <h1>About the data</h1>
@@ -34,9 +34,14 @@
   <p>The 59 startups and private companies are a hand-picked set of well-known names, not a ranking. Funding and valuations change too fast to keep in a static site, so the pages leave them out.</p>
   <h2>Map</h2>
   <p>Borders from Natural Earth via <a href="https://github.com/topojson/world-atlas">world-atlas</a> and <a href="https://github.com/topojson/us-atlas">us-atlas</a>. QR codes are generated in your browser with <a href="https://github.com/kazuhikoarase/qrcode-generator">qrcode-generator</a> (MIT).</p>
+  <h2>3D models</h2>
+  <p>Every model on the site can be downloaded from the <a href="library.html">3D asset library</a> as a GLB file, ready for Blender, game engines and 3D viewers. Each file carries the project credit and the full licence text.</p>
   <h2>Corrections</h2>
   <p>Edit <code>data/fortune500.json</code> or <code>data/startups.json</code> and run <code>npm run build</code>.</p>
+  <h2>Licence and credit</h2>
+  <p>QR Compass, including its code and 3D models, is made by <a href="https://github.com/ghanemja">ghanemja</a> and released under the <a href="LICENSE.txt">MIT License</a> (© 2026 ghanemja): you may use, change and share it, as long as the copyright notice and licence travel with it. The source is on <a href="https://github.com/ghanemja/qr">GitHub</a>. Company names belong to their owners; the data sources above keep their own terms.</p>
 </main>
+<footer class="site-foot">© 2026 ghanemja · QR Compass is open source under the <a href="LICENSE.txt">MIT License</a> · <a href="library.html">3D models</a> free to download · <a href="https://github.com/ghanemja/qr">Source on GitHub</a></footer>
 <script src="assets/sitesearch.js"></script>
 </body>
 </html>

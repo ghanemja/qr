@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
 // Builds the static site into docs/ from data/*.json.
 //   npm install && npm run build
 // SITE_URL (optional) sets canonical/OG URLs, e.g. SITE_URL=https://example.com/atlas/
@@ -5,7 +7,9 @@ import { readFileSync, writeFileSync, mkdirSync, rmSync, copyFileSync } from 'no
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
-import { variantCount, PROP_COUNT, TOPPER_COUNT } from '../src/models.js';
+import { variantCount, PROP_COUNT, TOPPER_COUNT, ARCHETYPES } from '../src/models.js';
+import { HEROES } from '../src/heroes.js';
+import { HEROES2 } from '../src/heroes2.js';
 import * as d3 from 'd3-geo';
 import * as topo from 'topojson-client';
 import * as simp from 'topojson-simplify';
@@ -14,6 +18,11 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'docs');
 const SITE_URL = (process.env.SITE_URL || 'https://ghanemja.github.io/qr/').replace(/\/?$/, '/');
 const LIST_YEAR = 2026;
+// The project's licence (LICENSE, MIT): credited in the footer and the About page, and embedded
+// in every model the 3D asset library exports.
+const LICENSE_TEXT = readFileSync(join(ROOT, 'LICENSE'), 'utf8');
+const AUTHOR = 'ghanemja';
+const REPO_URL = 'https://github.com/ghanemja/qr';
 
 const readJSON = (p) => JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -349,6 +358,7 @@ const head = ({ title, description, path, depth }) => {
 };
 
 // The site-wide company search (src/sitesearch.js); `cls` styles it for the page's stylesheet.
+const CUBE = '<svg class="i-cube" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 2.8 20 7.4v9.2l-8 4.6-8-4.6V7.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 7.4l8 4.6 8-4.6M12 12v9.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>';
 const siteSearch = (cls) => `<div class="${cls}" role="search" data-sitesearch>
     <input type="search" placeholder="Search companies…" autocomplete="off" spellcheck="false" aria-label="Search companies" aria-expanded="false">
     <ul class="ss-results" role="listbox" hidden></ul>
@@ -358,8 +368,13 @@ const topbar = (depth, extra = '') => {
   return `<header class="topbar">
   <a class="brand" href="${up}index.html"><img src="${up}assets/icon.svg" alt="" width="22" height="22"><span>QR&nbsp;Compass</span></a>
   ${extra}
-  <nav class="nav"><a href="${up}index.html">QR world</a><a href="${up}map.html">Flat map</a><a href="${up}companies.html">Directory</a></nav>
+  <nav class="nav"><a href="${up}index.html">QR world</a><a href="${up}map.html">Flat map</a><a href="${up}companies.html">Directory</a><a class="keep" href="${up}about.html">About</a><a class="keep lib-link" href="${up}library.html">${CUBE}<span class="l-long">Access 3D asset library</span><span class="l-short">3D library</span></a></nav>
 </header>`;
+};
+// The site footer: credit and licence.
+const footer = (depth) => {
+  const up = '../'.repeat(depth);
+  return `<footer class="site-foot">© ${LIST_YEAR} ${AUTHOR} · QR Compass is open source under the <a href="${up}LICENSE.txt">MIT License</a> · <a href="${up}library.html">3D models</a> free to download · <a href="${REPO_URL}">Source on GitHub</a></footer>`;
 };
 
 // ---------- dot-matrix logo ----------
@@ -393,7 +408,7 @@ const qwTop = (depth) => {
     <a class="qw-logo" href="${up}index.html" aria-label="QR Compass home">${LOGO}</a>
   </div>
   ${depth ? siteSearch('qw-find') : ''}
-  <nav class="qw-nav">${depth ? `<a href="${up}index.html">← Map</a>` : ''}<a href="${up}about.html">About</a></nav>`;
+  <nav class="qw-nav">${depth ? `<a href="${up}index.html">← Map</a>` : ''}<a href="${up}about.html">About</a><a class="lib-link" href="${up}library.html" aria-label="Access 3D asset library">${CUBE}<span class="l-long">Access 3D asset library</span><span class="l-short">3D library</span></a></nav>`;
 };
 const ICONS = {
   spring: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.6"/><path d="M12 9.4c-1.6-3.9 1.4-6.4 3.2-4.6 1.6 1.6-.4 4.6-3.2 4.6Zm2.6 2.6c3.9-1.6 6.4 1.4 4.6 3.2-1.6 1.6-4.6-.4-4.6-3.2ZM12 14.6c1.6 3.9-1.4 6.4-3.2 4.6-1.6-1.6.4-4.6 3.2-4.6ZM9.4 12c-3.9 1.6-6.4-1.4-4.6-3.2 1.6-1.6 4.6.4 4.6 3.2Z"/></svg>',
@@ -487,6 +502,7 @@ function companyPage(c, prev, next) {
   <p class="qw-source">${c.kind === 'f500'
     ? `Rank and financials: Fortune 500, ${LIST_YEAR} list (fiscal ${LIST_YEAR - 1}). HQ locations: the city on the list, placed with the US Census Gazetteer.`
     : 'Startup entries are curated by hand; check the company’s own site for current details.'} <a href="../about.html">About the data</a>.</p>
+  <p class="qw-source qw-licence">© ${LIST_YEAR} ${AUTHOR} · QR Compass is open source under the <a href="../LICENSE.txt">MIT License</a>. Download this model and the others from the <a href="../library.html">3D asset library</a>.</p>
 </main>
 <script>window.COMPANY=${JSON.stringify(data)};</script>
 <script src="../assets/qrcode.js"></script>
@@ -698,6 +714,7 @@ ${rows.map((c) => `<tr data-k="${c.kind}" data-t="${c.tech ? 1 : 0}" data-q="${e
     </tbody>
   </table>
 </main>
+${footer(0)}
 <script src="assets/directory.js"></script>
 <script src="assets/sitesearch.js"></script>
 </body>
@@ -720,10 +737,91 @@ ${topbar(0, siteSearch('search'))}
   <p>The ${startups.length} startups and private companies are a hand-picked set of well-known names, not a ranking. Funding and valuations change too fast to keep in a static site, so the pages leave them out.</p>
   <h2>Map</h2>
   <p>Borders from Natural Earth via <a href="https://github.com/topojson/world-atlas">world-atlas</a> and <a href="https://github.com/topojson/us-atlas">us-atlas</a>. QR codes are generated in your browser with <a href="https://github.com/kazuhikoarase/qrcode-generator">qrcode-generator</a> (MIT).</p>
+  <h2>3D models</h2>
+  <p>Every model on the site can be downloaded from the <a href="library.html">3D asset library</a> as a GLB file, ready for Blender, game engines and 3D viewers. Each file carries the project credit and the full licence text.</p>
   <h2>Corrections</h2>
   <p>Edit <code>data/fortune500.json</code> or <code>data/startups.json</code> and run <code>npm run build</code>.</p>
+  <h2>Licence and credit</h2>
+  <p>QR Compass, including its code and 3D models, is made by <a href="https://github.com/${AUTHOR}">${AUTHOR}</a> and released under the <a href="LICENSE.txt">MIT License</a> (© ${LIST_YEAR} ${AUTHOR}): you may use, change and share it, as long as the copyright notice and licence travel with it. The source is on <a href="${REPO_URL}">GitHub</a>. Company names belong to their owners; the data sources above keep their own terms.</p>
 </main>
+${footer(0)}
 <script src="assets/sitesearch.js"></script>
+</body>
+</html>
+`;
+}
+
+// ---------- 3D asset library ----------
+// Every model on the site, for download as GLB (src/library.js exports them in the browser).
+const LIBRARY = (() => {
+  const heroIds = new Set([...Object.keys(HEROES), ...Object.keys(HEROES2)]);
+  const vlabels = industries._variantLabels || {};
+  const users = new Map(); // "model:variant" -> companies with that look
+  for (const c of rankedCompanies()) {
+    const k = `${modelOf(c)}:${LOOKS.get(c.slug).v}`;
+    if (!users.has(k)) users.set(k, []);
+    users.get(k).push(c);
+  }
+  const KIND_NAMES = { ai: 'AI', vr: 'VR', pg: 'P&G' };
+  const kindName = (id) => KIND_NAMES[id] || id[0].toUpperCase() + id.slice(1);
+  const entry = (id, v, t, sub, kind) => {
+    const list = users.get(`${id}:${v}`) || [];
+    const lk = list.length ? LOOKS.get(list[0].slug) : { a: PALETTES[0][0], b: PALETTES[0][1] };
+    return { id, v, kind, t, sub, slug: slugify(kind === 'hero' ? id : `${id}-${v}-${t}`), a: lk.a, b: lk.b, users: list.map((c) => [c.name, c.slug]) };
+  };
+  const heroes = [...heroIds].map((id) => {
+    const list = users.get(`${id}:0`) || [];
+    const who = list.length ? list[0].name : kindName(id);
+    return entry(id, 0, who, MODEL_LABELS[id] || '', 'hero');
+  }).sort((a, b) => a.t.localeCompare(b.t));
+  const shapes = Object.keys(ARCHETYPES).filter((id) => !heroIds.has(id)).flatMap((id) =>
+    Array.from({ length: variantCount(id) }, (_, v) => entry(id, v, (vlabels[id] || [])[v] || MODEL_LABELS[id] || kindName(id), kindName(id), 'shape')));
+  return {
+    site: SITE_URL, year: LIST_YEAR, author: AUTHOR, license: LICENSE_TEXT,
+    groups: [
+      { title: 'Signature models', note: 'One-of-a-kind scenes for the biggest names, each showing why the company wins.', items: heroes },
+      { title: 'Shared shapes', note: 'The models other companies stand on, by kind of business. Pick the two brand colours before you download.', items: shapes },
+    ],
+  };
+})();
+function rankedCompanies() { return [...companies.filter((c) => c.kind === 'f500').sort((a, b) => a.rank - b.rank), ...companies.filter((c) => c.kind === 'startup')]; }
+function libraryPage() {
+  const n = LIBRARY.groups.reduce((s, g) => s + g.items.length, 0);
+  const description = `Download any of the ${n} QR Compass 3D models as GLB files, free under the MIT License.`;
+  return `${head({ title: '3D asset library · QR Compass', description, path: 'library.html', depth: 0 }).replace('</head>', `<script type="importmap">{"imports":{"three":"./assets/three.module.min.js"}}</script>
+</head>`)}
+<body class="page library">
+${topbar(0, siteSearch('search'))}
+<main>
+  <h1>3D asset library</h1>
+  <p class="lede">${esc(description)} Each file credits the project and carries the full licence; keep them with the model when you share it.</p>
+  <section class="lib-viewer" id="lib-viewer" aria-label="Model preview">
+    <div class="lib-canvas" id="lib-canvas"></div>
+    <div class="lib-panel">
+      <h2 id="lib-title"></h2>
+      <p class="lib-sub" id="lib-sub"></p>
+      <p class="lib-users" id="lib-users"></p>
+      <div class="lib-colors" id="lib-colors" hidden>
+        <label><input type="color" id="lib-a"> Brand colour</label>
+        <label><input type="color" id="lib-b"> Second colour</label>
+      </div>
+      <label class="lib-check"><input type="checkbox" id="lib-anim"> Include its animation (12-second loop)</label>
+      <div class="lib-actions">
+        <button class="btn primary" id="lib-glb">Download .glb</button>
+        <button class="btn" id="lib-zip">Download .zip <small>GLB + licence</small></button>
+        <a class="btn ghost" href="LICENSE.txt" download="LICENSE.txt">Download licence</a>
+      </div>
+      <p class="lib-status" id="lib-status" aria-live="polite"></p>
+      <p class="lib-fine">High detail, at its rest pose. Brand colours are baked into vertex colours; water is a plain glossy material. GLB metadata: <code>asset.copyright</code> “© ${LIST_YEAR} ${AUTHOR} — QR Compass, MIT License” and <code>asset.extras</code> with the title, project, author, link and licence text.</p>
+    </div>
+  </section>
+  <div class="lib-tools"><input id="lib-filter" type="search" placeholder="Filter models or companies…" aria-label="Filter models"></div>
+  <div id="lib-groups"></div>
+</main>
+${footer(0)}
+<script>window.LIBRARY=${JSON.stringify(LIBRARY).replace(/</g, '\\u003c')};</script>
+<script src="assets/sitesearch.js"></script>
+<script type="module" src="assets/library.js"></script>
 </body>
 </html>
 `;
@@ -733,12 +831,18 @@ ${topbar(0, siteSearch('search'))}
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(join(OUT, 'c'), { recursive: true });
 mkdirSync(join(OUT, 'assets'), { recursive: true });
-for (const f of ['site.css', 'qrworld.css', 'atlas.js', 'qr-card.js', 'directory.js', 'icon.svg', 'qrworld.js', 'models.js', 'qrsculpture.js', 'company3d.js', 'home.js', 'BufferGeometryUtils.js', 'RoundedBoxGeometry.js', 'kit.js', 'heroes.js', 'heroes2.js', 'scenes.js', 'sitesearch.js']) copyFileSync(join(ROOT, 'src', f), join(OUT, 'assets', f));
+for (const f of ['site.css', 'qrworld.css', 'atlas.js', 'qr-card.js', 'directory.js', 'icon.svg', 'qrworld.js', 'models.js', 'qrsculpture.js', 'company3d.js', 'home.js', 'BufferGeometryUtils.js', 'RoundedBoxGeometry.js', 'kit.js', 'heroes.js', 'heroes2.js', 'scenes.js', 'sitesearch.js', 'library.js']) copyFileSync(join(ROOT, 'src', f), join(OUT, 'assets', f));
 
 copyFileSync(join(ROOT, 'node_modules/qrcode-generator/qrcode.js'), join(OUT, 'assets/qrcode.js'));
 copyFileSync(join(ROOT, 'node_modules/three/build/three.module.min.js'), join(OUT, 'assets/three.module.min.js'));
 copyFileSync(join(ROOT, 'node_modules/three/examples/jsm/controls/OrbitControls.js'), join(OUT, 'assets/OrbitControls.js'));
 copyFileSync(join(ROOT, 'node_modules/three/examples/jsm/environments/RoomEnvironment.js'), join(OUT, 'assets/RoomEnvironment.js'));
+// GLTFExporter (for the 3D asset library) and the one helper it imports, flattened into assets/.
+writeFileSync(join(OUT, 'assets/GLTFExporter.js'), readFileSync(join(ROOT, 'node_modules/three/examples/jsm/exporters/GLTFExporter.js'), 'utf8').replace("'./../utils/TextureUtils.js'", "'./TextureUtils.js'"));
+copyFileSync(join(ROOT, 'node_modules/three/examples/jsm/utils/TextureUtils.js'), join(OUT, 'assets/TextureUtils.js'));
+// The licence, served next to the site (LICENSE.txt opens in the browser).
+copyFileSync(join(ROOT, 'LICENSE'), join(OUT, 'LICENSE'));
+copyFileSync(join(ROOT, 'LICENSE'), join(OUT, 'LICENSE.txt'));
 writeFileSync(join(OUT, 'assets/map.svg'), MAP_SVG);
 // The site-wide search index (src/sitesearch.js): [slug, name, place, kind, tech, rank, listed name].
 writeFileSync(join(OUT, 'assets/search.json'), JSON.stringify(companies.map((c) => {
@@ -750,6 +854,7 @@ writeFileSync(join(OUT, 'map.html'), indexPage());
 writeFileSync(join(OUT, 'index.html'), worldPage());
 writeFileSync(join(OUT, 'companies.html'), directoryPage());
 writeFileSync(join(OUT, 'about.html'), aboutPage());
+writeFileSync(join(OUT, 'library.html'), libraryPage());
 writeFileSync(join(OUT, '.nojekyll'), '');
 const ordered = [...companies.filter((c) => c.kind === 'f500').sort((a, b) => a.rank - b.rank), ...companies.filter((c) => c.kind === 'startup')];
 ordered.forEach((c, i) => writeFileSync(join(OUT, 'c', `${c.slug}.html`), companyPage(c, ordered[i - 1], ordered[i + 1])));

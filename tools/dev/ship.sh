@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
 # Smoke-test, commit, rebase on origin/main, rebuild docs, push. Usage: tools/dev/ship.sh "message"
 # (Append the session's attribution trailer lines to the message yourself if your setup needs them.)
 set -e

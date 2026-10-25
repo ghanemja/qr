@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
 // Shared 3D pieces for the QR worlds: stage, isometric camera rig, palettes, helpers.
 import * as THREE from 'three';
 import { OrbitControls } from './OrbitControls.js';

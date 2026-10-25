@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
 // The second batch of signature models: well-known companies that sat on shapes shared by only
 // a few companies. Same contract as src/heroes.js ({ finder, build } → { bare: true, ... }), and
 // they reuse the set dressing from heroes.js and scenes.js.

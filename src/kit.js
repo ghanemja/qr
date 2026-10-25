@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
 // The modelling kit shared by the kinds of company (models.js) and the signature models of the
 // biggest companies (heroes.js): soft primitives, colouring, brand slots and motion helpers.
 import * as THREE from 'three';

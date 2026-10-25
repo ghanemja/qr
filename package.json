@@ -1,6 +1,8 @@
 {
   "name": "qr-atlas",
   "private": true,
+  "license": "MIT",
+  "author": "ghanemja",
   "type": "module",
   "scripts": {
     "build": "node tools/build.mjs"

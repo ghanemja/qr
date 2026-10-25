@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: MIT
+   Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/ */
 :root {
   --cream: #f6f1e7;
   --cream-2: #fdf8f0;
@@ -45,9 +47,14 @@ small { color: var(--muted); font-size: 0.8em; }
   color: var(--ink); font-size: 13px; font-weight: 600; backdrop-filter: blur(6px);
 }
 .qw-nav a:hover { background: var(--sand); text-decoration: none; }
+.qw-nav a.lib-link { display: inline-flex; align-items: center; gap: 6px; }
+.lib-link .i-cube { flex: none; }
+.lib-link .l-short { display: none; }
+@media (max-width: 1180px) { .lib-link .l-long { display: none; } .lib-link .l-short { display: inline; } }
+.qw-licence { margin-top: 6px; }
 
 /* Site-wide company search at the top of the stage (src/sitesearch.js). */
-.qw-find { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 6; width: min(420px, calc(100% - 520px)); }
+.qw-find { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); z-index: 6; width: min(420px, calc(100% - 640px)); }
 .qw-find input {
   width: 100%; height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(253, 248, 240, 0.92);
   font: 15px var(--font); color: var(--ink); backdrop-filter: blur(6px);
@@ -63,7 +70,7 @@ small { color: var(--muted); font-size: 0.8em; }
 .dot-i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--f500); flex: none; }
 .dot-i.tech { background: var(--tech); }
 .dot-i.startup { background: var(--startup); }
-@media (max-width: 900px) { .qw-find { left: 240px; right: 170px; width: auto; transform: none; } }
+@media (max-width: 900px) { .qw-find { left: 240px; right: 290px; width: auto; transform: none; } }
 
 .qw-title { position: absolute; top: 96px; left: 0; right: 0; z-index: 3; text-align: center; pointer-events: none; padding: 0 16px; }
 .qw-title h1 { margin: 0; font-size: clamp(26px, 4.6vw, 46px); letter-spacing: -0.03em; line-height: 1.05; text-shadow: 0 0 12px var(--cream), 0 0 4px var(--cream); }
@@ -149,10 +156,11 @@ i.dot.startup { background: var(--startup); }
   .qw-word { font-size: 18px; }
   .qw-nav { top: 12px; right: 12px; }
   .qw-nav a { padding: 5px 10px; font-size: 12px; }
-  .qw-nav a:nth-child(3) { display: none; }
+  .qw-company .qw-nav a.lib-link span { display: none; }
+  .qw-company .qw-nav a.lib-link { padding: 5px 8px; }
   .qw-title { top: 84px; }
   .qw-company .qw-word { display: none; }
-  .qw-find { top: 12px; left: 56px; right: 146px; }
+  .qw-find { top: 12px; left: 56px; right: 176px; }
   .qw-find input { height: 34px; font-size: 16px; }
   .ss-results { right: auto; width: calc(100vw - 24px); left: -44px; }
   .qw-tabs button { font-size: 11px; gap: 3px; flex-direction: column; height: 52px; padding: 0 4px; min-width: 0; }

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
 """Build data/fortune500.json from the 2026 Fortune 500 list.
 
 Inputs:

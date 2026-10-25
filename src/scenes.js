@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
 // The shared industry shapes, rebuilt as small animated scenes to the signature models' standard
 // (src/heroes.js): each sits on its own slab and shows how that kind of business wins. Unlike a
 // signature model, one scene serves many companies, so it is painted partly in brand slots

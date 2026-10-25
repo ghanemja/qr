@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
 // Low-poly signature models: several shapes per kind of company (about 10 units tall, built at
 // the origin), plus optional moving parts (wings that flap, blades that spin, phones that fall).
 // Geometry carries vertex colours; parts painted 'A'/'B' (and darker 'Ad'/'Bd') take the
@@ -1357,6 +1359,8 @@ export function centerpiece(id, variant = 0, base = 0, detail = 'high') {
   if (!cache.has(key)) cache.set(key, withDetail(detail, () => build(id, variant, base)));
   return cache.get(key);
 }
+// The same model built fresh each time, not cached (the 3D asset library exports many models).
+export const buildModel = (id, variant = 0, base = 0, detail = 'high') => withDetail(detail, () => build(id, variant, base));
 function build(id, variant, base) {
   {
     const builders = [CENTER[id] || CENTER.tree, ...(EXTRA[id] || [])], v = variant % builders.length;

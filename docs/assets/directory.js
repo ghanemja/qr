@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
 (() => {
   const rows = [...document.querySelectorAll('.dir tbody tr')];
   const input = document.getElementById('filter');

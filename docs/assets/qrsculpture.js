@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 ghanemja. QR Compass, https://ghanemja.github.io/qr/
 // A company's QR world, mountable anywhere: its signature model stands on a plaza whose tiles
 // faintly carry the QR code. setScan(true) breaks the model into cube pixels that arc down onto
 // the QR's dark squares and darken to a scannable shade of their own colour, in a diagonal sweep, while the camera tilts to
