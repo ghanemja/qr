@@ -101,7 +101,8 @@
   "ice": "The exchange behind the exchanges: stocks, oil and mortgages in one data cube",
   "paypal": "Both sides of the checkout: friends pay friends, and the same accounts pay every shop",
   "block": "Square on the counter, Cash App in the pocket: the money goes round inside Block",
-  "dell": "Built to order and shipped direct, straight from the line to your door"
+  "dell": "Built to order and shipped direct, straight from the line to your door",
+  "hp": "The printer in every home, and the ink that keeps coming"
  },
  "bank": [
   "PNC Financial Services",
@@ -460,7 +461,6 @@
   "Cerebras"
  ],
  "computer": [
-  "HP",
   "Hewlett Packard Enterprise",
   "Xerox",
   "NCR",
@@ -1685,5 +1685,8 @@
  ],
  "dell": [
   "Dell Technologies"
+ ],
+ "hp": [
+  "HP"
  ]
 }
