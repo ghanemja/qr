@@ -1547,4 +1547,32 @@ export const HEROES2 = {
     hotels.forEach(([x, z, h], i) => moving.push(rider(merge(part(cyl(0.16, 0.16, 0.05, 16), RED, { r: [Math.PI / 2, 0, 0] }), part(cyl(0.1, 0.1, 0.055, 12), K.white, { r: [Math.PI / 2, 0, 0] })), curve([[x, y0 + h * 0.6, z + 0.9], [(x + 0.2) / 2, y0 + 3.6, (z + 0.4) / 2], [0.2, y0 + 1.6, 0.4]]), P / 4, i / 6, 0, 0.8, (t) => ({ ry: t * 4 }))));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Southwest Airlines: one kind of plane, point to point, turned fast. The 737 rolls in, the
+  // bags come off and on, the clock on the gate barely moves, and it is off again.
+  southwest: { finder: '#304cb2', build: () => {
+    const R = rand(146), out = [], BLUE = '#304cb2', RED = '#c8102e', YEL = '#ffbf27';
+    out.push(ground('#8fc66f'), part(box(10.2, 0.02, 6.0), '#9aa1a9', { p: [0, y0 + 0.01, -0.4] }), part(box(10.2, 0.02, 1.6), '#4a4f57', { p: [0, y0 + 0.02, 3.9] }));
+    for (let i = 0; i < 8; i++) out.push(part(box(0.55, 0.01, 0.06), '#f4f4f0', { p: [-4.4 + i * 1.25, y0 + 0.03, 3.9] }));
+    // ---- the terminal and the gate, back
+    out.push(part(rbox(8.6, 1.4, 1.6, 0.06), '#d6d9dd', { p: [0, y0 + 0.7, -3.9] }), part(box(8.6, 0.5, 0.02), '#5d7fa3', { p: [0, y0 + 0.8, -3.09] }), part(box(8.7, 0.12, 1.7), BLUE, { p: [0, y0 + 1.46, -3.9] }));
+    out.push(place(pixText('SOUTHWEST', 0.07, K.white, 0.03), { p: [-2.4, y0 + 1.15, -3.06] }), part(heartGeo(0.35, 0.12), RED, { p: [-0.6, y0 + 1.15, -3.0] }));
+    out.push(part(rbox(0.4, 0.4, 1.6, 0.05), '#c9ced6', { p: [0.6, y0 + 1.0, -2.3] }), part(cyl(0.05, 0.05, 0.8, 8), '#7b828c', { p: [0.6, y0 + 0.4, -1.6] }));
+    // The gate clock on a post, front left.
+    const CX = -3.6, CZ = 1.4;
+    out.push(part(cyl(0.05, 0.06, 1.8, 10), '#3a3f47', { p: [CX, y0 + 0.9, CZ] }), part(cyl(0.55, 0.55, 0.1, 32), K.white, { p: [CX, y0 + 2.2, CZ], r: [Math.PI / 2, 0, Math.PI / 4] }), part(torus(0.55, 0.05, TAU, 32), BLUE, { p: [CX, y0 + 2.2, CZ], r: [0, Math.PI / 4, 0] }));
+    out.push(trees(R, [[-4.6, -4.6], [4.6, -4.6], [4.6, 4.6], [-4.6, 4.6]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 12;
+    const plane = place(jet(RED, BLUE), {});
+    const belly = place(merge(part(box(2.6, 0.08, 0.5), YEL, { p: [0.2, 0.42, 0] })), {});
+    // In from the runway, nose to the gate, out again, takeoff.
+    const pose = (f) => { if (f < 0.18) { const u = easeOut(win(f, 0, 0.18)); return { x: -6 + u * 6.6, z: 3.9 - u * 0, ry: 0, y: 0 }; } if (f < 0.28) { const u = easeIO(win(f, 0.18, 0.28)); return { x: 0.6, z: 3.9 - u * 3.6, ry: u * Math.PI / 2, y: 0 }; } if (f < 0.68) return { x: 0.6, z: 0.3, ry: Math.PI / 2, y: 0 }; if (f < 0.78) { const u = easeIO(win(f, 0.68, 0.78)); return { x: 0.6, z: 0.3 + u * 3.6, ry: Math.PI / 2 - u * Math.PI / 2 - u * Math.PI, y: 0 }; } const u = easeIn(win(f, 0.78, 1)); return { x: 0.6 - u * 7, z: 3.9, ry: Math.PI, y: Math.max(0, u - 0.4) * 4, rz: 0 }; };
+    moving.push({ geo: merge(plane, belly), pivot: [0, y0 + 0.02, 0], anim: (t) => { const f = cyc(t, P), p = pose(f); return { ...p, s: clamp01((5.6 - Math.abs(p.x)) / 0.6) + 0.001 }; } });
+    // Bags off and on along the belt loader.
+    for (let k = 0; k < 4; k++) moving.push({ geo: part(rbox(0.3, 0.22, 0.4, 0.04), ['#3d7be0', '#e5533d', '#2f9e6e', '#f2c94c'][k]), pivot: [1.8, y0 + 0.3, 0.0], anim: (t) => { const f = cyc(t, P); if (f < 0.32 || f > 0.64) return { s: 0.001 }; const u = cyc(t, 1.4, k / 4); return { x: u * 1.6, y: u * 0.4 }; } });
+    moving.push({ geo: merge(part(box(1.8, 0.08, 0.4), '#3a3f47', { r: [0, 0, 0.25] }), part(box(0.6, 0.3, 0.6), YEL, { p: [-0.6, -0.25, 0] })), pivot: [2.6, y0 + 0.45, 0.0], anim: (t) => { const f = cyc(t, P); return f > 0.3 && f < 0.66 ? {} : { s: 0.001 }; } });
+    // The clock hand: one quick sweep while the plane is on the ground.
+    moving.push({ geo: part(box(0.05, 0.45, 0.04), RED, { p: [0, 0.2, 0] }), pivot: [CX + 0.05, y0 + 2.2, CZ + 0.05], anim: (t) => { const f = cyc(t, P); return { ry: Math.PI / 4, rz: -easeIO(win(f, 0.28, 0.68)) * TAU * 0.25 }; } });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };

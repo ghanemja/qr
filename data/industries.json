@@ -133,7 +133,8 @@
   "chipotle": "A fresh line that never stops, straight out to the Chipotlane",
   "doordash": "The most dashers on the most streets",
   "abbott": "Medicine you can wear: the sensor that reads glucose all day",
-  "marriott": "Thirty brands, one membership: every stay builds the Bonvoy card"
+  "marriott": "Thirty brands, one membership: every stay builds the Bonvoy card",
+  "southwest": "One kind of plane, point to point, turned around fast"
  },
  "bank": [
   "PNC Financial Services",
@@ -429,7 +430,6 @@
  "plane": [
   "American Airlines Group",
   "United Continental Holdings",
-  "Southwest Airlines",
   "Alaska Air Group",
   "JetBlue Airways",
   "Spirit AeroSystems Holdings",
@@ -1765,5 +1765,8 @@
  ],
  "marriott": [
   "Marriott International"
+ ],
+ "southwest": [
+  "Southwest Airlines"
  ]
 }
