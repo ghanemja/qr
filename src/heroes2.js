@@ -1944,31 +1944,43 @@ export const HEROES2 = {
     for (let k = 0; k < 5; k++) { const v = new V(-0.7 + k * 0.35, 0, 0.07).applyQuaternion(BQ); moving.push({ geo: part(box(0.22, 1.0, 0.02), [RED, '#3d7be0', '#f2c94c', '#2f9e6e', RED][k], { p: [0, 0.5, 0] }), pivot: [-3.2 + v.x, y0 + 1.05, -3.6 + v.z], anim: (t) => ({ q: BQ, sy: 0.2 + 0.8 * (0.4 + 0.6 * Math.abs(Math.sin(t * 0.6 + k))) * (0.4 + k * 0.12) }) }); }
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
-  // Perplexity: an answer engine that shows its sources. A question goes up; the search reaches
-  // out to the pages around it, three light up, and the answer card fills in with numbered
-  // citations pointing back to them.
+  // Perplexity: an answer engine that shows its sources. A question goes up to the big answer
+  // screen; the search reaches every source round the square, three of them light up, and their
+  // numbered citations fly back into the answer as it writes itself.
   perplexity: { finder: '#20808d', build: () => {
-    const R = rand(159), out = [], TEAL = '#20808d', INK = '#13343b';
-    out.push(ground('#8fc66f'), part(cyl(2.0, 2.0, 0.05, 48), '#e9efef', { p: [0, y0 + 0.025, 0] }));
-    // ---- the sources: little pages on stands in a ring, each numbered
-    const N = 7, srcs = Array.from({ length: N }, (_, i) => { const a = (i / N) * TAU + 0.3; return [Math.cos(a) * 3.7, Math.sin(a) * 3.7, a]; });
-    srcs.forEach(([x, z, a], i) => out.push(part(cyl(0.05, 0.05, 0.9, 8), '#9aa1a9', { p: [x, y0 + 0.45, z] }), place(merge(part(rbox(0.8, 1.0, 0.05, 0.04), K.white), part(box(0.6, 0.1, 0.06), ['#3d7be0', '#e5533d', '#2f9e6e', '#f29a3a', '#8a6cf0', '#d6336c', '#3fb8a8'][i], { p: [0, 0.3, 0] }), [0, 1, 2].map((k) => part(box(0.55, 0.04, 0.06), '#c9ced6', { p: [0, 0.08 - k * 0.15, 0] }))), { p: [x, y0 + 1.4, z], r: [0, -a - Math.PI / 2, 0] })));
-    // ---- the answer card in the middle: a tall tablet on a plinth
-    const Q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 4, 0)), at = (dx, dy, dz = 0.08) => { const v = new V(dx, dy, dz).applyQuaternion(Q); return [v.x, y0 + v.y, v.z]; };
-    out.push(part(cyl(0.6, 0.7, 0.3, 32), INK, { p: [0, y0 + 0.15, 0] }), part(rbox(2.0, 2.6, 0.12, 0.12), INK, { p: at(0, 1.8, 0), q: Q }), part(rbox(1.84, 2.44, 0.02, 0.08), '#f6f8f8', { p: at(0, 1.8, 0.07), q: Q }));
-    out.push(part(rbox(1.6, 0.36, 0.02, 0.08), '#e6f2f3', { p: at(0, 2.75, 0.09), q: Q }), place(pixText('?', 0.06, TEAL, 0.03), { p: at(0.62, 2.75, 0.1), q: Q }));
-    // The Perplexity mark: an eight-armed asterisk on top.
-    out.push(...[0, 1, 2, 3].map((k) => part(box(0.08, 0.7, 0.06), TEAL, { p: at(0, 3.5, 0), q: Q.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new V(0, 0, 1), k * Math.PI / 4)) })));
-    out.push(trees(R, [[4.6, 4.6], [-4.6, -4.6], [4.6, -4.4], [-4.6, 4.4]], 0.5));
+    const R = rand(218), out = [], TEAL = '#20808d', INK = '#13343b';
+    out.push(ground('#8fc66f'), part(cyl(2.6, 2.6, 0.05, 56), '#e9efef', { p: [0, y0 + 0.025, 0] }));
+    // ---- the sources round the square, each its own kind, each with a numbered badge
+    const S = [[-3.7, 1.2, 'NEWS'], [-3.6, -2.0, 'LIBRARY'], [-1.0, -3.9, 'JOURNAL'], [2.2, -3.6, 'FORUM'], [3.9, -0.6, 'VIDEO'], [3.4, 2.6, 'WIKI'], [-1.2, 3.8, 'GOV']];
+    const kindG = (k) => {
+      if (k === 'NEWS') return merge(place(block(1.4, 2.0, 1.2, '#eef0f2', '#5b6b7d', 0.3), {}), part(box(1.44, 0.35, 1.24), INK, { p: [0, 1.85, 0] }));
+      if (k === 'LIBRARY') return merge(part(rbox(1.6, 1.2, 1.2, 0.04), '#efe9dc', { p: [0, 0.6, 0] }), [0, 1, 2, 3].map((i) => part(cyl(0.07, 0.08, 1.0, 10), K.white, { p: [-0.55 + i * 0.37, 0.55, 0.65] })), part(prism(1.7, 0.45, 1.3), '#e2dccd', { p: [0, 1.2, 0] }));
+      if (k === 'JOURNAL') return merge([0, 1, 2, 3, 4].map((i) => part(rbox(1.1, 0.22, 0.8, 0.04), ['#8a1538', '#1d3557', '#2f6f3a', '#b8860b', '#5b2a86'][i], { p: [0, 0.11 + i * 0.23, 0], r: [0, i * 0.12, 0] })));
+      if (k === 'FORUM') return merge(part(rbox(1.0, 0.7, 0.1, 0.15), '#ff6a3d', { p: [0, 1.3, 0] }), part(rbox(0.9, 0.6, 0.1, 0.15), '#3d7be0', { p: [0.3, 0.6, 0.1] }), part(cyl(0.05, 0.05, 1.0, 8), '#9aa1a9', { p: [-0.2, 0.5, -0.1] }));
+      if (k === 'VIDEO') return merge(part(rbox(1.6, 1.0, 0.1, 0.06), INK, { p: [0, 1.1, 0] }), part(box(1.4, 0.8, 0.02), '#e5533d', { p: [0, 1.1, 0.06] }), part(extrude([[-0.15, -0.2], [0.25, 0], [-0.15, 0.2]], 0.02), K.white, { p: [0, 1.1, 0.08] }), part(cyl(0.06, 0.08, 0.6, 8), '#3a3f47', { p: [0, 0.3, 0] }));
+      if (k === 'WIKI') return merge(part(ball(0.6), '#e9ecef', { p: [0, 0.9, 0] }), part(torus(0.6, 0.02, TAU, 24), '#9aa1a9', { p: [0, 0.9, 0] }), part(cyl(0.3, 0.4, 0.3, 16), '#c9ced6', { p: [0, 0.15, 0] }));
+      return merge(part(rbox(1.4, 1.0, 1.0, 0.04), '#f4efe6', { p: [0, 0.5, 0] }), part(new THREE.SphereGeometry(0.4, 20, 10, 0, TAU, 0, Math.PI / 2), '#9fb7c9', { p: [0, 1.0, 0] }));
+    };
+    S.forEach(([x, z, k], i) => out.push(place(kindG(k), { p: [x, y0, z], r: [0, Math.PI / 4, 0] }), place(merge(part(cyl(0.26, 0.26, 0.06, 20), K.white, { r: [Math.PI / 2, 0, 0] }), pixText(String(i + 1), 0.06, INK, 0.08)), { p: [x, y0 + 2.6, z], r: [0, Math.PI / 4, 0] })));
+    // ---- the answer screen in the middle
+    const Q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 4, 0)), at = (dx, dy, dz = 0.09) => { const v = new V(dx, dy, dz).applyQuaternion(Q); return [v.x, y0 + dy, v.z]; };
+    out.push(part(cyl(0.7, 0.8, 0.3, 32), INK, { p: [0, y0 + 0.15, 0] }), part(rbox(2.6, 3.2, 0.14, 0.14), INK, { p: at(0, 2.0, 0), q: Q }), part(rbox(2.44, 3.04, 0.02, 0.1), '#f6f8f8', { p: at(0, 2.0, 0.08), q: Q }), part(rbox(2.1, 0.4, 0.02, 0.12), '#e1eff0', { p: at(0, 3.15, 0.1), q: Q }));
+    out.push(...[0, 1, 2, 3].map((k) => part(box(0.1, 0.8, 0.08), TEAL, { p: at(0, 4.1, 0), q: Q.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new V(0, 0, 1), k * Math.PI / 4)) })));
+    // The asker at the front with a laptop.
+    out.push(place(fan('#d6336c'), { p: [1.6, y0, 1.8], s: 1.5 }), part(rbox(0.6, 0.04, 0.4, 0.02), '#3a3f47', { p: [1.3, y0 + 0.9, 1.5] }), part(cyl(0.05, 0.05, 0.9, 8), '#9aa1a9', { p: [1.3, y0 + 0.45, 1.5] }));
+    out.push(trees(R, [[4.6, 4.6], [-4.6, -4.6], [4.6, -4.6], [-4.6, 4.6]], 0.45));
     // ---- moving parts
-    const moving = [], P = 8, cited = [1, 3, 5];
-    // The question rising from the plinth into the card's search bar.
-    moving.push({ geo: merge(part(rbox(0.9, 0.36, 0.05, 0.12), TEAL), [0, 1, 2].map((k) => part(box(0.12, 0.05, 0.06), K.white, { p: [-0.25 + k * 0.2, 0, 0] }))), pivot: at(0, 0.6, 0.4), anim: (t) => { const f = cyc(t, P); return f < 0.15 ? { q: Q, y: easeOut(win(f, 0, 0.15)) * 1.8, s: Math.min(1, f / 0.03) + 0.001 } : { s: 0.001 }; } });
-    // Search beams out to every page; three answer and light up.
-    srcs.forEach(([x, z], i) => { const out1 = curve([[0, y0 + 2.4, 0], [x * 0.5, y0 + 3.0, z * 0.5], [x, y0 + 1.6, z]]); moving.push(rider(part(new THREE.SphereGeometry(0.07, 8, 6), '#7fd3dc'), out1, P, 0, 0.15, 0.35));
-      if (cited.includes(i)) { const back1 = curve([[x, y0 + 1.6, z], [x * 0.5, y0 + 3.2, z * 0.5], [0, y0 + 2.2, 0]]); moving.push(rider(part(new THREE.SphereGeometry(0.1, 10, 7), TEAL), back1, P, 0, 0.38, 0.55)); moving.push({ geo: part(torus(0.6, 0.04, TAU, 32), TEAL, { r: [Math.PI / 2, 0, 0] }), pivot: [x, y0 + 0.92, z], anim: (t) => { const f = cyc(t, P); return f > 0.35 && f < 0.95 ? { s: 1 + Math.sin(t * 6) * 0.05 } : { s: 0.001 }; } }); } });
-    // The answer lines filling in, each with its citation number.
-    for (let k = 0; k < 4; k++) moving.push({ geo: merge(part(box(1.2 - (k % 2) * 0.3, 0.07, 0.02), '#5b6b7d', { p: [0, 0, 0] }), part(rbox(0.16, 0.16, 0.025, 0.04), TEAL, { p: [0.75 - (k % 2) * 0.15, 0, 0] })), pivot: at(-0.15, 2.2 - k * 0.3, 0.1), anim: (t) => { const f = cyc(t, P), a = 0.55 + k * 0.08; return f > a && f < 0.97 ? { q: Q, s: 1, sx: Math.min(1, win(f, a, a + 0.06)) + 0.001 } : { s: 0.001 }; } });
+    const moving = [], P = 10, cited = [1, 3, 5];
+    // The question rising into the search bar.
+    moving.push({ geo: merge(part(rbox(1.0, 0.36, 0.06, 0.12), TEAL), pixText('?', 0.05, K.white, 0.08)), pivot: [1.3, y0 + 1.1, 1.5], anim: (t) => { const f = cyc(t, P); if (f > 0.15) return { s: 0.001 }; const u = easeOut(win(f, 0, 0.15)), p = new V(1.3, y0 + 1.1, 1.5).lerp(new V(...at(0, 3.15, 0.15)), u); return { x: p.x - 1.3, y: p.y - y0 - 1.1, z: p.z - 1.5, q: Q }; } });
+    moving.push({ geo: merge(part(box(1.4, 0.08, 0.02), '#5b6b7d'), pixText('?', 0.04, TEAL, 0.03).translate(0.85, 0, 0)), pivot: at(-0.2, 3.15, 0.12), anim: (t) => { const f = cyc(t, P); return f > 0.13 && f < 0.97 ? { q: Q, sx: Math.min(1, win(f, 0.13, 0.2)) + 0.001 } : { s: 0.001 }; } });
+    // Search out to every source; the cited ones glow and send their number back.
+    S.forEach(([x, z], i) => { const top = [x, y0 + 2.6, z], o = curve([at(0, 3.3, 0), [x * 0.5, y0 + 4.0, z * 0.5], top]); moving.push(rider(part(new THREE.SphereGeometry(0.08, 8, 6), '#7fd3dc'), o, P, 0, 0.17, 0.32));
+      if (cited.includes(i)) { const n = cited.indexOf(i); moving.push({ geo: part(torus(0.36, 0.05, TAU, 24), TEAL), pivot: top, anim: (t) => { const f = cyc(t, P); return f > 0.32 && f < 0.95 ? { ry: Math.PI / 4, s: 1 + Math.sin(t * 6) * 0.06 } : { s: 0.001 }; } });
+        moving.push(rider(merge(part(rbox(0.3, 0.3, 0.06, 0.08), TEAL), pixText(String(i + 1), 0.045, K.white, 0.08)), curve([top, [x * 0.5, y0 + 4.2, z * 0.5], at(0.95, 2.55 - n * 0.55, 0.15)]), P, 0, 0.35 + n * 0.08, 0.5 + n * 0.08, () => ({ ry: Math.PI / 4 }))); } });
+    // The answer: lines writing themselves, each ending with its citation chip.
+    for (let k = 0; k < 3; k++) { const a = 0.48 + k * 0.08; moving.push({ geo: merge(part(box(1.6, 0.08, 0.02), '#5b6b7d', { p: [-0.1, 0.1, 0] }), part(box(1.2, 0.08, 0.02), '#9aa1a9', { p: [-0.3, -0.1, 0] })), pivot: at(-0.15, 2.55 - k * 0.55, 0.1), anim: (t) => { const f = cyc(t, P); return f > a && f < 0.97 ? { q: Q, sx: Math.min(1, win(f, a, a + 0.06)) + 0.001 } : { s: 0.001 }; } });
+      moving.push({ geo: merge(part(rbox(0.3, 0.3, 0.04, 0.08), TEAL), pixText(String(cited[k] + 1), 0.045, K.white, 0.06)), pivot: at(0.95, 2.55 - k * 0.55, 0.12), anim: (t) => { const f = cyc(t, P); return f > a + 0.05 && f < 0.97 ? { q: Q } : { s: 0.001 }; } }); }
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
   // Neuralink: thought into action. In the surgical bay the R1 robot threads the implant with a
