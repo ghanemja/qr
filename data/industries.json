@@ -103,7 +103,8 @@
   "block": "Square on the counter, Cash App in the pocket: the money goes round inside Block",
   "dell": "Built to order and shipped direct, straight from the line to your door",
   "hp": "The printer in every home, and the ink that keeps coming",
-  "supermicro": "First to ship the newest AI servers: building blocks, liquid-cooled"
+  "supermicro": "First to ship the newest AI servers: building blocks, liquid-cooled",
+  "adobe": "The tools every creative works in: layers, PDFs and the red A"
  },
  "bank": [
   "PNC Financial Services",
@@ -474,7 +475,6 @@
   "NetApp"
  ],
  "software": [
-  "Adobe",
   "Intuit",
   "ADP",
   "Cognizant Technology Solutions",
@@ -1412,7 +1412,6 @@
   "Canva": 2,
   "Glean": 2,
   "Intuit": 0,
-  "Adobe": 0,
   "Omnicom Group": 0,
   "Interpublic Group": 0,
   "Lovable": 3,
@@ -1692,5 +1691,8 @@
  ],
  "supermicro": [
   "Super Micro Computer"
+ ],
+ "adobe": [
+  "Adobe"
  ]
 }

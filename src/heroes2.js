@@ -540,4 +540,43 @@ export const HEROES2 = {
     [0, 1].forEach((i) => moving.push({ geo: merge([0, 1, 2, 3].map((k) => part(box(0.85, 0.02, 0.14), '#9aa1a9', { r: [0, k * Math.PI / 4, 0] }))), pivot: [CX - 0.4 + i * 0.8, y0 + 1.53, CZ], anim: (t) => ({ ry: t * 8 }) }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Adobe: the tools every creative works in. On the giant canvas the picture is built the
+  // Photoshop way, layer by layer: the layers float apart, then settle back into one image,
+  // while finished PDFs fly off to the office next door. The red A stands behind.
+  adobe: { finder: '#fa0f00', build: () => {
+    const R = rand(116), out = [], RED = '#fa0f00';
+    out.push(ground('#8fc66f'), part(rbox(6.4, 0.08, 6.0, 0.03), '#e8e3d8', { p: [-0.9, y0 + 0.04, -0.6] }));
+    // ---- the red A, back left
+    const AX = -3.4, AZ = -3.4, AQ = Math.PI / 4;
+    const aPart = (pts) => part(extrude(pts.map(([x, y]) => [x * 1.4, y * 1.4]), 0.5), RED, { p: [AX, y0 + 0.3, AZ], r: [0, AQ, 0] });
+    out.push(aPart([[-1.0, 0], [-0.6, 0], [-0.12, 2.2], [-0.52, 2.2]]), aPart([[0.6, 0], [1.0, 0], [0.52, 2.2], [0.12, 2.2]]), aPart([[-0.25, 0.3], [0.3, 0.3], [0.38, 0], [0.1, 0.0], [0.1, 0.02], [0.02, 0.9]]), part(rbox(2.0, 0.3, 1.0, 0.05), '#d6d0c4', { p: [AX, y0 + 0.15, AZ], r: [0, AQ, 0] }));
+    // ---- the easel and canvas, middle, facing the camera
+    const CX = 0.0, CZ = -0.6, CQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, AQ, 0)), cv = (dx, dy, dz) => { const v = new V(dx, dy, dz).applyQuaternion(CQ); return [CX + v.x, y0 + v.y, CZ + v.z]; };
+    out.push(beam(cv(-1.0, 0, 0.4), cv(-0.6, 3.8, -0.1), 0.1, K.wood), beam(cv(1.0, 0, 0.4), cv(0.6, 3.8, -0.1), 0.1, K.wood), beam(cv(0, 0, -0.9), cv(0, 3.6, -0.15), 0.1, K.wood), part(rbox(2.6, 0.1, 0.25, 0.03), K.wood, { p: cv(0, 1.1, 0.25), q: CQ }));
+    out.push(part(rbox(2.8, 2.2, 0.08, 0.03), '#f8f6f1', { p: cv(0, 2.3, 0.0), q: CQ }));
+    // ---- the designer at the tablet, the office receiving PDFs
+    out.push(place(desk(K.white, '#2b2f36'), { p: [2.0, y0, 1.6], r: [0, -Math.PI / 4, 0] }), place(fan('#3d7be0'), { p: [2.5, y0, 2.1], s: 1.4 }));
+    out.push(place(block(1.8, 2.2, 1.6, '#e3e6ea', '#5b7fa6', 0.32), { p: [3.6, y0, -3.2] }), part(rbox(1.0, 0.1, 0.7, 0.03), '#c9ced6', { p: [3.6, y0 + 0.05, -1.9] }));
+    // A video editor at the left desk: a timeline on the screen.
+    out.push(place(desk(K.white, '#2b2f36'), { p: [-2.6, y0, 2.0], r: [0, Math.PI / 4, 0] }), place(fan('#8a6cf0'), { p: [-2.1, y0, 2.5], s: 1.4 }), part(rbox(0.9, 0.55, 0.04, 0.02), '#1d1f24', { p: [-2.75, y0 + 1.2, 1.85], r: [0, Math.PI / 4, 0] }));
+    ['#9999ff', '#ffcf3f', '#8fc46a'].forEach((c, k) => out.push(part(box(0.7 - k * 0.15, 0.08, 0.01), c, { p: [-2.73 + k * 0.03, y0 + 1.05 + k * 0.12, 1.88], r: [0, Math.PI / 4, 0] })));
+    out.push(trees(R, [[4.6, 4.6], [-4.6, 4.6], [-0.6, 4.4], [4.6, 0.9], [-4.6, 0.4]]));
+    // ---- moving parts
+    const moving = [], P = 8;
+    // The layers: sky, hills, sun, title. Exploded toward the camera, then flattened into the canvas.
+    const layers = [
+      merge(part(box(2.6, 2.0, 0.02), '#8ccfff'), part(box(2.6, 0.7, 0.025), '#bfe6ff', { p: [0, 0.65, 0] })),
+      merge(part(extrude([[-1.3, -1.0], [1.3, -1.0], [1.3, -0.2], [0.6, 0.25], [0.0, -0.3], [-0.7, 0.35], [-1.3, -0.1]], 0.03), '#5fae5b'), part(extrude([[-1.3, -1.0], [1.3, -1.0], [1.3, -0.6], [0.2, -0.35], [-1.3, -0.7]], 0.035), '#3f7f43')),
+      part(new THREE.CircleGeometry(0.32, 32), '#ffcf3f', { p: [0.65, 0.5, 0] }),
+      merge(part(rbox(1.4, 0.32, 0.03, 0.08), RED, { p: [-0.4, -0.6, 0] }), pixText('HELLO', 0.04, K.white, 0.035).translate(-0.4, -0.6, 0)),
+    ];
+    layers.forEach((g, k) => moving.push({ geo: g, pivot: cv(0, 2.3, 0.06 + k * 0.03), anim: (t) => { const f = cyc(t, P), out1 = easeIO(win(f, 0.1, 0.35)) - easeIO(win(f, 0.6, 0.85)), d = out1 * (0.2 + k * 0.55); const sx = k * 0.55 * out1; return { q: CQ, x: Math.sin(AQ) * d + Math.cos(AQ) * sx, z: Math.cos(AQ) * d - Math.sin(AQ) * sx, y: out1 * k * 0.3 }; } }));
+    // Finished PDFs to the office.
+    const pdf = merge(part(rbox(0.4, 0.52, 0.03, 0.02), K.white), part(box(0.4, 0.14, 0.035), RED, { p: [0, 0.19, 0] }), [0, 1, 2].map((i) => part(box(0.26, 0.03, 0.035), '#c9ced6', { p: [0, 0.02 - i * 0.08, 0] })));
+    const send = curve([cv(1.2, 3.2, 0), [2.2, y0 + 4.0, -1.6], [3.6, y0 + 2.8, -2.2], [3.6, y0 + 0.4, -1.9]]);
+    for (let k = 0; k < 3; k++) moving.push(rider(pdf, send, P, -k * 0.08, 0.85, 1.0, (t, u) => ({ ry: Math.PI / 4, rz: u * 1.5 })));
+    // The designer's pen hand.
+    moving.push({ geo: part(capsule(0.03, 0.3), '#2b2f36'), pivot: [2.0, y0 + 0.95, 1.6], anim: (t) => ({ rz: 0.6 + Math.sin(t * 6) * 0.2, rx: Math.cos(t * 5) * 0.2 }) });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
