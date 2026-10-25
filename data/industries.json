@@ -64,7 +64,8 @@
   "verizon": "Can you hear me now?",
   "bofa": "The deposit reservoir",
   "target": "Expect more, pay less",
-  "ups": "Hub to doorstep"
+  "ups": "Hub to doorstep",
+  "ibm": "Mainframes to qubits"
  },
  "bank": [
   "Wells Fargo",
@@ -446,7 +447,6 @@
  "computer": [
   "Dell Technologies",
   "HP",
-  "IBM",
   "Hewlett Packard Enterprise",
   "Cisco Systems",
   "Xerox",
@@ -1580,5 +1580,8 @@
  ],
  "ups": [
   "United Parcel Service"
+ ],
+ "ibm": [
+  "IBM"
  ]
 }

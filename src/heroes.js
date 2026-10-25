@@ -2091,5 +2091,50 @@ export const HEROES = {
     moving.push(...walker(moving.length, (t) => { const f = cyc(t, 5), A = [0.6, 1.25], B = [0.6, 1.75]; const k = f < 0.4 ? easeIO(f / 0.4) : f < 0.6 ? 1 : 1 - easeIO(win(f, 0.6, 1)); return { x: A[0], z: A[1] + (B[1] - A[1]) * k, ry: f < 0.5 ? -Math.PI / 2 : Math.PI / 2, still: f > 0.4 && f < 0.6 }; }, { shirt: BROWN, pants: BROWN, y: y0, carry: part(rbox(0.36, 0.26, 0.3, 0.03), '#c99a62', { p: [0.28, 1.1, 0] }) }));
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // IBM: the machines big business runs on, and the ones coming next. In the glass cube the
+  // cryostat lifts off the golden quantum chandelier; the mainframes blink in their row; the Red
+  // Hat sits on its plinth for the hybrid cloud; the striped letters stand out front.
+  ibm: { finder: '#0f62fe', build: () => {
+    const R = rand(13), out = [], y0 = 0.24, BLUE = '#0f62fe', GOLD = '#d4a640';
+    out.push(part(rbox(10.4, 0.24, 10.4, 0.08), '#c9ced6', { p: [0, 0.12, 0] }), part(box(10.2, 0.012, 10.2), '#dfe3e8', { p: [0, y0 + 0.006, 0] }));
+    if (hi()) for (let i = 0; i < 11; i++) out.push(part(box(0.02, 0.004, 10.2), '#c4c9d0', { p: [-5 + i, y0 + 0.014, 0] }), part(box(10.2, 0.004, 0.02), '#c4c9d0', { p: [0, y0 + 0.014, -5 + i] }));
+    // ---- the glass cube (frame only) on its plinth
+    const QX = 0.6, QZ = -0.6, QS = 2.8, QH = 3.4;
+    out.push(part(rbox(QS + 0.4, 0.2, QS + 0.4, 0.04), '#2b2f36', { p: [QX, y0 + 0.1, QZ] }));
+    for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) out.push(part(box(0.06, QH, 0.06), '#e9ecef', { p: [QX + sx * QS / 2, y0 + 0.2 + QH / 2, QZ + sz * QS / 2] }));
+    for (const y of [0.2, 0.2 + QH]) { out.push(part(box(QS, 0.06, 0.06), '#e9ecef', { p: [QX, y0 + y, QZ - QS / 2] }), part(box(QS, 0.06, 0.06), '#e9ecef', { p: [QX, y0 + y, QZ + QS / 2] }), part(box(0.06, 0.06, QS), '#e9ecef', { p: [QX - QS / 2, y0 + y, QZ] }), part(box(0.06, 0.06, QS), '#e9ecef', { p: [QX + QS / 2, y0 + y, QZ] })); }
+    out.push(part(box(0.06, 0.06, QS), '#e9ecef', { p: [QX, y0 + 0.2 + QH, QZ] }), part(box(QS, 0.06, 0.06), '#e9ecef', { p: [QX, y0 + 0.2 + QH, QZ] }), part(cyl(0.3, 0.3, 0.2, 32), '#2b2f36', { p: [QX, y0 + 0.1 + QH, QZ] }));
+    // The chandelier: gold plates stepping down, tied by coax spirals and rods.
+    const plates = [[0.62, 3.0], [0.55, 2.5], [0.47, 2.0], [0.4, 1.55], [0.32, 1.15], [0.22, 0.8]];
+    plates.forEach(([r, y]) => out.push(part(cyl(r, r, 0.07, 40), GOLD, { p: [QX, y0 + y, QZ] })));
+    for (let i = 0; i < 6; i++) { const a = (i / 6) * TAU; out.push(part(cyl(0.025, 0.025, 2.2, 8), '#e8c871', { p: [QX + Math.cos(a) * 0.18, y0 + 1.9, QZ + Math.sin(a) * 0.18] })); }
+    if (hi()) for (let k = 0; k < 8; k++) { const a0 = (k / 8) * TAU, pts = []; for (let j = 0; j <= 24; j++) { const u = j / 24, a = a0 + u * TAU * 1.5, rr = 0.45 - u * 0.25; pts.push([QX + Math.cos(a) * rr, y0 + 2.95 - u * 2.0, QZ + Math.sin(a) * rr]); } out.push(part(tube(pts, 0.012), k % 2 ? '#c0c4ca' : '#b87333')); }
+    out.push(part(cyl(0.12, 0.08, 0.25, 20), '#2b2f36', { p: [QX, y0 + 0.62, QZ] }));
+    // ---- the mainframes: a row of tall black racks with a blue stripe
+    for (let i = 0; i < 5; i++) { const z = -4.2 + i * 0.75; out.push(part(rbox(1.0, 2.2, 0.68, 0.04), '#1d1f24', { p: [-4.0, y0 + 1.1, z] }), part(box(0.02, 2.0, 0.04), BLUE, { p: [-3.49, y0 + 1.1, z + 0.2] })); if (hi()) for (let j = 0; j < 10; j++) out.push(part(box(0.02, 0.02, 0.4), '#3a3f47', { p: [-3.49, y0 + 0.2 + j * 0.2, z - 0.08] })); }
+    // ---- the Red Hat on its plinth
+    const FX = 3.4, FZ = 2.4;
+    out.push(part(rbox(1.0, 0.9, 1.0, 0.05), '#f4f5f6', { p: [FX, y0 + 0.45, FZ] }));
+    out.push(part(lathe([[0, 0], [0.75, 0], [0.8, 0.04], [0.7, 0.08], [0.42, 0.1], [0.42, 0.18], [0.4, 0.5], [0.3, 0.6], [0, 0.62]], 40), (px, py) => (py > y0 + 0.9 + 0.1 && py < y0 + 0.9 + 0.2 ? '#1d1f24' : '#ee0000'), { p: [FX, y0 + 0.9, FZ], s: [1, 1, 0.82] }));
+    // ---- the striped letters out front
+    const LX = -2.4, LZ = 2.8, letters = [];
+    const rows = 8, lh = 0.13, gap = 0.06;
+    for (let r = 0; r < rows; r++) { const y = y0 + 0.2 + (rows - 1 - r) * (lh + gap); const row = [[0, 0.4], r === 3 || r === 4 ? [0.55, 1.2] : [0.55, 1.35], ...(r < 2 ? [[1.5, 1.85], [2.35, 2.7]] : r < 4 ? [[1.5, 1.95], [2.25, 2.7]] : r < 6 ? [[1.5, 1.85], [1.95, 2.25], [2.35, 2.7]] : [[1.5, 1.85], [2.35, 2.7]])]; row.forEach(([a, b]) => letters.push(part(box(b - a, lh, 0.25), BLUE, { p: [-1.35 + (a + b) / 2, y, 0] }))); }
+    out.push(place(merge(letters), { p: [LX, 0, LZ], r: [0, Math.PI / 4, 0] }));
+    out.push(part(box(3.2, 0.12, 0.6), '#9aa1a9', { p: [LX, y0 + 0.06, LZ], r: [0, Math.PI / 4, 0] }));
+    [[-4.6, 4.6], [4.6, -4.6], [4.6, 4.6], [-4.4, 0.6], [1.0, 4.5]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.75 + R() * 0.2)));
+    // ---- moving parts
+    const moving = [];
+    // The cryostat can: lowers over the chandelier, then lifts away again.
+    moving.push({ geo: merge(part(lathe([[0.75, 0], [0.75, 2.4], [0.7, 2.5], [0, 2.55]], 40), '#f4f5f6'), part(cyl(0.77, 0.77, 0.08, 40), '#c9ced6', { p: [0, 0.6, 0] }), part(cyl(0.77, 0.77, 0.08, 40), '#c9ced6', { p: [0, 1.6, 0] })), pivot: [QX, y0 + 0.55, QZ], anim: (t) => { const f = cyc(t, 12), up = 1 - easeIO(win(f, 0.6, 0.72)) + easeIO(win(f, 0.85, 0.97)); return { y: up * 2.6 }; } });
+    // Qubit glows pulsing on the bottom plate.
+    for (let i = 0; i < 5; i++) moving.push({ geo: part(ball(0.05), '#7cf0ff'), pivot: [QX + Math.cos(i * 1.26) * 0.14, y0 + 0.76, QZ + Math.sin(i * 1.26) * 0.14], anim: (t) => ({ s: 0.5 + Math.max(0, Math.sin(t * 5 + i * 1.3)) * 0.9 }) });
+    // The mainframes' blinking lights.
+    for (let i = 0; i < 5; i++) for (let j = 0; j < 3; j++) moving.push({ geo: part(box(0.02, 0.04, 0.06), j % 2 ? '#2fbf5b' : BLUE), pivot: [-3.48, y0 + 0.5 + j * 0.6, -4.2 + i * 0.75 - 0.2], anim: (t) => ({ s: Math.sin(t * (6 + i + j * 2) + i * j) > 0 ? 1 : 0.001 }) });
+    // People: a researcher by the cube and a visitor at the letters.
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 10), a = Math.PI * (0.25 + f * 1.5); return { x: QX + Math.cos(a) * 2.3, z: QZ + Math.sin(a) * 2.3, ry: -a - Math.PI / 2 + Math.PI, s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: '#f4f5f6', pants: '#2b3a55', y: y0 }));
+    moving.push(...walker(moving.length, (t) => { const f = cyc(t, 12, 0.3), x = -4.6 + f * 9.2; return { x, z: 1.4, ry: 0, s: Math.min(1, f / 0.05, (1 - f) / 0.05) }; }, { shirt: BLUE, pants: '#2b2f36', skin: '#c58c66', hair: '#1d1f24', y: y0 }));
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
 
