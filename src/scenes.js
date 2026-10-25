@@ -104,6 +104,12 @@ const reach2 = (r, h, L1, L2) => {
   return { s: Math.atan2(h, r) - Math.atan2(L2 * Math.sin(e), L1 + L2 * Math.cos(e)), e };
 };
 
+// A storm cloud of soft puffs, darker underneath, centred on the origin.
+const stormCloud = (s = 1) => merge([[0, 0, 0, 0.9], [0.85, -0.1, 0.2, 0.7], [-0.85, -0.15, -0.1, 0.72], [0.35, 0.35, -0.3, 0.65], [-0.4, 0.3, 0.35, 0.6], [1.5, -0.25, -0.1, 0.45], [-1.5, -0.25, 0.15, 0.45], [0, -0.2, 0.7, 0.55], [0.2, -0.2, -0.7, 0.55]]
+  .map(([x, y, z, r]) => part(new THREE.SphereGeometry(r * s, hi() ? 20 : 8, hi() ? 14 : 6), (X, Y) => (Y < -0.25 * s ? '#7f8a99' : '#a9b3c0'), { p: [x * s, y * s, z * s] })));
+// A zigzag lightning bolt, about h tall, hanging down from the origin.
+const bolt = (h = 3) => part(extrude([[0, 0], [0.32, 0], [0.12, -h * 0.4], [0.36, -h * 0.4], [-0.05, -h], [0.02, -h * 0.52], [-0.24, -h * 0.52]], 0.08), '#fff3a3');
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -691,5 +697,76 @@ export const SCENES = {
       [[-0.55, 0.38], [0.6, 0.38], [-0.55, -0.38], [0.6, -0.38]].map(([x, z]) => part(new THREE.CylinderGeometry(0.16, 0.16, 0.1, 14), '#1d1f24', { p: [x, 0.16, z], r: [Math.PI / 2, 0, 0] }))),
       pivot: [0, y0, 0], anim: (t) => { const { p, ry } = along(run, cyc(t, 12)); return { x: p.x, z: p.z, ry }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [3.7, y0, -0.2], topAt: [SX - 1.2, y0 + 2.25, SZ] };
+  },
+
+  // Rainy-day umbrella (insurers and brokers): many pay a little so the few who are hit are
+  // covered. Every house in town hops a premium coin into the pool under a giant umbrella; a storm
+  // rolls over and rains on the umbrella while the town stays dry, lightning knocks the roof off
+  // one house, and a payout coin and the repair van go out and put it right.
+  'insurance:0': () => {
+    const R = rand(808), out = [], moving = [];
+    out.push(slab('#9fcf7a'));
+    // A ring road and paths to the plaza.
+    out.push(part(new THREE.RingGeometry(2.7, 3.3, hi() ? 64 : 24).rotateX(-Math.PI / 2), '#d8d0c0', { p: [0, y0 + 0.012, -0.2] }));
+    // ---- the plaza: the pool of premiums under the umbrella
+    const UX = 0, UZ = -0.2, CR = 2.6, CY = y0 + 3.1;
+    out.push(part(cyl(1.6, 1.7, 0.4, 40), K.stone, { p: [UX, y0 + 0.2, UZ] }), part(cyl(1.72, 1.74, 0.12, 40), 'A', { p: [UX, y0 + 0.06, UZ] }));
+    out.push(part(lathe([[1.45, 0], [1.3, 0.2], [0.9, 0.4], [0.4, 0.5], [0, 0.52]], 40), K.gold, { p: [UX, y0 + 0.35, UZ] }));
+    const coinG = merge(part(new THREE.CylinderGeometry(0.2, 0.2, 0.06, 20), K.gold), part(new THREE.CylinderGeometry(0.14, 0.14, 0.07, 18), '#f6d66e'));
+    for (let i = 0; i < (hi() ? 16 : 4); i++) { const a = R() * TAU, d = R() * 1.2; out.push(place(coinG, { p: [UX + Math.cos(a) * d, y0 + 0.9 - d * 0.35, UZ + Math.sin(a) * d], r: [(R() - 0.5) * 0.8, 0, (R() - 0.5) * 0.8] })); }
+    // The umbrella: eight panels in alternating colours, ribs, a scalloped hem, shaft and handle.
+    const panels = [], N8 = 8;
+    for (let i = 0; i < N8; i++) {
+      const a0 = (i / N8) * TAU, a1 = ((i + 1) / N8) * TAU, g = new THREE.BufferGeometry(), pos = [], m = hi() ? 8 : 3;
+      for (let j = 0; j < m; j++) for (let k = 0; k < m; k++) {
+        const P = (u, v) => { const a = a0 + (a1 - a0) * v, sag = Math.sin(v * Math.PI) * 0.12 * u, r = CR * u * (1 - sag * 0.4); return [Math.cos(a) * r, 0.9 * (1 - u * u) - sag * 0.5 - 0.08 * u, Math.sin(a) * r]; };
+        const [u0, u1, v0, v1] = [j / m, (j + 1) / m, k / m, (k + 1) / m];
+        pos.push(...P(u0, v0), ...P(u1, v1), ...P(u1, v0), ...P(u0, v0), ...P(u0, v1), ...P(u1, v1));
+      }
+      g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.computeVertexNormals();
+      const both = merge(part(g, i % 2 ? 'A' : K.white), part(g.clone().scale(1, 1, 1).translate(0, -0.03, 0), i % 2 ? 'Ad' : '#e6e3de'));
+      panels.push(both);
+      panels.push(beam([0, 0.9, 0].map((v, k) => v), [Math.cos(a0) * CR, -0.08, Math.sin(a0) * CR], 0.04, K.dark));
+    }
+    out.push(place(merge(panels, part(cyl(0.12, 0.08, 0.4, 12), K.dark, { p: [0, 1.05, 0] }), part(new THREE.SphereGeometry(0.1, 12, 8), K.gold, { p: [0, 1.3, 0] })), { p: [UX, CY, UZ] }));
+    out.push(part(cyl(0.07, 0.07, CY - y0 - 0.5, 12), '#5b616b', { p: [UX, (CY + y0 + 0.5) / 2, UZ] }));
+    // ---- the houses around the ring; the one at the front right will be struck
+    const homes = [[-3.4, -3.5, 0.6], [0.2, -4.1, 0], [3.5, -3.4, -0.6], [-4.0, 0.6, Math.PI / 2], [4.0, 0.4, -Math.PI / 2], [-2.6, 3.5, Math.PI - 0.6], [2.5, 3.4, Math.PI + 0.6]];
+    const walls = [K.cream, '#e9eef2', '#f3e6d0', '#efe2cc', '#e4ecf0', '#f6f0e4', K.cream], roofs = ['#7d6a5a', '#5a6b7d', 'Bd', '#a35a3c', '#5a6b7d', '#7d6a5a', 'Bd'];
+    homes.forEach(([x, z, ry], i) => out.push(place(home(walls[i], roofs[i], 1.6, 1.4, 1.0), { p: [x, y0, z], r: [0, ry, 0] })));
+    [[-4.6, -1.6], [4.6, -1.8], [0, 4.6], [-4.5, 4.5], [4.5, 4.5]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.5 + R() * 0.2)));
+    if (hi()) for (let i = 0; i < 14; i++) { const a = R() * TAU, d = 3.6 + R() * 1.0; out.push(tuft(R, Math.cos(a) * d, Math.sin(a) * d, 0.2, 5, ['#7fcf3f', '#6cc23a', '#94d84f'], 0.3).map((g) => place(g, { p: [0, y0, 0] }))); }
+    // ---- moving parts (one 10 s cycle)
+    const P = 10, F = (t) => cyc(t, P), [HX, HZ, HRY] = homes[6];
+    // Premiums: each house hops a coin into the pool, one after another.
+    homes.forEach(([x, z], i) => {
+      const from = new V(x, y0 + 0.5, z).lerp(new V(UX, 0, UZ), 0.18), to = new V(UX + (x - UX) * 0.15, y0 + 0.95, UZ + (z - UZ) * 0.15);
+      moving.push({ geo: coinG, pivot: to.toArray(), anim: (t) => { const f = cyc(t, 3.5, i / 7), k = easeIO(win(f, 0.05, 0.4)), p = from.clone().lerp(to, k).sub(to); return { x: p.x, y: p.y + hop(k) * 1.6, z: p.z, rx: k * TAU, s: life(f, 0.0, 0.05, 0.42, 0.48) }; } });
+    });
+    // The storm: in over the umbrella, then over the front-right house as lightning strikes.
+    const cp = (f) => { const a = new V(-5.0, 0, -2.6), b = new V(UX, 0, UZ), c = new V(HX - 0.3, 0, HZ - 0.3), d = new V(5.6, 0, 5.0); return f < 0.22 ? a.lerp(b, easeIO(f / 0.22)) : f < 0.36 ? b.lerp(c, easeIO(win(f, 0.22, 0.36))) : f < 0.48 ? c : c.lerp(d, easeIn(win(f, 0.48, 0.66))); };
+    const cloudS = (f) => Math.min(1, f / 0.05) * (1 - win(f, 0.6, 0.66));
+    const CH = y0 + 5.2;
+    moving.push({ geo: stormCloud(1.15), pivot: [0, CH, 0], anim: (t) => { const f = F(t), p = cp(f); return { x: p.x, z: p.z, s: cloudS(f) + 0.001 }; } });
+    for (let k = 0; k < 14; k++) {
+      const ox = (R() - 0.5) * 2.2, oz = (R() - 0.5) * 1.6;
+      moving.push({ geo: part(new THREE.SphereGeometry(0.06, 6, 4), '#6fb4e8', { s: [1, 3, 1] }), pivot: [0, CH - 0.5, 0], anim: (t) => {
+        const f = F(t), p = cp(f), x = p.x + ox, z = p.z + oz, under = Math.hypot(x - UX, z - UZ) < CR * 0.97;
+        const floor = under ? CY + 0.9 * (1 - (Math.hypot(x - UX, z - UZ) / CR) ** 2) - 0.1 : y0 + 0.1, u = cyc(t, 0.7, k / 14), drop = (CH - 0.5 - floor);
+        return { x, z, y: -u * drop, s: cloudS(f) > 0.5 && f < 0.6 ? (u > 0.92 ? 0.5 : 1) : 0.001 };
+      } });
+    }
+    moving.push({ geo: bolt(4.4), pivot: [HX - 0.1, CH - 0.4, HZ - 0.1], anim: (t) => { const f = F(t); return { s: (f > 0.38 && f < 0.395) || (f > 0.41 && f < 0.425) ? 1 : 0.001 }; } });
+    // The struck roof panel flies off, and comes back when the repair is done.
+    const panel = part(rbox(1.0, 0.08, 1.0, 0.03), roofs[6]);
+    moving.push({ geo: panel, pivot: [HX, y0 + 1.45, HZ], anim: (t) => { const f = F(t), off = win(f, 0.4, 0.5), back2 = easeIO(win(f, 0.78, 0.86)), k = off * (1 - back2); return { x: k * 1.4, y: hop(Math.min(1, off * 1.6)) * 1.2 * (1 - back2) + k * -1.25, z: k * 0.8, rx: k * 2.6, ry: HRY + k, rz: 0.55 + k * 1.8 }; } });
+    for (let k = 0; k < 3; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.25, 10, 7), '#8b8f96'), pivot: [HX, y0 + 1.6, HZ], anim: (t) => { const f = F(t), u = cyc(t, 1.2, k / 3); return { y: u * 1.2, x: u * 0.4, s: f > 0.4 && f < 0.78 ? (1 - u) * (0.5 + u) + 0.001 : 0.001 }; } });
+    // The claim is paid: a big coin from the pool to the house, and the van brings the crew.
+    moving.push({ geo: place(coinG, { s: 2.2 }), pivot: [HX, y0 + 1.0, HZ], anim: (t) => { const f = F(t), k = easeIO(win(f, 0.5, 0.64)), from = new V(UX, y0 + 1.0, UZ), p = from.lerp(new V(HX, y0 + 1.0, HZ), k).sub(new V(HX, y0 + 1.0, HZ)); return { x: p.x, z: p.z, y: hop(k) * 2.2, rx: Math.PI / 2, ry: k * 6, s: life(f, 0.5, 0.54, 0.64, 0.68) }; } });
+    const road = curve([[UX + 1.2, 0, UZ + 1.9], [UX + 1.9, 0, UZ + 2.5], [HX - 1.0, 0, HZ - 0.9]]);
+    moving.push({ geo: merge(part(rbox(1.2, 0.75, 0.7, 0.08), K.white, { p: [-0.1, 0.52, 0] }), part(rbox(0.4, 0.5, 0.68, 0.1), K.white, { p: [0.62, 0.38, 0] }), part(box(0.03, 0.24, 0.58), '#26323f', { p: [0.82, 0.52, 0] }), part(box(0.9, 0.2, 0.02), 'A', { p: [-0.1, 0.6, 0.36] }), part(box(0.9, 0.2, 0.02), 'A', { p: [-0.1, 0.6, -0.36] }), part(box(0.5, 0.06, 0.2), '#f2c94c', { p: [-0.1, 0.92, 0] }),
+      [[-0.45, 0.33], [0.5, 0.33], [-0.45, -0.33], [0.5, -0.33]].map(([x, z]) => part(new THREE.CylinderGeometry(0.14, 0.14, 0.08, 12), '#1d1f24', { p: [x, 0.14, z], r: [Math.PI / 2, 0, 0] }))),
+      pivot: [0, y0, 0], anim: (t) => { const f = F(t), k = easeIO(win(f, 0.56, 0.72)) * (1 - easeIO(win(f, 0.88, 0.98))), { p, ry } = along(road, k * 0.999); return { x: p.x, z: p.z, ry: ry + (f > 0.86 ? Math.PI : 0), s: life(f, 0.55, 0.58, 0.95, 0.99) }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-3.6, y0, -1.4], topAt: [UX, CY + 1.38, UZ] };
   },
 };
