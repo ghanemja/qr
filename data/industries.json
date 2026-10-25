@@ -135,7 +135,8 @@
   "abbott": "Medicine you can wear: the sensor that reads glucose all day",
   "marriott": "Thirty brands, one membership: every stay builds the Bonvoy card",
   "southwest": "One kind of plane, point to point, turned around fast",
-  "lasvegassands": "The integrated resort: Marina Bay Sands and its SkyPark"
+  "lasvegassands": "The integrated resort: Marina Bay Sands and its SkyPark",
+  "mgm": "The Strip's biggest landlord, and BetMGM in every pocket"
  },
  "bank": [
   "PNC Financial Services",
@@ -440,7 +441,6 @@
   "Hilton Worldwide Holdings"
  ],
  "casino": [
-  "MGM Resorts International",
   "Caesars Entertainment",
   "Wynn Resorts"
  ],
@@ -1771,5 +1771,8 @@
  ],
  "lasvegassands": [
   "Las Vegas Sands"
+ ],
+ "mgm": [
+  "MGM Resorts International"
  ]
 }
