@@ -3261,4 +3261,55 @@ export const SCENES = {
     moving.push(...walker(moving.length, (t) => ({ x: kiosks[1].x - 0.2, z: kiosks[1].z + 0.8, ry: Math.PI / 2, still: true, push: Math.sin(t * 2) > 0 }), { shirt: '#3fb8a8', pants: '#2b3a55', y: y0 }));
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-2.6, y0, 1.6], topAt: [VX, y0 + 1.8, VZ] };
   },
+
+  // Garbage truck (waste, recycling and water companies): the route nobody else can run as cheaply.
+  // The side-loader works down the street, its arm grabbing each bin, tipping it in and setting it
+  // back; behind, the recycling plant presses bales, the capped landfill burns its gas at the flare,
+  // and the water works' clarifier bridge turns over clean water.
+  'industrial:5': () => {
+    const R = rand(4901), out = [], moving = [];
+    out.push(slab('#a9d384'));
+    // ---- the street along the front, homes facing it, their bins at the kerb
+    const SZ = 3.7;
+    out.push(part(box(10.4, 0.03, 1.4), '#6b7078', { p: [0, y0 + 0.015, SZ] }), part(box(10.4, 0.05, 0.5), '#e6dcc8', { p: [0, y0 + 0.025, SZ - 1.0] }));
+    for (let i = 0; i < 9; i++) out.push(part(box(0.5, 0.012, 0.06), K.white, { p: [-4.4 + i * 1.1, y0 + 0.035, SZ] }));
+    const bins = [-3.2, -0.9, 1.4];
+    bins.forEach((x, i) => out.push(place(home(['#f3ead8', '#e4ecf0', '#efe2cc'][i], ['#7d6a5a', '#5a6b7d', 'Bd'][i], 1.5, 1.2, 1.0), { p: [x - 0.3, y0, 1.5] })));
+    // ---- the capped landfill (back left), its gas wells and flare
+    out.push(part(lathe([[2.4, 0], [2.0, 0.5], [1.2, 1.0], [0.001, 1.15]], 36), '#8cc66a', { p: [-2.6, y0, -3.0], s: [1.0, 1, 0.85] }));
+    [[-3.4, -2.6], [-2.0, -3.4], [-2.6, -2.2]].forEach(([x, z]) => out.push(part(cyl(0.06, 0.06, 0.5, 8), '#c9ced6', { p: [x, y0 + 1.0, z] }), part(cyl(0.1, 0.1, 0.1, 10), K.orange, { p: [x, y0 + 1.25, z] })));
+    out.push(part(cyl(0.1, 0.14, 2.6, 12), '#c9ced6', { p: [-4.5, y0 + 1.3, -1.2] }), part(cyl(0.15, 0.15, 0.15, 12), 'A', { p: [-4.5, y0 + 2.5, -1.2] }), part(rbox(0.8, 0.6, 0.6, 0.05), '#d8dde3', { p: [-4.4, y0 + 0.3, -0.3] }));
+    // ---- the recycling plant (back right): building, out-feed belt, stacked bales
+    const MX = 2.6, MZ = -3.4;
+    out.push(part(rbox(3.2, 1.8, 1.8, 0.06), '#e3e0da', { p: [MX, y0 + 0.9, MZ] }), part(box(3.22, 0.22, 1.82), 'A', { p: [MX, y0 + 1.6, MZ] }), part(rbox(1.2, 1.1, 0.06, 0.03), '#3a3f47', { p: [MX - 0.6, y0 + 0.55, MZ + 0.91] }));
+    out.push(part(box(0.5, 0.06, 1.8), '#3a3f47', { p: [MX + 0.9, y0 + 0.6, MZ + 1.8], r: [0.15, 0, 0] }), [[0.4, 1.2], [0.4, 2.4]].map(([dx, dz]) => part(box(0.06, 0.55, 0.06), K.steelDk, { p: [MX + 0.9 + dx * 0, y0 + 0.28, MZ + dz] })));
+    for (let i = 0; i < 6; i++) out.push(part(rbox(0.55, 0.45, 0.45, 0.04), ['#5b8ad0', '#e8d3ad', '#9fcf7a', '#c9ced6'][i % 4], { p: [4.4, y0 + 0.23 + Math.floor(i / 3) * 0.46, -1.4 + (i % 3) * 0.5] }));
+    // ---- the water works (middle right): a round clarifier
+    const WX = 2.4, WZ = -0.4, WR = 1.2;
+    out.push(part(new THREE.CylinderGeometry(WR + 0.12, WR + 0.12, 0.5, 40, 1, true), '#c9c4b8', { p: [WX, y0 + 0.25, WZ] }), part(torus(WR + 0.12, 0.06, TAU, 40), '#b9b4aa', { p: [WX, y0 + 0.5, WZ], r: [Math.PI / 2, 0, 0] }));
+    out.push(part(new THREE.CircleGeometry(WR + 0.1, 40).rotateX(-Math.PI / 2), 'W', { p: [WX, y0 + 0.42, WZ] }), part(cyl(0.18, 0.18, 0.5, 12), '#9aa1a9', { p: [WX, y0 + 0.4, WZ] }));
+    [[-4.6, 1.6], [4.6, 1.6], [0.4, -1.6]].forEach(([x, z]) => out.push(miniTree(R, x, y0, z, 0.5 + R() * 0.15)));
+    // ---- moving parts (one 15 s cycle)
+    const P = 15, F = (t) => cyc(t, P), BZ = SZ - 0.75;
+    const stops = bins.map((x, i) => [0.12 + i * 0.24, x - 0.2]);
+    const tx = (f) => { if (f < stops[0][0]) return -5.8 + (stops[0][1] + 5.8) * easeOut(f / stops[0][0]); for (let i = 0; i < 3; i++) { const [a, x] = stops[i], b = a + 0.14; if (f < b) return x; const nx = i < 2 ? stops[i + 1][1] : 6; const na = i < 2 ? stops[i + 1][0] : 0.98; if (f < na) return x + (nx - x) * easeIO(win(f, b, na)); } return 6; };
+    const lift = (f) => { for (let i = 0; i < 3; i++) { const a = stops[i][0]; if (f > a && f < a + 0.14) return { i, k: bump(f, a + 0.07, 0.03) }; } return { i: -1, k: 0 }; };
+    const truck = moving.length;
+    moving.push({ geo: merge(part(rbox(0.9, 1.0, 1.0, 0.1), 'A', { p: [1.1, 0.75, 0] }), part(box(0.04, 0.34, 0.86), '#26323f', { p: [1.56, 0.9, 0] }), part(rbox(2.2, 1.3, 1.05, 0.1), K.white, { p: [-0.5, 0.95, 0] }), part(box(2.2, 0.25, 1.07), 'A', { p: [-0.5, 0.6, 0] }), part(rbox(0.3, 1.2, 1.0, 0.08), '#9aa1a9', { p: [-1.65, 0.9, 0] }),
+      [[-1.1, 0.45], [-0.4, 0.45], [1.1, 0.45], [-1.1, -0.45], [-0.4, -0.45], [1.1, -0.45]].map(([x, z]) => part(new THREE.CylinderGeometry(0.24, 0.24, 0.16, 14), '#1d1f24', { p: [x, 0.24, z], r: [Math.PI / 2, 0, 0] }))),
+      pivot: [0, y0, SZ + 0.15], anim: (t) => { const x = tx(F(t)); return { x, s: clamp01((5.0 - Math.abs(x)) / 0.7) * 0.999 + 0.001 }; } });
+    // The arm on the kerb side: reaches out, lifts, tips.
+    moving.push({ geo: merge(part(box(0.12, 0.12, 0.7), K.steelDk, { p: [0, 0, -0.35] }), part(box(0.5, 0.1, 0.1), K.steelDk, { p: [0, 0, -0.7] })), pivot: [0.3, 0.55, -0.55], parent: truck, anim: (t) => { const { k } = lift(F(t)); return { rx: -k * 2.2 }; } });
+    // Each bin: grabbed and tipped over the hopper, then set back down.
+    bins.forEach((x, i) => moving.push({ geo: merge(part(rbox(0.45, 0.65, 0.45, 0.05), ['#2a7a4a', '#3d6bb0', '#5b616b'][i], { p: [0, 0.33, 0] }), part(rbox(0.5, 0.06, 0.5, 0.03), ['#1f5a37', '#2a4f86', '#3a3f47'][i], { p: [0, 0.68, 0] }), part(new THREE.CylinderGeometry(0.08, 0.08, 0.5, 10), K.dark, { p: [0, 0.08, -0.25], r: [0, 0, Math.PI / 2] })), pivot: [x + 0.1, y0, BZ], anim: (t) => { const { i: li, k } = lift(F(t)), on = li === i ? k : 0; return { y: on * 1.9, z: on * 0.85, rx: on * 2.3 }; } }));
+    // Recycling: bundles ride the out-feed belt; the plant door's lights.
+    for (let k = 0; k < 3; k++) moving.push({ geo: part(rbox(0.32, 0.22, 0.3, 0.03), ['#5b8ad0', '#e8d3ad', '#9fcf7a'][k], {}), pivot: [MX + 0.9, y0 + 0.7, MZ + 1.0], anim: (t) => { const u = cyc(t, 3, k / 3); return { z: u * 1.6, y: -u * 0.24, s: Math.min(1, u / 0.1, (1 - u) / 0.1) * 0.999 + 0.001 }; } });
+    // The flare burns the landfill gas.
+    moving.push({ geo: merge(part(lathe([[0, 0], [0.18, 0.12], [0.2, 0.32], [0.1, 0.62], [0, 0.9]]), K.orange), part(lathe([[0, 0], [0.1, 0.08], [0.11, 0.25], [0, 0.55]]), K.yellow, { p: [0, -0.02, 0] })), pivot: [-4.5, y0 + 2.6, -1.2], anim: (t) => ({ sy: 0.8 + Math.sin(t * 13) * 0.12, sx: 1 + Math.sin(t * 9) * 0.08, rz: Math.sin(t * 2) * 0.1 }) });
+    // The clarifier's bridge turns.
+    moving.push({ geo: merge(part(box(WR * 2, 0.08, 0.2), '#e9ecef'), part(box(0.25, 0.25, 0.25), 'A', { p: [WR - 0.1, 0.12, 0] }), part(box(WR * 1.9, 0.05, 0.04), '#9aa1a9', { p: [0, 0.16, 0.1] })), pivot: [WX, y0 + 0.6, WZ], anim: (t) => ({ ry: t * 0.4 }) });
+    // A compactor working on the landfill.
+    moving.push({ geo: merge(part(rbox(0.8, 0.5, 0.6, 0.06), '#f2c94c', { p: [0, 0.4, 0] }), part(rbox(0.4, 0.4, 0.5, 0.06), '#9fcdea', { p: [-0.1, 0.8, 0] }), part(cyl(0.22, 0.22, 0.7, 14), K.steelDk, { p: [0.45, 0.22, 0], r: [Math.PI / 2, 0, 0] }), part(cyl(0.22, 0.22, 0.7, 14), K.steelDk, { p: [-0.45, 0.22, 0], r: [Math.PI / 2, 0, 0] })), pivot: [-2.6, y0 + 0.85, -2.6], anim: (t) => { const k = Math.sin(t * 0.5); return { x: k * 1.0, y: -Math.abs(k) * 0.35, ry: Math.cos(t * 0.5) > 0 ? 0 : Math.PI }; } });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [0.4, y0, -0.6], topAt: [MX - 0.8, y0 + 1.8, MZ] };
+  },
 };
