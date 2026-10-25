@@ -121,7 +121,8 @@
   "autozone": "The right part today, and help fitting it in the lot",
   "oreilly": "The pros' parts store: from the warehouse to the repair bay within the hour",
   "publix": "Owned by the people who work there: every order walked out to your car",
-  "albertsons": "One grocer behind the local names, one fleet stocking them all"
+  "albertsons": "One grocer behind the local names, one fleet stocking them all",
+  "sysco": "The truck behind the menu: restaurants, schools, hospitals, stadiums"
  },
  "bank": [
   "PNC Financial Services",
@@ -533,7 +534,6 @@
   "Yum Brands",
   "Yum China Holdings",
   "Darden Restaurants",
-  "Sysco",
   "US Foods Holding",
   "Performance Food Group",
   "Tyson Foods",
@@ -1453,7 +1453,6 @@
   "Yum China Holdings": 1,
   "Darden Restaurants": 1,
   "McDonald's": 0,
-  "Sysco": 0,
   "US Foods Holding": 0,
   "Performance Food Group": 0,
   "Aramark": 2,
@@ -1732,5 +1731,8 @@
  ],
  "albertsons": [
   "Albertsons"
+ ],
+ "sysco": [
+  "Sysco"
  ]
 }

@@ -1163,4 +1163,31 @@ export const HEROES2 = {
     banners.forEach(([x, z], i) => { const route = curve([[WX + 0.4, y0, WZ + 1.5], [(WX + x) / 2 + 0.4, y0, (WZ + z) / 2 + 0.4], [x + 0.6, y0, z + 1.2]]); moving.push({ geo: place(semi(BLUE, K.white, BLUE), { s: 0.4 }), pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P, i / 5), u = easeIO(win(f, 0, 0.4)) - easeIO(win(f, 0.55, 0.95)), a = along(route, clamp01(u)); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: f < 0.5 ? a.ry : a.ry + Math.PI, s: f > 0.95 || f < 0.02 ? 0.001 : 1 }; } }); moving.push(pulse(x, y0 + 0.05, z, BLUE, P, i / 5 * -1 + 0.4, 1.1)); });
     return { bare: true, move: () => ({}), geo: merge(out), moving };
   } },
+  // Sysco: the truck behind the menu. From the big distribution centre the trucks run to the
+  // restaurant, the school, the hospital and the stadium, and wherever they stop a meal is served.
+  sysco: { finder: '#0077c8', build: () => {
+    const R = rand(134), out = [], BLUE = '#0077c8';
+    out.push(ground('#8fc66f'));
+    // ---- the distribution centre, back left
+    const DX = -3.0, DZ = -3.2;
+    out.push(part(rbox(3.6, 2.0, 2.6, 0.05), '#e6e9ed', { p: [DX, y0 + 1.0, DZ] }), part(box(3.62, 0.35, 2.62), BLUE, { p: [DX, y0 + 1.82, DZ] }), place(pixText('SYSCO', 0.08, K.white, 0.03), { p: [DX, y0 + 1.82, DZ + 1.32] }), [0, 1, 2].map((k) => part(box(0.7, 1.0, 0.04), '#7b828c', { p: [DX - 1.1 + k * 1.1, y0 + 0.5, DZ + 1.31] })));
+    out.push(part(rbox(4.2, 0.06, 3.6, 0.03), '#9aa1a9', { p: [DX, y0 + 0.03, DZ + 0.4] }));
+    // ---- the customers: a restaurant, a school, a hospital, a stadium
+    const sites = [[3.4, -3.4], [3.8, 0.6], [2.2, 3.8], [-2.6, 3.4]];
+    { const [x, z] = sites[0]; out.push(part(rbox(1.8, 1.2, 1.4, 0.05), '#f6efe2', { p: [x, y0 + 0.6, z] }), [0, 1, 2, 3].map((i) => part(box(0.45, 0.05, 0.4), i % 2 ? K.white : '#e5533d', { p: [x - 0.67 + i * 0.45, y0 + 1.2, z + 0.85], r: [0.45, 0, 0] })), part(box(1.0, 0.5, 0.04), '#9cc3e0', { p: [x, y0 + 0.5, z + 0.71] }), part(cyl(0.3, 0.3, 0.04, 16), K.white, { p: [x + 1.2, y0 + 0.7, z + 0.4] }), part(cyl(0.03, 0.03, 0.7, 6), K.dark, { p: [x + 1.2, y0 + 0.35, z + 0.4] })); }
+    { const [x, z] = sites[1]; out.push(part(rbox(2.0, 1.3, 1.4, 0.05), '#c0533d', { p: [x, y0 + 0.65, z], r: [0, Math.PI / 2, 0] }), part(prism(1.6, 0.4, 2.1), '#7a3a2a', { p: [x, y0 + 1.3, z] }), part(cyl(0.03, 0.03, 1.4, 6), '#c9ced6', { p: [x - 1.0, y0 + 0.7, z + 1.0] }), part(box(0.4, 0.25, 0.02), '#3c3b6e', { p: [x - 0.8, y0 + 1.25, z + 1.0] }), part(box(0.04, 0.6, 1.2), '#f2c94c', { p: [x + 0.71, y0 + 0.5, z] })); }
+    { const [x, z] = sites[2]; out.push(place(block(1.6, 2.0, 1.4, K.white, '#7fb7d8', 0.35), { p: [x, y0, z] }), part(box(0.12, 0.42, 0.04), '#e5533d', { p: [x, y0 + 1.7, z + 0.72] }), part(box(0.42, 0.12, 0.04), '#e5533d', { p: [x, y0 + 1.7, z + 0.72] })); }
+    { const [x, z] = sites[3]; out.push(part(new THREE.CylinderGeometry(1.2, 1.0, 0.9, hi() ? 32 : 12, 1, true), '#c9ced6', { p: [x, y0 + 0.45, z] }), part(cyl(0.95, 0.95, 0.04, 32), '#5fae45', { p: [x, y0 + 0.04, z] }), part(torus(1.2, 0.06, TAU, 40), BLUE, { p: [x, y0 + 0.9, z], r: [Math.PI / 2, 0, 0] })); }
+    out.push(trees(R, [[0.4, -4.6], [0.6, 1.0], [-4.6, 0.8], [4.6, 4.6], [-0.4, 4.6]], 0.55));
+    // ---- moving parts
+    const moving = [], P = 9;
+    const truck = place(merge(part(rbox(0.8, 0.9, 0.9, 0.08), BLUE, { p: [0.9, 0.6, 0] }), part(box(0.04, 0.3, 0.75), '#26323f', { p: [1.31, 0.75, 0] }), part(rbox(1.8, 1.1, 0.95, 0.05), K.white, { p: [-0.4, 0.75, 0] }), part(box(1.4, 0.3, 0.02), BLUE, { p: [-0.4, 0.8, 0.48] }), [[-0.8, 0.45], [0.8, 0.45], [-0.8, -0.45], [0.8, -0.45]].map(([x, z]) => part(new THREE.CylinderGeometry(0.2, 0.2, 0.12, 14), '#1d1f24', { p: [x, 0.2, z], r: [Math.PI / 2, 0, 0] }))), { s: 0.6 });
+    const plate = merge(part(cyl(0.3, 0.25, 0.05, 20), K.white), part(new THREE.SphereGeometry(0.12, 10, 8), '#e5533d', { p: [-0.08, 0.05, 0], s: [1, 0.6, 1] }), part(new THREE.SphereGeometry(0.1, 10, 8), '#5fae45', { p: [0.1, 0.05, 0.05], s: [1, 0.6, 1] }), part(box(0.16, 0.06, 0.1), '#d9a05b', { p: [0.05, 0.05, -0.12] }));
+    sites.forEach(([x, z], i) => {
+      const route = curve([[DX + 1.2, y0, DZ + 2.0], [(DX + x) / 2 + 0.6, y0, (DZ + z) / 2 + 0.8], [x - 0.6, y0, z - 1.4 + (i === 3 ? 0.4 : 0)]]);
+      moving.push({ geo: truck, pivot: [0, 0, 0], anim: (t) => { const f = cyc(t, P, i / 4), u = easeIO(win(f, 0, 0.4)) - easeIO(win(f, 0.6, 0.95)), a = along(route, clamp01(u)); return { x: a.p.x, y: a.p.y, z: a.p.z, ry: f < 0.5 ? a.ry : a.ry + Math.PI, s: f > 0.95 || f < 0.02 ? 0.001 : 1 }; } });
+      moving.push({ geo: plate, pivot: [x, y0 + 2.4, z], anim: (t) => { const f = cyc(t, P, i / 4); return f > 0.42 && f < 0.7 ? { s: back(win(f, 0.42, 0.5)) * 1.4, ry: t, y: Math.sin(t * 3) * 0.06 } : { s: 0.001 }; } });
+    });
+    return { bare: true, move: () => ({}), geo: merge(out), moving };
+  } },
 };
