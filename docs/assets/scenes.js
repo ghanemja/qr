@@ -286,6 +286,12 @@ const desk = (top = K.wood, laptop = '#3a3f47') => merge(part(rbox(1.4, 0.06, 0.
 const serverRack = (h = 2.0, top = 'A') => merge(part(rbox(0.9, h, 0.8, 0.04), '#2b2f36', { p: [0, h / 2, 0] }), part(box(0.92, 0.12, 0.82), top, { p: [0, h - 0.06, 0] }),
   Array.from({ length: Math.floor((h - 0.3) / 0.26) }, (_, i) => part(rbox(0.78, 0.2, 0.04, 0.02), '#3a3f47', { p: [0, 0.2 + i * 0.26, 0.41] })));
 
+// A DNA double helix standing on y = 0, h tall, rungs in brand colours.
+const helixGeo = (h = 1.4, r = 0.3) => { const n = hi() ? 16 : 8, g = []; for (let i = 0; i <= n; i++) { const u = i / n, a = u * TAU * 1.5, y = u * h, p1 = [Math.cos(a) * r, y, Math.sin(a) * r], p2 = [-Math.cos(a) * r, y, -Math.sin(a) * r]; g.push(part(new THREE.SphereGeometry(0.06, 8, 6), K.white, { p: p1 }), part(new THREE.SphereGeometry(0.06, 8, 6), K.white, { p: p2 })); if (i % 2 === 0) g.push(beam(p1, p2, 0.04, i % 4 ? 'A' : 'B')); }
+  [0, Math.PI].forEach((o) => g.push(part(tube(Array.from({ length: 13 }, (_, i) => { const u = i / 12, a = u * TAU * 1.5 + o; return [Math.cos(a) * r, u * h, Math.sin(a) * r]; }), 0.035), '#c9ced6'))); return merge(g); };
+// A whiteboard on legs facing +z, on y = 0.
+const whiteboard = (w = 1.8) => merge(part(rbox(w, 1.1, 0.06, 0.03), K.white, { p: [0, 1.35, 0] }), part(box(w + 0.06, 0.06, 0.1), '#9aa1a9', { p: [0, 0.78, 0.03] }), [-1, 1].map((sx) => part(cyl(0.03, 0.03, 1.9, 8), '#9aa1a9', { p: [sx * w * 0.45, 0.95, -0.05] })), [-1, 1].map((sx) => part(box(0.06, 0.04, 0.5), '#9aa1a9', { p: [sx * w * 0.45, 0.02, 0] })));
+
 export const SCENES = {
   // Coin tower (regional banks, mortgage finance): deposits in, loans out. A customer walks into
   // the branch; a coin flies from its roof onto the tower of savings; the bottom coin slides out
@@ -2383,5 +2389,66 @@ export const SCENES = {
     out.push(merge(part(box(W - 0.6, 0.14, 0.02), '#2c3644', { p: [(W - 0.6) / 2, 0, 0] })).applyMatrix4(new THREE.Matrix4().extractRotation(SM)).translate(...bp.toArray()));
     moving.push({ geo: part(box(W - 0.6, 0.14, 0.03), '#28c840', { p: [(W - 0.6) / 2, 0, 0] }).applyMatrix4(new THREE.Matrix4().extractRotation(SM)), pivot: bp.toArray(), anim: (t) => { const f = F(t); return { sx: (win(f, 0.4, 0.43) + win(f, 0.52, 0.55) + win(f, 0.64, 0.67)) / 3 * (1 - win(f, 0.95, 0.99)) * 0.999 + 0.001 }; } });
     return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [3.6, y0, 0.9], topAt: [WX + 1.2, y0 + WH, WZ] };
+  },
+
+  // Bright idea (frontier AI and AI-for-science labs): compute in, breakthroughs out. The racks
+  // pulse power into the giant bulb, where the neural network inside lights up node by node; when
+  // it's whole the bulb flashes and its discoveries (a molecule, a chip, a gene) float out to their
+  // pedestals while the researchers scribble at the whiteboards.
+  'ai:5': () => {
+    const R = rand(3301), out = [], moving = [];
+    out.push(slab('#d2d0e2'));
+    out.push(part(rbox(10.0, 0.03, 10.0, 0.04), '#e8e6f2', { p: [0, y0 + 0.015, 0] }));
+    // ---- the compute row along the left
+    const racks = [-3.6, -2.5, -1.4, -0.3].map((z) => new V(-4.4, 0, z));
+    racks.forEach((r) => out.push(place(serverRack(2.0, 'A'), { p: [r.x, y0, r.z], r: [0, Math.PI / 2, 0] })));
+    // ---- the giant bulb on its plinth (back middle): a wire cage of glass, the network inside
+    const BX = -0.9, BZ = -2.3, BR = 1.3, BY = y0 + 3.0;
+    out.push(part(cyl(1.3, 1.45, 0.4, 40), K.stone, { p: [BX, y0 + 0.2, BZ] }), part(cyl(1.47, 1.47, 0.1, 40), 'Ad', { p: [BX, y0 + 0.14, BZ] }));
+    out.push(part(lathe([[0.3, 0], [0.62, 0.05], [0.66, 0.2], [0.62, 0.35], [0.66, 0.5], [0.62, 0.65], [0.66, 0.8], [0.62, 0.95]], 32), '#c9ced6', { p: [BX, y0 + 0.4, BZ] }), part(cyl(0.68, 0.64, 0.12, 32), 'A', { p: [BX, y0 + 1.4, BZ] }));
+    // The glass: wire meridians along the bulb's profile (globe tapering into the neck), and rings.
+    const prof = [[0.66, -BR - 0.3], [0.7, -BR * 0.95], ...Array.from({ length: 12 }, (_, i) => { const a = -Math.PI / 3 + (i / 11) * (Math.PI / 2 + Math.PI / 3); return [Math.cos(a) * BR, Math.sin(a) * BR]; }), [0.001, BR]];
+    const cage = [];
+    for (let i = 0; i < 8; i++) { const a = (i / 8) * TAU; cage.push(part(tube(prof.map(([r, y]) => [Math.cos(a) * r, y, Math.sin(a) * r]), 0.025), '#f4f1e4')); }
+    [[0, 1], [BR * 0.6, 0.8], [-BR * 0.55, 0.83]].forEach(([y, k]) => cage.push(part(torus(Math.sqrt(BR * BR - y * y) * (k === 1 ? 1 : 1), 0.025, TAU, 48), '#f4f1e4', { p: [0, y, 0], r: [Math.PI / 2, 0, 0] })));
+    cage.push(part(torus(0.7, 0.03, TAU, 32), '#f4f1e4', { p: [0, -BR * 0.95, 0], r: [Math.PI / 2, 0, 0] }));
+    out.push(place(merge(cage), { p: [BX, BY, BZ] }));
+    // The network: three layers in a plane facing the camera.
+    const q = new THREE.Quaternion().setFromAxisAngle(new V(0, 1, 0), Math.PI / 4), layers = [[-0.75, 3], [0, 4], [0.75, 3]], nodes = [];
+    layers.forEach(([x, n], l) => { for (let i = 0; i < n; i++) nodes.push({ l, p: new V(x, (i - (n - 1) / 2) * 0.5, 0).applyQuaternion(q).add(new V(BX, BY, BZ)) }); });
+    const links = [];
+    nodes.forEach((a, i) => nodes.forEach((b, j) => { if (b.l === a.l + 1) links.push([i, j]); }));
+    links.forEach(([i, j]) => out.push(beam(nodes[i].p.toArray(), nodes[j].p.toArray(), 0.02, '#8e95c7')));
+    nodes.forEach((n) => out.push(part(new THREE.SphereGeometry(0.11, 12, 8), '#5b5f86', { p: n.p.toArray() })));
+    // Cables from the racks to the plinth.
+    const cables = racks.map((r) => curve([[r.x + 0.45, y0 + 0.05, r.z], [r.x + 1.6, y0 + 0.05, r.z + 0.1], [BX - 1.0, y0 + 0.05, BZ + 0.6 * Math.sign(r.z - BZ)], [BX - 0.9, y0 + 0.05, BZ]]));
+    cables.forEach((c) => out.push(part(tubeOn(c, 0.05), '#5b616b')));
+    // ---- the whiteboards (back right) and the discovery pedestals (front right)
+    [[1.6, -3.9, 0.1], [3.7, -3.4, -0.35]].forEach(([x, z, ry]) => out.push(place(whiteboard(1.8), { p: [x, y0, z], r: [0, ry, 0] })));
+    const peds = [new V(1.4, 0, 1.2), new V(3.2, 0, -0.4), new V(3.0, 0, 2.8)];
+    peds.forEach((p) => out.push(part(cyl(0.5, 0.6, 0.9, 28), K.white, { p: [p.x, y0 + 0.45, p.z] }), part(cyl(0.52, 0.52, 0.08, 28), 'A', { p: [p.x, y0 + 0.88, p.z] })));
+    [[-3.0, 3.6], [-0.8, 4.4], [4.6, 4.6]].forEach(([x, z]) => out.push(part(cyl(0.3, 0.22, 0.4, 14), '#c99a62', { p: [x, y0 + 0.2, z] }), miniTree(R, x, y0 + 0.4, z, 0.45)));
+    // ---- moving parts (one 12 s cycle)
+    const P = 12, F = (t) => cyc(t, P);
+    // Rack lights blink.
+    racks.forEach((r, i) => { for (let k = 0; k < 5; k++) moving.push({ geo: part(box(0.02, 0.05, 0.5), k % 2 ? '#62d35f' : '#3d7be0'), pivot: [r.x + 0.44, y0 + 0.25 + k * 0.32, r.z], anim: (t) => ({ s: Math.sin(t * (4 + k) + i * 2 + k) > -0.2 ? 1 : 0.001 }) }); });
+    // Power pulses along the cables.
+    cables.forEach((c, i) => { for (let k = 0; k < 2; k++) moving.push({ geo: part(new THREE.SphereGeometry(0.08, 8, 6), '#ffd23f'), pivot: [0, 0, 0], anim: (t) => { const u = cyc(t, 1.8, k / 2 + i * 0.21), p = c.getPointAt(u); return { x: p.x, y: p.y + 0.04, z: p.z, s: F(t) < 0.62 ? 1 : 0.001 }; } }); });
+    // Nodes light one by one, layer by layer; a spark runs along each link as its far node lights.
+    const lit = (i) => 0.08 + (nodes[i].l * 4 + (i % 4)) * 0.04;
+    nodes.forEach((n, i) => moving.push({ geo: part(new THREE.SphereGeometry(0.15, 14, 10), '#ffe066'), pivot: n.p.toArray(), anim: (t) => { const f = F(t); return { s: (back(win(f, lit(i), lit(i) + 0.04)) + bump(f, 0.62, 0.02) * 0.4) * (1 - win(f, 0.93, 0.98)) * 0.999 + 0.001 }; } }));
+    links.forEach(([i, j], k) => { if (k % 2) return; moving.push({ geo: part(new THREE.SphereGeometry(0.05, 8, 6), '#fff3b0'), pivot: [0, 0, 0], anim: (t) => { const f = F(t), u = win(f, lit(j) - 0.04, lit(j)), p = nodes[i].p.clone().lerp(nodes[j].p, u); return { x: p.x, y: p.y, z: p.z, s: u > 0 && u < 1 ? 1 : 0.001 }; } }); });
+    // The flash: rays burst round the bulb when the network is whole.
+    moving.push({ geo: merge(ring(12, (a) => beam([Math.cos(a) * (BR + 0.3), Math.sin(a) * (BR + 0.3), 0], [Math.cos(a) * (BR + 0.9), Math.sin(a) * (BR + 0.9), 0], 0.12, '#ffd23f'))).applyQuaternion(q), pivot: [BX, BY, BZ], anim: (t) => { const f = F(t); return { s: life(f, 0.6, 0.64, 0.7, 0.76), rz: 0 }; } });
+    // The discoveries float out of the bulb to their pedestals and turn there.
+    const finds = [molecule('A', K.white, 'B').scale(0.5, 0.5, 0.5), chipGeo(0.7).translate(0, -0.06, 0), helixGeo(1.0, 0.24).translate(0, -0.5, 0)];
+    finds.forEach((g, i) => { const to = new V(peds[i].x, y0 + 1.55, peds[i].z), from = new V(BX, BY, BZ); moving.push({ geo: g, pivot: [0, 0, 0], anim: (t) => { const f = F(t), a = 0.64 + i * 0.04, u = easeIO(win(f, a, a + 0.12)), p = from.clone().lerp(to, u); return { x: p.x, y: p.y + hop(u) * 1.2, z: p.z, ry: t * 0.9, s: f > a ? (0.4 + 0.6 * u) * (1 - win(f, 0.95, 0.99)) + 0.001 : 0.001 }; } }); });
+    // Researchers at the whiteboards, and the lines they write.
+    [[1.6, -3.9, 0.1], [3.7, -3.4, -0.35]].forEach(([x, z, ry], i) => {
+      const fw = new V(Math.sin(ry), 0, Math.cos(ry)), side = new V(Math.cos(ry), 0, -Math.sin(ry));
+      moving.push(...walker(moving.length, (t) => { const k = Math.sin(t * 0.7 + i * 2) * 0.4; return { x: x + fw.x * 0.55 + side.x * k, z: z + fw.z * 0.55 + side.z * k, ry: ry + Math.PI / 2, still: true, push: Math.sin(t * 5 + i) > 0 }; }, { shirt: i ? '#8a6cf0' : '#3fb8a8', pants: '#2b3a55', y: y0 }));
+      for (let k = 0; k < 4; k++) moving.push({ geo: part(box(1.2 - k * 0.15, 0.05, 0.02), k % 2 ? '#3d7be0' : '#2b2f36', { p: [(1.2 - k * 0.15) / 2, 0, 0] }), pivot: [x - side.x * 0.75 + fw.x * 0.04, y0 + 1.75 - k * 0.2, z - side.z * 0.75 + fw.z * 0.04], anim: (t) => { const f = cyc(t, 8, i * 0.4); return { ry, sx: win(f, k * 0.18, k * 0.18 + 0.15) * (1 - win(f, 0.92, 0.98)) * 0.999 + 0.001 }; } });
+    });
+    return { slab: true, move: () => ({}), geo: merge(out), moving, propAt: [-2.2, y0, 2.0], topAt: [-4.4, y0 + 2.0, -3.6] };
   },
 };
