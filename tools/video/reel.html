@@ -1,0 +1,173 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: MIT · Copyright (c) 2026 Janelle Ghanem -->
+<!-- An Instagram Reel (9:16, 1080×1920) for one company: reel.html?slug=amazon. Same contract as
+     stage.html (window.frame(seconds), DURATION, SHOTS), so render.cjs films it with STAGE=reel.
+     The 'qr' shot is the site's own QR world (qrshot.html?fmt=reel), filmed by render.cjs.
+     Each company gets a recipe below: the close-ups that show why it wins. -->
+<meta charset="utf-8">
+<title>QR Compass reel</title>
+<style>
+  html, body { margin: 0; width: 100vw; height: 100vh; overflow: hidden; background: #f6f1e7; font-family: Inter, sans-serif; color: #17202c; }
+  canvas { position: absolute; inset: 0; }
+  .ov { position: absolute; opacity: 0; will-change: opacity, transform; }
+  /* Instagram's own UI covers about the top 220 px and the bottom 420 px (caption, buttons on the
+     right), so every word sits between them. */
+  #hook { left: 70px; right: 70px; top: 250px; text-align: center; text-shadow: 0 2px 30px #f6f1e7, 0 0 12px #f6f1e7, 0 0 4px #f6f1e7; }
+  #hook small { display: block; margin-bottom: 20px; font: 700 40px/1.15 Inter, sans-serif; color: #c9652c; letter-spacing: -0.5px; }
+  #hook b { display: block; font: 800 128px/0.98 'Inter Display', Inter, sans-serif; letter-spacing: -4px; }
+  #cap { left: 70px; right: 150px; bottom: 470px; text-shadow: 0 0 22px #f6f1e7, 0 0 10px #f6f1e7, 0 0 4px #f6f1e7; }
+  #cap .bar { width: 80px; height: 9px; border-radius: 5px; background: #e07a3f; margin-bottom: 26px; }
+  #cap .line { font: 800 86px/1.02 'Inter Display', Inter, sans-serif; letter-spacing: -2.5px; }
+  #tag { left: 50%; top: 540px; margin-left: -9999px; margin-right: -9999px; width: max-content; left: 0; right: 0; margin: 0 auto; padding: 16px 28px; border-radius: 999px; background: #17202c; color: #f6f1e7; font: 700 34px/1 Inter, sans-serif; }
+  #tag b { color: #f0a46b; margin-right: 12px; }
+  #veil { inset: 0; background: #f6f1e7; }
+  .card { left: 70px; right: 70px; top: 0; bottom: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding-bottom: 120px; }
+  .card .brand { display: flex; align-items: center; gap: 22px; margin-bottom: 44px; font: 800 58px/1 'Inter Display', Inter, sans-serif; letter-spacing: -1px; }
+  .card .brand img { width: 92px; height: 92px; }
+  .card h2 { margin: 0; font: 800 118px/1.0 'Inter Display', Inter, sans-serif; letter-spacing: -4px; }
+  .card p { margin: 36px 0 0; font: 500 46px/1.3 Inter, sans-serif; color: #3d4757; }
+  .card p b { color: #17202c; }
+  .card .ask { margin-top: 64px; padding: 26px 40px; border-radius: 28px; background: #17202c; color: #f6f1e7; font: 800 52px/1.15 'Inter Display', Inter, sans-serif; letter-spacing: -1px; }
+  .card .ask span { color: #f0a46b; }
+  .card .url { margin-top: 48px; font: 600 42px/1 'JetBrains Mono', monospace; color: #e07a3f; }
+  .card .url small { display: block; margin-top: 16px; font: 600 32px/1 Inter, sans-serif; color: #5b6778; }
+</style>
+<script type="importmap">{"imports":{"three":"/qr/assets/three.module.min.js"}}</script>
+<div id="veil" class="ov"></div>
+<div id="hook" class="ov"><small></small><b></b></div>
+<div id="tag" class="ov"></div>
+<div id="cap" class="ov"><div class="bar"></div><div class="line"></div></div>
+<div id="end" class="ov card">
+  <div class="brand"><img src="/qr/assets/icon.svg">QR Compass</div>
+  <h2>The economy,<br>built in 3D.</h2>
+  <p>All of the Fortune 500 and 81 top startups,<br>each a living world <b>and a real QR code.</b></p>
+  <div class="ask">Who should be next?<br><span>Comment a company ↓</span></div>
+  <div class="url">ghanemja.github.io/qr<small>link in bio</small></div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+const M = await import('/qr/assets/models.js');
+const { centerpiece, modelMaterial, setBrands, motion, mountMovers, poseMovers, propGeo, topperGeo } = M;
+const { RoomEnvironment } = await import('/qr/assets/RoomEnvironment.js');
+
+const slug = new URLSearchParams(location.search).get('slug') || 'amazon';
+const W = 1080, H = 1920, BG = '#f6f1e7';
+const r = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+r.setPixelRatio(1); r.setSize(W, H); r.outputColorSpace = THREE.SRGBColorSpace;
+r.shadowMap.enabled = true; r.shadowMap.type = THREE.PCFSoftShadowMap; r.setClearColor(BG);
+document.body.prepend(r.domElement);
+const env = new THREE.PMREMGenerator(r).fromScene(new RoomEnvironment(), 0.04).texture;
+const scene = new THREE.Scene();
+scene.environment = env; scene.environmentIntensity = 0.45; scene.background = new THREE.Color(BG);
+scene.fog = new THREE.Fog(BG, 120, 400);
+scene.add(new THREE.HemisphereLight('#fffaf0', '#d8cbb5', 0.95));
+const sun = new THREE.DirectionalLight('#fff4e0', 2.1);
+sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0004;
+sun.position.set(-10, 22, 7); sun.target.position.set(0, 0, 0);
+Object.assign(sun.shadow.camera, { left: -9, bottom: -9, right: 9, top: 9, far: 140 }); sun.shadow.camera.updateProjectionMatrix();
+scene.add(sun, sun.target);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshStandardMaterial({ color: '#e9e1d2' }));
+floor.rotation.x = -Math.PI / 2; floor.position.y = -0.02; floor.receiveShadow = true; scene.add(floor);
+const cam = new THREE.PerspectiveCamera(42, W / H, 0.2, 500);
+
+// The company, as its page shows it.
+const html = await (await fetch(`/qr/c/${slug}.html`)).text();
+const C = JSON.parse(html.match(/window\.COMPANY=(\{.*?\});<\/script>/)[1]);
+C.kicker = (html.match(/Fortune 500 · No\. \d+/) || html.match(/[A-Za-z&' -]*startup · [^<]*/) || [''])[0].trim();
+const look = C.look || { v: 0, base: 0, a: '#e5533d', b: '#2b5aa8' };
+const cp = centerpiece(C.model, look.v, look.base, 'high');
+const mat = modelMaterial();
+const mk = (geo, at) => {
+  const m = new THREE.InstancedMesh(geo, mat, 1);
+  m.setMatrixAt(0, at ? new THREE.Matrix4().makeTranslation(...at) : new THREE.Matrix4());
+  setBrands(m, [[look.a, look.b]]); m.castShadow = m.receiveShadow = true; m.frustumCulled = false; return m;
+};
+const g = new THREE.Group();
+g.add(mk(cp.geo));
+if (!cp.bare) {
+  if (look.prop != null) g.add(mk(propGeo(look.prop, 'high'), cp.propAt));
+  const tg = look.topper ? topperGeo(look.topper, 'high') : null;
+  if (tg) g.add(mk(tg, cp.topAt));
+}
+const nodes = mountMovers(cp, g, mk); scene.add(g);
+const mh = new THREE.Box3().setFromBufferAttribute(cp.geo.attributes.position).max.y;
+function pose(t) {
+  poseMovers(nodes, t);
+  const b = motion(C.model, cp, t);
+  g.position.set(b.x * mh, b.y * mh, b.z * mh); g.rotation.set(b.rx, b.ry, b.rz); g.scale.set(b.sx, b.sy, b.sz);
+}
+// Where mover i is at model time t (for a camera that follows it).
+const at = (i, t) => { const a = cp.moving[i].anim(t), p = cp.moving[i].pivot; return new THREE.Vector3(a.x ?? p[0], a.y ?? p[1], a.z ?? p[2]); };
+
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
+const lerp = (a, b, k) => a + (b - a) * k;
+// A recipe per company: the hook, then close-ups, each { t: model time at its first frame,
+// cam(u, t) → [target, distance, elevation, azimuth] }, captioned with why it wins.
+const RECIPES = {
+  amazon: {
+    hook: ['Every company, a tiny living world.', 'This is Amazon.'],
+    shots: [
+      { line: 'Every box rides the smile', t: 1.2, cam: (u) => [V(lerp(-1.2, 0.8, u), 1.15, 2.7), lerp(7.5, 6.2, u), 0.32, lerp(0.35, 0.95, u)] },
+      { line: 'A drone grabs the next one', t: 1.9, cam: (u, t) => [at(5, t).lerp(V(2.2, 2, 2.4), 0.35), 8.5, lerp(0.42, 0.3, u), lerp(1.05, 0.7, u)] },
+      { line: '…and it’s out for delivery', t: 1.6, cam: (u, t) => [at(11, t).add(V(0.6, 1, 0)), lerp(8, 7, u), 0.2, lerp(1.25, 0.85, u)] },
+    ],
+  },
+};
+const R = RECIPES[slug] || { hook: ['Every company, a tiny living world.', `This is ${C.name}.`], shots: [] };
+
+// ---- timeline (120 bpm, a bar is 2 s; the soundtrack follows songs/plan.mjs with CUT=reel) ----
+const BAR = 2, shots = [];
+let t = 0;
+const add = (len, s) => { shots.push({ t0: t, t1: t + len, ...s }); t += len; };
+add(BAR, { kind: 'hook' });
+R.shots.forEach((s, i) => add(BAR, { kind: 'close', ...s, no: i }));
+add(4 * BAR, { kind: 'qr', slug });
+add(2 * BAR, { kind: 'end' });
+window.DURATION = t;
+window.SHOTS = shots.map(({ kind, t0, t1, slug }) => ({ kind, t0, t1, slug }));
+
+const $ = (id) => document.getElementById(id);
+const ease = (x) => x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x);
+const fade = (u, a, b, c, d) => Math.min(ease((u - a) / (b - a)), 1 - ease((u - c) / (d - c)));
+function set(id, o, dy = 0, s = 1) { const e = $(id); e.style.opacity = o; e.style.transform = `translateY(${dy}px) scale(${s})`; }
+function orbit(target, dist, elev, az) {
+  cam.position.set(target.x + dist * Math.cos(elev) * Math.sin(az), target.y + dist * Math.sin(elev), target.z + dist * Math.cos(elev) * Math.cos(az));
+  cam.lookAt(target);
+}
+$('hook').querySelector('small').textContent = R.hook[0];
+$('hook').querySelector('b').textContent = R.hook[1];
+$('tag').innerHTML = C.kicker.replace(/Fortune 500 · No\. (\d+)/, '<b>No. $1</b>on the Fortune 500').replace(' · ', ' · ');
+
+window.frame = async (T) => {
+  const s = shots.find((x) => T >= x.t0 && T < x.t1) || shots[shots.length - 1];
+  const u = (T - s.t0) / (s.t1 - s.t0), lt = T - s.t0;
+  for (const e of document.querySelectorAll('.ov')) { e.style.opacity = 0; e.style.transform = ''; }
+  if (s.kind === 'qr') return s.kind;
+  const tgt = V(0, Math.max(2.4, mh * 0.4), 0);
+  if (s.kind === 'hook') {
+    // A fast push-in from high above, swinging round to the front; the model sits low, under the words.
+    pose(2 + lt);
+    const k = 1 - Math.pow(1 - u, 3);
+    orbit(tgt, lerp(46, 25, k), lerp(0.95, 0.5, k), Math.PI / 4 - 0.6 + 0.6 * k);
+    cam.setViewOffset(W, H, 0, -H * 0.12, W, H);
+    set('hook', ease(u / 0.12), (1 - ease(u / 0.15)) * 30, 1 + 0.04 * (1 - ease(u / 0.2)));
+    set('tag', ease((u - 0.3) / 0.15), (1 - ease((u - 0.3) / 0.15)) * 20);
+  } else if (s.kind === 'close') {
+    pose(s.t + lt);
+    const [tg, d, el, az] = s.cam(u, s.t + lt);
+    orbit(tg, d, el, az); cam.setViewOffset(W, H, 0, -H * 0.05, W, H);
+    $('cap').querySelector('.line').textContent = s.line;
+    set('cap', fade(u, 0, 0.1, 0.92, 1.01), (1 - ease(u / 0.1)) * 30);
+  } else {
+    // The end card over a veil, the model still turning behind it.
+    pose(10 + lt);
+    cam.clearViewOffset();
+    orbit(tgt, 30, 0.5, Math.PI / 4 + 0.3 * u);
+    set('veil', ease(u / 0.12) * 0.86);
+    set('end', ease((u - 0.04) / 0.12), (1 - ease((u - 0.04) / 0.12)) * 40);
+  }
+  r.render(scene, cam);
+  return s.kind;
+};
+document.title = 'ready';
+</script>

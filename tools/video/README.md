@@ -28,3 +28,17 @@ CUT=short node ../equalizer/examples/render.mjs tools/video/songs/house.mjs /tmp
 ffmpeg -framerate 30 -i /tmp/qrv/frames/f%05d.jpg -i /tmp/qrv/house.wav \
   -c:v libx264 -preset slow -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest -movflags +faststart qr-compass-ad.mp4
 ```
+
+## Instagram Reels (`reel.html`)
+
+A 20-second 9:16 reel (1080×1920) for one company: a hook, three close-ups of its world that show
+why it wins, the model breaking into its real QR code (held long enough to scan off the screen), and
+an end card asking who's next. Words stay clear of Instagram's own UI (top 220 px, bottom 420 px).
+Each company's close-ups are a recipe in `RECIPES` in `reel.html`; only Amazon has one so far.
+
+```sh
+CUT=reel node ../equalizer/examples/render.mjs tools/video/songs/house.mjs /tmp/qrv/house-reel.wav
+STAGE=reel SLUG=amazon node tools/video/render.cjs /tmp/qrv/reel-stills stills 1.5,3,5,7,17.5
+STAGE=reel SLUG=amazon node tools/video/render.cjs /tmp/qrv/reel-amazon 30 3
+tools/video/encode.sh /tmp/qrv/reel-amazon /tmp/qrv/house-reel.wav media/reels/amazon-house.mp4 8
+```

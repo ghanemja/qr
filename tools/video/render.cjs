@@ -12,7 +12,9 @@ const [out, a1 = '30', a2 = '3'] = process.argv.slice(2);
 fs.mkdirSync(out, { recursive: true });
 const ARGS = ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'];
 // FMT=portrait renders the 4:5 vertical cut (1080×1350) instead of 16:9 (1920×1080).
-const PORTRAIT = process.env.FMT === 'portrait', VIEW = PORTRAIT ? { width: 1080, height: 1350 } : { width: 1920, height: 1080 };
+// STAGE=reel films reel.html (SLUG=amazon), the 9:16 Instagram Reel (1080×1920).
+const PORTRAIT = process.env.FMT === 'portrait', REEL = process.env.STAGE === 'reel', SLUG = process.env.SLUG || 'amazon';
+const VIEW = REEL ? { width: 1080, height: 1920 } : PORTRAIT ? { width: 1080, height: 1350 } : { width: 1920, height: 1080 };
 const name = (f) => `${out}/f${String(f).padStart(5, '0')}.jpg`;
 
 async function open(url, { clock = false } = {}) {
@@ -25,7 +27,7 @@ async function open(url, { clock = false } = {}) {
   return { b, p };
 }
 async function stage() {
-  const { b, p } = await open(`/tools/video/stage.html${PORTRAIT ? '?fmt=portrait' : ''}`);
+  const { b, p } = await open(REEL ? `/tools/video/reel.html?slug=${SLUG}` : `/tools/video/stage.html${PORTRAIT ? '?fmt=portrait' : ''}`);
   await p.waitForFunction(() => document.title === 'ready', null, { timeout: 120000 });
   await p.evaluate(() => document.fonts.ready);
   return { b, p };
@@ -38,7 +40,7 @@ async function shoot(p, T, file, type = 'jpeg') {
 async function qrShot(shot, fps) {
   const first = Math.round(shot.t0 * fps), last = Math.round(shot.t1 * fps);
   if (fs.existsSync(name(last - 1))) return;
-  const { b, p } = await open(`/tools/video/qrshot.html?slug=${shot.slug}`, { clock: true });
+  const { b, p } = await open(`/tools/video/qrshot.html?slug=${shot.slug}${REEL ? '&fmt=reel' : ''}`, { clock: true });
   for (let i = 0; i < 150 && !(await p.evaluate(() => !!window.world)); i++) await new Promise((r) => setTimeout(r, 200));
   await p.evaluate(() => document.fonts.ready);
   await p.clock.runFor(2600); // let the world grow in before the shot starts

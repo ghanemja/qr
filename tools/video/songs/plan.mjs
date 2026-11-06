@@ -2,9 +2,17 @@
 // The bar map every ad soundtrack follows, so any of them drops into the video: 120 bpm, a bar
 // is 2 s, and the video cuts on these bar lines. CUT=short gives the 32 s cut (cut.mjs edits it
 // from the full one's frames); otherwise the full 64 s cut.
-const SHORT = process.env.CUT === 'short';
-export const BPM = 120, BARS = SHORT ? 18 : 35;
-export const S = SHORT ? {
+// CUT=reel gives the 20 s Instagram Reel (reel.html): a hook, three close-ups building up, and the
+// drop landing on the cut into the QR shot.
+const SHORT = process.env.CUT === 'short', REEL = process.env.CUT === 'reel';
+export const BPM = 120, BARS = REEL ? 10 : SHORT ? 18 : 35;
+export const S = REEL ? {
+  intro: 'bar < 1',                    // the hook
+  a: 'bar < 0', qr: 'bar < 0', b: 'bar < 0',
+  build: 'bar >= 1 && bar < 4',        // three close-ups, rising
+  drop: 'bar >= 4 && bar < 8',         // the QR shot: the model shatters into its code and rebuilds
+  outro: 'bar >= 8',                   // end card
+} : SHORT ? {
   intro: 'bar < 1',                    // title card
   a: 'bar >= 1 && bar < 6',            // 1 · Understand: five featured models
   qr: 'bar >= 6 && bar < 11',          // 2 · Scan: the QR morph (in slow motion) and the rebuild (breakdown)
@@ -23,8 +31,8 @@ export const S = SHORT ? {
 };
 export const any = (...keys) => keys.map((k) => `(${S[k]})`).join(' || ');
 // The build's last bar: the kick drops out for a roll into the drop.
-const last = SHORT ? 13 : 27, b0 = (last + 1) * 4 - 2;
+const last = REEL ? 3 : SHORT ? 13 : 27, b0 = (last + 1) * 4 - 2;
 export const KICK = `${any('a', 'b', 'drop')} || (${S.build} && beat < ${b0})`, KICK_ROLL = `bar == ${last} && beat < ${b0 + 1.5}`, ROLL = `bar == ${last}`, ROLL2 = `bar >= ${last - 1} && bar < ${last + 1}`;
 // Moments in seconds: the first cut, the model shattering into pixels and rebuilding, the build, the drop, the end card.
-export const AT = SHORT ? { first: 2, shatter: 13, rebuild: 17.6, build: 22, drop: 28, end: 32 } : { first: 4, shatter: 25, rebuild: 29.6, build: 44, drop: 56, end: 64 };
+export const AT = REEL ? { first: 2, shatter: 9, rebuild: 13.6, build: 2, drop: 8, end: 16 } : SHORT ? { first: 2, shatter: 13, rebuild: 17.6, build: 22, drop: 28, end: 32 } : { first: 4, shatter: 25, rebuild: 29.6, build: 44, drop: 56, end: 64 };
 export const RISE = AT.drop - AT.build;

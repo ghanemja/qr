@@ -13,6 +13,11 @@
   #c1 { top: 150px; } #c2 { top: 150px; }
   #act { position: absolute; left: 96px; top: 80px; padding: 14px 26px; border-radius: 999px; background: #17202c; color: #f6f1e7; font: 700 30px/1 Inter, sans-serif; }
   #act b { color: #f0a46b; margin-right: 12px; }
+  /* ?fmt=reel (9:16, 1080×1920): bigger words, kept clear of Instagram's own UI. */
+  .reel #act { display: none; }
+  .reel #c1, .reel #c2 { top: 260px; padding: 0 70px; }
+  .reel .ov b { font-size: 104px; letter-spacing: -3px; }
+  .reel .ov span { margin-top: 20px; font-size: 46px; }
 </style>
 <script type="importmap">{"imports":{"three":"/qr/assets/three.module.min.js"}}</script>
 <div id="stage"></div>
@@ -21,11 +26,14 @@
 <div id="act"><b>2</b>Scan: every world is a real QR code</div>
 <script type="module">
 import { createQRWorld } from '/qr/assets/qrsculpture.js';
-const slug = new URLSearchParams(location.search).get('slug') || 'coca-cola';
+const Q = new URLSearchParams(location.search), slug = Q.get('slug') || 'coca-cola', REEL = Q.get('fmt') === 'reel';
+document.documentElement.classList.toggle('reel', REEL);
+// In a reel, the code holds still long enough to scan straight off the screen.
+if (REEL) document.querySelector('#c2 span').textContent = 'Pause and scan it with your camera.';
 const html = await (await fetch(`/qr/c/${slug}.html`)).text();
 const C = JSON.parse(html.match(/window\.COMPANY=(\{.*?\});<\/script>/)[1]);
 document.querySelector('#c1 b').textContent = C.name;
-const world = createQRWorld(document.getElementById('stage'), { slug: C.slug, model: C.model, look: C.look, qr: C.qr, viewScale: 1.3, insets: () => ({ top: 300, bottom: 50 }) });
+const world = createQRWorld(document.getElementById('stage'), { slug: C.slug, model: C.model, look: C.look, qr: C.qr, viewScale: 1.3, insets: () => (REEL ? { top: 620, bottom: 520 } : { top: 300, bottom: 50 }) });
 // The shot, in seconds from its first frame (the world has already grown in by then).
 const SCAN = 1, BACK = 5.6;
 // Playback rate of the page's clock at shot time t: the breakdown plays at half speed so every
