@@ -31,7 +31,8 @@ const TAU = Math.PI * 2;
 // ---------- materials: every mesh has a 2D (flat ink on paper) and a 3D (lit colour) material ----------
 const PAPER = '#f5f1e6', INK = '#161616';
 const basic = {}; const mb = (c) => (basic[c] ||= new THREE.MeshBasicMaterial({ color: c }));
-const std = (c, rough = 0.6, extra = {}) => new THREE.MeshStandardMaterial({ color: c, roughness: rough, metalness: 0, ...extra });
+const TOON = new THREE.DataTexture(new Uint8Array([0, 255]), 2, 1, THREE.RedFormat); TOON.minFilter = TOON.magFilter = THREE.NearestFilter; TOON.needsUpdate = true;
+const std = (c, rough = 0, extra = {}) => new THREE.MeshToonMaterial({ color: c, gradientMap: TOON, ...extra });
 const OUT_VS = `uniform float w; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.); vec3 n = normalize(normalMatrix*normal);
   float l = length(n.xy); vec2 d = l > 1e-4 ? n.xy/l : vec2(0.); mv.xy += d*w*(0.55+0.45*l); mv.z -= w*0.4; gl_Position = projectionMatrix*mv; }`;
 const outlines = {};
@@ -44,7 +45,7 @@ function part(parent, geo, c2, m3, pos = V(), o = {}) {
   m.userData.m2 = typeof c2 === 'string' ? mb(c2) : c2; m.userData.m3 = m3;
   m.castShadow = o.cast !== false; m.receiveShadow = o.recv !== false;
   if (o.only) m.userData['only' + o.only] = true;
-  if (o.ol !== 0 && o.only !== '3d') { const ol = new THREE.Mesh(geo, outlineMat(o.ol || 0.012)); ol.userData.ol = true; ol.castShadow = false; m.add(ol); }
+  if (o.ol !== 0) { const ol = new THREE.Mesh(geo, outlineMat(o.ol || 0.012)); ol.userData.ol = true; ol.castShadow = false; m.add(ol); }
   if (o.order) m.renderOrder = o.order;
   parent.add(m); return m;
 }
@@ -58,82 +59,72 @@ function canvasTex(w, h, draw, rep) {
 }
 let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
 
-// ---------- 2D: a paper wall and floor ----------
+// ---------- 2D: paper, a ground line and grass tufts (like the strip) ----------
 const scene = new THREE.Scene();
 const cam = new THREE.PerspectiveCamera(22, W / H, 0.5, 120);
 const flat = new THREE.MeshBasicMaterial({ color: '#000000' });
 part(scene, new THREE.PlaneGeometry(40, 16), PAPER, flat, V(0, 8, -1), { ol: 0, cast: false, only: '2d' });
 part(scene, new THREE.PlaneGeometry(40, 16), PAPER, flat, V(0, 0, 7), { ol: 0, cast: false, rot: [-Math.PI / 2, 0, 0], only: '2d' });
-part(scene, new THREE.BoxGeometry(40, 0.022, 0.01), INK, flat, V(0, 0.011, -0.985), { ol: 0, only: '2d' });
-part(scene, new THREE.BoxGeometry(40, 0.016, 0.01), INK, flat, V(0, 0.3, -0.985), { ol: 0, only: '2d' });
-
-// ---------- 3D: space ----------
-const skyTex = canvasTex(2048, 1024, (g, w, h) => {
-  const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#0b0630'); gr.addColorStop(0.45, '#1b1460'); gr.addColorStop(0.7, '#3a1a6e'); gr.addColorStop(1, '#0d0a2e');
-  g.fillStyle = gr; g.fillRect(0, 0, w, h);
-  for (const [x, y, r, c] of [[300, 420, 380, '255,80,170'], [900, 560, 460, '40,190,255'], [1500, 380, 420, '170,90,255'], [1800, 640, 300, '255,140,60'], [600, 700, 300, '80,255,200']]) {
-    const rg = g.createRadialGradient(x, y, 0, x, y, r); rg.addColorStop(0, `rgba(${c},.38)`); rg.addColorStop(1, `rgba(${c},0)`); g.fillStyle = rg; g.fillRect(0, 0, w, h);
-  }
-  for (let i = 0; i < 2600; i++) { const s = rnd() ** 4 * 3 + 0.6; g.fillStyle = `rgba(255,${230 + rnd() * 25},${200 + rnd() * 55},${0.5 + rnd() * 0.5})`; g.beginPath(); g.arc(rnd() * w, rnd() * h, s, 0, TAU); g.fill(); }
+part(scene, new THREE.BoxGeometry(40, 0.03, 0.01), INK, flat, V(0, 0.015, -0.985), { ol: 0, only: '2d' });
+const grassTex = canvasTex(1024, 128, (g, w, h) => {
+  g.strokeStyle = INK; g.lineCap = 'round';
+  g.lineWidth = 6; g.beginPath(); g.moveTo(0, h - 8); for (let x = 0; x <= w; x += 32) g.lineTo(x, h - 8 + Math.sin(x * 0.05) * 2); g.stroke();
+  for (let x = 10; x < w; x += 9 + rnd() * 16) { const l = 30 + rnd() * 80, a = (rnd() - 0.5) * 0.9; g.lineWidth = 3 + rnd() * 3;
+    g.beginPath(); g.moveTo(x, h - 8); g.quadraticCurveTo(x + Math.sin(a) * l * 0.4, h - 8 - l * 0.6, x + Math.sin(a) * l, h - 8 - l); g.stroke(); }
 });
-part(scene, new THREE.SphereGeometry(90, 64, 32), PAPER, new THREE.MeshBasicMaterial({ map: skyTex, side: THREE.BackSide }), V(0, 0, 0), { ol: 0, cast: false, recv: false, only: '3d' });
-const moonTex = canvasTex(512, 256, (g, w, h) => {
-  g.fillStyle = '#d9d6e3'; g.fillRect(0, 0, w, h);
-  for (let i = 0; i < 70; i++) { const x = rnd() * w, y = rnd() * h, r = 4 + rnd() ** 2 * 30; g.fillStyle = 'rgba(120,115,150,.35)'; g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill(); g.fillStyle = 'rgba(255,255,255,.25)'; g.beginPath(); g.arc(x - r * 0.2, y - r * 0.2, r * 0.75, 0, TAU); g.fill(); }
+const grass = part(scene, new THREE.PlaneGeometry(3.6, 0.45), PAPER, flat, V(0, 0.2, 0.86), { ol: 0, cast: false, only: '2d' });
+grass.userData.m2 = new THREE.MeshBasicMaterial({ map: grassTex, transparent: true, depthWrite: false });
+
+// ---------- 3D: the strip's cream sky, the moon and little ink stars ----------
+part(scene, new THREE.SphereGeometry(90, 32, 16), PAPER, new THREE.MeshBasicMaterial({ color: '#f6eee5', side: THREE.BackSide }), V(), { ol: 0, cast: false, only: '3d' });
+const moonTex = canvasTex(1024, 512, (g, w, h) => {
+  g.fillStyle = '#fbfbfb'; g.fillRect(0, 0, w, h); g.strokeStyle = '#b9b9bd'; g.lineCap = 'round';
+  for (let i = 0; i < 60; i++) { const x = rnd() * w, y = 60 + rnd() * (h - 120), r = 8 + rnd() ** 2 * 34; g.lineWidth = 3 + rnd() * 3;
+    g.beginPath(); g.arc(x, y, r, Math.PI * (0.1 + rnd() * 0.3), Math.PI * (1.2 + rnd() * 0.6)); g.stroke(); }
 });
-part(scene, new THREE.SphereGeometry(1.1, 48, 32), PAPER, std('#ffffff', 0.9, { map: moonTex }), V(2.4, 6.6, -11), { ol: 0, cast: false, only: '3d' });
-const ringTex = canvasTex(512, 64, (g, w, h) => { for (let x = 0; x < w; x++) { g.fillStyle = `hsla(${30 + 20 * Math.sin(x * 0.07)},80%,${70 + 15 * Math.sin(x * 0.3)}%,${0.35 + 0.6 * Math.abs(Math.sin(x * 0.045))})`; g.fillRect(x, 0, 1, h); } });
-const bandTex = canvasTex(256, 256, (g, w, h) => { for (let y = 0; y < h; y += 8) { g.fillStyle = ['#ff9f43', '#ffcf7a', '#e8743b', '#ffb3c7', '#f7d794'][(y / 8) % 5]; g.fillRect(0, y, w, 8); } });
-const saturn = new THREE.Group(); saturn.position.set(-3.6, 1.0, -16); saturn.rotation.set(0.35, 0, 0.35); scene.add(saturn);
-part(saturn, new THREE.SphereGeometry(2.0, 48, 32), PAPER, std('#ffffff', 0.8, { map: bandTex }), V(), { ol: 0, cast: false, only: '3d' });
-const ringGeo = new THREE.RingGeometry(2.6, 4.0, 96, 1); { const P = ringGeo.attributes.position, U = ringGeo.attributes.uv; for (let i = 0; i < P.count; i++) U.setXY(i, (Math.hypot(P.getX(i), P.getY(i)) - 2.6) / 1.4, 0.5); }
-part(saturn, ringGeo, PAPER, std('#ffffff', 0.8, { map: ringTex, transparent: true, side: THREE.DoubleSide }), V(), { ol: 0, cast: false, rot: [-Math.PI / 2 + 0.2, 0, 0], only: '3d' });
-part(scene, new THREE.SphereGeometry(0.7, 40, 24), PAPER, std('#3fd0c9', 0.6), V(3.3, 0.4, -9), { ol: 0, cast: false, only: '3d' });
-part(scene, new THREE.SphereGeometry(0.35, 32, 20), PAPER, std('#ff6fa8', 0.6), V(-2.4, 5.2, -7), { ol: 0, cast: false, only: '3d' });
-// streaming stars, so it feels like flying
-const NS = 420, starPos = new Float32Array(NS * 3), starBase = [...Array(NS)].map(() => [rnd() * 30 - 15, rnd() * 14 - 4, -rnd() * 14 + 3, 2 + rnd() * 6]);
-const starGeo = new THREE.BufferGeometry(); starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
-const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: '#ffffff', size: 0.035, sizeAttenuation: true }));
-stars.userData.only3d = true; scene.add(stars);
+part(scene, new THREE.SphereGeometry(1.15, 48, 32), PAPER, new THREE.MeshBasicMaterial({ map: moonTex }), V(2.2, 7.6, -11), { ol: 0.05, cast: false, only: '3d' });
+const starTex = canvasTex(64, 64, (g) => { g.strokeStyle = '#3a3a3a'; g.lineWidth = 5; g.lineCap = 'round';
+  g.beginPath(); g.moveTo(32, 8); g.lineTo(32, 56); g.moveTo(8, 32); g.lineTo(56, 32); g.stroke(); });
+const NS = 46, starBase = [...Array(NS)].map(() => [rnd() * 30 - 15, rnd() * 14 - 3, -2 - rnd() * 12, 1 + rnd() * 3, 0.12 + rnd() * 0.16]);
+const stars = starBase.map(([, , , , s]) => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: starTex, transparent: true }));
+  sp.scale.setScalar(s); sp.userData.only3d = true; scene.add(sp); return sp; });
+// flat colours with a hint of shade: lit = the colour as printed, shade = 85%
+scene.add(new THREE.AmbientLight('#ffffff', 0.85 * Math.PI));
+const sun = new THREE.DirectionalLight('#ffffff', 0.15 * Math.PI); sun.position.set(4, 8, 7); scene.add(sun);
 
-const sun = new THREE.DirectionalLight('#fff6ea', 2.7); sun.position.set(5, 9, 8); sun.target.position.set(0, 2, 0);
-sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048); Object.assign(sun.shadow.camera, { left: -5, right: 5, top: 5, bottom: -5, near: 1, far: 30 });
-sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02; scene.add(sun, sun.target);
-scene.add(new THREE.HemisphereLight('#dfe6ff', '#7a5ca8', 1.35));
-const rim = new THREE.DirectionalLight('#ff8fd0', 1.1); rim.position.set(-6, 3, -4); scene.add(rim);
-
-// ---------- the doghouse (house-local: floor at y 0, ridge along x at y 2.7) ----------
+// ---------- the doghouse (house-local: floor at y 0, ridge along x) ----------
 const HOUSE = new THREE.Group(); scene.add(HOUSE);
-const RIDGE = 2.7, EAVE = 1.5, EAVE_Z = 0.95, SLOPE = (RIDGE - EAVE) / EAVE_Z;
-const planks = (bg, line, edge, n) => canvasTex(512, 256, (g, w, h) => {
-  g.fillStyle = bg; g.fillRect(0, 0, w, h); g.strokeStyle = line; g.lineCap = 'round';
-  for (let i = 1; i < n; i++) { g.lineWidth = 5; g.beginPath(); const y = (h * i) / n; g.moveTo(12, y + 2); g.bezierCurveTo(w * 0.35, y - 3, w * 0.65, y + 4, w - 12, y - 1); g.stroke(); }
-  if (edge) { g.lineWidth = 9; g.strokeRect(5, 5, w - 10, h - 10); }
+const RIDGE = 3.15, EAVE = 1.65, EAVE_Z = 1.05, SLOPE = (RIDGE - EAVE) / EAVE_Z;
+const planks = (bg, n) => canvasTex(512, 256, (g, w, h) => {
+  g.fillStyle = bg; g.fillRect(0, 0, w, h); g.strokeStyle = INK; g.lineCap = 'round';
+  for (let i = 1; i < n; i++) { g.lineWidth = 7; g.beginPath(); const y = (h * i) / n; g.moveTo(14, y + 2); g.bezierCurveTo(w * 0.35, y - 4, w * 0.65, y + 5, w - 14, y - 1); g.stroke(); }
+  g.lineWidth = 12; g.strokeRect(6, 6, w - 12, h - 12);
 });
-const roof2 = new THREE.MeshBasicMaterial({ map: planks(PAPER, INK, true, 3) }), roof3 = std('#ffffff', 0.7, { map: planks('#d9503e', '#8e2a1f', false, 3) });
-const body2 = new THREE.MeshBasicMaterial({ map: planks(PAPER, INK, true, 3) }), body3 = std('#ffffff', 0.7, { map: planks('#c94635', '#82261c', false, 4) });
+const roof2 = new THREE.MeshBasicMaterial({ map: planks(PAPER, 3) }), roof3 = std('#ffffff', 0, { map: planks('#cf5442', 3) });
+const body2 = new THREE.MeshBasicMaterial({ map: planks(PAPER, 3) }), body3 = std('#ffffff', 0, { map: planks('#c44c3b', 4) });
 const sl = Math.hypot(RIDGE - EAVE, EAVE_Z), ang = Math.atan2(EAVE_Z, RIDGE - EAVE);
-for (const s of [1, -1]) part(HOUSE, new THREE.BoxGeometry(2.5, sl, 0.08), roof2, roof3, V(0, (RIDGE + EAVE) / 2, s * EAVE_Z / 2), { rot: [-s * ang, 0, 0], ol: 0 });
-part(HOUSE, new THREE.BoxGeometry(1.9, 1.48, 1.5), body2, body3, V(0, 0.74, 0), { ol: 0 });
-const gable = new THREE.Shape([new THREE.Vector2(-0.75, 1.45), new THREE.Vector2(0.75, 1.45), new THREE.Vector2(0, RIDGE - 0.05)]);
-const gableGeo = new THREE.ShapeGeometry(gable).rotateY(Math.PI / 2);
-for (const s of [1, -1]) part(HOUSE, gableGeo, PAPER, std('#c94635', 0.7, { side: THREE.DoubleSide }), V(0.95 * s, 0, 0), { ol: 0 });
-const door = new THREE.Shape(); door.moveTo(-0.32, 0); door.lineTo(-0.32, 0.6); door.absarc(0, 0.6, 0.32, Math.PI, 0, true); door.lineTo(0.32, 0); door.lineTo(-0.32, 0);
-part(HOUSE, new THREE.ShapeGeometry(door, 24), PAPER, std('#1a0f14', 0.9), V(0.953, 0, 0), { rot: [0, Math.PI / 2, 0], ol: 0, only: '3d', cast: false }); // the door
-const flames = [-0.5, 0.5].map((x) => {
+for (const s of [1, -1]) part(HOUSE, new THREE.BoxGeometry(3.0, sl, 0.1), roof2, roof3, V(0, (RIDGE + EAVE) / 2, s * EAVE_Z / 2), { rot: [-s * ang, 0, 0], ol: 0 });
+part(HOUSE, new THREE.BoxGeometry(2.0, 1.62, 1.6), body2, body3, V(0, 0.81, 0), { ol: 0 });
+const gable = new THREE.Shape([new THREE.Vector2(-0.8, 1.6), new THREE.Vector2(0.8, 1.6), new THREE.Vector2(0, RIDGE - 0.06)]);
+for (const s of [1, -1]) part(HOUSE, new THREE.ShapeGeometry(gable).rotateY(Math.PI / 2), PAPER, std('#c44c3b', 0, { side: THREE.DoubleSide }), V(1.0 * s, 0, 0), { ol: 0 });
+const door = new THREE.Shape(); door.moveTo(-0.34, 0); door.lineTo(-0.34, 0.62); door.absarc(0, 0.62, 0.34, Math.PI, 0, true); door.lineTo(0.34, 0); door.lineTo(-0.34, 0);
+part(HOUSE, new THREE.ShapeGeometry(door, 24), PAPER, std('#1b1b1b'), V(1.003, 0, 0), { rot: [0, Math.PI / 2, 0], ol: 0, only: '3d', cast: false });
+const flames = [-0.55, 0.55].map((x) => {
   const g = new THREE.Group(); g.position.set(x, -0.05, 0); HOUSE.add(g); g.userData.only3d = true;
-  part(g, new THREE.ConeGeometry(0.2, 0.9, 20, 1, true).rotateX(Math.PI).translate(0, -0.45, 0), PAPER, new THREE.MeshBasicMaterial({ color: '#ff7a1a', transparent: true, opacity: 0.9 }), V(), { ol: 0, cast: false, only: '3d' });
-  part(g, new THREE.ConeGeometry(0.11, 0.55, 16, 1, true).rotateX(Math.PI).translate(0, -0.27, 0), PAPER, new THREE.MeshBasicMaterial({ color: '#fff27a' }), V(), { ol: 0, cast: false, only: '3d' });
+  part(g, new THREE.ConeGeometry(0.22, 0.95, 20).rotateX(Math.PI).translate(0, -0.47, 0), PAPER, std('#f08a24'), V(), { ol: 0.022, only: '3d' });
+  part(g, new THREE.ConeGeometry(0.11, 0.55, 16).rotateX(Math.PI).translate(0, -0.28, 0.06), PAPER, std('#ffd84a'), V(), { ol: 0, only: '3d' });
   return g;
 });
 
-// ---------- the beagle (faces +x, feet at the origin, house-local) ----------
+// ---------- the beagle (faces +x, feet at the origin, house-local), modelled on the strip ----------
+// A huge head (about as big as the rest of him) whose big round muzzle hangs forward to a small nose,
+// the ear hanging at the back (black with a white rim), a thin neck, a small body and big oval feet.
 // Head and body are single smooth surfaces: blended ellipsoids (a signed distance field), meshed by
 // pushing each vertex of a sphere out along its ray to the surface, with normals from the field.
 const sdE = (p, c, r) => { const x = (p.x - c[0]) / r[0], y = (p.y - c[1]) / r[1], z = (p.z - c[2]) / r[2];
   const k0 = Math.hypot(x, y, z), k1 = Math.hypot(x / r[0], y / r[1], z / r[2]); return k0 * (k0 - 1) / k1; };
 const smin = (a, b, k) => { const h = Math.max(k - Math.abs(a - b), 0) / k; return Math.min(a, b) - h * h * k * 0.25; };
-function sdfGeo(sdf, c, seg = 96) {
+function sdfGeo(sdf, c, seg = 112) {
   const g = new THREE.SphereGeometry(1, seg, Math.round(seg * 0.75)), P = g.attributes.position, NA = g.attributes.normal;
   const v = V(), q = V(), e = 1e-3, f = (r) => sdf(q.copy(v).multiplyScalar(r).add(c));
   for (let i = 0; i < P.count; i++) {
@@ -146,83 +137,82 @@ function sdfGeo(sdf, c, seg = 96) {
   }
   return g;
 }
-const surfZ = (sdf, x, y) => { let lo = 0, hi = 1; for (let k = 0; k < 30; k++) { const m = (lo + hi) / 2; if (sdf(V(x, y, m)) < 0) lo = m; else hi = m; } return lo; };
-// head, local to the neck: a round crown at the back, a big round muzzle with a bulb at the front
-const headSdf = (p) => {
-  let d = sdE(p, [-0.04, 0.44, 0], [0.42, 0.41, 0.39]);
-  d = smin(d, sdE(p, [0.5, 0.37, 0], [0.5, 0.3, 0.31]), 0.24);
-  d = smin(d, sdE(p, [0.84, 0.41, 0], [0.21, 0.22, 0.25]), 0.12);
-  d = smin(d, sdE(p, [0.22, 0.22, 0], [0.3, 0.19, 0.3]), 0.16);
-  return d;
-};
-const bodySdf = (p) => smin(sdE(p, [0, 0.55, 0], [0.36, 0.36, 0.33]), sdE(p, [0.03, 0.88, 0], [0.26, 0.28, 0.25]), 0.22);
-const WHITE = std('#ffffff', 0.75), BLACK = std('#202024', 0.55), NOSE = std('#121214', 0.22), RED = std('#e8323c', 0.4);
-const SUIT = std('#f08a24', 0.55), SUITD = std('#c96a14', 0.6), LEATHER = std('#8a4a24', 0.6), GREY = std('#9aa1ad', 0.35, { metalness: 0.4 });
+const surfZ = (sdf, x, y) => { let lo = 0, hi = 1.5; for (let k = 0; k < 30; k++) { const m = (lo + hi) / 2; if (sdf(V(x, y, m)) < 0) lo = m; else hi = m; } return lo; };
+const headSdf = (p) => smin(sdE(p, [0, 0.62, 0], [0.5, 0.5, 0.46]), sdE(p, [0.55, 0.44, 0], [0.56, 0.42, 0.44]), 0.3);
+const bodySdf = (p) => smin(smin(sdE(p, [0, 0.5, 0], [0.32, 0.34, 0.3]), sdE(p, [0.04, 0.85, 0], [0.2, 0.3, 0.2]), 0.2), sdE(p, [0.06, 1.12, 0], [0.11, 0.2, 0.11]), 0.1);
+const SOL = 0.03;                                   // his ink line
+const WHITE = std('#ffffff'), INKM = std(INK), SUIT = std('#ec8a2c'), SUITD = std('#c96d1d'), LEATHER = std('#8c4a26'), GREY = std('#a3a7ad'), RED = std('#d9402f');
 const S = new THREE.Group(); HOUSE.add(S);
 const SB = new THREE.Group(); S.add(SB);
-part(SB, sdfGeo(bodySdf, V(0, 0.7, 0)), PAPER, SUIT, V());
-part(SB, cap(0.045, 0.14), PAPER, SUIT, V(-0.36, 0.6, 0), { rot: [0, 0, 0.8], ol: 0.009 });
-part(SB, new THREE.TorusGeometry(0.19, 0.045, 12, 40), PAPER, RED, V(0.02, 1.06, 0), { rot: [Math.PI / 2, 0.1, 0], ol: 0.008, only: '2d' });
-part(SB, ell(0.07, 0.07, 0.03), PAPER, SUITD, V(0.3, 0.75, 0.16), { ol: 0, only: '3d' }); // suit pocket
+part(SB, sdfGeo(bodySdf, V(0, 0.65, 0)), PAPER, SUIT, V(), { ol: SOL });
+part(SB, cap(0.04, 0.14), PAPER, SUIT, V(-0.31, 0.5, 0), { rot: [0, 0, 0.8], ol: SOL * 0.7 });
+part(SB, new THREE.TorusGeometry(0.115, 0.018, 8, 32), PAPER, SUIT, V(0.06, 1.07, 0), { rot: [Math.PI / 2, 0.15, 0], ol: SOL * 0.6, only: '2d' }); // the collar line
 const limb = (x, y, z, r, len, paw) => {
   const g = new THREE.Group(); g.position.set(x, y, z); SB.add(g);
-  part(g, cap(r, len), PAPER, SUIT, V(0, paw ? -0.15 : -0.1, 0));
-  const end = paw ? part(g, new THREE.SphereGeometry(0.088, 24, 16), PAPER, WHITE, V(0, -0.32, 0))
-    : part(g, ell(0.22, 0.1, 0.14), PAPER, SUITD, V(0.09, -0.24, 0));
+  part(g, cap(r, len), PAPER, SUIT, V(0, paw ? -0.17 : -0.08, 0), { ol: SOL * 0.8 });
+  const end = paw ? part(g, new THREE.SphereGeometry(0.085, 24, 16), PAPER, WHITE, V(0, -0.36, 0), { ol: SOL * 0.8 })
+    : part(g, ell(0.3, 0.12, 0.16), PAPER, SUIT, V(0.12, -0.17, 0), { ol: SOL });
   g.userData.end = end; return g;
 };
-const legL = limb(0.02, 0.34, -0.15, 0.1, 0.08), legR = limb(0.02, 0.34, 0.15, 0.1, 0.08);
-const armL = limb(0.06, 0.9, -0.27, 0.072, 0.2, true), armR = limb(0.06, 0.9, 0.27, 0.072, 0.2, true);
-const HG = new THREE.Group(); HG.position.set(0.02, 1.02, 0); SB.add(HG);
-part(HG, sdfGeo(headSdf, V(0.25, 0.4, 0)), PAPER, WHITE, V());
-part(HG, ell(0.1, 0.085, 0.12), INK, NOSE, V(1.0, 0.55, 0), { ol: 0 });
-const ears = [];
-const earGeo = (() => { const g = ell(0.18, 0.4, 0.065), P = g.attributes.position;
-  for (let i = 0; i < P.count; i++) { const y = P.getY(i), k = (0.4 - y) / 0.8; P.setX(i, P.getX(i) * (0.5 + 0.6 * k) - 0.05 * k); }
-  g.computeVertexNormals(); return g; })();
-const mouthPts = [[0.88, 0.25], [0.68, 0.2], [0.47, 0.2], [0.31, 0.25], [0.23, 0.33]];
+const legL = limb(0.02, 0.28, -0.14, 0.1, 0.06), legR = limb(0.02, 0.28, 0.14, 0.1, 0.06);
+const armL = limb(0.08, 0.98, -0.2, 0.06, 0.24, true), armR = limb(0.08, 0.98, 0.2, 0.06, 0.24, true);
+const HG = new THREE.Group(); HG.position.set(0.06, 1.12, 0); SB.add(HG);
+part(HG, sdfGeo(headSdf, V(0.3, 0.55, 0)), PAPER, WHITE, V(), { ol: SOL });
+part(HG, ell(0.085, 0.075, 0.11), INK, INKM, V(1.1, 0.53, 0), { ol: 0 });
+const ears = [], eyes = [];
+const earGeo = (k) => { const g = ell(0.2 * k, 0.36 * k, 0.05), P = g.attributes.position;
+  for (let i = 0; i < P.count; i++) { const y = P.getY(i) / k, u = (0.36 - y) / 0.72; P.setX(i, P.getX(i) * (0.62 + 0.55 * u)); }
+  g.computeVertexNormals(); return g; };
+const EAR_W = earGeo(1), EAR_B = earGeo(0.78);
+const mouthPts = [[1.02, 0.25], [0.93, 0.19], [0.82, 0.2]];
 for (const s of [-1, 1]) {
-  part(HG, ell(0.03, 0.075, 0.03, 16), INK, NOSE, V(0.33, 0.61, s * (surfZ(headSdf, 0.33, 0.61) - 0.006)), { ol: 0 });
+  eyes.push(part(HG, ell(0.035, 0.085, 0.035, 16), INK, INKM, V(0.4, 0.76, s * (surfZ(headSdf, 0.4, 0.76) - 0.012)), { ol: 0 }));
   const curve = new THREE.CatmullRomCurve3(mouthPts.map(([x, y]) => V(x, y, s * (surfZ(headSdf, x, y) + 0.002))));
-  part(HG, new THREE.TubeGeometry(curve, 40, 0.012, 6), INK, NOSE, V(), { ol: 0 });
-  const e = new THREE.Group(); e.position.set(-0.12, 0.8, 0.2 * s); HG.add(e); e.userData.s = s;
-  part(e, earGeo, INK, BLACK, V(-0.02, -0.36, 0.22 * s), { ol: 0.008, only: '2d' });
+  part(HG, new THREE.TubeGeometry(curve, 20, 0.014, 6), INK, INKM, V(), { ol: 0 });
+  const e = new THREE.Group(); e.position.set(-0.3, 0.8, 0.27 * s); HG.add(e); e.userData.s = s;
+  part(e, EAR_W, PAPER, WHITE, V(-0.03, -0.32, 0.1 * s), { ol: SOL, only: '2d' });
+  part(e, EAR_B, INK, INKM, V(-0.03, -0.34, 0.14 * s), { ol: 0, only: '2d' });
   ears.push(e);
   // flying-ace kit: the cap's round ear piece and the goggles
-  part(HG, new THREE.CylinderGeometry(0.1, 0.1, 0.05, 28), PAPER, GREY, V(-0.14, 0.42, s * 0.44), { rot: [Math.PI / 2, 0, 0], ol: 0, only: '3d' });
-  part(HG, new THREE.TorusGeometry(0.085, 0.03, 12, 28), PAPER, GREY, V(0.12, 0.86, s * 0.14), { rot: [-Math.PI / 2 + 0.5, 0.6, 0], ol: 0, only: '3d' });
-  part(HG, ell(0.07, 0.07, 0.03), PAPER, std('#2a2f45', 0.1), V(0.12, 0.86, s * 0.14), { rot: [-Math.PI / 2 + 0.5, 0.6, 0], ol: 0, only: '3d' });
+  part(HG, new THREE.CylinderGeometry(0.13, 0.13, 0.06, 32), PAPER, GREY, V(-0.28, 0.55, s * 0.47), { rot: [Math.PI / 2, 0, 0], ol: SOL * 0.8, only: '3d' });
+  part(HG, new THREE.TorusGeometry(0.1, 0.035, 12, 28), PAPER, GREY, V(0.02, 1.1, s * 0.16), { rot: [-Math.PI / 2 + 0.35, 0.45, 0], ol: SOL * 0.7, only: '3d' });
+  part(HG, ell(0.085, 0.085, 0.03), PAPER, INKM, V(0.02, 1.1, s * 0.16), { rot: [-Math.PI / 2 + 0.35, 0.45, 0], ol: 0, only: '3d' });
 }
-part(HG, ell(0.45, 0.44, 0.43, 48), PAPER, LEATHER, V(-0.14, 0.5, 0), { ol: 0, only: '3d' }); // leather cap
-part(HG, new THREE.TorusGeometry(0.3, 0.045, 12, 40).scale(1.35, 1, 1), PAPER, GREY, V(0.27, -0.12, 0), { rot: [Math.PI / 2, 0, 0], ol: 0, only: '3d' });
-const glass = std('#d8ecff', 0.05, { transparent: true, opacity: 0.2, depthWrite: false });
-part(HG, ell(0.9, 0.68, 0.62, 48), PAPER, glass, V(0.27, 0.44, 0), { ol: 0, only: '3d', cast: false, order: 5 });
+part(HG, ell(0.5, 0.5, 0.48, 48), PAPER, LEATHER, V(-0.17, 0.66, 0), { ol: SOL, only: '3d' }); // leather cap
+part(HG, new THREE.TorusGeometry(0.32, 0.05, 12, 40).scale(1.3, 1, 1), PAPER, std('#e9e4dc'), V(0.25, -0.06, 0), { rot: [Math.PI / 2, 0, 0], ol: SOL * 0.7, only: '3d' });
+// glass: clear in the middle, an ink line at the rim (a solid outline shell would show through)
+const glass = new THREE.ShaderMaterial({ transparent: true, depthWrite: false,
+  vertexShader: 'varying vec3 vN, vV; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }',
+  fragmentShader: `varying vec3 vN, vV; void main(){ float d = abs(dot(normalize(vN), normalize(vV)));
+    float rim = 1. - smoothstep(.13, .2, d); vec3 c = mix(vec3(1.), vec3(.0078), rim);
+    float a = mix(.16 + .1*smoothstep(.6,.2,d), 1., rim); if (gl_FrontFacing == false) a *= rim; gl_FragColor = vec4(c, a); }`, side: THREE.DoubleSide });
+part(HG, ell(0.95, 0.74, 0.7, 64), PAPER, glass, V(0.26, 0.6, 0), { ol: 0, only: '3d', cast: false, order: 5 });
 // the red scarf, streaming back from the neck
 const scarves = [0.03, -0.04].map((dz, i) => {
-  const geo = new THREE.PlaneGeometry(1, 0.13, 24, 1).translate(-0.5, 0, 0);
-  const m = part(SB, geo, PAPER, std('#e0342e', 0.6, { side: THREE.DoubleSide }), V(-0.12, 1.07 - i * 0.05, dz), { ol: 0, only: '3d' });
+  const geo = new THREE.PlaneGeometry(1.1, 0.14, 24, 1).translate(-0.55, 0, 0);
+  const m = part(SB, geo, PAPER, std('#d9402f', 0, { side: THREE.DoubleSide }), V(-0.06, 1.1 - i * 0.06, dz), { ol: 0, only: '3d' });
   m.userData.base = Float32Array.from(geo.attributes.position.array); m.userData.k = i; return m;
 });
-const dash = part(S, new THREE.CircleGeometry(0.42, 32).scale(1.1, 0.12, 1), INK, flat, V(0, 0.004, 0), { ol: 0, rot: [-Math.PI / 2, 0, 0], only: '2d' });
+const dash = part(S, new THREE.CircleGeometry(0.42, 32).scale(1.2, 0.12, 1), INK, flat, V(0, 0.004, 0), { ol: 0, rot: [-Math.PI / 2, 0, 0], only: '2d' });
 
-// ---------- the bird ----------
-const YEL = std('#ffd21f', 0.5), ORA = std('#ff9a1f', 0.45);
+// ---------- the bird: a big round head, a beak, a tuft, a little body ----------
+const YEL = std('#ffd21f'), ORA = std('#f2a01c');
 const B = new THREE.Group(); scene.add(B);
 const BB = new THREE.Group(); B.add(BB);
-const bo = 0.009;
-part(BB, ell(0.14, 0.15, 0.125), PAPER, YEL, V(0, 0, 0), { ol: bo });
-part(BB, new THREE.SphereGeometry(0.12, 24, 16), PAPER, YEL, V(0.06, 0.19, 0), { ol: bo });
-part(BB, new THREE.ConeGeometry(0.035, 0.1, 12), PAPER, ORA, V(0.2, 0.18, 0), { rot: [0, 0, -Math.PI / 2], ol: 0.006 });
-part(BB, ell(0.06, 0.03, 0.07), PAPER, YEL, V(-0.15, -0.02, 0), { rot: [0, 0, 0.5], ol: bo });
-for (const [a, l] of [[-0.35, 0.09], [0, 0.11], [0.35, 0.08]]) part(BB, cap(0.012, l), INK, ORA, V(0.04 + Math.sin(a) * 0.05, 0.34, 0), { rot: [0, 0, a - 0.2], ol: 0 });
+const bo = 0.016;
+part(BB, ell(0.085, 0.12, 0.08), PAPER, YEL, V(0, 0, 0), { ol: bo });
+part(BB, new THREE.SphereGeometry(0.135, 28, 20), PAPER, YEL, V(0.03, 0.19, 0), { ol: bo });
+part(BB, new THREE.ConeGeometry(0.04, 0.12, 12).rotateZ(-Math.PI / 2), PAPER, YEL, V(0.2, 0.17, 0), { rot: [0, 0, -0.25], ol: bo * 0.8 });
+part(BB, ell(0.07, 0.025, 0.05), PAPER, YEL, V(-0.1, -0.08, 0), { rot: [0, 0, 0.4], ol: bo });
+for (const [a, l] of [[-0.5, 0.11], [-0.15, 0.13], [0.2, 0.1]]) part(BB, cap(0.01, l), INK, INKM, V(-0.02 + Math.sin(a) * 0.04, 0.36, 0), { rot: [0, 0, a + 0.5], ol: 0 });
 for (const s of [-1, 1]) {
-  part(BB, ell(0.012, 0.03, 0.012, 12), INK, NOSE, V(0.13, 0.22, 0.075 * s), { rot: [0, 0, -0.4], ol: 0 });
-  part(BB, cap(0.01, 0.07), INK, ORA, V(0.0, -0.18, 0.05 * s), { ol: 0 });
+  part(BB, ell(0.012, 0.035, 0.012, 12), INK, INKM, V(0.1, 0.22, 0.1 * s), { ol: 0 });
+  part(BB, cap(0.012, 0.08), PAPER, ORA, V(0.0, -0.15, 0.04 * s), { ol: bo * 0.6 });
 }
-part(BB, new THREE.SphereGeometry(0.25, 32, 20), PAPER, glass, V(0.06, 0.19, 0), { ol: 0, only: '3d', cast: false, order: 6 });
+part(BB, new THREE.SphereGeometry(0.26, 40, 28), PAPER, glass, V(0.05, 0.19, 0), { ol: 0, only: '3d', cast: false, order: 6 });
 const wings = [-1, 1].map((s) => {
-  const g = new THREE.Group(); g.position.set(-0.01, 0.04, 0.1 * s); g.userData.s = s; BB.add(g);
-  part(g, ell(0.08, 0.022, 0.15), PAPER, YEL, V(-0.02, 0, 0.13 * s), { ol: 0.007 }); return g;
+  const g = new THREE.Group(); g.position.set(-0.01, 0.03, 0.07 * s); g.userData.s = s; BB.add(g);
+  part(g, ell(0.07, 0.02, 0.13), PAPER, YEL, V(-0.02, 0, 0.11 * s), { ol: bo * 0.8 }); return g;
 });
 
 // ---------- the toggle: placed where the paw is at the top of the big jump ----------
@@ -233,7 +223,7 @@ const pill = part(TOG, cap(0.33, 0.66).rotateZ(Math.PI / 2).scale(1, 1, 0.3), ne
 const knob = part(TOG, new THREE.SphereGeometry(0.29, 32, 24).scale(1, 1, 0.45), PAPER, std('#ffffff', 0.3), V(0, 0, 0.09), { ol: 0.012 });
 
 // ---------- confetti and the puff the bird pops out of (3D only) ----------
-const NC = 110, conf = new THREE.InstancedMesh(new THREE.BoxGeometry(0.075, 0.005, 0.045), std('#ffffff', 0.5, { side: THREE.DoubleSide }), NC);
+const NC = 0, conf = new THREE.InstancedMesh(new THREE.BoxGeometry(0.075, 0.005, 0.045), std('#ffffff', 0.5, { side: THREE.DoubleSide }), NC);
 conf.userData.only3d = true; scene.add(conf);
 const PAL = ['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93', '#ff8fab', '#ffffff'].map((c) => new THREE.Color(c));
 const confData = [...Array(NC)].map((_, i) => {
@@ -247,7 +237,7 @@ const puffs = [...Array(8)].map((_, i) => {
 
 // ---------- the choreography (timed to the song of the original reel: silent 1.9–4 s, drops at 4.3 s) ----------
 const DUR = 9.6, TAP = 4.3, HOUSE_Z = -0.05;
-const XS = -2.9, XT = -0.4, ZW = 1.3;               // walk in along z = ZW, in front of the house, to x = XT
+const XS = -3.2, XT = -0.45, ZW = 1.4;               // walk in along z = ZW, in front of the house, to x = XT
 const roofY = (z) => RIDGE - SLOPE * Math.abs(z);
 function walkCycle(P, d, amp, rate = 0.7) {
   const ph = TAU * d / rate, s = Math.sin(ph);
@@ -257,7 +247,7 @@ function walkCycle(P, d, amp, rate = 0.7) {
   P.ear = 0.15 * Math.sin(2 * ph - 1) * amp; P.lean = -0.06 * amp;
 }
 function snoopy(t) {
-  const P = { x: XT, y: 0, z: ZW, ry: 0, lean: 0, roll: 0, sq: 1, headZ: 0, headX: 0, headY: 0, armLz: 0.12, armLx: 0, armRz: 0.12, armRx: 0, armRs: 1, legL: 0, legR: 0, ear: 0, bob: 0, earUp: 0.1 };
+  const P = { x: XT, y: 0, z: ZW, ry: 0, lean: 0, roll: 0, sq: 1, headZ: 0, headX: 0, headY: 0, armLz: 0.12, armLx: 0, armRz: 0.12, armRx: 0, armRs: 1, legL: 0, legR: 0, ear: 0, bob: 0, earUp: 0.1, eye: 1 };
   // walk in (constant pace, easing to a stop at 1.9 s)
   if (t < 1.95) {
     const a = 0.7, v = 2 / (1 + a), u = clamp(t / 1.9);
@@ -268,7 +258,7 @@ function snoopy(t) {
   P.ry = Math.PI / 2 * ss(1.9, 2.15, t);
   P.headZ += 0.45 * ss(1.95, 2.2, t) * (1 - ss(2.38, 2.5, t));
   // jump and grab the edge of the roof (on the click at 2.65 s), dangle and kick
-  const zg = EAVE_Z + 0.19, yg = EAVE + 0.02 - 1.22;
+  const zg = EAVE_Z + 0.22, yg = EAVE + 0.02 - 1.31;
   if (t >= 2.3 && t < 2.65) { const p = (t - 2.3) / 0.35; P.z = lerp(ZW, zg, p); P.y = lerp(0, yg, p) + 0.25 * Math.sin(Math.PI * p); }
   const up = ss(2.3, 2.5, t) * (1 - ss(3.32, 3.45, t));
   P.armLz = lerp(P.armLz, 2.75, up); P.armRz = lerp(P.armRz, 2.75, up);
@@ -303,11 +293,12 @@ function snoopy(t) {
   // sit on the ridge facing along it, and fly (and, in 2D at the end, just sit there and sigh)
   const sit = ss(4.75, 5.05, t);
   if (sit > 0) {
-    P.ry = lerp(P.ry, 0, sit); P.y = lerp(P.y, RIDGE - 0.22, sit); P.x = lerp(XT, XT - 0.1, sit);
+    P.ry = lerp(P.ry, 0, sit); P.y = lerp(P.y, RIDGE - 0.16, sit); P.x = lerp(XT, XT - 0.1, sit);
     P.legL = lerp(P.legL, 1.45, sit); P.legR = lerp(P.legR, 1.45, sit); P.lean = lerp(P.lean, 0.12, sit);
     P.armLz = lerp(P.armLz, 1.1, sit); P.armRz = lerp(P.armRz, 1.1, sit);
     const fly = ss(5.0, 5.4, t) * (1 - ss(8.3, 8.6, t));
     P.headZ += 0.18 * fly + 0.05 * Math.sin(TAU * t / 1.6) * fly; P.armLz += 0.15 * Math.sin(TAU * t) * fly; P.armRz -= 0.15 * Math.sin(TAU * t) * fly;
+    P.eye = 1 - 0.8 * ss(8.95, 9.15, t); // eyes close: a sigh
     P.sq -= 0.05 * ss(8.9, 9.3, t); P.headZ -= 0.28 * ss(8.9, 9.3, t); P.lean += 0.05 * ss(8.9, 9.3, t); // sigh
   }
   return P;
@@ -319,6 +310,7 @@ function applySnoopy(P) {
   armL.rotation.set(P.armLx, 0, P.armLz, 'XZY'); armR.rotation.set(P.armRx, 0, P.armRz, 'XZY');
   armR.scale.set(1, P.armRs, 1); armR.userData.end.scale.set(1, 1 / P.armRs, 1);
   HG.rotation.set(P.headX, P.headY, P.headZ, 'YXZ');
+  for (const e of eyes) e.scale.y = P.eye;
   for (const e of ears) e.rotation.set(-e.userData.s * P.earUp, 0, P.ear - 0.05);
   dash.userData.vis = P.y < 0.3; dash.scale.setScalar(1 - clamp(P.y / 0.3)); dash.position.y = 0.004 - P.y;
 }
@@ -337,14 +329,14 @@ const toggleOn = (t) => ss(TAP, TAP + 0.12, t) - ss(8.5, 8.6, t);
 
 const housePt = (t, p) => { house(t); HOUSE.updateMatrixWorld(true); return HOUSE.localToWorld(p.clone()); };
 function birdPos(t) {
-  const c = housePt(Math.min(t, 8.6), V(XT, RIDGE + 1.1, 0));
+  const c = housePt(Math.min(t, 8.6), V(XT + 0.3, RIDGE + 1.5, 0));
   const a = TAU * (t - 4.6) / 2.2 - 0.6;
-  const orbit = V(c.x + 1.35 * Math.cos(a), c.y + 0.35 * Math.sin(2 * a), c.z + 1.35 * Math.sin(a));
+  const orbit = V(c.x + 1.7 * Math.cos(a), c.y + 0.4 * Math.sin(2 * a), c.z + 1.7 * Math.sin(a));
   let p = KNOB_ON.clone().add(V(0, 0.15, 0.25)).lerp(orbit, ss(4.6, 5.4, t));
   const perch = KNOB_ON.clone().add(V(-0.02, 0.33, 0.12));
   p.lerp(perch, ss(7.6, 8.32, t));
   if (t > 8.36 && t < 8.62) p.add(V(-0.06, -0.08, -0.06).multiplyScalar(Math.sin(clamp((t - 8.38) / 0.22) * Math.PI)));
-  const mid = V((perch.x + XT + 0.75) / 2, RIDGE + 1.0, 0.2), land = V(XT + 0.75, RIDGE + 0.25, HOUSE_Z);
+  const mid = V((perch.x + XT + 0.75) / 2, RIDGE + 1.0, 0.2), land = V(XT + 1.05, RIDGE + 0.22, HOUSE_Z);
   const k = ss(8.66, 9.35, t); if (k > 0) { const a1 = perch.clone().lerp(mid, k), a2 = mid.clone().lerp(land, k); p = a1.lerp(a2, k); }
   return p;
 }
@@ -388,8 +380,7 @@ function pose(t) {
   }
   conf.instanceMatrix.needsUpdate = true;
   for (let i = 0; i < NS; i++) { const [x, y, z, sp] = starBase[i], tt = Math.max(0, t - 4.3);
-    starPos[i * 3] = ((x - sp * tt * (0.3 + lift)) % 30 + 45) % 30 - 15; starPos[i * 3 + 1] = y; starPos[i * 3 + 2] = z; }
-  starGeo.attributes.position.needsUpdate = true;
+    stars[i].position.set(((x - sp * tt * (0.3 + lift)) % 30 + 45) % 30 - 15, y, z); }
   const pt = (t - 4.57) / 0.5;
   for (const m of puffs) {
     m.userData.vis = pt > 0 && pt < 1;
@@ -397,16 +388,15 @@ function pose(t) {
   }
   // camera: flat and frontal for the 2D parts, swings round the flying house in 3D
   const u = ioc((t - 4.95) / 1.2) * (1 - ioc((t - 7.05) / 1.25));
-  const tf = V(0.15, 2.85, 0), pf = V(0.15, 2.85, 15.4);
-  const th = 0.55 + 0.3 * Math.sin((t - 4.95) * 0.7), to = HOUSE.position.clone().add(V(-0.2, 2.1, 0));
-  const po = to.clone().add(V(12.5 * Math.sin(th), 1.8, 12.5 * Math.cos(th)));
+  const tf = V(0.1, 3.3, 0), pf = V(0.1, 3.3, 18.0);
+  const th = 0.22 + 0.32 * Math.sin((t - 4.95) * 0.75), to = HOUSE.position.clone().add(V(-0.1, 2.6, 0));
+  const po = to.clone().add(V(13.5 * Math.sin(th), 1.0, 13.5 * Math.cos(th)));
   cam.position.lerpVectors(pf, po, u); cam.fov = lerp(22, 32, u); cam.updateProjectionMatrix();
   cam.lookAt(tf.lerp(to, u));
 }
 function setPass(p) {
   scene.traverse((o) => {
     if (o.isMesh && o.userData.m3) o.material = p === 2 ? o.userData.m2 : o.userData.m3;
-    if (o.userData.ol) o.visible = p === 2;
     if (o.userData.only3d) o.visible = p === 3 && o.userData.vis !== false;
     if (o.userData.only2d) o.visible = p === 2 && o.userData.vis !== false;
   });
@@ -433,8 +423,8 @@ const comp = new THREE.ShaderMaterial({
     lum *= .955 + .045*h(floor(vUv*res*.5) + seed);
     lum *= 1. - .1*pow(length(vUv-.5)*1.3, 3.);
     c2 = vec3(lum)*vec3(1.,.99,.965);
-    vec3 c3 = srgb(tmap(texture2D(t3, vUv).rgb*0.95));
-    c3 = clamp(mix(vec3(dot(c3, vec3(.299,.587,.114))), c3, 1.15), 0., 1.);
+    vec3 c3 = srgb(clamp(texture2D(t3, vUv + boil*.5).rgb, 0., 1.));
+    c3 *= .97 + .03*h(floor(vUv*res*.5) + seed);
     vec3 col = mix(c2, c3, m3);
     float ring = (r > 0. && r < 1.04) ? exp(-pow((e-r)/.011, 2.)) : 0.;
     float a = atan(p.y, p.x);
@@ -451,7 +441,7 @@ window.frame = (t) => {
   const r = wipeR(t);
   if (r < 1.04) { pose(Math.floor(t * 12 + 1e-6) / 12); setPass(2); R.shadowMap.enabled = false; R.setRenderTarget(RT2); R.render(scene, cam); }
   pose(t);
-  if (r > 0) { setPass(3); R.shadowMap.enabled = true; R.setRenderTarget(RT3); R.render(scene, cam); }
+  if (r > 0) { setPass(3); R.setRenderTarget(RT3); R.render(scene, cam); }
   const kp = TOG.localToWorld(knob.position.clone()).project(cam);
   comp.uniforms.c.value.set(kp.x * 0.5 + 0.5, kp.y * 0.5 + 0.5);
   comp.uniforms.r.value = r; comp.uniforms.tm.value = t; comp.uniforms.seed.value = Math.floor(t * 8);

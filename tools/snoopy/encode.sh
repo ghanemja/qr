@@ -7,8 +7,8 @@
 set -euo pipefail
 if [ $# -ge 3 ]; then
   ffmpeg -y -v error -framerate 30 -i "$1/f%05d.png" -t 9.6 -i "$3" -map 0:v -map 1:a \
-    -c:v libx264 -preset slow -crf 17 -pix_fmt yuv420p -profile:v high -movflags +faststart \
+    -c:v libx264 -preset medium -crf 17 -pix_fmt yuv420p -profile:v high -movflags +faststart \
     -af "afade=t=in:d=0.03,afade=t=out:st=9.4:d=0.2" -c:a aac -b:a 192k -shortest "$2"
 else
-  ffmpeg -y -v error -framerate 30 -i "$1/f%05d.png" -c:v libx264 -preset slow -crf 17 -pix_fmt yuv420p -profile:v high -movflags +faststart "$2"
+  ffmpeg -y -v error -framerate 30 -i "$1/f%05d.png" -c:v libx264 -preset medium -crf 17 -pix_fmt yuv420p -profile:v high -movflags +faststart "$2"
 fi
