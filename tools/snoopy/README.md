@@ -1,6 +1,6 @@
 # Toggle trend: the beagle edition
 
-A 9.6 s vertical video (1080×1920, 30 fps) of the "flip the giant iOS switch" trend, timed beat for beat
+A 10.4 s vertical video (1080×1920, 30 fps) of the "flip the giant iOS switch" trend, timed beat for beat
 to the song of the original reel:
 
 - **0–1.9 s (intro):** in 2D black and white, the beagle walks up to his doghouse. The switch is high on
@@ -11,8 +11,9 @@ to the song of the original reel:
   astronaut flying-ace kit (leather cap and goggles, bubble helmet, red scarf, orange suit) and the red
   doghouse rockets through space past Saturn and the moon, while his little yellow bird, in its own
   bubble helmet, flies loops round him.
-- **8.5 s (the gap):** the bird pecks the switch off, the world goes flat again, and he's just sitting
-  on his doghouse with a sigh as the bird lands beside him.
+- **8.5 s (the gap):** the bird pecks the switch off and the world goes flat again. He glares up at
+  the bird, brows down and frowning, shakes his fist under an angry scribble; the bird bolts, and he
+  crosses his arms and fumes.
 
 Files:
 

@@ -138,14 +138,15 @@ function sdfGeo(sdf, c, seg = 112) {
   return g;
 }
 const surfZ = (sdf, x, y) => { let lo = 0, hi = 1.5; for (let k = 0; k < 30; k++) { const m = (lo + hi) / 2; if (sdf(V(x, y, m)) < 0) lo = m; else hi = m; } return lo; };
-const headSdf = (p) => smin(sdE(p, [0, 0.62, 0], [0.5, 0.5, 0.46]), sdE(p, [0.55, 0.44, 0], [0.56, 0.42, 0.44]), 0.3);
-const bodySdf = (p) => smin(smin(sdE(p, [0, 0.5, 0], [0.32, 0.34, 0.3]), sdE(p, [0.04, 0.85, 0], [0.2, 0.3, 0.2]), 0.2), sdE(p, [0.06, 1.12, 0], [0.11, 0.2, 0.11]), 0.1);
+const headSdf = (p) => smin(sdE(p, [0, 0.66, 0], [0.5, 0.55, 0.47]), sdE(p, [0.5, 0.46, 0], [0.52, 0.46, 0.45]), 0.28);
+// a narrow tube of a body under the big head, with a thin neck
+const bodySdf = (p) => smin(smin(sdE(p, [0, 0.44, 0], [0.22, 0.3, 0.2]), sdE(p, [0.05, 0.8, 0], [0.155, 0.32, 0.16]), 0.22), sdE(p, [0.08, 1.1, 0], [0.075, 0.2, 0.075]), 0.08);
 const SOL = 0.03;                                   // his ink line
 const WHITE = std('#ffffff'), INKM = std(INK), SUIT = std('#ec8a2c'), SUITD = std('#c96d1d'), LEATHER = std('#8c4a26'), GREY = std('#a3a7ad'), RED = std('#d9402f');
 const S = new THREE.Group(); HOUSE.add(S);
 const SB = new THREE.Group(); S.add(SB);
-part(SB, sdfGeo(bodySdf, V(0, 0.65, 0)), PAPER, SUIT, V(), { ol: SOL });
-part(SB, cap(0.04, 0.14), PAPER, SUIT, V(-0.31, 0.5, 0), { rot: [0, 0, 0.8], ol: SOL * 0.7 });
+part(SB, sdfGeo(bodySdf, V(0.02, 0.62, 0)), PAPER, SUIT, V(), { ol: SOL });
+part(SB, cap(0.035, 0.12), PAPER, SUIT, V(-0.25, 0.42, 0), { rot: [0, 0, 0.8], ol: SOL * 0.7 });
 part(SB, new THREE.TorusGeometry(0.115, 0.018, 8, 32), PAPER, SUIT, V(0.06, 1.07, 0), { rot: [Math.PI / 2, 0.15, 0], ol: SOL * 0.6, only: '2d' }); // the collar line
 const limb = (x, y, z, r, len, paw) => {
   const g = new THREE.Group(); g.position.set(x, y, z); SB.add(g);
@@ -154,24 +155,30 @@ const limb = (x, y, z, r, len, paw) => {
     : part(g, ell(0.3, 0.12, 0.16), PAPER, SUIT, V(0.12, -0.17, 0), { ol: SOL });
   g.userData.end = end; return g;
 };
-const legL = limb(0.02, 0.28, -0.14, 0.1, 0.06), legR = limb(0.02, 0.28, 0.14, 0.1, 0.06);
-const armL = limb(0.08, 0.98, -0.2, 0.06, 0.24, true), armR = limb(0.08, 0.98, 0.2, 0.06, 0.24, true);
-const HG = new THREE.Group(); HG.position.set(0.06, 1.12, 0); SB.add(HG);
+const legL = limb(0.02, 0.28, -0.12, 0.09, 0.06), legR = limb(0.02, 0.28, 0.12, 0.09, 0.06);
+const armL = limb(0.14, 0.93, -0.18, 0.055, 0.26, true), armR = limb(0.14, 0.93, 0.18, 0.055, 0.26, true); // in front of the chest, not inside it
+const HG = new THREE.Group(); HG.position.set(0.08, 1.12, 0); HG.scale.setScalar(1.15); SB.add(HG);
 part(HG, sdfGeo(headSdf, V(0.3, 0.55, 0)), PAPER, WHITE, V(), { ol: SOL });
-part(HG, ell(0.085, 0.075, 0.11), INK, INKM, V(1.1, 0.53, 0), { ol: 0 });
+part(HG, ell(0.085, 0.075, 0.11), INK, INKM, V(1.0, 0.62, 0), { rot: [0, 0, -0.5], ol: 0 });
 const ears = [], eyes = [];
-const earGeo = (k) => { const g = ell(0.2 * k, 0.36 * k, 0.05), P = g.attributes.position;
-  for (let i = 0; i < P.count; i++) { const y = P.getY(i) / k, u = (0.36 - y) / 0.72; P.setX(i, P.getX(i) * (0.62 + 0.55 * u)); }
+// the ear: a long narrow teardrop, black inside a thin white rim
+const earGeo = (k) => { const g = ell(0.13 * k, 0.36 * k, 0.05), P = g.attributes.position;
+  for (let i = 0; i < P.count; i++) { const y = P.getY(i) / k, u = (0.37 - y) / 0.74; P.setX(i, P.getX(i) * (0.55 + 0.6 * u)); }
   g.computeVertexNormals(); return g; };
-const EAR_W = earGeo(1), EAR_B = earGeo(0.78);
-const mouthPts = [[1.02, 0.25], [0.93, 0.19], [0.82, 0.2]];
+const EAR_W = earGeo(1), EAR_B = earGeo(0.9);
+const mouthPts = [[0.95, 0.22], [0.86, 0.16], [0.75, 0.17]], frownPts = [[0.96, 0.16], [0.87, 0.21], [0.76, 0.17]];
+const smiles = [], frowns = [], brows = [];
 for (const s of [-1, 1]) {
   eyes.push(part(HG, ell(0.035, 0.085, 0.035, 16), INK, INKM, V(0.4, 0.76, s * (surfZ(headSdf, 0.4, 0.76) - 0.012)), { ol: 0 }));
   const curve = new THREE.CatmullRomCurve3(mouthPts.map(([x, y]) => V(x, y, s * (surfZ(headSdf, x, y) + 0.002))));
-  part(HG, new THREE.TubeGeometry(curve, 20, 0.014, 6), INK, INKM, V(), { ol: 0 });
-  const e = new THREE.Group(); e.position.set(-0.3, 0.8, 0.27 * s); HG.add(e); e.userData.s = s;
-  part(e, EAR_W, PAPER, WHITE, V(-0.03, -0.32, 0.1 * s), { ol: SOL, only: '2d' });
-  part(e, EAR_B, INK, INKM, V(-0.03, -0.34, 0.14 * s), { ol: 0, only: '2d' });
+  smiles.push(part(HG, new THREE.TubeGeometry(curve, 20, 0.014, 6), INK, INKM, V(), { ol: 0 }));
+  const fc = new THREE.CatmullRomCurve3(frownPts.map(([x, y]) => V(x, y, s * (surfZ(headSdf, x, y) + 0.002))));
+  frowns.push(part(HG, new THREE.TubeGeometry(fc, 20, 0.016, 6), INK, INKM, V(), { ol: 0 }));
+  // angry brows: a heavy line slanting down to the muzzle (shown only when he's mad)
+  brows.push(part(HG, cap(0.022, 0.2), INK, INKM, V(0.4, 0.93, s * (surfZ(headSdf, 0.4, 0.93) + 0.004)), { rot: [0, 0, -2.0], ol: 0 }));
+  const e = new THREE.Group(); e.position.set(-0.17, 1.0, 0.3 * s); HG.add(e); e.userData.s = s;
+  part(e, EAR_W, PAPER, WHITE, V(-0.03, -0.32, 0.15 * s), { ol: SOL * 0.75, only: '2d' });
+  part(e, EAR_B, INK, INKM, V(-0.03, -0.32, 0.19 * s), { ol: 0, only: '2d' });
   ears.push(e);
   // flying-ace kit: the cap's round ear piece and the goggles
   part(HG, new THREE.CylinderGeometry(0.13, 0.13, 0.06, 32), PAPER, GREY, V(-0.28, 0.55, s * 0.47), { rot: [Math.PI / 2, 0, 0], ol: SOL * 0.8, only: '3d' });
@@ -215,6 +222,16 @@ const wings = [-1, 1].map((s) => {
   part(g, ell(0.07, 0.02, 0.13), PAPER, YEL, V(-0.02, 0, 0.11 * s), { ol: bo * 0.8 }); return g;
 });
 
+// ---------- the angry scribble over his head (2D) ----------
+const scribTex = [0, 1, 2].map(() => canvasTex(512, 320, (g, w, h) => {
+  g.strokeStyle = INK; g.lineWidth = 7; g.lineCap = g.lineJoin = 'round'; g.beginPath();
+  let x = 70, y = h / 2; g.moveTo(x, y);
+  for (let i = 0; i < 46; i++) { const cx = 60 + rnd() * (w - 120), cy = 50 + rnd() * (h - 100); g.quadraticCurveTo(x + (rnd() - 0.5) * 200, y + (rnd() - 0.5) * 160, cx, cy); x = cx; y = cy; }
+  g.stroke();
+}));
+const scrib = new THREE.Sprite(new THREE.SpriteMaterial({ map: scribTex[0], transparent: true, depthTest: false }));
+scrib.scale.set(0.95, 0.6, 1); scrib.userData.only2d = true; scrib.renderOrder = 9; scene.add(scrib);
+
 // ---------- the toggle: placed where the paw is at the top of the big jump ----------
 const TOG = new THREE.Group(); scene.add(TOG);
 const PILL_OFF = new THREE.Color('#d1d1d6'), PILL_ON = new THREE.Color('#34c759');
@@ -236,7 +253,7 @@ const puffs = [...Array(8)].map((_, i) => {
 });
 
 // ---------- the choreography (timed to the song of the original reel: silent 1.9–4 s, drops at 4.3 s) ----------
-const DUR = 9.6, TAP = 4.3, HOUSE_Z = -0.05;
+const DUR = 10.4, TAP = 4.3, HOUSE_Z = -0.05;
 const XS = -3.2, XT = -0.45, ZW = 1.4;               // walk in along z = ZW, in front of the house, to x = XT
 const roofY = (z) => RIDGE - SLOPE * Math.abs(z);
 function walkCycle(P, d, amp, rate = 0.7) {
@@ -247,7 +264,7 @@ function walkCycle(P, d, amp, rate = 0.7) {
   P.ear = 0.15 * Math.sin(2 * ph - 1) * amp; P.lean = -0.06 * amp;
 }
 function snoopy(t) {
-  const P = { x: XT, y: 0, z: ZW, ry: 0, lean: 0, roll: 0, sq: 1, headZ: 0, headX: 0, headY: 0, armLz: 0.12, armLx: 0, armRz: 0.12, armRx: 0, armRs: 1, legL: 0, legR: 0, ear: 0, bob: 0, earUp: 0.1, eye: 1 };
+  const P = { x: XT, y: 0, z: ZW, ry: 0, lean: 0, roll: 0, sq: 1, headZ: 0, headX: 0, headY: 0, armLz: 0.12, armLx: 0, armRz: 0.12, armRx: 0, armRs: 1, legL: 0, legR: 0, ear: 0, bob: 0, earUp: 0.1, eye: 1, mad: 0, sit: 0 };
   // walk in (constant pace, easing to a stop at 1.9 s)
   if (t < 1.95) {
     const a = 0.7, v = 2 / (1 + a), u = clamp(t / 1.9);
@@ -293,13 +310,20 @@ function snoopy(t) {
   // sit on the ridge facing along it, and fly (and, in 2D at the end, just sit there and sigh)
   const sit = ss(4.75, 5.05, t);
   if (sit > 0) {
-    P.ry = lerp(P.ry, 0, sit); P.y = lerp(P.y, RIDGE - 0.16, sit); P.x = lerp(XT, XT - 0.1, sit);
-    P.legL = lerp(P.legL, 1.45, sit); P.legR = lerp(P.legR, 1.45, sit); P.lean = lerp(P.lean, 0.12, sit);
-    P.armLz = lerp(P.armLz, 1.1, sit); P.armRz = lerp(P.armRz, 1.1, sit);
+    P.sit = sit; P.ry = lerp(P.ry, 0, sit); P.y = lerp(P.y, RIDGE - 0.16, sit); P.x = lerp(XT, XT - 0.1, sit);
+    P.legL = lerp(P.legL, 1.95, sit); P.legR = lerp(P.legR, 1.95, sit); // knees up P.lean = lerp(P.lean, 0.12, sit);
+    const hold = ss(4.9, 5.2, t) * (1 - ss(8.3, 8.6, t)); // paws forward on the controls while flying, hanging in front otherwise
+    P.armLz = lerp(P.armLz, lerp(0.3, 1.1, hold), sit); P.armRz = lerp(P.armRz, lerp(0.3, 1.1, hold), sit);
     const fly = ss(5.0, 5.4, t) * (1 - ss(8.3, 8.6, t));
     P.headZ += 0.18 * fly + 0.05 * Math.sin(TAU * t / 1.6) * fly; P.armLz += 0.15 * Math.sin(TAU * t) * fly; P.armRz -= 0.15 * Math.sin(TAU * t) * fly;
-    P.eye = 1 - 0.8 * ss(8.95, 9.15, t); // eyes close: a sigh
-    P.sq -= 0.05 * ss(8.9, 9.3, t); P.headZ -= 0.28 * ss(8.9, 9.3, t); P.lean += 0.05 * ss(8.9, 9.3, t); // sigh
+    // the bird switched it off: glare up at him, shake a fist, then cross arms and fume
+    const glare = ss(8.62, 8.78, t) * (1 - ss(9.85, 10.05, t)), fume = ss(9.85, 10.05, t);
+    P.mad = t > 8.72 ? 1 : 0;
+    P.headZ += 0.55 * glare + 0.3 * fume; P.eye = 1 - 0.45 * P.mad - 0.5 * fume;
+    const shake = ss(8.82, 8.92, t) * (1 - ss(9.8, 9.95, t));
+    P.armRz = lerp(P.armRz, 1.45 + 0.4 * Math.sin(TAU * 7 * t), shake); P.armRx = lerp(P.armRx, -0.7, shake); P.lean += 0.035 * Math.sin(TAU * 9 * t) * shake;
+    P.armLz = lerp(P.armLz, 1.5, fume); P.armRz = lerp(P.armRz, 1.5, fume); P.armLx = 0.75 * fume; P.armRx = lerp(P.armRx, -0.75, fume);
+    P.sq += 0.04 * hump(8.72, 8.9, t);
   }
   return P;
 }
@@ -311,7 +335,11 @@ function applySnoopy(P) {
   armR.scale.set(1, P.armRs, 1); armR.userData.end.scale.set(1, 1 / P.armRs, 1);
   HG.rotation.set(P.headX, P.headY, P.headZ, 'YXZ');
   for (const e of eyes) e.scale.y = P.eye;
-  for (const e of ears) e.rotation.set(-e.userData.s * P.earUp, 0, P.ear - 0.05);
+  for (const m of brows) m.scale.setScalar(P.mad ? 1 : 1e-4);
+  for (const m of frowns) m.visible = !!P.mad; for (const m of smiles) m.visible = !P.mad;
+  for (const e of ears) e.rotation.set(-e.userData.s * P.earUp, 0, P.ear - 0.12 - 0.5 * P.headZ);
+  legL.position.x = legR.position.x = 0.02 + 0.3 * P.sit; legL.position.z = -0.12 - 0.05 * P.sit; legR.position.z = 0.12 + 0.05 * P.sit;
+  legL.userData.end.scale.setScalar(1 + 0.3 * P.sit); legR.userData.end.scale.setScalar(1 + 0.3 * P.sit);
   dash.userData.vis = P.y < 0.3; dash.scale.setScalar(1 - clamp(P.y / 0.3)); dash.position.y = 0.004 - P.y;
 }
 function house(t) {
@@ -336,8 +364,8 @@ function birdPos(t) {
   const perch = KNOB_ON.clone().add(V(-0.02, 0.33, 0.12));
   p.lerp(perch, ss(7.6, 8.32, t));
   if (t > 8.36 && t < 8.62) p.add(V(-0.06, -0.08, -0.06).multiplyScalar(Math.sin(clamp((t - 8.38) / 0.22) * Math.PI)));
-  const mid = V((perch.x + XT + 0.75) / 2, RIDGE + 1.0, 0.2), land = V(XT + 1.05, RIDGE + 0.22, HOUSE_Z);
-  const k = ss(8.66, 9.35, t); if (k > 0) { const a1 = perch.clone().lerp(mid, k), a2 = mid.clone().lerp(land, k); p = a1.lerp(a2, k); }
+  p.y += 0.22 * hump(9.12, 9.32, t); // startled
+  const k = ss(9.3, 10.1, t); if (k > 0) p = perch.clone().lerp(V(3.4, 8.2, 0.6), k * k); // and gone
   return p;
 }
 function bird(t) {
@@ -345,9 +373,9 @@ function bird(t) {
   const g = clamp((t - 4.6) / 0.35); B.scale.setScalar(g < 1 ? g * (1 + 0.35 * Math.sin(g * Math.PI)) : 1);
   const p = birdPos(t), q = birdPos(t + 0.03), d = q.clone().sub(p);
   B.position.copy(p);
-  const perch = ss(8.12, 8.32, t) * (1 - ss(8.62, 8.72, t)), landed = ss(9.3, 9.4, t);
+  const perch = ss(8.12, 8.32, t) * (1 - ss(9.28, 9.36, t)), landed = 0;
   let yaw = lerp(Math.atan2(-d.z, d.x), Math.PI / 2 + 0.3, perch);
-  if (t > 9.3) yaw = lerp(yaw, Math.PI - 0.5, landed);
+  if (t > 8.62 && t < 9.32) yaw = lerp(yaw, Math.PI - 0.2, ss(8.62, 8.72, t)); // looks at the dog
   B.rotation.set(0, yaw, clamp(d.y * 6, -0.5, 0.5) * (1 - perch) * (1 - landed));
   BB.rotation.z = -0.6 * Math.sin(clamp((t - 8.38) / 0.22) * Math.PI) * (t > 8.36 && t < 8.62 ? 1 : 0);
   const flap = Math.sin(TAU * 6 * t) * (1 - 0.7 * perch) * (1 - landed);
@@ -369,6 +397,8 @@ function pose(t) {
   pillM.color.copy(PILL_OFF).lerp(PILL_ON, on);
   pill.userData.m2.color.set(PAPER).lerp(new THREE.Color('#3c3c3c'), on);
   bird(t); house(t);
+  scrib.userData.vis = t > 8.86; scrib.material.map = scribTex[Math.floor(t * 8) % 3];
+  scrib.position.copy(HOUSE.localToWorld(V(XT - 0.55, RIDGE + 2.45, 0))).add(V(0.02 * Math.sin(t * 40), 0, 0.3));
   const tc = t - TAP - 0.03; // confetti from the switch, drifting in zero gravity
   for (let i = 0; i < NC; i++) {
     const c = confData[i], o = new THREE.Object3D();
