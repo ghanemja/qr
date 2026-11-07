@@ -34,5 +34,5 @@ export const any = (...keys) => keys.map((k) => `(${S[k]})`).join(' || ');
 const last = REEL ? 2 : SHORT ? 13 : 27, b0 = (last + 1) * 4 - 2;
 export const KICK = `${any('a', 'b', 'drop')} || (${S.build} && beat < ${b0})`, KICK_ROLL = `bar == ${last} && beat < ${b0 + 1.5}`, ROLL = `bar == ${last}`, ROLL2 = `bar >= ${last - 1} && bar < ${last + 1}`;
 // Moments in seconds: the first cut, the model shattering into pixels and rebuilding, the build, the drop, the end card.
-export const AT = REEL ? { first: 2, shatter: 6, rebuild: 12.5, build: 2, drop: 6, end: 16 } : SHORT ? { first: 2, shatter: 13, rebuild: 17.6, build: 22, drop: 28, end: 32 } : { first: 4, shatter: 25, rebuild: 29.6, build: 44, drop: 56, end: 64 };
+export const AT = REEL ? { first: 2, shatter: 6, rebuild: 12.5, build: 2, drop: 6, end: 16, clicks: [6, 12.5] } : SHORT ? { first: 2, shatter: 13, rebuild: 17.6, build: 22, drop: 28, end: 32 } : { first: 4, shatter: 25, rebuild: 29.6, build: 44, drop: 56, end: 64 };
 export const RISE = AT.drop - AT.build;

@@ -43,5 +43,10 @@ export function pixelFx() {
     track('whoosh', { name: 'Shatter', at: [AT.shatter - 0.35, AT.rebuild - 0.35], params: { rise: 0.35 }, gain: 0.4 }),
     track('pop', { name: 'Pixels', at: [...pops(AT.shatter, 3), ...pops(AT.rebuild, 2.1)], params: { hi: 1500, lo: 500 }, gain: 0.3, pan: 0.15 }),
     track('bell', { name: 'Scan chime', at: [AT.shatter + 3.4], note: 'E6', len: 1.2, params: { ratio: 3, decay: 2.5 }, gain: 0.12, echo: 0.15, lp: 5000 }),
+    // The reel's mouse clicks: a sharp tick as the button goes down, a softer one as it comes back up.
+    ...(AT.clicks ? [
+      { name: 'Click down', equation: '(0.7*noise() + 0.6*sin(TAU*2900*tau) + 0.4*sin(TAU*5200*tau)) * exp(-tau*420)', at: AT.clicks.map((c) => c - 0.06), len: 0.05, hp: 1200, gain: 1.5 },
+      { name: 'Click up', equation: '(0.6*noise() + 0.5*sin(TAU*3600*tau)) * exp(-tau*520)', at: AT.clicks.map((c) => c + 0.1), len: 0.04, hp: 1500, gain: 1.0 },
+    ] : []),
   ];
 }

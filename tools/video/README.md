@@ -43,7 +43,10 @@ Each company's close-ups are a recipe in `RECIPES` in `reel.html`; only Amazon h
 CUT=reel node ../equalizer/examples/render.mjs tools/video/songs/house.mjs /tmp/qrv/house-reel.wav
 STAGE=reel SLUG=amazon node tools/video/render.cjs /tmp/qrv/reel-stills stills 1.5,3,5,7,17.5
 STAGE=reel SLUG=amazon node tools/video/render.cjs /tmp/qrv/reel-amazon 30 3
-# no flash or zoom punch, so plain ffmpeg rather than encode.sh
-ffmpeg -framerate 30 -i /tmp/qrv/reel-amazon/f%05d.jpg -i /tmp/qrv/house-reel.wav -c:v libx264 -preset slow -crf 20 \
-  -pix_fmt yuv420p -c:a aac -b:a 192k -shortest -movflags +faststart media/reels/amazon-house.mp4
+# the title ("3D model → QR code", "Comment LINK for the site"; reel-title.html) as an overlay,
+# and no flash or zoom punch, so plain ffmpeg rather than encode.sh. The soundtrack has the clicks.
+node tools/video/title.cjs /tmp/qrv/title.png
+ffmpeg -framerate 30 -i /tmp/qrv/reel-amazon/f%05d.jpg -i /tmp/qrv/house-reel.wav -i /tmp/qrv/title.png \
+  -filter_complex "[0:v][2:v]overlay=0:0,format=yuv420p[v]" -map '[v]' -map 1:a -c:v libx264 -preset slow -crf 20 \
+  -c:a aac -b:a 192k -shortest -movflags +faststart media/reels/amazon-house.mp4
 ```
