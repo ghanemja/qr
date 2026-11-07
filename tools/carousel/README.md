@@ -1,9 +1,11 @@
 # The "hold the dots and swipe" carousel
 
 Ten 4:5 slides (1080×1350) for Instagram or LinkedIn. A torn sheet of paper rips open over QR Compass
-a little more on every slide, so holding the dots and scrubbing plays it like a flipbook. Slide 1 has
-the "Hold the dots and swipe!" hint, slides 4–9 show the headline in a scanner viewfinder, and slide 10
-ends on a real, scannable QR code to the site.
+a little more on every slide, so holding the dots and scrubbing plays it like a flipbook. The panel
+under the paper tells the story one beat a slide (`STORY` in `slides.html`): "I built the economy in
+3D" (repeated on 2–4 while the rip opens), 581 companies, 261 models that all move, now they're
+yours, free MIT GLBs, "Animated 3D model asset store", and "Comment for the link!". Slide 1 has the
+"Hold the dots and swipe!" hint.
 
 Finished files: `media/carousel/slide-01.jpg` … `slide-10.jpg`, plus `swipe-preview.mp4` (a quick
 flip through, like scrubbing the dots) and `contact-sheet.jpg`.
@@ -15,5 +17,5 @@ node tools/carousel/render.cjs /tmp/qrv/carousel/out                      # the 
 ```
 
 `slides.html` draws everything on a canvas: the paper texture, the shared tear line, how far each
-slide opens (`OPEN`), the viewfinder and the end card. Fonts: Archivo and Instrument Serif (Google
+slide opens (`OPEN`) and the viewfinder with its two lines of text. Fonts: Archivo and Instrument Serif (Google
 Fonts), Inter and JetBrains Mono.

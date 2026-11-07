@@ -7,12 +7,10 @@
 <html><head><meta charset="utf-8"><title>loading</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=Archivo:wdth,wght@62..125,800..900&display=swap">
 <style>html, body { margin: 0; background: #111; } canvas { display: block; }</style>
-<script src="/qr/assets/qrcode.js"></script>
 </head><body><canvas id="c" width="1080" height="1350"></canvas>
 <script>
 const W = 1080, H = 1350, N = 10;
 const BG = new URLSearchParams(location.search).get('bg') || '/tools/carousel/bg.jpg';
-const URL_ = 'https://ghanemja.github.io/qr/';
 const cv = document.getElementById('c'), ctx = cv.getContext('2d');
 
 // ---------- seeded randomness and 1D fractal noise ----------
@@ -84,12 +82,26 @@ function drawSheet(side, tf, tex) {
 
 // ---------- the picture under the paper ----------
 let bgImg;
+// The story, one beat per slide: the hook (2–4 repeat it while the rip opens), what it is, that it
+// moves, that it's yours, the asset store, and the ask.
+const STORY = [
+  ['I BUILT THE ECONOMY', 'in 3D.'],
+  ['I BUILT THE ECONOMY', 'in 3D.'],
+  ['I BUILT THE ECONOMY', 'in 3D.'],
+  ['I BUILT THE ECONOMY', 'in 3D.'],
+  ['581 COMPANIES', 'each its own world.'],
+  ['261 MODELS', 'and every one moves.'],
+  ['NOW THEY\u2019RE', 'all yours.'],
+  ['FREE \u00b7 MIT \u00b7 GLB', 'download & use them.'],
+  ['ANIMATED 3D MODEL', 'asset store'],
+  ['COMMENT', 'for the link!'],
+];
 function rr(g, x, y, w, h, r) { g.beginPath(); g.roundRect(x, y, w, h, r); }
 function hidden(n) {
   const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
   g.drawImage(bgImg, 0, 0, W, H);
   // the viewfinder: a dark glass panel over the city, like a phone camera about to scan
-  const P = n === N ? { x: 70, y: 380, w: 940, h: 470 } : { x: 150, y: 415, w: 780, h: 400 };
+  const P = { x: 150, y: 415, w: 780, h: 400 };
   g.save(); rr(g, P.x, P.y, P.w, P.h, 34); g.clip(); g.filter = 'blur(14px)'; g.drawImage(bgImg, 0, 0, W, H); g.filter = 'none';
   const pg = g.createLinearGradient(0, P.y, 0, P.y + P.h); pg.addColorStop(0, 'rgba(12,18,28,.80)'); pg.addColorStop(1, 'rgba(12,18,28,.70)'); g.fillStyle = pg; g.fillRect(P.x, P.y, P.w, P.h); g.restore();
   g.save(); rr(g, P.x, P.y, P.w, P.h, 34); g.strokeStyle = 'rgba(255,255,255,.18)'; g.lineWidth = 2; g.stroke(); g.restore();
@@ -98,33 +110,16 @@ function hidden(n) {
   for (const [cx, cy, sx, sy] of [[P.x + m, P.y + m, 1, 1], [P.x + P.w - m, P.y + m, -1, 1], [P.x + m, P.y + P.h - m, 1, -1], [P.x + P.w - m, P.y + P.h - m, -1, -1]]) {
     g.beginPath(); g.moveTo(cx, cy + sy * k); g.lineTo(cx, cy + sy * 10); g.quadraticCurveTo(cx, cy, cx + sx * 10, cy); g.lineTo(cx + sx * k, cy); g.stroke();
   }
-  // HUD
-  g.font = '600 24px "JetBrains Mono"'; g.textBaseline = 'middle';
-  g.fillStyle = '#ff4d4d'; g.beginPath(); g.arc(P.x + 108, P.y + 62, 8, 0, 7); g.fill();
-  g.fillStyle = 'rgba(255,255,255,.9)'; g.textAlign = 'left'; g.fillText('QR COMPASS', P.x + 128, P.y + 63);
-  g.textAlign = 'right'; g.fillText('581 WORLDS', P.x + P.w - 100, P.y + 63);
-  g.textAlign = 'center';
+  // two lines: heavy condensed caps over a glowing italic serif
+  g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#fff';
   const glow = (fn) => { g.save(); g.shadowColor = 'rgba(255,255,255,.75)'; g.shadowBlur = 34; fn(); g.shadowBlur = 12; fn(); g.restore(); fn(); };
-  if (n < N) {
-    g.fillStyle = '#fff'; g.font = '900 120px Archivo'; g.fontStretch = 'extra-condensed';
-    glow(() => g.fillText('THE ECONOMY,', W / 2, P.y + 172)); g.fontStretch = 'normal';
-    g.font = 'italic 138px "Instrument Serif"'; glow(() => g.fillText('built in 3D.', W / 2, P.y + 284));
-    g.font = '600 22px "JetBrains Mono"'; g.fillStyle = 'rgba(255,255,255,.7)'; g.fillText('MENU', P.x + P.w - 110, P.y + P.h - 46);
-    g.textAlign = 'left'; g.fillText('▶ 1:1', P.x + 92, P.y + P.h - 46);
-  } else {
-    // the end card: a real, scannable QR code to the site
-    const q = qrcode(0, 'M'); q.addData(URL_); q.make();
-    const cnt = q.getModuleCount(), qs = 290, cell = qs / (cnt + 8), qx = P.x + 84, qy = P.y + (P.h - qs) / 2 + 8;
-    g.fillStyle = '#fff'; rr(g, qx, qy, qs, qs, 18); g.fill(); g.fillStyle = '#17202c';
-    for (let r = 0; r < cnt; r++) for (let c = 0; c < cnt; c++) if (q.isDark(r, c)) g.fillRect(Math.round(qx + (c + 4) * cell), Math.round(qy + (r + 4) * cell), Math.ceil(cell), Math.ceil(cell));
-    const tx = qx + qs + 46;
-    g.textAlign = 'left'; g.fillStyle = '#fff';
-    g.font = '900 80px Archivo'; g.fontStretch = 'extra-condensed'; glow(() => g.fillText('EVERY COMPANY', tx, P.y + 160));
-    g.fontStretch = 'normal'; g.font = 'italic 100px "Instrument Serif"'; glow(() => g.fillText('is a QR code.', tx - 4, P.y + 250));
-    g.font = '500 30px Inter'; g.fillStyle = 'rgba(255,255,255,.88)';
-    g.fillText('Tap a model, it breaks into', tx, P.y + 322); g.fillText('pixels and lands as its code.', tx, P.y + 362);
-    g.font = '700 28px "JetBrains Mono"'; g.fillStyle = '#f0a46b'; g.fillText('ghanemja.github.io/qr', tx, P.y + 418);
-  }
+  const [top, sub] = STORY[n - 1];
+  let size = 120; g.font = `900 ${size}px Archivo`; g.fontStretch = 'extra-condensed';
+  while (g.measureText(top).width > P.w - 140) { size -= 2; g.font = `900 ${size}px Archivo`; g.fontStretch = 'extra-condensed'; }
+  glow(() => g.fillText(top, W / 2, P.y + 160));
+  g.fontStretch = 'normal'; let ss = 150; g.font = `italic ${ss}px "Instrument Serif"`;
+  while (g.measureText(sub).width > P.w - 110) { ss -= 2; g.font = `italic ${ss}px "Instrument Serif"`; }
+  glow(() => g.fillText(sub, W / 2, P.y + 272));
   return c;
 }
 
@@ -168,7 +163,7 @@ window.slide = (n) => {
 };
 (async () => {
   bgImg = new Image(); bgImg.src = BG; await bgImg.decode();
-  await Promise.all(['900 condensed 112px Archivo', '900 112px Archivo', 'italic 150px "Instrument Serif"', '600 24px "JetBrains Mono"', '400 38px Inter'].map((f) => document.fonts.load(f)));
+  await Promise.all(['900 condensed 112px Archivo', '900 112px Archivo', 'italic 150px "Instrument Serif"', '400 38px Inter'].map((f) => document.fonts.load(f)));
   window.slide(1); document.title = 'ready';
 })();
 </script></body></html>
