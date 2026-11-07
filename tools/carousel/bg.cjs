@@ -14,6 +14,11 @@ const times = (process.argv[3] || '59.3').split(',').map(Number);
     await p.evaluate((T) => window.frame(T), T);
     await p.evaluate(() => { for (const el of document.querySelectorAll('#cap,#act,#big,.card')) el.style.opacity = 0; });
     if (process.env.SHIFT) await p.evaluate(([dx, dy]) => window.shift(dx, dy), process.env.SHIFT.split(',').map(Number));
+    // FEATURE=slug@x,y[@t];… swaps those companies in for the grid model nearest each point (-1..1).
+    if (process.env.FEATURE) for (const f of process.env.FEATURE.split(';')) {
+      const [slug, at, t] = f.split('@'), [x, y] = at.split(',').map(Number);
+      await p.evaluate(([slug, x, y, t]) => window.feature(slug, x, y, t), [slug, x, y, t ? +t : 4.4]);
+    }
     await p.screenshot({ path: `${out}/bg-${T}.png` });
     console.log('bg', T);
   }

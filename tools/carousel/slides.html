@@ -3,7 +3,8 @@
 <!-- The "hold the dots and swipe" carousel: ten 4:5 slides where a torn sheet of paper rips open
      over QR Compass, a little more on every slide, so scrubbing the dots plays it like a flipbook.
      window.slide(n) draws slide n (1..10) on the canvas; render.cjs saves each one.
-     The picture under the paper (bg.jpg) comes from bg.cjs: SHIFT=0,-260 DSF=1.5, t = 60.5. -->
+     The picture under the paper (bg.jpg) comes from bg.cjs: SHIFT=0,-260 DSF=1.5,
+     FEATURE=walmart@-0.05,-0.6;starbucks@-0.46,0.21;wells-fargo@0.03,0.12, t = 60.5. -->
 <html><head><meta charset="utf-8"><title>loading</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@1&family=Archivo:wdth,wght@62..125,800..900&display=swap">
 <style>html, body { margin: 0; background: #111; } canvas { display: block; }</style>
@@ -101,25 +102,27 @@ function hidden(n) {
   const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
   g.drawImage(bgImg, 0, 0, W, H);
   // the viewfinder: a dark glass panel over the city, like a phone camera about to scan
-  const P = { x: 150, y: 415, w: 780, h: 400 };
-  g.save(); rr(g, P.x, P.y, P.w, P.h, 34); g.clip(); g.filter = 'blur(14px)'; g.drawImage(bgImg, 0, 0, W, H); g.filter = 'none';
+  // a small panel that widens only as much as a long italic line needs (it never drops below 62px)
+  const [top, sub] = STORY[n - 1];
+  g.font = 'italic 62px "Instrument Serif"'; const need = g.measureText(sub).width + 80;
+  const pw = Math.max(520, Math.min(860, need)), P = { x: (W - pw) / 2, y: 478, w: pw, h: 236 };
+  g.save(); rr(g, P.x, P.y, P.w, P.h, 24); g.clip(); g.filter = 'blur(14px)'; g.drawImage(bgImg, 0, 0, W, H); g.filter = 'none';
   const pg = g.createLinearGradient(0, P.y, 0, P.y + P.h); pg.addColorStop(0, 'rgba(12,18,28,.80)'); pg.addColorStop(1, 'rgba(12,18,28,.70)'); g.fillStyle = pg; g.fillRect(P.x, P.y, P.w, P.h); g.restore();
-  g.save(); rr(g, P.x, P.y, P.w, P.h, 34); g.strokeStyle = 'rgba(255,255,255,.18)'; g.lineWidth = 2; g.stroke(); g.restore();
+  g.save(); rr(g, P.x, P.y, P.w, P.h, 24); g.strokeStyle = 'rgba(255,255,255,.18)'; g.lineWidth = 2; g.stroke(); g.restore();
   // scan-frame corners
-  g.strokeStyle = '#fff'; g.lineWidth = 7; g.lineCap = 'round'; const k = 52, m = 30;
+  g.strokeStyle = '#fff'; g.lineWidth = 5; g.lineCap = 'round'; const k = 32, m = 20;
   for (const [cx, cy, sx, sy] of [[P.x + m, P.y + m, 1, 1], [P.x + P.w - m, P.y + m, -1, 1], [P.x + m, P.y + P.h - m, 1, -1], [P.x + P.w - m, P.y + P.h - m, -1, -1]]) {
     g.beginPath(); g.moveTo(cx, cy + sy * k); g.lineTo(cx, cy + sy * 10); g.quadraticCurveTo(cx, cy, cx + sx * 10, cy); g.lineTo(cx + sx * k, cy); g.stroke();
   }
   // two lines: heavy condensed caps over a glowing italic serif
   g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillStyle = '#fff';
-  const glow = (fn) => { g.save(); g.shadowColor = 'rgba(255,255,255,.75)'; g.shadowBlur = 34; fn(); g.shadowBlur = 12; fn(); g.restore(); fn(); };
-  const [top, sub] = STORY[n - 1];
-  let size = 120; g.font = `900 ${size}px Archivo`; g.fontStretch = 'extra-condensed';
-  while (g.measureText(top).width > P.w - 140) { size -= 2; g.font = `900 ${size}px Archivo`; g.fontStretch = 'extra-condensed'; }
-  glow(() => g.fillText(top, W / 2, P.y + 160));
-  g.fontStretch = 'normal'; let ss = 150; g.font = `italic ${ss}px "Instrument Serif"`;
-  while (g.measureText(sub).width > P.w - 110) { ss -= 2; g.font = `italic ${ss}px "Instrument Serif"`; }
-  glow(() => g.fillText(sub, W / 2, P.y + 272));
+  const glow = (fn) => { g.save(); g.shadowColor = 'rgba(255,255,255,.75)'; g.shadowBlur = 22; fn(); g.shadowBlur = 8; fn(); g.restore(); fn(); };
+  let size = 68; g.font = `900 ${size}px Archivo`; g.fontStretch = 'extra-condensed';
+  while (g.measureText(top).width > P.w - 100) { size -= 2; g.font = `900 ${size}px Archivo`; g.fontStretch = 'extra-condensed'; }
+  glow(() => g.fillText(top, W / 2, P.y + 90));
+  g.fontStretch = 'normal'; let ss = 84; g.font = `italic ${ss}px "Instrument Serif"`;
+  while (g.measureText(sub).width > P.w - 70) { ss -= 2; g.font = `italic ${ss}px "Instrument Serif"`; }
+  glow(() => g.fillText(sub, W / 2, P.y + 158));
   return c;
 }
 

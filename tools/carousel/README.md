@@ -13,7 +13,8 @@ flip through, like scrubbing the dots) and `contact-sheet.jpg`.
 
 ```sh
 # serve the repo as in tools/video/README.md (docs/ at /qr/, tools/ at /tools/, port 8124)
-SHIFT=0,-260 DSF=1.5 node tools/carousel/bg.cjs /tmp/qrv/carousel 60.5   # the picture (saved as bg.jpg)
+SHIFT=0,-260 DSF=1.5 FEATURE="walmart@-0.05,-0.6;starbucks@-0.46,0.21;wells-fargo@0.03,0.12" \
+  node tools/carousel/bg.cjs /tmp/qrv/carousel 60.5   # the picture (saved as bg.jpg)
 node tools/carousel/render.cjs /tmp/qrv/carousel/out                      # the ten slides as PNGs
 ```
 
