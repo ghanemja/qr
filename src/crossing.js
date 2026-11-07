@@ -14,7 +14,7 @@
   const COS = Math.cos(ROT), SIN = Math.sin(ROT);
   const STRIPE_H = 46, STRIPE_P = 84;
   const END_ZOOM = 1.8;        // the wide shot after the pull-back
-  const DOG = 1.25;            // Snoopy is drawn a bit larger than life, it's the star
+  const DOG = 1;               // extra scale for Snoopy (his own size is set by SNOOPY_K)
 
   // ---------- seeded randomness (so a shape jitters the same way within one boil frame) ----------
   const mulberry = (a) => () => {
@@ -239,52 +239,85 @@
     crayon(rng, wobblyEllipse(rng, 1.8, -28.6, 3.8, 2.4), p.hat || p.hair, { edge: 0.5 });
   }
 
-  // Snoopy in profile, facing right, walking upright on two feet: a small pear-shaped body,
-  // a big round head with a long bulbous snout, a black oval nose at its tip, one long black ear.
+  // Snoopy, standing in 3/4 view facing right. Shapes are SVG paths in a 801x1055 reference box
+  // (feet on y=940, centre of the feet at x=300); SNOOPY_K scales that box to world units.
+  const SNOOPY_K = 34 / 895;
+  const SN = {
+    head: new Path2D('M 300 380 C 220 300 230 150 330 80 C 370 55 430 45 480 65 C 505 75 515 90 512 110 C 515 160 530 195 580 210 C 660 225 740 260 772 320 C 795 370 780 440 735 470 C 690 495 620 498 585 478 C 540 460 490 455 470 460 C 440 440 380 420 300 380 Z'),
+    neck: new Path2D('M 330 390 L 478 452 L 432 548 L 352 540 Z'),
+    neckLines: ['M 300 377 C 340 395 355 430 355 530', 'M 476 458 C 455 485 440 515 432 545'].map((d) => new Path2D(d)),
+    body: new Path2D('M 352 540 C 280 575 190 620 168 700 C 155 770 195 820 240 830 L 238 895 L 385 895 L 390 838 C 450 820 490 770 482 700 C 476 640 450 590 432 548 Z'),
+    footL: new Path2D('M 245 880 C 160 882 90 900 85 930 C 85 948 200 945 300 940 C 305 920 300 895 290 880 Z'),
+    footR: new Path2D('M 330 882 C 325 900 325 925 330 942 C 420 948 510 950 518 930 C 515 900 450 885 380 880 Z'),
+    toesL: ['M 162 912 L 152 938', 'M 192 908 L 186 938'].map((d) => new Path2D(d)),
+    toesR: ['M 452 912 L 462 940', 'M 480 915 L 494 938'].map((d) => new Path2D(d)),
+    tongue: new Path2D('M 500 462 C 490 495 492 525 508 526 C 522 520 524 490 522 462 Z'),
+    bodyLines: ['M 215 650 C 185 690 180 750 195 785', 'M 430 595 C 455 640 470 720 450 795', 'M 325 840 C 318 870 316 885 316 892'].map((d) => new Path2D(d)),
+    face: ['M 505 85 Q 520 88 532 103', 'M 440 345 C 440 380 470 420 530 448 C 590 470 660 462 695 432', 'M 690 420 Q 702 432 690 448'].map((d) => new Path2D(d)),
+    collar: new Path2D('M 348 532 L 442 545'),
+  };
+  const SN_COLLAR = [(395 - 300) * SNOOPY_K, (538 - 940) * SNOOPY_K];
+  const SN_TOP = (50 - 940) * SNOOPY_K;
   function drawSnoopy(rng, ph, still) {
-    const sw = still ? 0 : Math.sin(ph), bob = still ? 0 : Math.abs(Math.cos(ph)) * 0.7;
-    const WH = '#fdfaf3', K = '#1f1d1c';
-    const white = (pts) => { crayon(rng, pts, WH, { dark: 'rgba(0,0,0,0.05)', light: 'rgba(0,0,0,0)', edge: 0.4 }); };
-    const foot = (dx) => {
-      const pts = wobblyEllipse(rng, 0.8 + dx, -1.3, 3.4, 1.5, 0, 0.05);
-      white(pts); outline(rng, pts, 0.8, K);
+    const sw = still ? 0 : Math.sin(ph), bob = still ? 0 : Math.abs(Math.sin(ph));
+    const K = '#1d1b1a', WH = '#fdfbf5';
+    ctx.scale(SNOOPY_K, SNOOPY_K);
+    ctx.translate(-300, -940);
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    const lw = 24;
+    // white shape with a little wax hatching inside, then a black outline drawn twice, each pass
+    // nudged a few units so the line boils like the rest of the drawing
+    const shape = (p, fill = WH) => {
+      ctx.fillStyle = fill; ctx.fill(p);
+      ctx.save(); ctx.clip(p);
+      ctx.strokeStyle = 'rgba(120,110,95,0.10)'; ctx.lineWidth = 9; ctx.beginPath();
+      for (let d = -200; d < 1100; d += 26) { const j = rng() * 10; ctx.moveTo(d + j, 1000); ctx.lineTo(d + 520 + j, 0); }
+      ctx.stroke(); ctx.restore();
     };
-    const y = -bob;
-    // far foot and far arm behind the body
-    foot(-sw * 2.4);
-    const farArm = [[-0.5, -10.6 + y], [1.5 + sw * 1.2, -7.8 + y], [2.7 + sw * 1.2, -8.6 + y], [1, -11.4 + y]];
-    white(farArm); outline(rng, farArm, 0.7, K);
-    // tail: a little stub at the back
-    const tail = [[-4.6, -6.6 + y], [-7.6, -9.4 + y], [-6.8, -10.4 + y], [-4.2, -8.4 + y]];
-    white(tail); outline(rng, tail, 0.7, K);
-    // pear-shaped body
-    const body = [[-1, -1.8 + y], [-4.6, -3 + y], [-5.4, -7 + y], [-3.6, -11.6 + y], [-0.6, -13.4 + y], [2.4, -12.4 + y], [3.4, -8.4 + y], [3.4, -3.6 + y], [1.6, -1.8 + y]];
-    const b = wobblyPoly(rng, body, 0.15);
-    white(b); outline(rng, b, 0.75, K);
-    foot(sw * 2.4);
-    // near arm swinging
-    const arm = [[1.4, -11.2 + y], [5 - sw * 1.2, -9.2 + y], [4.7 - sw * 1.2, -7.7 + y], [1.6, -9.2 + y]];
-    white(arm); outline(rng, arm, 0.75, K);
-    // red collar
-    crayonLine(rng, [[-2.9, -12 + y], [-0.4, -13.3 + y], [2.3, -12.6 + y]], '#d8322b', 1.5, 0.12);
-    // head: round skull plus a long rounded snout, read as one white shape
-    const hy = -19 + y;
-    const skull = wobblyEllipse(rng, -0.4, hy, 5.6, 5.6, 0, 0.03);
-    const snout = wobblyEllipse(rng, 6, hy + 0.6, 6.4, 4.3, -0.06, 0.03);
-    outline(rng, skull, 0.85, K); outline(rng, snout, 0.85, K);
-    white(skull); white(snout);
-    ctx.strokeStyle = K; ctx.lineWidth = 0.75; ctx.globalAlpha = 0.9;
-    ctx.beginPath(); ctx.arc(-0.4, hy, 5.6, 0.95, 5.05, false); ctx.stroke();               // back of the head
-    ctx.beginPath(); ctx.ellipse(6, hy + 0.6, 6.4, 4.3, -0.06, -1.95, 1.75); ctx.stroke();   // around the snout
-    ctx.globalAlpha = 1;
-    // black oval nose at the very tip
-    crayon(rng, wobblyEllipse(rng, 11.4, hy - 1.6, 1.9, 1.5, 0.3), K, { edge: 0.3 });
-    // eye: a small upright dash; a little smile under the snout
-    crayon(rng, wobblyEllipse(rng, 2.6, hy - 1.9, 0.55, 1.15), K, { edge: 0.2 });
-    crayonLine(rng, [[5.4, hy + 3.4], [7.6, hy + 4.1], [9.4, hy + 3.2]], K, 0.55, 0.08);
-    // one long black ear hanging from the top of the head
-    const ear = wobblyEllipse(rng, -0.9 - sw * 0.3, hy + 2.2, 1.85, 5.3, 0.12 + sw * 0.06, 0.05);
-    crayon(rng, ear, K, { light: 'rgba(255,255,255,0.1)', edge: 0.4 });
+    const line = (p, w = lw) => {
+      ctx.strokeStyle = K;
+      for (let pass = 0; pass < 2; pass++) {
+        ctx.save(); ctx.translate((rng() - 0.5) * 7, (rng() - 0.5) * 7);
+        ctx.lineWidth = pass ? w * 0.55 : w; ctx.globalAlpha = pass ? 0.55 : 0.95;
+        ctx.stroke(p); ctx.restore();
+      }
+      ctx.globalAlpha = 1;
+    };
+    const ell = (cx, cy, rx, ry, r, fill, stroke) => {
+      const p = new Path2D(); p.ellipse(cx + (rng() - 0.5) * 4, cy + (rng() - 0.5) * 4, rx, ry, r, 0, Math.PI * 2);
+      if (fill === WH) shape(p); else { ctx.fillStyle = fill; ctx.fill(p); }
+      if (stroke) line(p);
+    };
+    // feet step forward and back in turn and lift a little; the body bounces on each step
+    const foot = (p, toes, dx, lift) => {
+      ctx.save(); ctx.translate(dx, -lift);
+      shape(p); line(p); toes.forEach((t) => line(t, lw * 0.7));
+      ctx.restore();
+    };
+    foot(SN.footL, SN.toesL, -sw * 34, Math.max(0, sw) * 26);
+    ctx.save();
+    ctx.translate(0, -bob * 22);
+    ctx.translate(300, 900); ctx.rotate(sw * 0.035); ctx.translate(-300, -900);
+    shape(SN.body); line(SN.body);
+    SN.bodyLines.forEach((p) => line(p, lw * 0.85));
+    foot(SN.footR, SN.toesR, sw * 34 + 0, Math.max(0, -sw) * 26 - bob * 22);
+    // neck, collar, tongue, head
+    shape(SN.neck); SN.neckLines.forEach((p) => line(p));
+    ctx.fillStyle = '#f2a7a0'; ctx.fill(SN.tongue); line(SN.tongue, lw * 0.7);
+    line(SN.collar, 46);
+    ctx.save(); ctx.translate(410, 470); ctx.rotate(sw * 0.04); ctx.translate(-410, -470);
+    shape(SN.head); line(SN.head);
+    // the long black ear on the back of the head, swinging with the steps
+    ctx.save(); ctx.translate(250, 190); ctx.rotate(-sw * 0.08); ctx.translate(-250, -190);
+    ell(232, 345, 66, 166, 0.2, WH, true);
+    ell(238, 335, 44, 134, 0.2, K, false);
+    ctx.restore();
+    ell(435, 215, 12, 25, 0.12, K, false);
+    ell(492, 220, 12, 25, 0.12, K, false);
+    ell(640, 368, 52, 25, 0.05, K, false);
+    SN.face.forEach((p) => line(p, lw * 0.85));
+    ctx.restore();
+    ctx.restore();
   }
 
   function drawBird(rng, t) {
@@ -383,7 +416,7 @@
       return { a, sx, sy };
     }).filter((o) => o.sx > -60 * s && o.sx < W + 60 * s && o.sy > -40 * s && o.sy < H + 80 * s);
     // Snoopy's position relative to the walker: ahead (up the crossing) and to the right
-    const dogWorld = [star.x + 20, star.y - 14];
+    const dogWorld = [star.x + 22, star.y - 12];
     const [dsx, dsy] = toScreen(...dogWorld);
     const place = (sx, sy) => ctx.setTransform(dpr * s, 0, 0, dpr * s, dpr * sx, dpr * sy);
     // shadows first so nobody's shadow lands on top of someone else
@@ -391,7 +424,7 @@
       place(o.sx, o.sy);
       drawShadow(rngFor(o.a.id, 1), o.a.kind === 'bike' ? 14 : 8, o.a.kind === 'bike' ? 26 : 24);
     }
-    place(dsx, dsy); ctx.scale(DOG, DOG); drawShadow(rngFor(9, 1), 10, 20);
+    place(dsx, dsy); ctx.scale(DOG, DOG); drawShadow(rngFor(9, 1), 16, 22);
     items.push({ a: { kind: 'dog' }, sx: dsx, sy: dsy });
     items.sort((p, q) => p.sy - q.sy);
     for (const o of items) {
@@ -412,7 +445,7 @@
       const [wsx, wsy] = toScreen(star.x, star.y);
       const sw = star.sniff > 0 ? 0 : Math.sin(star.phase);
       const hx = wsx + 5.8 * s, hy = wsy + (-12 + sw * 1.6 * -1) * s;
-      const cx = dsx - 2.6 * DOG * s, cy = dsy - 12.2 * DOG * s;
+      const cx = dsx + SN_COLLAR[0] * DOG * s, cy = dsy + SN_COLLAR[1] * DOG * s;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       const rng = rngFor(9, 3);
       const pts = [];
@@ -424,7 +457,7 @@
     }
     // the little yellow bird looping over Snoopy
     {
-      const bx = dsx + (Math.cos(t * 1.4) * 15 + 6) * s, by = dsy + (-40 + Math.sin(t * 2.8) * 5) * s;
+      const bx = dsx + (Math.cos(t * 1.4) * 15 + 6) * s, by = dsy + (SN_TOP * DOG - 7 + Math.sin(t * 2.8) * 5) * s;
       place(bx, by + 30 * s); drawShadow(rngFor(11, 1), 3, 6);
       place(bx, by);
       if (Math.cos(t * 1.4 - Math.PI / 2) < 0) ctx.scale(-1, 1);
