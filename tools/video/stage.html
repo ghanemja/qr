@@ -129,6 +129,7 @@ function model(id, detail, look = { v: 0, base: 0, a: '#e5533d', b: '#2b5aa8' })
   return models.get(k);
 }
 function pose(m, t) {
+  m.tp = t;
   poseMovers(m.nodes, t);
   const b = motion(m.id, m.cp, t);
   m.g.position.set(b.x * m.h, b.y * m.h, b.z * m.h); m.g.rotation.set(b.rx, b.ry, b.rz); m.g.scale.set(b.sx, b.sy, b.sz);
@@ -288,5 +289,8 @@ window.feature = async (slug, sx, sy, t = 4.4) => {
   shown.delete(best); scene.remove(best.outer); fm.outer.position.copy(best.outer.position); scene.add(fm.outer); fm.featured = true; shown.add(fm); pose(fm, t);
   r.render(scene, cam);
 };
+// For the carousel's video: hold everything on screen where it is now, then play it on by dt seconds.
+window.freeze = () => { for (const m of shown) m.base = m.tp; };
+window.advance = (dt) => { for (const m of shown) pose(m, (m.base ?? m.tp) + dt); r.render(scene, cam); };
 document.title = 'ready';
 </script>

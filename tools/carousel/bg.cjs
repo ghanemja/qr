@@ -21,6 +21,19 @@ const times = (process.argv[3] || '59.3').split(',').map(Number);
     }
     await p.screenshot({ path: `${out}/bg-${T}.png` });
     console.log('bg', T);
+    // FRAMES=n: also film n frames of everything moving (FPS, default 30) as bg-<T>/b0000.jpg…
+    if (process.env.FRAMES) {
+      const dir = `${out}/bg-${T}`, fps = +(process.env.FPS || 30);
+      require('fs').mkdirSync(dir, { recursive: true });
+      await p.evaluate(() => window.freeze());
+      for (let i = 0; i < +process.env.FRAMES; i++) {
+        const f = `${dir}/b${String(i).padStart(4, '0')}.jpg`;
+        if (require('fs').existsSync(f)) continue;
+        await p.evaluate((dt) => window.advance(dt), i / fps);
+        await p.screenshot({ path: f, type: 'jpeg', quality: 92 });
+        if (i % 20 === 0) console.log('frame', i);
+      }
+    }
   }
   await b.close();
 })();
