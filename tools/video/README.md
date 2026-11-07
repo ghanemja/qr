@@ -31,16 +31,22 @@ ffmpeg -framerate 30 -i /tmp/qrv/frames/f%05d.jpg -i /tmp/qrv/house.wav \
 
 ## The thumb video (`thumb/`)
 
-A 20 s vertical (9:16, 1080×1920) take on the "put your thumb on the dot, feel the beat" trend. After
-the opening card there are no words. The viewer holds a thumb on the dot: pixels rain and bounce off
-it, the SpaceX booster lands on it, the Roadster jumps it, a scanner gets stuck on it, and then the
-Starbucks world breaks into pixels that whirl around it and slam into a real QR code on the drop. The
-dot sits on the code's lower right, and level-H error correction covers the thumb, so the code still
-scans with the thumb on it (checked with ZXing on the final frame, with a simulated thumb).
+A 16.3 s vertical (9:16, 1080×1920) take on the "slide your thumb up, feel the beat" trend, cut to
+the original reel's song (about 147.6 bpm; beat k falls at -0.04 + 0.4065k s, measured from the
+reel's audio, and it cuts every two bars like the reel). Only the opening card has words. Every
+swipe lands on a hit that launches something:
+- **Roadster:** off its ramp, then down on its wheels, twice.
+- **Rockets:** the SpaceX booster lifts off, then the launch-pad rocket climbs out of the frame.
+- **Build:** the Starbucks world is fired up into its QR code, one slice per beat.
+- **Finish:** the finished code bounces, with confetti, on the last swipes.
+
+The models' own clocks are driven off the beat (`pw()` keyframes in `thumb.html`). The video has no
+audio track: add the song where you post it (it starts with the video at 0 s). The last frame scans
+(checked with ZXing).
 
 ```sh
-node ../equalizer/examples/render.mjs tools/video/thumb/song.mjs /tmp/qrv/thumb.wav
-node tools/video/thumb/render.cjs /tmp/qrv/thumb stills 1,5,16.5   # a few stills
-node tools/video/thumb/render.cjs /tmp/qrv/frames 30 3             # every frame (about 2.5 min)
-tools/video/encode.sh /tmp/qrv/frames /tmp/qrv/thumb.wav media/thumb/qr-thumb-dance-20s.mp4 16
+node tools/video/thumb/render.cjs /tmp/qrv/thumb stills 1,4,9,13.5   # a few stills
+node tools/video/thumb/render.cjs /tmp/qrv/frames 30 3               # every frame (about 2.5 min)
+ffmpeg -framerate 30 -i /tmp/qrv/frames/f%05d.jpg -c:v libx264 -preset slow -crf 19 -pix_fmt yuv420p \
+  -movflags +faststart media/thumb/qr-thumb-swipe-16s.mp4
 ```
