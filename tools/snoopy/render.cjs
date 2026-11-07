@@ -7,7 +7,7 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 const HOST = process.env.HOST || 'http://localhost:8125';
 const [out, fps = '30', w = '1080', times] = process.argv.slice(2);
-const W = +w, H = Math.round(W * 16 / 9), DUR = 12;
+const W = +w, H = Math.round(W * 16 / 9);
 fs.mkdirSync(out, { recursive: true });
 (async () => {
   const b = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
@@ -16,6 +16,7 @@ fs.mkdirSync(out, { recursive: true });
   p.on('console', (m) => console.log('CONSOLE', m.text()));
   await p.goto(`${HOST}/tools/snoopy/stage.html?w=${W}`);
   await p.waitForFunction(() => document.title === 'ready', null, { timeout: 120000 });
+  const DUR = await p.evaluate(() => window.DUR);
   const list = times ? times.split(',').map(Number) : [...Array(Math.round(DUR * fps)).keys()].map((f) => f / fps);
   const t0 = Date.now();
   for (let i = 0; i < list.length; i++) {
