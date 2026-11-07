@@ -1,0 +1,302 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: MIT · Copyright (c) 2026 Janelle Ghanem -->
+<!-- "Put your thumb on the dot": the thumb-dance trend, QR Compass edition (9:16, 20 s, 120 bpm).
+     The viewer holds a thumb on the dot; pixels bounce off it, a booster lands on it, the
+     Roadster jumps it, a scanner trips over it, and then a 3D world breaks into pixels that whirl
+     round it and slam into a real QR code with the thumb still on it (level H error correction
+     covers it, so the code still scans). window.frame(seconds) draws any moment; render.cjs
+     captures it. No captions: after the opening card it plays with no words, only the music. -->
+<meta charset="utf-8">
+<title>loading</title>
+<style>html, body { margin: 0; background: #f6f1e7; overflow: hidden; } canvas { display: block; }</style>
+<script type="importmap">{"imports":{"three":"/qr/assets/three.module.min.js"}}</script>
+<script src="/qr/assets/qrcode.js"></script>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script type="module">
+import { world } from './model.js';
+const W = 1080, H = 1920, cv = document.getElementById('c'), ctx = cv.getContext('2d');
+const INK = '#17202c', CREAM = '#f6f1e7', ORANGE = '#e07a3f', PEACH = '#f0a46b', RED = '#e5484d';
+const URL_ = 'https://ghanemja.github.io/qr/';
+
+// ---- timing: 120 bpm, a beat is 0.5 s, a bar 2 s (the song follows the same map) ----
+const BEATS = { title: 0, count: 2, rain: 4, land: 6, jump: 8, scan: 10, world: 12, shatter: 13, drop: 16, end: 18, out: 20 };
+window.DURATION = 20;
+const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
+const ease = (x) => { x = clamp(x); return x * x * (3 - 2 * x); };
+const easeOut = (x) => 1 - (1 - clamp(x)) ** 3;
+const easeIn = (x) => clamp(x) ** 3;
+const back = (x) => { x = clamp(x); const s = 1.9; return 1 + (s + 1) * (x - 1) ** 3 + s * (x - 1) ** 2; };
+const lerp = (a, b, k) => a + (b - a) * k;
+// A deterministic random stream.
+const rand = (seed) => () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+
+// ---- the QR code, and where the thumb goes on it ----
+const q = qrcode(0, 'H'); q.addData(URL_); q.make();
+const N = q.getModuleCount(), MOD = 22, QX = Math.round(W / 2 - (N * MOD) / 2), QY = 640;
+// The dot sits on the code's lower right, so a right thumb coming up from the corner covers a
+// patch the error correction can rebuild (checked with ZXing: it still reads).
+const DOT = { x: QX + 23.5 * MOD, y: QY + 23.5 * MOD }, DOT_R = 58;
+// The viewer's thumb, roughly: a tip on the dot, its length running off to the lower right.
+const TH_DIR = { x: Math.cos(1.05), y: Math.sin(1.05) }, TH_R = 92;
+const DARK = [];
+for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (q.isDark(r, c)) DARK.push({ r, c, x: QX + (c + 0.5) * MOD, y: QY + (r + 0.5) * MOD });
+
+// ---- drawing helpers ----
+function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
+// One line of the big trend-style text: segments [text, colour], centred, popping in at `t0`.
+function line(segs, y, size, T, t0 = -1, { weight = 900, stroke = 14, font = "'Inter Display', Inter" } = {}) {
+  const k = T - t0; if (k < 0) return;
+  const s = t0 < 0 ? 1 : lerp(0.55, 1, back(k / 0.22));
+  ctx.save(); ctx.translate(W / 2, y); ctx.scale(s, s);
+  ctx.font = `${weight} ${size}px ${font}`; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+  const widths = segs.map(([t]) => ctx.measureText(t).width), total = widths.reduce((a, b) => a + b, 0);
+  let x = -total / 2;
+  segs.forEach(([t, col], i) => {
+    if (stroke) { ctx.strokeStyle = CREAM; ctx.lineWidth = stroke; ctx.strokeText(t, x, 0); }
+    ctx.fillStyle = col || INK; ctx.fillText(t, x, 0); x += widths[i];
+  });
+  ctx.restore();
+}
+const beatPulse = (T) => Math.exp(-((((T % 0.5) + 0.5) % 0.5)) * 9);
+
+// The dot: a soft ring, like the trend's, that pulses on the beat with a ripple going out.
+function dot(T, alpha = 1) {
+  if (alpha <= 0) return;
+  ctx.save(); ctx.globalAlpha = alpha;
+  const p = beatPulse(T), ph = (((T % 0.5) + 0.5) % 0.5) / 0.5;
+  ctx.beginPath(); ctx.arc(DOT.x, DOT.y, DOT_R * (1 + ph * 0.9), 0, 7);
+  ctx.strokeStyle = `rgba(23,32,44,${0.28 * (1 - ph)})`; ctx.lineWidth = 6; ctx.stroke();
+  const r = DOT_R * (1 + 0.1 * p);
+  ctx.beginPath(); ctx.arc(DOT.x, DOT.y, r, 0, 7);
+  ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.fill();
+  ctx.lineWidth = 16; ctx.strokeStyle = 'rgba(120,128,140,0.85)'; ctx.stroke();
+  ctx.lineWidth = 8; ctx.strokeStyle = 'rgba(245,246,248,0.95)'; ctx.stroke();
+  ctx.restore();
+}
+
+// A cartoon thumb (seen from the nail side) with its tip at (x, y), running off along `dir`.
+function thumb(x, y, dir, k = 1) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(dir.y, dir.x)); ctx.scale(k, k);
+  const w = 176, L = 1400;
+  ctx.beginPath(); ctx.moveTo(w / 2, -w / 2); ctx.arc(w / 2, 0, w / 2, -Math.PI / 2, Math.PI / 2, true);
+  ctx.bezierCurveTo(260, w / 2 + 6, 420, w / 2 + 30, L, w / 2 + 60); ctx.lineTo(L, -w / 2 - 50);
+  ctx.bezierCurveTo(420, -w / 2 - 22, 260, -w / 2 - 4, w / 2, -w / 2); ctx.closePath();
+  ctx.fillStyle = '#fff'; ctx.fill(); ctx.lineWidth = 8; ctx.strokeStyle = INK; ctx.stroke();
+  rr(18, -54, 96, 108, [46, 22, 22, 46]); ctx.fillStyle = '#f2f2f4'; ctx.fill(); ctx.lineWidth = 6; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(228, -44); ctx.quadraticCurveTo(240, 0, 228, 44); ctx.moveTo(252, -30); ctx.quadraticCurveTo(262, 0, 252, 30);
+  ctx.lineWidth = 6; ctx.stroke();
+  ctx.restore();
+}
+
+// Screen shake: a few hits, each a quick decaying wobble.
+const HITS = [[7.5, 26], [9.72, 22], [11.0, 18], [11.5, 18]];
+function shake(T) {
+  let x = 0, y = 0;
+  for (const [t0, a] of HITS) { const k = T - t0; if (k >= 0 && k < 0.4) { const e = a * Math.exp(-k * 12); x += Math.sin(k * 90) * e; y += Math.cos(k * 70) * e * 0.7; } }
+  return [x, y];
+}
+
+// ---- 1 · pixel rain: squares fall on the beat and bounce off the thumb ----
+const PAL = [INK, INK, INK, ORANGE, '#2b5aa8', '#3ddc84', '#f2c94c', INK];
+const RAIN = (() => {
+  const R = rand(7), ps = [];
+  [0, 0.5, 1, 1.5].forEach((tb, b) => {
+    for (let i = 0; i < 34; i++) {
+      // Most fall where the thumb is, so plenty hit it.
+      const g = (R() + R() + R()) / 3 - 0.5;
+      ps.push({ t0: tb + R() * 0.12, x: DOT.x + g * 900, y: -60 - R() * 260, vx: (R() - 0.5) * 160, vy: 300 + R() * 300, s: 26 + R() * 18, col: PAL[(i + b) % PAL.length], a: R() * 6, va: (R() - 0.5) * 8 });
+    }
+  });
+  // Step the physics once and keep 120 snapshots a second.
+  const dt = 1 / 480, snaps = [];
+  const live = ps.map((p) => ({ ...p, on: false }));
+  for (let step = 0; step <= 2.2 * 480; step++) {
+    const t = step * dt;
+    for (const p of live) {
+      if (t < p.t0) continue;
+      p.vy += 2600 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.a += p.va * dt;
+      // Collide with the thumb: a capsule from the dot off to the lower right.
+      const dx = p.x - DOT.x, dy = p.y - DOT.y, along = Math.max(0, dx * TH_DIR.x + dy * TH_DIR.y);
+      const cx = DOT.x + TH_DIR.x * along, cy = DOT.y + TH_DIR.y * along, ox = p.x - cx, oy = p.y - cy, d = Math.hypot(ox, oy), rad = TH_R + p.s * 0.45;
+      if (d < rad && d > 0) {
+        const nx = ox / d, ny = oy / d, vn = p.vx * nx + p.vy * ny;
+        p.x = cx + nx * rad; p.y = cy + ny * rad;
+        if (vn < 0) { p.vx -= 1.6 * vn * nx; p.vy -= 1.6 * vn * ny; p.va += vn * 0.01 * (nx > 0 ? 1 : -1); p.vx += nx * 60; }
+      }
+    }
+    if (step % 4 === 0) snaps.push(live.map((p) => (t < p.t0 ? null : [p.x, p.y, p.a])));
+  }
+  return { ps, snaps };
+})();
+function rain(lt) {
+  const snap = RAIN.snaps[Math.min(RAIN.snaps.length - 1, Math.round(lt * 120))];
+  RAIN.ps.forEach((p, i) => {
+    const s = snap[i]; if (!s) return;
+    ctx.save(); ctx.translate(s[0], s[1]); ctx.rotate(s[2]);
+    rr(-p.s / 2 + 3, -p.s / 2 + 5, p.s, p.s, 5); ctx.fillStyle = 'rgba(23,32,44,0.12)'; ctx.fill();
+    rr(-p.s / 2, -p.s / 2, p.s, p.s, 5); ctx.fillStyle = p.col; ctx.fill();
+    ctx.restore();
+  });
+}
+
+// ---- the 3D worlds ----
+const SPACEX = await world('spacex', W, H), TESLA = await world('tesla', W, H), CAFE = await world('starbucks', W, H);
+// The booster's pad is the dot: it touches down on beat 4 (its 10 s cycle lands at t = 4.2).
+const landView = { pin: [0, 2.35, 0], at: [DOT.x, DOT.y], az: Math.PI / 4 + 0.1, elev: 0.5, dist: 30 };
+// The Roadster's jump goes over the dot, seen from the left so it lands clear of the thumb.
+const jumpView = { pin: [0.55, 0.24, 3.35], at: [DOT.x, DOT.y], az: -Math.PI / 4 + 0.12, elev: 0.6, dist: 21 };
+// The café world stands in the middle of where the code will be.
+const QC = { x: W / 2, y: QY + (N * MOD) / 2 };
+const cafeView = (T) => ({ pin: [0, 0.6, 0], at: [QC.x, QC.y + 40], az: Math.PI / 4 - 0.35 + 0.35 * clamp((T - 12) / 1.0), elev: 0.62, dist: 31,
+  lift: 14 * (1 - easeOut((T - 12) / 0.32)), squash: 1 - 0.18 * Math.sin(clamp((T - 12.3) / 0.25) * Math.PI) });
+
+// ---- 2 · the shatter: the café's own pixels whirl round the thumb and land as its QR code ----
+const SHATTER = (() => {
+  const T = BEATS.shatter, img = CAFE.render(2 + T - 12, cafeView(T));
+  const tmp = document.createElement('canvas'); tmp.width = W; tmp.height = H; const tc = tmp.getContext('2d');
+  tc.drawImage(img, 0, 0); const data = tc.getImageData(0, 0, W, H).data;
+  // Every opaque spot of the world on a coarse grid is a candidate pixel.
+  const src = [];
+  for (let y = 0; y < H; y += 14) for (let x = 0; x < W; x += 14) { const i = (y * W + x) * 4; if (data[i + 3] > 200) src.push({ x, y, col: `rgb(${data[i]},${data[i + 1]},${data[i + 2]})` }); }
+  // Pair them with the code's dark squares in reading order, so the picture flows into the code
+  // without crossing over itself too much.
+  const R = rand(11), pick = [];
+  const step = src.length / DARK.length;
+  for (let i = 0; i < DARK.length; i++) pick.push(src[Math.floor(i * step + R() * step * 0.9)]);
+  const order = [...DARK].sort((a, b) => a.r - b.r || a.c - b.c);
+  return { img: tmp, ps: order.map((d, i) => {
+    const s = pick[i], ang = Math.atan2(d.y - DOT.y, d.x - DOT.x), rad = Math.hypot(d.x - DOT.x, d.y - DOT.y);
+    const out = Math.atan2(s.y - QC.y, s.x - QC.x), kick = 60 + R() * 150;
+    return { d, s, ang, rad, bx: s.x + Math.cos(out) * kick, by: s.y + Math.sin(out) * kick - 40 * R(), rot: (R() - 0.5) * 4, wob: R() * 6.28 };
+  }) };
+})();
+function shatter(T) {
+  const sp = SHATTER.ps, k0 = T - BEATS.shatter, D = BEATS.drop;
+  for (const p of sp) {
+    // Burst out of the world (0.6 s), then fall into a whirl round the thumb that spins faster
+    // and faster and unwinds onto the code exactly on the drop.
+    const burst = easeOut(k0 / 0.6);
+    const bx = lerp(p.s.x, p.bx, burst), by = lerp(p.s.y, p.by, burst);
+    const spin = 7 * Math.PI * ((D - T) / (D - 13.6)) ** 0.62;
+    const pull = 1 - 0.32 * ease((T - 15.2) / 0.75);            // tightening in before the drop
+    const r = p.rad * pull + 18 * Math.sin(T * 5 + p.wob) * (1 - ease((T - 15.4) / 0.5)), a = p.ang + spin;
+    const vx = DOT.x + Math.cos(a) * r, vy = DOT.y + Math.sin(a) * r;
+    const m = ease((T - 13.6) / 0.7);
+    const x = lerp(bx, vx, m), y = lerp(by, vy, m), s = MOD - 3;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(p.rot * (1 - m) + a * 0.15 * m);
+    rr(-s / 2, -s / 2, s, s, 4); ctx.fillStyle = p.s.col; ctx.fill();
+    ctx.restore();
+  }
+}
+
+// ---- the code, landed ----
+function code(T) {
+  const k = T - BEATS.drop;
+  // The squares slam from where the whirl left them (just inside) out to their places.
+  const out = back(k / 0.16), pullIn = 0.68;
+  const card = easeOut(k / 0.2);
+  ctx.save();
+  const pad = 2 * MOD;
+  ctx.globalAlpha = card;
+  rr(QX - pad, QY - pad, N * MOD + 2 * pad, N * MOD + 2 * pad, 26); ctx.fillStyle = '#fff'; ctx.fill();
+  ctx.shadowColor = 'transparent'; ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+  ctx.globalAlpha = 1;
+  for (const d of DARK) {
+    const r = Math.hypot(d.x - DOT.x, d.y - DOT.y), a = Math.atan2(d.y - DOT.y, d.x - DOT.x), rr_ = r * lerp(pullIn, 1, out);
+    const x = DOT.x + Math.cos(a) * rr_, y = DOT.y + Math.sin(a) * rr_;
+    const s = lerp(MOD - 3, MOD + 0.6, ease(k / 0.18));
+    ctx.fillStyle = INK; ctx.fillRect(Math.round(x - s / 2), Math.round(y - s / 2), Math.ceil(s), Math.ceil(s));
+  }
+  ctx.restore();
+}
+
+// ---- the frame ----
+function background(T) {
+  ctx.fillStyle = CREAM; ctx.fillRect(-60, -60, W + 120, H + 120);
+  // A faint field of QR squares drifting up.
+  const R = rand(3); ctx.fillStyle = 'rgba(23,32,44,0.045)';
+  for (let i = 0; i < 70; i++) {
+    const x = R() * W, s = 10 + R() * 26, y = ((R() * (H + 200) - T * (20 + R() * 40)) % (H + 200) + H + 200) % (H + 200) - 100;
+    rr(x, y, s, s, 4); ctx.fill();
+  }
+}
+
+window.frame = (T) => {
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const [sx, sy] = shake(T); ctx.translate(sx, sy);
+  background(T);
+  let dotA = 1;
+
+  if (T < BEATS.rain) {
+    // Title, then a countdown while the demo thumb shows where to go.
+    line([['PUT YOUR THUMB']], 300, 104, T, 0.0);
+    line([['ON THE '], ['DOT', ORANGE]], 412, 104, T, 0.25);
+    line([['FEEL THE BEAT']], 530, 64, T, 0.5, { weight: 800 });
+    dot(T);
+    // Demo thumb: in, a tap on each beat, out.
+    const inK = easeOut(T / 0.6), outK = easeIn((T - 2.6) / 0.5), tap = T > 0.6 && T < 2.6 ? 26 * beatPulse(T) : 0;
+    const off = (1 - inK) * 1000 + outK * 1100 + tap;
+    if (outK < 1) thumb(DOT.x + TH_DIR.x * off, DOT.y + TH_DIR.y * off, TH_DIR);
+    return;
+  }
+  if (T < BEATS.land) {
+    const lt = T - BEATS.rain;
+    rain(lt); dot(T);
+    return;
+  }
+  if (T < BEATS.jump) {
+    const lt = T - BEATS.land;
+    ctx.drawImage(SPACEX.render(2.7 + lt, landView), 0, 0);
+    dot(T, 0.9);
+    return;
+  }
+  if (T < BEATS.scan) {
+    const lt = T - BEATS.jump;
+    ctx.drawImage(TESLA.render(1.62 + lt * 1.15, jumpView), 0, 0);
+    dot(T, 0.9);
+    return;
+  }
+  if (T < BEATS.world) {
+    // A scanner sweeps down, finds a thumb and complains.
+    const lt = T - BEATS.scan, open = back(lt / 0.25);
+    const L = 150, x0 = 120, x1 = W - 120, y0 = 560, y1 = 1480;
+    ctx.save(); ctx.lineWidth = 16; ctx.lineCap = 'round'; ctx.strokeStyle = lt < 1 ? INK : RED;
+    const cx = W / 2, cy = (y0 + y1) / 2;
+    ctx.translate(cx, cy); ctx.scale(lerp(1.2, 1, open), lerp(1.2, 1, open)); ctx.translate(-cx, -cy); ctx.globalAlpha = clamp(lt / 0.15);
+    for (const [x, y, dx, dy] of [[x0, y0, 1, 1], [x1, y0, -1, 1], [x0, y1, 1, -1], [x1, y1, -1, -1]]) { ctx.beginPath(); ctx.moveTo(x, y + dy * L); ctx.lineTo(x, y); ctx.lineTo(x + dx * L, y); ctx.stroke(); }
+    ctx.restore();
+    const ly = lerp(y0 + 30, DOT.y - 124, easeOut(lt / 0.95));
+    const found = lt >= 1;
+    ctx.save();
+    const g = ctx.createLinearGradient(0, ly - 90, 0, ly); g.addColorStop(0, 'rgba(229,72,77,0)'); g.addColorStop(1, 'rgba(229,72,77,0.22)');
+    ctx.fillStyle = g; ctx.fillRect(x0 + 20, ly - 90, x1 - x0 - 40, 90);
+    ctx.fillStyle = RED; ctx.shadowColor = RED; ctx.shadowBlur = 24; ctx.fillRect(x0 + 20, ly - 4, x1 - x0 - 40, 8);
+    ctx.restore();
+    dot(T, found ? 0 : 1);
+    if (found) {
+      // A red box round the thumb, blinking on the beat.
+      const bl = beatPulse(T);
+      ctx.save(); ctx.strokeStyle = RED; ctx.lineWidth = 10; ctx.globalAlpha = 0.55 + 0.45 * bl;
+      rr(DOT.x - 120, DOT.y - 120, 240, 240, 26); ctx.stroke(); ctx.restore();
+    }
+    return;
+  }
+  if (T < BEATS.drop) {
+    if (T < BEATS.shatter) {
+      ctx.drawImage(CAFE.render(2 + T - 12, cafeView(T)), 0, 0);
+    } else {
+      // The world flashes into its pixels.
+      const f = 1 - clamp((T - BEATS.shatter) / 0.12);
+      if (f > 0) { ctx.globalAlpha = f; ctx.drawImage(SHATTER.img, 0, 0); ctx.globalAlpha = 1; }
+      shatter(T);
+    }
+    dotA = 1 - clamp((T - 15.85) / 0.15);
+    dot(T, dotA);
+    return;
+  }
+  // The code, with the thumb still on it.
+  code(T);
+};
+await document.fonts.load("900 100px 'Inter Display'");
+document.title = 'ready';
+</script>

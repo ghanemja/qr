@@ -28,3 +28,19 @@ CUT=short node ../equalizer/examples/render.mjs tools/video/songs/house.mjs /tmp
 ffmpeg -framerate 30 -i /tmp/qrv/frames/f%05d.jpg -i /tmp/qrv/house.wav \
   -c:v libx264 -preset slow -crf 20 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest -movflags +faststart qr-compass-ad.mp4
 ```
+
+## The thumb video (`thumb/`)
+
+A 20 s vertical (9:16, 1080×1920) take on the "put your thumb on the dot, feel the beat" trend. After
+the opening card there are no words. The viewer holds a thumb on the dot: pixels rain and bounce off
+it, the SpaceX booster lands on it, the Roadster jumps it, a scanner gets stuck on it, and then the
+Starbucks world breaks into pixels that whirl around it and slam into a real QR code on the drop. The
+dot sits on the code's lower right, and level-H error correction covers the thumb, so the code still
+scans with the thumb on it (checked with ZXing on the final frame, with a simulated thumb).
+
+```sh
+node ../equalizer/examples/render.mjs tools/video/thumb/song.mjs /tmp/qrv/thumb.wav
+node tools/video/thumb/render.cjs /tmp/qrv/thumb stills 1,5,16.5   # a few stills
+node tools/video/thumb/render.cjs /tmp/qrv/frames 30 3             # every frame (about 2.5 min)
+tools/video/encode.sh /tmp/qrv/frames /tmp/qrv/thumb.wav media/thumb/qr-thumb-dance-20s.mp4 16
+```

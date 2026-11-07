@@ -26,6 +26,7 @@ Notes for the next session working on this repo. Live site: https://ghanemja.git
 1. **Bespoke models (done for now).** More heroes only if the user asks. Ask before doing Broadcom, Qualcomm, Micron, Anduril or Zipline (already on upgraded shared scenes), or Amgen, Gilead, Regeneron, Halliburton or ConocoPhillips.
 2. **Upgrade the shared shapes** (done for the agreed list; see **Shared-shape upgrades** below for what's done and what's deliberately skipped).
 3. **Advertisement video. Done and posted** (LinkedIn, "7 days of vibes: Day 3", 25 Oct 2026). See **The ad video** below.
+3b. **Thumb-dance video. Done** (`media/thumb/qr-thumb-dance-20s.mp4`, 9:16, 20 s). It's the "put your thumb on the dot" trend, with no captions after the opening card, at the user's request. It ends on a real QR code that still scans with the viewer's thumb on it. Source and steps: `tools/video/thumb/` and `tools/video/README.md`.
 4. **"Access 3D asset library" button** next to **About** in the header. **Done** (see **3D asset library** below).
    - It should open a page where people can download the 3D models (for example GLB via three's `GLTFExporter`).
    - Every model file must **credit the project and authors** and **embed the open-source licence**. In GLB, use `asset.copyright` and `asset.extras`, and add a LICENSE text alongside. The repo is MIT-licensed (`LICENSE`, chosen by the user); embed that text and the copyright line.
