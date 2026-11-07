@@ -1,30 +1,30 @@
 # Toggle trend: the beagle edition
 
-A 10.4 s vertical video (1080×1920, 30 fps) of the "flip the giant iOS switch" trend, timed beat for beat
-to the song of the original reel:
+A 10.4 s vertical video (1080×1920, 30 fps) of the "flip the giant iOS switch" trend, animated from the
+reference drawings themselves and timed to the song of the original reel:
 
-- **0–1.9 s (intro):** in 2D black and white, the beagle walks up to his doghouse. The switch is high on
-  the wall above it.
-- **1.9–4.3 s (the silence):** he jumps and grabs the edge of the roof (on the click at 2.65 s), dangles
-  kicking, scrambles up to the ridge, stretches on tiptoe and still can't reach, crouches…
-- **4.3 s (the drop):** …and a big jump taps the switch. A rainbow-edged wipe grows out of it into colourful 3D: he's in his
-  astronaut flying-ace kit (leather cap and goggles, bubble helmet, red scarf, orange suit) and the red
-  doghouse rockets off past the moon, in the strip's flat colours with ink outlines on a cream sky, while his little yellow bird, in its own
-  bubble helmet, flies loops round him.
-- **8.5 s (the gap):** the bird pecks the switch off and the world goes flat again. He glares up at
-  the bird, brows down and frowning, shakes his fist under an angry scribble; the bird bolts, and he
-  crosses his arms and fumes.
+- **0–1.9 s (intro):** in black and white he walks up to his doghouse. The switch is high up on the right.
+- **1.9–4.3 s (the silence):** he jumps onto the edge of the roof (on the click at 2.65 s), scrambles up,
+  stretches up on tiptoe and still can't reach, crouches…
+- **4.3 s (the drop):** …and boops the switch with his nose at the top of a big jump. Colour grows out of
+  it inside a rainbow ring: the flying ace on his red doghouse, scarf rippling, smoke puffs going by,
+  his yellow bird looping round him (in front and behind). The doghouse stays put.
+- **8.5 s (the gap):** the bird perches on the switch and pecks it off. Black and white again: he sits
+  on his doghouse, grumpy, glaring up at the bird, an angry scribble over his head. The bird bolts.
 
-Files:
+The drawings aren't kept in the repo (nor is the song, nor the video). To render:
 
-- `stage.html`: the three.js scene. `window.frame(t)` draws time `t`. Every mesh has a 2D material (flat
-  ink on paper, outlined, stepped at 12 fps like old cartoons) and a 3D one (flat toon colours, same ink outlines); the
-  composite mixes the two passes inside the wipe circle centred on the switch knob. Head and body are
-  blended-ellipsoid distance fields meshed into single smooth surfaces.
-- `render.cjs`: films the frames with Playwright (`node tools/snoopy/render.cjs <dir> [fps] [width] [t1,t2…]`;
-  with times it writes only those stills). Serve the repo root first: `python3 -m http.server 8125`.
-- `encode.sh <frames> <out.mp4> [audio source]`: H.264, plus the song taken from the screen recording of
-  the original reel when given (the song isn't kept in the repo). Without it the video is silent, ready
-  for the trending sound to be added in the app.
+1. Put the four reference images in a folder as `A_stand.jpg` (standing), `B_ace.jpg` (flying ace on
+   the doghouse), `C_astro.jpg` (astronaut on the red doghouse, with the moon) and `D_sit.jpg`
+   (sitting on the roof, grumpy).
+2. `python3 tools/snoopy/prep.py <that folder> <pieces folder>` cuts them into pieces with transparent
+   backgrounds (the standing drawing into head, body and two legs for the puppet; the flying ace, his
+   scarf and the smoke puffs; the doghouse in colour and in black and white; the moon; the sitting
+   drawing), plus `pieces.json` with their anchor points. Link the pieces folder to `tools/snoopy/pieces`.
+3. Serve the repo root (`python3 -m http.server 8125`) and run `node tools/snoopy/render.cjs <frames> 30 1080`.
+4. `tools/snoopy/encode.sh <frames> <out.mp4> [screen recording of the original reel]` adds the song.
 
-Full render: about 2 min for the frames in the cloud container.
+`stage.html` draws everything on a 2D canvas: the standing puppet (legs swing at the hips, the head
+tilts, the body squashes and leans), the scarf drawn in thin rippling strips, the bird drawn in the
+strip's manner (big round head, beak, tuft, flapping wings), and the wipe between the two worlds. The
+black-and-white world moves on twos (12 fps), like old cartoons.
