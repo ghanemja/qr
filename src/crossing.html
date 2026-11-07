@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Beagle Crossing</title>
+<meta name="description" content="A hand-drawn crayon crosswalk: a white beagle on a leash, walkers and bikes, seen from above.">
+<meta name="theme-color" content="#e9e0cf">
+<link rel="icon" href="assets/icon.svg">
+<script src="assets/analytics.js" data-goatcounter="ghanemja" data-site="qr"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gochi+Hand&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; height: 100%; background: #e9e0cf; overflow: hidden; }
+  body { font-family: 'Gochi Hand', 'Comic Sans MS', cursive; color: #2d2b28; -webkit-tap-highlight-color: transparent; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; cursor: pointer; touch-action: manipulation; }
+  .tag {
+    position: fixed; left: 50%; top: max(18px, env(safe-area-inset-top)); transform: translateX(-50%) rotate(-1.5deg);
+    background: #2d2b28; color: #f3ead8; padding: 6px 14px 4px; border-radius: 6px; font-size: clamp(18px, 4.6vw, 26px);
+    white-space: nowrap; pointer-events: none; transition: opacity .8s; box-shadow: 3px 4px 0 rgba(28,72,82,.35);
+  }
+  .hint { position: fixed; left: 0; right: 0; bottom: max(14px, env(safe-area-inset-bottom)); text-align: center; font-size: 17px; opacity: .7; pointer-events: none; transition: opacity .8s; }
+  .gone { opacity: 0; }
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Crayon animation of people, bikes and a white beagle on a leash crossing a zebra crosswalk, seen from above"></canvas>
+<div class="tag" id="tag">a walk with the beagle</div>
+<div class="hint" id="hint">tap to zoom back in</div>
+<script src="assets/crossing.js"></script>
+</body>
+</html>
