@@ -301,11 +301,18 @@
 
   // ---------- the crowd ----------
   let agents = [], star = null, t = 0, frame = 0, introAt = 0;
+  // anywhere across the crossing except the lane Snoopy and his walker use, so nobody walks through them
+  function laneX() {
+    for (;;) {
+      const x = (R() * 2 - 1) * (halfCW - 15);
+      if (!star || x < star.x - 22 || x > star.x + 58) return x;
+    }
+  }
   function newPerson(kind) {
     const dir = R() < 0.5 ? -1 : 1;
     return {
       kind, dir, id: Math.floor(R() * 1e9),
-      x: (R() * 2 - 1) * (halfCW - 15),
+      x: laneX(),
       y: 0,
       speed: kind === 'bike' ? 70 + R() * 30 : 18 + R() * 16,
       phase: R() * 6,
@@ -324,8 +331,6 @@
       a.y = cam.y + 40 + (R() * 2 - 1) * span;
       agents.push(a);
     }
-    // keep the walker's own lane mostly clear so Snoopy stays visible
-    agents = agents.filter((a) => Math.abs(a.x - star.x) > 30 || Math.abs(a.y - star.y) > 70);
   }
   function startIntro() {
     star = { kind: 'star', dir: -1, x: -30, y: 0, speed: 24, phase: 0, id: 1,
