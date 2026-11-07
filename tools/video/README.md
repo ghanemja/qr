@@ -31,9 +31,11 @@ ffmpeg -framerate 30 -i /tmp/qrv/frames/f%05d.jpg -i /tmp/qrv/house.wav \
 
 ## Instagram Reels (`reel.html`)
 
-A 20-second 9:16 reel (1080×1920) for one company, with no words on screen: a push-in, three
-close-ups of its world, the model breaking into its real QR code (held long enough to scan off the
-screen) and rebuilding, then a pull-back. `TEXT=1` renders the captioned version (hook, captions,
+A 20-second 9:16 reel (1080×1920) for one company, in one take with no words and no camera moves:
+the site's own QR world in its normal iso view, the model's animation playing; at 6 s a mouse pointer
+clicks it and it breaks into its real QR code (held long enough to scan off the screen); at 12.5 s
+it clicks again, the model rebuilds and plays on (`qrshot.html?fmt=reel&click=1`). The music drops
+on the first click. `TEXT=1` renders the older captioned version with close-ups (hook, captions,
 end card), with the words kept clear of Instagram's own UI (top 220 px, bottom 420 px).
 Each company's close-ups are a recipe in `RECIPES` in `reel.html`; only Amazon has one so far.
 
@@ -41,5 +43,5 @@ Each company's close-ups are a recipe in `RECIPES` in `reel.html`; only Amazon h
 CUT=reel node ../equalizer/examples/render.mjs tools/video/songs/house.mjs /tmp/qrv/house-reel.wav
 STAGE=reel SLUG=amazon node tools/video/render.cjs /tmp/qrv/reel-stills stills 1.5,3,5,7,17.5
 STAGE=reel SLUG=amazon node tools/video/render.cjs /tmp/qrv/reel-amazon 30 3
-tools/video/encode.sh /tmp/qrv/reel-amazon /tmp/qrv/house-reel.wav media/reels/amazon-house.mp4 8
+tools/video/encode.sh /tmp/qrv/reel-amazon /tmp/qrv/house-reel.wav media/reels/amazon-house.mp4 999   # 999: no flash or zoom punch
 ```

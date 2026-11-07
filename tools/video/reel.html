@@ -123,12 +123,15 @@ const R = RECIPES[slug] || { hook: ['Every company, a tiny living world.', `This
 const BAR = 2, shots = [];
 let t = 0;
 const add = (len, s) => { shots.push({ t0: t, t1: t + len, ...s }); t += len; };
-add(BAR, { kind: 'hook' });
-R.shots.forEach((s, i) => add(BAR, { kind: 'close', ...s, no: i }));
-add(4 * BAR, { kind: 'qr', slug });
-add(2 * BAR, { kind: 'end' });
+if (TEXT) {
+  add(BAR, { kind: 'hook' });
+  R.shots.forEach((s, i) => add(BAR, { kind: 'close', ...s, no: i }));
+  add(4 * BAR, { kind: 'qr', slug });
+  add(2 * BAR, { kind: 'end' });
+} else add(10 * BAR, { kind: 'qr', slug, click: 1 }); // one take on the site's QR world: a cursor clicks it into its code and back
+
 window.DURATION = t;
-window.SHOTS = shots.map(({ kind, t0, t1, slug }) => ({ kind, t0, t1, slug }));
+window.SHOTS = shots.map(({ kind, t0, t1, slug, click }) => ({ kind, t0, t1, slug, click }));
 
 const $ = (id) => document.getElementById(id);
 const ease = (x) => x < 0 ? 0 : x > 1 ? 1 : x * x * (3 - 2 * x);

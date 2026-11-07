@@ -9,8 +9,8 @@ export const BPM = 120, BARS = REEL ? 10 : SHORT ? 18 : 35;
 export const S = REEL ? {
   intro: 'bar < 1',                    // the hook
   a: 'bar < 0', qr: 'bar < 0', b: 'bar < 0',
-  build: 'bar >= 1 && bar < 4',        // three close-ups, rising
-  drop: 'bar >= 4 && bar < 8',         // the QR shot: the model shatters into its code and rebuilds
+  build: 'bar >= 1 && bar < 3',        // the world plays; the pointer comes in, rising
+  drop: 'bar >= 3 && bar < 8',         // the click: it shatters into its code, the click back, and it plays on
   outro: 'bar >= 8',                   // end card
 } : SHORT ? {
   intro: 'bar < 1',                    // title card
@@ -31,8 +31,8 @@ export const S = REEL ? {
 };
 export const any = (...keys) => keys.map((k) => `(${S[k]})`).join(' || ');
 // The build's last bar: the kick drops out for a roll into the drop.
-const last = REEL ? 3 : SHORT ? 13 : 27, b0 = (last + 1) * 4 - 2;
+const last = REEL ? 2 : SHORT ? 13 : 27, b0 = (last + 1) * 4 - 2;
 export const KICK = `${any('a', 'b', 'drop')} || (${S.build} && beat < ${b0})`, KICK_ROLL = `bar == ${last} && beat < ${b0 + 1.5}`, ROLL = `bar == ${last}`, ROLL2 = `bar >= ${last - 1} && bar < ${last + 1}`;
 // Moments in seconds: the first cut, the model shattering into pixels and rebuilding, the build, the drop, the end card.
-export const AT = REEL ? { first: 2, shatter: 9, rebuild: 13.6, build: 2, drop: 8, end: 16 } : SHORT ? { first: 2, shatter: 13, rebuild: 17.6, build: 22, drop: 28, end: 32 } : { first: 4, shatter: 25, rebuild: 29.6, build: 44, drop: 56, end: 64 };
+export const AT = REEL ? { first: 2, shatter: 6, rebuild: 12.5, build: 2, drop: 6, end: 16 } : SHORT ? { first: 2, shatter: 13, rebuild: 17.6, build: 22, drop: 28, end: 32 } : { first: 4, shatter: 25, rebuild: 29.6, build: 44, drop: 56, end: 64 };
 export const RISE = AT.drop - AT.build;

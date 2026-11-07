@@ -41,7 +41,7 @@ async function shoot(p, T, file, type = 'jpeg') {
 async function qrShot(shot, fps) {
   const first = Math.round(shot.t0 * fps), last = Math.round(shot.t1 * fps);
   if (fs.existsSync(name(last - 1))) return;
-  const { b, p } = await open(`/tools/video/qrshot.html?slug=${shot.slug}${REEL ? '&fmt=reel' + RTEXT : ''}`, { clock: true });
+  const { b, p } = await open(`/tools/video/qrshot.html?slug=${shot.slug}${REEL ? '&fmt=reel' + RTEXT : ''}${shot.click ? '&click=1' : ''}`, { clock: true });
   for (let i = 0; i < 150 && !(await p.evaluate(() => !!window.world)); i++) await new Promise((r) => setTimeout(r, 200));
   await p.evaluate(() => document.fonts.ready);
   await p.clock.runFor(2600); // let the world grow in before the shot starts
