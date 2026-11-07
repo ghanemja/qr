@@ -9,7 +9,7 @@ to the song of the original reel:
   kicking, scrambles up to the ridge, stretches on tiptoe and still can't reach, crouches…
 - **4.3 s (the drop):** …and a big jump taps the switch. A rainbow-edged wipe grows out of it into colourful 3D: he's in his
   astronaut flying-ace kit (leather cap and goggles, bubble helmet, red scarf, orange suit) and the red
-  doghouse rockets through space past Saturn and the moon, while his little yellow bird, in its own
+  doghouse rockets off past the moon, in the strip's flat colours with ink outlines on a cream sky, while his little yellow bird, in its own
   bubble helmet, flies loops round him.
 - **8.5 s (the gap):** the bird pecks the switch off and the world goes flat again. He glares up at
   the bird, brows down and frowning, shakes his fist under an angry scribble; the bird bolts, and he
@@ -18,7 +18,7 @@ to the song of the original reel:
 Files:
 
 - `stage.html`: the three.js scene. `window.frame(t)` draws time `t`. Every mesh has a 2D material (flat
-  ink on paper, outlined, stepped at 12 fps like old cartoons) and a 3D one (lit, coloured, shadows); the
+  ink on paper, outlined, stepped at 12 fps like old cartoons) and a 3D one (flat toon colours, same ink outlines); the
   composite mixes the two passes inside the wipe circle centred on the switch knob. Head and body are
   blended-ellipsoid distance fields meshed into single smooth surfaces.
 - `render.cjs`: films the frames with Playwright (`node tools/snoopy/render.cjs <dir> [fps] [width] [t1,t2…]`;
