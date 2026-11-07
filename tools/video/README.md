@@ -31,24 +31,25 @@ ffmpeg -framerate 30 -i /tmp/qrv/frames/f%05d.jpg -i /tmp/qrv/house.wav \
 
 ## The thumb video (`thumb/`)
 
-A 16.3 s vertical (9:16, 1080×1920, 60 fps) take on the "slide your thumb up, feel the beat" trend, cut to
-the original reel's song (about 147.6 bpm; beat k falls at -0.04 + 0.4065k s, measured from the
-reel's audio, and it cuts every two bars like the reel). Only the opening card has words.
+A 16.3 s vertical (9:16, 1080×1920, 60 fps) take on the "slide your thumb up, feel the beat" trend,
+timed to the original reel's song: a beat every 0.4073 s from 0. The reel cuts every 8 beats, at
+3.24, 6.49, 9.73 and 13.01 s, and its actions land on the beats in between.
 
-The thumb moves like the reel's demo: in from the right edge, it flips up along the edge on every
-other beat and back down (pointing left) on the beat after. That's 20 cycles, four per section, and it
-matches the reel to about a frame. Each up move launches something and each down move brings it back:
-- **Roadster:** four jumps from four angles. It comes off the curl on the up move and lands on the down.
-- **Rockets:** the SpaceX booster climbs and lands three times, then the pad rocket climbs out of the frame.
-- **Build:** the Starbucks world pops up and lands. Then three up moves fire it, a slice at a time, into its
-  QR code, and it recoils on each down move.
-- **Finish:** the finished code goes up with confetti and thumps down, four times.
+- **The opening card** has the trend's look (sky blue, "SLIDE YOUR THUMB UP! FEEL THE BEAT
+  (QR edition)"). A cartoon thumb bends at the knuckle and comes in from the bottom right: up on
+  the even beats, down on the odd ones, like the reel's demo.
+- **The montage** (beats 8–23) cuts on every beat. Up beats send something up: the Roadster off its
+  ramp, the SpaceX booster lifting off (flown on a smooth climb), the Amazon drone, the pad rocket,
+  the Starship. Down beats bring something down: the Berkshire snowball rolling down its slope, the
+  booster landing, the Oreo dunk, General Mills cereal pouring, the Caterpillar digging. Each shot runs
+  its world's clock at one steady rate (smooth) and drifts with the swipe.
+- **Beats 24–31:** the Starbucks world is fired up into its QR code, slice by slice.
+- **Beats 32–39:** the code jumps up and thumps down with confetti. The last frame scans (checked with
+  ZXing).
 
-For smooth motion, each model's own clock runs at one steady rate per shot, and the booster is flown
-on a smooth arc by the video itself (`after()` in `model.js` lets it take over posed parts). The
-only single-frame jumps are the deliberate cuts. The video has no
-audio track: add the song where you post it (it starts with the video at 0 s). The last frame scans
-(checked with ZXing).
+The video in the repo has no audio track. Add the reel's song when posting; it starts with the video
+at 0 s. The song's strongest hits sit about 35 ms ahead of the grid, so a version with the song
+muxed in uses `adelay=35`.
 
 ```sh
 node tools/video/thumb/render.cjs /tmp/qrv/thumb stills 1,4,9,13.5   # a few stills

@@ -1,12 +1,14 @@
 <!doctype html>
 <!-- SPDX-License-Identifier: MIT · Copyright (c) 2026 Janelle Ghanem -->
-<!-- "Slide your thumb up! Feel the beat": the thumb-swipe trend, QR Compass edition (9:16).
-     Cut to the original reel's song (about 147.6 bpm; it cuts every two bars, 3.25 s), so every
-     thumb move lands on the beat: the thumb flips up and back down like the reel's demo, and
-     each up move launches something (the Roadster off its ramp, the SpaceX booster, a rocket
-     off its pad, slices of a 3D world fired up into a real QR code) while each down move brings
-     it back down (the car lands, the booster lands, the world recoils, the code thumps down). No captions after the opening card.
-     window.frame(seconds) draws any moment; render.cjs captures it. -->
+<!-- "Slide your thumb up! Feel the beat": the thumb-swipe trend, QR Compass edition (9:16, 60 fps).
+     Timed to the original reel's song: a beat every 0.4073 s from 0 (the reel cuts every 8 beats
+     and its actions land on these beats). The thumb flips up on the even beats and down on the
+     odd ones, as the reel's demo does. After the opening card it cuts on every beat: on an up beat
+     a company's world sends something up (the Roadster off its ramp, the SpaceX booster, the
+     Amazon drone, a rocket, the Starship); on a down beat something comes
+     down (Buffett's snowball down the Berkshire slope, the booster landing, the Oreo dunk, cereal
+     pouring, an excavator digging). Then the café world is fired up into a real QR code, which
+     bounces on the last beats. window.frame(seconds) draws any moment; render.cjs captures it. -->
 <meta charset="utf-8">
 <title>loading</title>
 <style>html, body { margin: 0; background: #f6f1e7; overflow: hidden; } canvas { display: block; }</style>
@@ -16,40 +18,36 @@
 <script type="module">
 import { world } from './model.js';
 const W = 1080, H = 1920, cv = document.getElementById('c'), ctx = cv.getContext('2d');
-const INK = '#17202c', CREAM = '#f6f1e7', ORANGE = '#e07a3f';
+const INK = '#17202c', CREAM = '#f6f1e7', ORANGE = '#e07a3f', SKY = '#a8d8f4';
 const URL_ = 'https://ghanemja.github.io/qr/';
 
-// ---- the song's grid: beat k falls at -0.04 + 0.4065 k (measured from the reel's audio) ----
-const BEAT = 0.4065, K = (k) => -0.04 + BEAT * k;
-// Sections, two bars each, as the reel cuts them.
-const S = { intro: 0, roadster: K(8) + 0.04, rockets: K(16) + 0.04, build: K(24) + 0.04, code: K(32) + 0.04 };
+// ---- the song's grid: beat k at 0.4073 k s (from the reel: its cuts at 3.24, 6.49, 9.73 and
+// 13.01 s are every 8 beats, and its actions land on the beats in between) ----
+const BEAT = 0.4073, K = (k) => BEAT * k;
+const S = { intro: 0, montage: K(8), build: K(24), code: K(32) };
 window.DURATION = +(BEAT * 40).toFixed(3); // 10 bars, so it loops like the reel
-// The thumb, as the reel's demo moves it: it flips up on every other beat and back down on the
-// beat after, so there are 20 up-and-down cycles, four per section. Up moves launch things;
-// down moves bring them back (or land them).
-const UP = (n) => K(2 * n) + 0.08, DN = (n) => K(2 * n + 1) + 0.15;
+// Up on the even beats, down on the odd ones: 20 cycles.
+const UP = (n) => K(2 * n), DN = (n) => K(2 * n + 1);
 const UPS = Array.from({ length: 20 }, (_, n) => UP(n)), DNS = Array.from({ length: 20 }, (_, n) => DN(n));
 const ups = (s) => UPS.slice(4 * s, 4 * s + 4), dns = (s) => DNS.slice(4 * s, 4 * s + 4);
-// How far the thumb is up (0 down, 1 up) at time T: a quick flip (0.08 s), then a hold.
-function thumbUp(T, dur = 0.09, curve = back) {
-  let lastU = -Infinity, lastD = -Infinity;
-  for (const u of UPS) if (T >= u) lastU = u;
-  for (const d of DNS) if (T >= d) lastD = d;
-  if (lastU > lastD) return curve((T - lastU) / dur);
-  if (lastD === -Infinity) return 0;
-  return 1 - curve((T - lastD) / dur);
-}
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const ease = (x) => { x = clamp(x); return x * x * (3 - 2 * x); };
 const easeOut = (x) => 1 - (1 - clamp(x)) ** 3;
 const easeIn = (x) => clamp(x) ** 3;
-function back(x) { x = clamp(x); const s = 1.9; return 1 + (s + 1) * (x - 1) ** 3 + s * (x - 1) ** 2; }
+function back(x) { x = clamp(x); const s = 1.7; return 1 + (s + 1) * (x - 1) ** 3 + s * (x - 1) ** 2; }
 const lerp = (a, b, k) => a + (b - a) * k;
 const rand = (seed) => () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
-// Piecewise-linear map through [x, y] keys (for driving a model's clock off the beat).
-const pw = (x, keys) => { if (x <= keys[0][0]) return keys[0][1]; for (let i = 1; i < keys.length; i++) if (x <= keys[i][0]) { const [a, b] = keys[i - 1], [c, d] = keys[i]; return b + ((x - a) / (c - a)) * (d - b); } return keys[keys.length - 1][1]; };
-// How long since the latest of these hits (Infinity before the first).
 const since = (T, hits) => { let d = Infinity; for (const h of hits) if (T >= h) d = T - h; return d; };
+// How far up the thumb is (0 down, 1 up). A flip takes `dur` and is centred on its beat, so the
+// pose lands on the beat itself.
+function thumbUp(T, dur = 0.12, curve = back) {
+  let lastU = -Infinity, lastD = -Infinity;
+  for (const u of UPS) if (T >= u - dur / 2) lastU = u;
+  for (const d of DNS) if (T >= d - dur / 2) lastD = d;
+  if (lastU > lastD) return curve((T - lastU + dur / 2) / dur);
+  if (lastD === -Infinity) return 0;
+  return 1 - curve((T - lastD + dur / 2) / dur);
+}
 
 // ---- the QR code ----
 const q = qrcode(0, 'H'); q.addData(URL_); q.make();
@@ -57,54 +55,10 @@ const N = q.getModuleCount(), MOD = 22, QX = Math.round(W / 2 - (N * MOD) / 2), 
 const DARK = [];
 for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (q.isDark(r, c)) DARK.push({ r, c, x: QX + (c + 0.5) * MOD, y: QY + (r + 0.5) * MOD });
 
-// ---- drawing helpers ----
 function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
-function line(segs, y, size, T, t0 = -1, { weight = 900, stroke = 14 } = {}) {
-  const k = T - t0; if (k < 0) return;
-  const s = t0 < 0 ? 1 : lerp(0.55, 1, back(k / 0.22));
-  ctx.save(); ctx.translate(W / 2, y); ctx.scale(s, s);
-  ctx.font = `${weight} ${size}px 'Inter Display', Inter`; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
-  const widths = segs.map(([t]) => ctx.measureText(t).width), total = widths.reduce((a, b) => a + b, 0);
-  let x = -total / 2;
-  segs.forEach(([t, col], i) => {
-    if (stroke) { ctx.strokeStyle = CREAM; ctx.lineWidth = stroke; ctx.strokeText(t, x, 0); }
-    ctx.fillStyle = col || INK; ctx.fillText(t, x, 0); x += widths[i];
-  });
-  ctx.restore();
-}
-// The reel's thumb: it comes in from the right edge and swings about a pivot off screen,
-// pointing left when down and straight up along the edge when up. Drawn seen from the nail side.
-const PIV = { x: 1130, y: 1330 }, TL = 780;
-function thumb(up) {
-  const ang = lerp(Math.PI + 0.2, -Math.PI / 2 - 0.12, up); // the direction from the pivot to the tip
-  ctx.save(); ctx.translate(PIV.x + Math.cos(ang) * TL, PIV.y + Math.sin(ang) * TL); ctx.rotate(ang + Math.PI);
-  const w = 190, L = 1500;
-  ctx.beginPath(); ctx.moveTo(w / 2, -w / 2); ctx.arc(w / 2, 0, w / 2, -Math.PI / 2, Math.PI / 2, true);
-  ctx.bezierCurveTo(280, w / 2 + 6, 460, w / 2 + 30, L, w / 2 + 70); ctx.lineTo(L, -w / 2 - 60);
-  ctx.bezierCurveTo(460, -w / 2 - 22, 280, -w / 2 - 4, w / 2, -w / 2); ctx.closePath();
-  ctx.fillStyle = '#fff'; ctx.fill(); ctx.lineWidth = 9; ctx.strokeStyle = INK; ctx.stroke();
-  rr(20, -58, 104, 116, [50, 24, 24, 50]); ctx.fillStyle = '#f2f2f4'; ctx.fill(); ctx.lineWidth = 7; ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(246, -48); ctx.quadraticCurveTo(258, 0, 246, 48); ctx.moveTo(272, -32); ctx.quadraticCurveTo(282, 0, 272, 32);
-  ctx.lineWidth = 7; ctx.stroke();
-  ctx.restore();
-}
-// Speed lines rushing up after a launch, so every swipe feels like it threw something.
-function streaks(T, hits, seed, col = 'rgba(23,32,44,0.18)') {
-  const d = since(T, hits); if (d > 0.45) return;
-  const R = rand(seed + hits.findIndex((h) => Math.abs(T - d - h) < 1e-6) * 7 + 1);
-  ctx.save(); ctx.strokeStyle = col; ctx.lineCap = 'round';
-  for (let i = 0; i < 16; i++) {
-    const x = 60 + R() * (W - 120), len = 160 + R() * 340, y = H + 100 - (d / 0.45) * (H + 600) * (0.7 + R() * 0.6);
-    ctx.globalAlpha = 1 - d / 0.45; ctx.lineWidth = 6 + R() * 10;
-    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + len); ctx.stroke();
-  }
-  ctx.restore();
-}
-// One zoom punch, when the code lands (a punch on every beat read as a jolt).
-function punch(T) { const d = T - S.code; return d >= 0 && d < 0.8 ? 1 + 0.05 * Math.exp(-d * 6) * Math.min(1, d / 0.05) : 1; }
-
-function background(T) {
-  ctx.fillStyle = CREAM; ctx.fillRect(-100, -100, W + 200, H + 200);
+function background(T, col = CREAM) {
+  ctx.fillStyle = col; ctx.fillRect(-100, -100, W + 200, H + 200);
+  if (col !== CREAM) return;
   const R = rand(3); ctx.fillStyle = 'rgba(23,32,44,0.045)';
   for (let i = 0; i < 70; i++) {
     const x = R() * W, s = 10 + R() * 26, y = ((R() * (H + 200) - T * (40 + R() * 60)) % (H + 200) + H + 200) % (H + 200) - 100;
@@ -112,70 +66,109 @@ function background(T) {
   }
 }
 
-// ---- the 3D worlds, each on the song's clock ----
-const TESLA = await world('tesla', W, H), SPACEX = await world('spacex', W, H), PAD = await world('relativity-space', W, H), CAFE = await world('starbucks', W, H);
-// The Roadster, one jump per thumb cycle, each from a new angle: the cut comes just before
-// the up move, the up move throws it off the curl, and it lands on the down move. Its own
-// clock: in the curl from 1.6 s, off it at 2.2 s, down on its wheels at 3.6 s.
-const RU = ups(1), RD = dns(1);
-const ROAD_CUTS = [S.roadster, RU[1] - 0.14, RU[2] - 0.14, RU[3] - 0.14, S.rockets];
-const ROAD_VIEWS = [
-  { az: -Math.PI / 4 + 0.1, elev: 0.32, dist: 19 }, { az: -Math.PI / 2 - 0.35, elev: 0.22, dist: 17 },
-  { az: -0.15, elev: 0.42, dist: 21 }, { az: -Math.PI / 4 - 0.7, elev: 0.14, dist: 16 }];
-const roadCut = (T) => Math.max(0, ROAD_CUTS.findIndex((c, i) => T >= c && T < ROAD_CUTS[i + 1]));
-// One steady clock per shot (no speed jumps): off the curl (2.2 s) on the up move, down on its
-// wheels (3.6 s) on the down move.
-const ROAD_RATE = 1.4 / (RD[0] - RU[0]);
-const roadT = (T) => 2.2 + (T - RU[roadCut(T)]) * ROAD_RATE;
-const roadView = (T) => { const j = roadCut(T), v = ROAD_VIEWS[j]; return { pin: [-0.1, 1.6, 3.35], at: [W / 2, 1060], ...v, az: v.az + 0.12 * (T - ROAD_CUTS[j]) }; };
-// The SpaceX booster bounces off its droneship with the thumb: it lights and leaves the deck on
-// the up move, tops out on the down move and settles back onto the pad on the next up move.
-// We fly it ourselves (a smooth arc) rather than speeding its own clock up and down; the scene
-// is posed at a moment when the legs are out and the deck is clear.
-const BU = ups(2), BD = dns(2), PAD_CUT = BU[3] - 0.14, HOP = 4.2;
-function boostAlt(T) {
-  for (let j = 0; j < 4; j++) {
-    const u = BU[j], d = BD[j], u2 = j < 3 ? BU[j + 1] : u + (BU[1] - BU[0]);
-    if (T >= u && T < d) { const x = (T - u) / (d - u); return HOP * (1 - (1 - x) ** 2); }            // decelerating climb
-    if (T >= d && T < u2) { const x = (T - d) / (u2 - d); return HOP * (1 - x * x); }                 // accelerating fall
-  }
-  return 0;
+// ---- the opening card: the trend's look, and a cartoon thumb that bends at the knuckle ----
+function title(T) {
+  ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#0d0f12';
+  ctx.font = "900 84px 'Inter Display', Inter"; ctx.fillText('SLIDE YOUR THUMB UP!', W / 2, 330);
+  ctx.fillText('FEEL THE BEAT', W / 2, 432);
+  ctx.font = "800 60px 'Inter Display', Inter"; ctx.fillText('(QR edition)', W / 2, 522);
+  ctx.restore();
 }
-const boostAfter = (T) => (nodes) => {
-  // Everything past the booster's own parts (the boat, the gulls, the Starship on its island) runs
-  // on a gentle clock that keeps the Starship sitting on its pad.
-  for (let i = 20; i < nodes.length; i++) {
-    const { o, mv } = nodes[i], q = mv.anim(1 + (T - S.rockets));
-    o.position.set(mv.pivot[0] + (q.x || 0), mv.pivot[1] + (q.y || 0), mv.pivot[2] + (q.z || 0));
-    if (q.q) o.quaternion.copy(q.q); else o.rotation.set(q.rx || 0, q.ry || 0, q.rz || 0);
-    const s0 = q.s ?? 1, sx = q.sx ?? s0, sy = q.sy ?? s0, sz = q.sz ?? s0;
-    o.scale.set(Math.max(1e-3, sx), Math.max(1e-3, sy), Math.max(1e-3, sz)); o.visible = Math.min(sx, sy, sz) > 2e-3;
+// The thumb comes in from the right edge: a base joint off screen, a first segment and the tip
+// segment with the nail. Down, it lies across the screen pointing left; up, it stands along the
+// right edge. Outline pass, then fill pass, so the joints have no seams.
+const BASE = { x: 1000, y: 1650 }, L1 = 470, L2 = 360, W1 = 214, W2 = 182;
+function thumbArt(up) {
+  const a1 = lerp(Math.PI + 0.42, -Math.PI / 2 - 0.2, up), a2 = lerp(Math.PI + 0.12, -Math.PI / 2 + 0.12, up) + Math.sin(up * Math.PI) * 0.25;
+  const k = { x: BASE.x + Math.cos(a1) * L1, y: BASE.y + Math.sin(a1) * L1 }, tip = { x: k.x + Math.cos(a2) * L2, y: k.y + Math.sin(a2) * L2 };
+  const seg = (w) => {
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    ctx.lineWidth = w + W1 - W2; ctx.beginPath(); ctx.moveTo(BASE.x + 300 * Math.cos(a1 + Math.PI), BASE.y + 300 * Math.sin(a1 + Math.PI)); ctx.lineTo(k.x, k.y); ctx.stroke();
+    ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(k.x, k.y); ctx.lineTo(tip.x, tip.y); ctx.stroke();
+  };
+  ctx.save();
+  ctx.strokeStyle = INK; seg(W2 + 18);
+  ctx.strokeStyle = '#ffffff'; seg(W2);
+  // A soft shade along the underside.
+  ctx.globalAlpha = 0.08; ctx.strokeStyle = INK; ctx.lineWidth = 40; ctx.beginPath();
+  const nx = Math.sin(a2), ny = -Math.cos(a2);
+  ctx.moveTo(k.x - nx * 60, k.y - ny * 60); ctx.lineTo(tip.x - nx * 60 - Math.cos(a2) * 40, tip.y - ny * 60 - Math.sin(a2) * 40); ctx.stroke(); ctx.globalAlpha = 1;
+  // The knuckle creases.
+  ctx.strokeStyle = INK; ctx.lineWidth = 7; ctx.lineCap = 'round';
+  const cx = k.x + Math.cos(a2) * 30, cy = k.y + Math.sin(a2) * 30;
+  for (const [o, len] of [[0, 46], [22, 30]]) {
+    ctx.beginPath(); ctx.moveTo(cx + Math.cos(a2) * o + nx * len, cy + Math.sin(a2) * o + ny * len);
+    ctx.quadraticCurveTo(cx + Math.cos(a2) * (o + 10), cy + Math.sin(a2) * (o + 10), cx + Math.cos(a2) * o - nx * len, cy + Math.sin(a2) * o - ny * len); ctx.stroke();
   }
-  const alt = boostAlt(T), body = nodes[0].o;
-  body.position.y += alt;
-  body.rotation.z = Math.sin(T * 6) * 0.02 * (alt / HOP); body.rotation.x = Math.cos(T * 5) * 0.015 * (alt / HOP);
-  // The flame burns on the climb and for the landing burn.
-  const dU = since(T, BU), dD = since(T, BD), burning = (dU < dD && alt > 0) || (dD < dU && alt > 0 && alt < 1.6);
-  const flame = nodes[9].o; flame.visible = burning;
-  if (burning) flame.scale.set(1 + Math.sin(T * 29) * 0.06, 0.9 + Math.sin(T * 37) * 0.12 + (dU < dD ? 0.35 : 0), 1 + Math.sin(T * 31) * 0.06);
-  // A puff of smoke across the deck at each lift-off, spreading and fading.
-  const p = since(T, BU);
-  for (let i = 10; i < 20; i++) {
-    const mv = nodes[i].mv, k = p > 1.2 ? 0 : p < 0.15 ? easeOut(p / 0.15) : 1 - ease((p - 0.15) / 0.6);
-    const f = k >= 1 ? 0.8 : p < 0.15 ? 0.72 + 0.08 * k : 0.84 + 0.11 * (1 - k); // read the puff's own pose at that spread
-    const q = mv.anim(f * 10), o = nodes[i].o;
-    o.position.set(mv.pivot[0] + (q.x || 0), mv.pivot[1] + (q.y || 0), mv.pivot[2] + (q.z || 0));
-    const sc = Math.max(1e-3, q.s ?? 1); o.scale.set(sc, sc, sc); o.visible = sc > 2e-3;
+  // The nail, near the tip.
+  ctx.translate(tip.x, tip.y); ctx.rotate(a2);
+  rr(-118, -56, 104, 112, [24, 50, 50, 24]); ctx.fillStyle = '#f3f3f5'; ctx.fill(); ctx.lineWidth = 7; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-96, -40); ctx.quadraticCurveTo(-104, 0, -96, 40); ctx.lineWidth = 5; ctx.globalAlpha = 0.35; ctx.stroke();
+  ctx.restore();
+}
+
+// ---- the 3D worlds ----
+const SLUGS = ['tesla', 'berkshire-hathaway', 'spacex', 'amazon', 'mondelez-international', 'relativity-space', 'general-mills', 'caterpillar', 'starbucks'];
+const WORLD = {};
+for (const s of SLUGS) WORLD[s] = await world(s, W, H);
+const CAFE = WORLD.starbucks;
+
+// The SpaceX booster flown by us (a smooth climb or a landing), with its flame and smoke.
+const pose = (o, mv, t) => {
+  const q = mv.anim(t);
+  o.position.set(mv.pivot[0] + (q.x || 0), mv.pivot[1] + (q.y || 0), mv.pivot[2] + (q.z || 0));
+  if (q.q) o.quaternion.copy(q.q); else o.rotation.set(q.rx || 0, q.ry || 0, q.rz || 0);
+  const s0 = q.s ?? 1, sx = q.sx ?? s0, sy = q.sy ?? s0, sz = q.sz ?? s0;
+  o.scale.set(Math.max(1e-3, sx), Math.max(1e-3, sy), Math.max(1e-3, sz)); o.visible = Math.min(sx, sy, sz) > 2e-3;
+};
+const flyBooster = (alt, burn, puff, T) => (nodes) => {
+  for (let i = 20; i < nodes.length; i++) pose(nodes[i].o, nodes[i].mv, 1 + T * 0.3); // boat, gulls, Starship parked
+  const body = nodes[0].o; body.position.y += alt;
+  body.rotation.z = Math.sin(T * 6) * 0.02 * Math.min(1, alt / 3);
+  const flame = nodes[9].o; flame.visible = burn;
+  if (burn) flame.scale.set(1 + Math.sin(T * 29) * 0.06, 1.1 + Math.sin(T * 37) * 0.14, 1 + Math.sin(T * 31) * 0.06);
+  for (let i = 10; i < 20; i++) { // smoke: puff in [0, 1] spreads it out, then it fades
+    const k = puff <= 0 ? 0 : puff < 0.3 ? easeOut(puff / 0.3) : 1 - ease((puff - 0.3) / 0.7);
+    pose(nodes[i].o, nodes[i].mv, 10 * (k >= 1 ? 0.8 : puff < 0.3 ? 0.72 + 0.08 * k : 0.84 + 0.11 * (1 - k)));
   }
 };
-// Its scene is held at 6.0 s on its own clock (booster down, legs out) apart from what we fly.
-const boostT = () => 6.0;
-const boostView = (T) => ({ pin: [0, 4.2, 0], at: [W / 2, 1250], az: Math.PI / 4 + 0.1 + 0.08 * (T - S.rockets), elev: 0.2, dist: 31, after: boostAfter(T) });
-// Then the pad rocket lights on the fourth up move and climbs out of the top of the frame, on a
-// steady clock (ignition at 8.64 s; gone by 11.7 s).
-const PAD_RATE = (11.7 - 8.64) / (S.build - BU[3]);
-const padT = (T) => 8.64 + (T - BU[3]) * PAD_RATE;
-const padView = (T) => ({ pin: [-3, 3.2, -3], at: [W / 2, 1300], az: Math.PI / 4 + 0.2 - 0.1 * (T - PAD_CUT), elev: 0.12, dist: 21 });
+
+// The montage: one shot per beat from beat 8 to beat 23. Each runs its world's own clock at a
+// steady rate (t0 at the cut), so motion is smooth, and the action starts on the cut, which is
+// the beat. Up shots drift up a touch and down shots drift down, with the swipe.
+const V = (az, elev, dist, pin, y = 1150) => ({ az, elev, dist, pin, at: [W / 2, y] });
+const SHOTS = [
+  { dir: 1, slug: 'tesla', t0: 2.0, rate: 2.6, view: V(-Math.PI / 4 + 0.1, 0.3, 19, [-0.1, 1.6, 3.35], 1080) },
+  { dir: -1, slug: 'berkshire-hathaway', t0: 3.9, rate: 1.7, view: V(Math.PI / 4 - 0.2, 0.5, 26, [0, 1.8, 0]) },
+  { dir: 1, slug: 'spacex', booster: 'up', view: V(Math.PI / 4 + 0.1, 0.18, 30, [0, 4.6, 0], 1300) },
+  { dir: -1, slug: 'mondelez-international', t0: 5.15, rate: 1.4, view: V(Math.PI / 4 + 0.2, 0.42, 17, [-0.6, 1.8, 1.4], 1150) },
+  { dir: 1, slug: 'amazon', t0: 3.95, rate: 2.0, view: V(Math.PI / 4 - 0.15, 0.3, 26, [0, 4.0, 0], 1350) },
+  { dir: -1, slug: 'spacex', booster: 'down', view: V(Math.PI / 4 + 0.7, 0.2, 30, [0, 4.6, 0], 1300) },
+  { dir: 1, slug: 'relativity-space', t0: 9.9, rate: 2.3, view: V(Math.PI / 4 + 0.2, 0.12, 22, [-3, 3.4, -3], 1300) },
+  { dir: -1, slug: 'general-mills', t0: 3.4, rate: 1.6, view: V(Math.PI / 4 - 0.1, 0.4, 19, [0, 1.6, 0], 1150) },
+  { dir: 1, slug: 'spacex', booster: 'up', view: V(Math.PI / 4 - 0.7, 0.1, 24, [0, 4.6, 0], 1400) },
+  { dir: -1, slug: 'berkshire-hathaway', t0: 5.0, rate: 1.5, view: V(-0.25, 0.32, 20, [1.4, 1.0, 0.6]) },
+  { dir: 1, slug: 'spacex', t0: 5.25, rate: 2.2, view: V(Math.PI / 4 - 0.3, 0.16, 15, [4.05, 3.0, -4.05], 1350) },
+  { dir: -1, slug: 'caterpillar', t0: 3.0, rate: 1.6, view: V(Math.PI / 4, 0.55, 20, [0, 0.8, 0], 1150) },
+  { dir: 1, slug: 'tesla', t0: 2.0, rate: 2.6, view: V(-Math.PI / 2 - 0.35, 0.2, 17, [-0.1, 1.6, 3.35], 1060) },
+  { dir: -1, slug: 'spacex', booster: 'down', view: V(Math.PI / 4 - 0.6, 0.12, 26, [0, 4.0, 0], 1350) },
+  { dir: 1, slug: 'amazon', t0: 4.0, rate: 2.0, view: V(Math.PI / 4 + 0.6, 0.22, 28, [0, 4.4, 0], 1400) },
+  { dir: -1, slug: 'mondelez-international', t0: 5.15, rate: 1.4, view: V(-0.1, 0.3, 15, [-0.6, 1.8, 1.4], 1150) },
+];
+function montage(T) {
+  const i = clamp(Math.floor((T - S.montage) / BEAT), 0, SHOTS.length - 1), sh = SHOTS[i], u = (T - S.montage - i * BEAT) / BEAT;
+  const w = WORLD[sh.slug], drift = sh.dir * (1 - easeOut(u)) * 70;
+  const view = { ...sh.view, at: [sh.view.at[0], sh.view.at[1] + drift], az: sh.view.az + 0.12 * u };
+  if (sh.booster === 'up') {
+    const alt = 9 * u ** 1.7; // accelerating off the deck
+    view.after = flyBooster(alt, true, u + 0.15, T);
+    ctx.drawImage(w.render(6.0, view), 0, 0);
+  } else if (sh.booster === 'down') {
+    const alt = 7 * (1 - easeOut(u / 0.92)); // decelerating onto the deck, touching down just before the next beat
+    view.after = flyBooster(alt, alt > 0.02, u > 0.85 ? (u - 0.85) * 3 : 0, T);
+    ctx.drawImage(w.render(6.0, view), 0, 0);
+  } else ctx.drawImage(w.render(sh.t0 + u * BEAT * sh.rate, view), 0, 0);
+}
 
 // ---- the build: the café world pops up on the first up move, lands on the down, and the
 // next three up moves fire it, a slice at a time, up into its QR code; it recoils on each down ----
@@ -253,32 +246,18 @@ function code(T) {
   ctx.restore();
 }
 
+
 // ---- the frame ----
 window.frame = (T) => {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  const z = punch(T); ctx.translate(W / 2, H / 2); ctx.scale(z, z); ctx.translate(-W / 2, -H / 2);
+  if (T < S.montage) { background(T, SKY); title(T); thumbArt(thumbUp(T)); return; }
+  // One zoom punch, when the code lands.
+  const d = T - S.code, z = d >= 0 && d < 0.8 ? 1 + 0.05 * Math.exp(-d * 6) * Math.min(1, d / 0.05) : 1;
+  ctx.translate(W / 2, H / 2); ctx.scale(z, z); ctx.translate(-W / 2, -H / 2);
   background(T);
-
-  if (T < S.roadster) {
-    line([['SLIDE YOUR THUMB UP!']], 330, 92, T, 0.0);
-    line([['FEEL THE '], ['BEAT', ORANGE]], 440, 92, T, 0.2);
-    thumb(thumbUp(T));
-    return;
-  }
-  if (T < S.rockets) {
-    streaks(T, RU, 5);
-    ctx.drawImage(TESLA.render(roadT(T), roadView(T)), 0, 0);
-    return;
-  }
-  if (T < S.build) {
-    streaks(T, BU, 9);
-    if (T < PAD_CUT) ctx.drawImage(SPACEX.render(boostT(T), boostView(T)), 0, 0);
-    else ctx.drawImage(PAD.render(padT(T), padView(T)), 0, 0);
-    return;
-  }
-  if (T < S.code) { streaks(T, WU, 13, 'rgba(23,32,44,0.1)'); build(T); return; }
+  if (T < S.build) { montage(T); return; }
+  if (T < S.code) { build(T); return; }
   code(T);
-  // The flash as the code completes.
   const f = 1 - (T - S.code) / 0.35;
   if (f > 0) { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.fillStyle = `rgba(255,255,255,${f})`; ctx.fillRect(0, 0, W, H); }
 };
