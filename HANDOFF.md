@@ -63,8 +63,8 @@ The Walmart "falling off the edge" fix (region-view lots kept fully on their pie
 
 ## Instagram Reels (`tools/video/reel.html`, final files in `media/reels/`)
 
-- **Asked for:** Instagram videos hyping the site, "just Amazon for now". Made `media/reels/amazon-house.mp4` and `amazon-synthwave.mp4` (same picture, two soundtracks), 9:16 1080×1920, 20 s, plus `amazon-cover.jpg` and a post caption in `media/reels/amazon-caption.txt`.
-- **Cut (10 bars at 120 bpm, `CUT=reel` in `songs/plan.mjs`):** 0–2 s hook ("Every company, a tiny living world. This is Amazon." + "No. 1 on the Fortune 500"); 2–8 s three close-ups (the smile conveyor, the drone pickup, the van out for delivery), the build-up; 8–16 s the drop into the QR shot (`qrshot.html?fmt=reel`): it shatters into its QR code, "Pause and scan it with your camera", and rebuilds; 16–20 s end card with "Who should be next? Comment a company" and "link in bio".
+- **Asked for:** Instagram videos hyping the site, "just Amazon for now". Made `media/reels/amazon-house.mp4` and `amazon-synthwave.mp4` (same picture, two soundtracks), 9:16 1080×1920, 20 s, plus `amazon-cover.jpg`. The user then asked for **no captions at all**: the reels have no words on screen and no post caption. The captioned version below is still there behind `TEXT=1`.
+- **Cut (10 bars at 120 bpm, `CUT=reel` in `songs/plan.mjs`; the words only with `TEXT=1`):** 0–2 s hook ("Every company, a tiny living world. This is Amazon." + "No. 1 on the Fortune 500"); 2–8 s three close-ups (the smile conveyor, the drone pickup, the van out for delivery), the build-up; 8–16 s the drop into the QR shot (`qrshot.html?fmt=reel`): it shatters into its QR code, "Pause and scan it with your camera", and rebuilds; 16–20 s end card with "Who should be next? Comment a company" and "link in bio".
 - **Next companies:** add a recipe to `RECIPES` in `reel.html` (hook text, three close-ups with a model time and a camera that can follow a mover via `at(i, t)`), then render with `SLUG=<page slug>`. Without a recipe a company gets only the hook, QR shot and end card.
 
 ## Shared-shape upgrades

@@ -28,12 +28,13 @@
 import { createQRWorld } from '/qr/assets/qrsculpture.js';
 const Q = new URLSearchParams(location.search), slug = Q.get('slug') || 'coca-cola', REEL = Q.get('fmt') === 'reel';
 document.documentElement.classList.toggle('reel', REEL);
+if (REEL && Q.get('text') !== '1') document.head.insertAdjacentHTML('beforeend', '<style>.ov, #act { display: none; }</style>');
 // In a reel, the code holds still long enough to scan straight off the screen.
 if (REEL) document.querySelector('#c2 span').textContent = 'Pause and scan it with your camera.';
 const html = await (await fetch(`/qr/c/${slug}.html`)).text();
 const C = JSON.parse(html.match(/window\.COMPANY=(\{.*?\});<\/script>/)[1]);
 document.querySelector('#c1 b').textContent = C.name;
-const world = createQRWorld(document.getElementById('stage'), { slug: C.slug, model: C.model, look: C.look, qr: C.qr, viewScale: 1.3, insets: () => (REEL ? { top: 620, bottom: 520 } : { top: 300, bottom: 50 }) });
+const world = createQRWorld(document.getElementById('stage'), { slug: C.slug, model: C.model, look: C.look, qr: C.qr, viewScale: 1.3, insets: () => (REEL ? (Q.get('text') === '1' ? { top: 620, bottom: 520 } : { top: 300, bottom: 300 }) : { top: 300, bottom: 50 }) });
 // The shot, in seconds from its first frame (the world has already grown in by then).
 const SCAN = 1, BACK = 5.6;
 // Playback rate of the page's clock at shot time t: the breakdown plays at half speed so every

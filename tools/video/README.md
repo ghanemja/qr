@@ -31,9 +31,10 @@ ffmpeg -framerate 30 -i /tmp/qrv/frames/f%05d.jpg -i /tmp/qrv/house.wav \
 
 ## Instagram Reels (`reel.html`)
 
-A 20-second 9:16 reel (1080×1920) for one company: a hook, three close-ups of its world that show
-why it wins, the model breaking into its real QR code (held long enough to scan off the screen), and
-an end card asking who's next. Words stay clear of Instagram's own UI (top 220 px, bottom 420 px).
+A 20-second 9:16 reel (1080×1920) for one company, with no words on screen: a push-in, three
+close-ups of its world, the model breaking into its real QR code (held long enough to scan off the
+screen) and rebuilding, then a pull-back. `TEXT=1` renders the captioned version (hook, captions,
+end card), with the words kept clear of Instagram's own UI (top 220 px, bottom 420 px).
 Each company's close-ups are a recipe in `RECIPES` in `reel.html`; only Amazon has one so far.
 
 ```sh
