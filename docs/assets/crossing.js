@@ -1,5 +1,5 @@
-// Beagle Crossing: a crayon crosswalk seen from above. A white beagle (black ear, black nose,
-// red collar) is walked across a zebra crossing among walkers and bikes; a little yellow bird
+// Snoopy Crossing: a crayon crosswalk seen from above. Snoopy, upright on two feet (black ear,
+// black nose, red collar), is walked across a zebra crossing among walkers and bikes; a little yellow bird
 // tags along. Everything is drawn in 2D canvas as wobbly crayon shapes, re-jittered a few
 // times a second ("line boil") and stepped at 12 fps so it reads like stop-motion, then a
 // paper grain is punched out of the whole frame so the wax looks patchy.
@@ -14,7 +14,7 @@
   const COS = Math.cos(ROT), SIN = Math.sin(ROT);
   const STRIPE_H = 46, STRIPE_P = 84;
   const END_ZOOM = 1.8;        // the wide shot after the pull-back
-  const DOG = 1.25;            // the beagle is drawn a bit larger than life, it's the star
+  const DOG = 1.25;            // Snoopy is drawn a bit larger than life, it's the star
 
   // ---------- seeded randomness (so a shape jitters the same way within one boil frame) ----------
   const mulberry = (a) => () => {
@@ -239,45 +239,52 @@
     crayon(rng, wobblyEllipse(rng, 1.8, -28.6, 3.8, 2.4), p.hat || p.hair, { edge: 0.5 });
   }
 
-  // A white beagle in profile, facing right: big head, long snout with a black nose, one long black ear.
-  function drawBeagle(rng, ph, sit) {
-    const sw = Math.sin(ph), bob = sit ? 0 : Math.abs(Math.cos(ph)) * 0.8;
-    const W_ = '#fbf8f1', K = '#232120';
-    const leg = (x, s) => {
-      const pts = [[x - 1.6, -7 - bob], [x + 1.6, -7 - bob], [x + 1.5 + s, -0.6], [x - 1.7 + s, -0.6]];
-      crayon(rng, wobblyPoly(rng, pts, 0.25), W_, { dark: 'rgba(0,0,0,0.07)', edge: 0.5 });
-      outline(rng, pts, 0.7, K);
+  // Snoopy in profile, facing right, walking upright on two feet: a small pear-shaped body,
+  // a big round head with a long bulbous snout, a black oval nose at its tip, one long black ear.
+  function drawSnoopy(rng, ph, still) {
+    const sw = still ? 0 : Math.sin(ph), bob = still ? 0 : Math.abs(Math.cos(ph)) * 0.7;
+    const WH = '#fdfaf3', K = '#1f1d1c';
+    const white = (pts) => { crayon(rng, pts, WH, { dark: 'rgba(0,0,0,0.05)', light: 'rgba(0,0,0,0)', edge: 0.4 }); };
+    const foot = (dx) => {
+      const pts = wobblyEllipse(rng, 0.8 + dx, -1.3, 3.4, 1.5, 0, 0.05);
+      white(pts); outline(rng, pts, 0.8, K);
     };
-    // far legs
-    leg(-5, sw * 1.6); leg(4.5, -sw * 1.6);
-    // tail
-    crayonLine(rng, [[-8, -11 - bob], [-10.5, -14.5 - bob], [-11, -17.5 - bob + sw * 0.5]], K, 2.4, 0.25);
-    crayonLine(rng, [[-8, -11 - bob], [-10.5, -14.5 - bob], [-11, -17.5 - bob + sw * 0.5]], W_, 1.3, 0.2);
-    // body
-    const body = wobblyEllipse(rng, -0.5, -10.5 - bob, 9.5, 5.4, -0.05, 0.05);
-    crayon(rng, body, W_, { dark: 'rgba(0,0,0,0.06)', edge: 0.6 }); outline(rng, body, 0.85, K);
-    // near legs
-    leg(-6.5, -sw * 1.6); leg(6, sw * 1.6);
+    const y = -bob;
+    // far foot and far arm behind the body
+    foot(-sw * 2.4);
+    const farArm = [[-0.5, -10.6 + y], [1.5 + sw * 1.2, -7.8 + y], [2.7 + sw * 1.2, -8.6 + y], [1, -11.4 + y]];
+    white(farArm); outline(rng, farArm, 0.7, K);
+    // tail: a little stub at the back
+    const tail = [[-4.6, -6.6 + y], [-7.6, -9.4 + y], [-6.8, -10.4 + y], [-4.2, -8.4 + y]];
+    white(tail); outline(rng, tail, 0.7, K);
+    // pear-shaped body
+    const body = [[-1, -1.8 + y], [-4.6, -3 + y], [-5.4, -7 + y], [-3.6, -11.6 + y], [-0.6, -13.4 + y], [2.4, -12.4 + y], [3.4, -8.4 + y], [3.4, -3.6 + y], [1.6, -1.8 + y]];
+    const b = wobblyPoly(rng, body, 0.15);
+    white(b); outline(rng, b, 0.75, K);
+    foot(sw * 2.4);
+    // near arm swinging
+    const arm = [[1.4, -11.2 + y], [5 - sw * 1.2, -9.2 + y], [4.7 - sw * 1.2, -7.7 + y], [1.6, -9.2 + y]];
+    white(arm); outline(rng, arm, 0.75, K);
     // red collar
-    crayonLine(rng, [[5.2, -13.8 - bob], [7.2, -10.6 - bob]], '#d8322b', 1.8, 0.2);
-    // head: round skull plus a long snout
-    const hy = -19.5 - bob;
-    const head = wobblyEllipse(rng, 9, hy, 6.6, 6.2, 0, 0.04);
-    const snout = wobblyEllipse(rng, 15.5, hy + 1.6, 6.2, 3.9, -0.08, 0.04);
-    crayon(rng, head, W_, { dark: 'rgba(0,0,0,0.05)', edge: 0.5 });
-    crayon(rng, snout, W_, { dark: 'rgba(0,0,0,0.05)', edge: 0.5 });
-    outline(rng, wobblyEllipse(rng, 9, hy, 6.6, 6.2, 0, 0.03), 0.85, K);
-    // repaint white over the seam so head and snout read as one shape, then outline the snout's outer edge
-    crayon(rng, wobblyEllipse(rng, 12.5, hy + 1.2, 4, 3.4), W_, { dark: 'rgba(0,0,0,0)', light: 'rgba(0,0,0,0)', edge: 0 });
-    ctx.strokeStyle = K; ctx.lineWidth = 0.85; ctx.globalAlpha = 0.9; ctx.beginPath();
-    ctx.ellipse(15.5 + (rng() - 0.5) * 0.3, hy + 1.6, 6.2, 3.9, -0.08, -1.75, 1.75); ctx.stroke(); ctx.globalAlpha = 1;
-    // nose, eye, smile
-    crayon(rng, wobblyEllipse(rng, 21.2, hy + 0.6, 1.9, 1.6), K, { edge: 0.4 });
-    crayonLine(rng, [[11.6, hy - 2.6], [11.8, hy - 0.9]], K, 0.9, 0.12);
-    crayonLine(rng, [[14, hy + 4], [16.5, hy + 4.6], [18.5, hy + 3.6]], K, 0.6, 0.12);
-    // long black ear, swinging a little with the walk
-    const ear = wobblyEllipse(rng, 5.6 - sw * 0.4, hy + 3, 2.3, 6.1, 0.25 + sw * 0.08, 0.05);
-    crayon(rng, ear, K, { light: 'rgba(255,255,255,0.12)', edge: 0.5 });
+    crayonLine(rng, [[-2.9, -12 + y], [-0.4, -13.3 + y], [2.3, -12.6 + y]], '#d8322b', 1.5, 0.12);
+    // head: round skull plus a long rounded snout, read as one white shape
+    const hy = -19 + y;
+    const skull = wobblyEllipse(rng, -0.4, hy, 5.6, 5.6, 0, 0.03);
+    const snout = wobblyEllipse(rng, 6, hy + 0.6, 6.4, 4.3, -0.06, 0.03);
+    outline(rng, skull, 0.85, K); outline(rng, snout, 0.85, K);
+    white(skull); white(snout);
+    ctx.strokeStyle = K; ctx.lineWidth = 0.75; ctx.globalAlpha = 0.9;
+    ctx.beginPath(); ctx.arc(-0.4, hy, 5.6, 0.95, 5.05, false); ctx.stroke();               // back of the head
+    ctx.beginPath(); ctx.ellipse(6, hy + 0.6, 6.4, 4.3, -0.06, -1.95, 1.75); ctx.stroke();   // around the snout
+    ctx.globalAlpha = 1;
+    // black oval nose at the very tip
+    crayon(rng, wobblyEllipse(rng, 11.4, hy - 1.6, 1.9, 1.5, 0.3), K, { edge: 0.3 });
+    // eye: a small upright dash; a little smile under the snout
+    crayon(rng, wobblyEllipse(rng, 2.6, hy - 1.9, 0.55, 1.15), K, { edge: 0.2 });
+    crayonLine(rng, [[5.4, hy + 3.4], [7.6, hy + 4.1], [9.4, hy + 3.2]], K, 0.55, 0.08);
+    // one long black ear hanging from the top of the head
+    const ear = wobblyEllipse(rng, -0.9 - sw * 0.3, hy + 2.2, 1.85, 5.3, 0.12 + sw * 0.06, 0.05);
+    crayon(rng, ear, K, { light: 'rgba(255,255,255,0.1)', edge: 0.4 });
   }
 
   function drawBird(rng, t) {
@@ -317,7 +324,7 @@
       a.y = cam.y + 40 + (R() * 2 - 1) * span;
       agents.push(a);
     }
-    // keep the walker's own lane mostly clear so the beagle stays visible
+    // keep the walker's own lane mostly clear so Snoopy stays visible
     agents = agents.filter((a) => Math.abs(a.x - star.x) > 30 || Math.abs(a.y - star.y) > 70);
   }
   function startIntro() {
@@ -332,7 +339,7 @@
   const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
   function step(dt) {
     t += dt;
-    // the walker and beagle stop for a sniff every so often
+    // the walker and Snoopy stop for a sniff every so often
     star.sniff = Math.max(0, star.sniff - dt);
     if (star.sniff === 0 && R() < dt * 0.06 && t > 7) star.sniff = 1.6;
     const v = star.sniff > 0 ? 0 : star.speed;
@@ -370,8 +377,8 @@
       const [sx, sy] = toScreen(a.x, a.y);
       return { a, sx, sy };
     }).filter((o) => o.sx > -60 * s && o.sx < W + 60 * s && o.sy > -40 * s && o.sy < H + 80 * s);
-    // beagle position relative to the walker: ahead (up the crossing) and to the right
-    const dogWorld = [star.x + 22, star.y - 22];
+    // Snoopy's position relative to the walker: ahead (up the crossing) and to the right
+    const dogWorld = [star.x + 20, star.y - 14];
     const [dsx, dsy] = toScreen(...dogWorld);
     const place = (sx, sy) => ctx.setTransform(dpr * s, 0, 0, dpr * s, dpr * sx, dpr * sy);
     // shadows first so nobody's shadow lands on top of someone else
@@ -379,7 +386,7 @@
       place(o.sx, o.sy);
       drawShadow(rngFor(o.a.id, 1), o.a.kind === 'bike' ? 14 : 8, o.a.kind === 'bike' ? 26 : 24);
     }
-    place(dsx, dsy); ctx.scale(DOG, DOG); drawShadow(rngFor(9, 1), 18, 18);
+    place(dsx, dsy); ctx.scale(DOG, DOG); drawShadow(rngFor(9, 1), 10, 20);
     items.push({ a: { kind: 'dog' }, sx: dsx, sy: dsy });
     items.sort((p, q) => p.sy - q.sy);
     for (const o of items) {
@@ -388,7 +395,7 @@
       if (a.kind === 'dog') {
         const sniff = star.sniff > 0;
         ctx.scale(DOG, DOG);
-        drawBeagle(rngFor(9, 2), sniff ? 0 : star.phase * 1.4, sniff);
+        drawSnoopy(rngFor(9, 2), sniff ? 0 : star.phase * 1.4, sniff);
       } else if (a.kind === 'bike') drawBike(a, rngFor(a.id, 2), a.phase);
       else {
         const sw = a.kind === 'star' && star.sniff > 0 ? 0 : Math.sin(a.phase);
@@ -400,7 +407,7 @@
       const [wsx, wsy] = toScreen(star.x, star.y);
       const sw = star.sniff > 0 ? 0 : Math.sin(star.phase);
       const hx = wsx + 5.8 * s, hy = wsy + (-12 + sw * 1.6 * -1) * s;
-      const cx = dsx + 6.2 * DOG * s, cy = dsy - 12.2 * DOG * s;
+      const cx = dsx - 2.6 * DOG * s, cy = dsy - 12.2 * DOG * s;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       const rng = rngFor(9, 3);
       const pts = [];
@@ -410,7 +417,7 @@
       }
       crayonLine(rng, pts, '#6b2a1a', 1.3 * s, 0.4 * s);
     }
-    // the little yellow bird looping over the beagle
+    // the little yellow bird looping over Snoopy
     {
       const bx = dsx + (Math.cos(t * 1.4) * 15 + 6) * s, by = dsy + (-40 + Math.sin(t * 2.8) * 5) * s;
       place(bx, by + 30 * s); drawShadow(rngFor(11, 1), 3, 6);
