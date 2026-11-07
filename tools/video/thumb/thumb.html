@@ -31,13 +31,13 @@ const UP = (n) => K(2 * n) + 0.08, DN = (n) => K(2 * n + 1) + 0.15;
 const UPS = Array.from({ length: 20 }, (_, n) => UP(n)), DNS = Array.from({ length: 20 }, (_, n) => DN(n));
 const ups = (s) => UPS.slice(4 * s, 4 * s + 4), dns = (s) => DNS.slice(4 * s, 4 * s + 4);
 // How far the thumb is up (0 down, 1 up) at time T: a quick flip (0.08 s), then a hold.
-function thumbUp(T) {
+function thumbUp(T, dur = 0.09, curve = back) {
   let lastU = -Infinity, lastD = -Infinity;
   for (const u of UPS) if (T >= u) lastU = u;
   for (const d of DNS) if (T >= d) lastD = d;
-  if (lastU > lastD) return back((T - lastU) / 0.09);
+  if (lastU > lastD) return curve((T - lastU) / dur);
   if (lastD === -Infinity) return 0;
-  return 1 - back((T - lastD) / 0.09);
+  return 1 - curve((T - lastD) / dur);
 }
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const ease = (x) => { x = clamp(x); return x * x * (3 - 2 * x); };
@@ -100,13 +100,8 @@ function streaks(T, hits, seed, col = 'rgba(23,32,44,0.18)') {
   }
   ctx.restore();
 }
-// A zoom punch on each up move, a smaller one on each down, a big one when the code lands.
-function punch(T) {
-  if (T < S.roadster) return 1;
-  let z = 0;
-  for (const [hits, a] of [[UPS, 0.035], [DNS, 0.015], [[S.code], 0.06]]) { const d = since(T, hits); if (d < 0.6) z += a * Math.exp(-d * 10); }
-  return 1 + z;
-}
+// One zoom punch, when the code lands (a punch on every beat read as a jolt).
+function punch(T) { const d = T - S.code; return d >= 0 && d < 0.8 ? 1 + 0.05 * Math.exp(-d * 6) * Math.min(1, d / 0.05) : 1; }
 
 function background(T) {
   ctx.fillStyle = CREAM; ctx.fillRect(-100, -100, W + 200, H + 200);
@@ -128,23 +123,58 @@ const ROAD_VIEWS = [
   { az: -Math.PI / 4 + 0.1, elev: 0.32, dist: 19 }, { az: -Math.PI / 2 - 0.35, elev: 0.22, dist: 17 },
   { az: -0.15, elev: 0.42, dist: 21 }, { az: -Math.PI / 4 - 0.7, elev: 0.14, dist: 16 }];
 const roadCut = (T) => Math.max(0, ROAD_CUTS.findIndex((c, i) => T >= c && T < ROAD_CUTS[i + 1]));
-const roadT = (T) => { const j = roadCut(T), c = ROAD_CUTS[j]; return pw(T, [[c, j ? 1.45 : 1.2], [RU[j] - 0.02, 1.95], [RU[j], 2.2], [RD[j], 3.6], [ROAD_CUTS[j + 1], 3.6 + (ROAD_CUTS[j + 1] - RD[j]) * 1.6]]); };
+// One steady clock per shot (no speed jumps): off the curl (2.2 s) on the up move, down on its
+// wheels (3.6 s) on the down move.
+const ROAD_RATE = 1.4 / (RD[0] - RU[0]);
+const roadT = (T) => 2.2 + (T - RU[roadCut(T)]) * ROAD_RATE;
 const roadView = (T) => { const j = roadCut(T), v = ROAD_VIEWS[j]; return { pin: [-0.1, 1.6, 3.35], at: [W / 2, 1060], ...v, az: v.az + 0.12 * (T - ROAD_CUTS[j]) }; };
-// The SpaceX booster, three cycles: it relights and climbs on the up move (its clock 7.2 s to
-// 10 s), comes back down on the down move and touches down just before the next up (10 s to
-// 14.2 s, then on round its 10 s loop). Then the pad rocket lights on the fourth up move and
-// climbs out of the top of the frame (ignition at 8.64 s; gone by 11.7 s).
-const BU = ups(2), BD = dns(2), PAD_CUT = BU[3] - 0.14;
-const boostKeys = [[S.rockets, 6.4]];
-for (let j = 0; j < 3; j++) {
-  const o = 10 * j;
-  boostKeys.push([BU[j] - 0.02, 7.15 + o], [BU[j], 7.2 + o], [BD[j], 9.95 + o], [BD[j] + 0.01, 10 + o]);
-  const next = j < 2 ? BU[j + 1] : PAD_CUT;
-  boostKeys.push([next - 0.07, 14.2 + o], [next - 0.03, 16.9 + o]);
+// The SpaceX booster bounces off its droneship with the thumb: it lights and leaves the deck on
+// the up move, tops out on the down move and settles back onto the pad on the next up move.
+// We fly it ourselves (a smooth arc) rather than speeding its own clock up and down; the scene
+// is posed at a moment when the legs are out and the deck is clear.
+const BU = ups(2), BD = dns(2), PAD_CUT = BU[3] - 0.14, HOP = 4.2;
+function boostAlt(T) {
+  for (let j = 0; j < 4; j++) {
+    const u = BU[j], d = BD[j], u2 = j < 3 ? BU[j + 1] : u + (BU[1] - BU[0]);
+    if (T >= u && T < d) { const x = (T - u) / (d - u); return HOP * (1 - (1 - x) ** 2); }            // decelerating climb
+    if (T >= d && T < u2) { const x = (T - d) / (u2 - d); return HOP * (1 - x * x); }                 // accelerating fall
+  }
+  return 0;
 }
-const boostT = (T) => pw(T, boostKeys);
-const boostView = (T) => ({ pin: [0, 4.2, 0], at: [W / 2, 1250], az: Math.PI / 4 + 0.1 + 0.08 * (T - S.rockets), elev: 0.2, dist: 31 });
-const padT = (T) => pw(T, [[PAD_CUT, 8.3], [BU[3], 8.64], [BD[3], 10.0], [S.build, 11.7]]);
+const boostAfter = (T) => (nodes) => {
+  // Everything past the booster's own parts (the boat, the gulls, the Starship on its island) runs
+  // on a gentle clock that keeps the Starship sitting on its pad.
+  for (let i = 20; i < nodes.length; i++) {
+    const { o, mv } = nodes[i], q = mv.anim(1 + (T - S.rockets));
+    o.position.set(mv.pivot[0] + (q.x || 0), mv.pivot[1] + (q.y || 0), mv.pivot[2] + (q.z || 0));
+    if (q.q) o.quaternion.copy(q.q); else o.rotation.set(q.rx || 0, q.ry || 0, q.rz || 0);
+    const s0 = q.s ?? 1, sx = q.sx ?? s0, sy = q.sy ?? s0, sz = q.sz ?? s0;
+    o.scale.set(Math.max(1e-3, sx), Math.max(1e-3, sy), Math.max(1e-3, sz)); o.visible = Math.min(sx, sy, sz) > 2e-3;
+  }
+  const alt = boostAlt(T), body = nodes[0].o;
+  body.position.y += alt;
+  body.rotation.z = Math.sin(T * 6) * 0.02 * (alt / HOP); body.rotation.x = Math.cos(T * 5) * 0.015 * (alt / HOP);
+  // The flame burns on the climb and for the landing burn.
+  const dU = since(T, BU), dD = since(T, BD), burning = (dU < dD && alt > 0) || (dD < dU && alt > 0 && alt < 1.6);
+  const flame = nodes[9].o; flame.visible = burning;
+  if (burning) flame.scale.set(1 + Math.sin(T * 29) * 0.06, 0.9 + Math.sin(T * 37) * 0.12 + (dU < dD ? 0.35 : 0), 1 + Math.sin(T * 31) * 0.06);
+  // A puff of smoke across the deck at each lift-off, spreading and fading.
+  const p = since(T, BU);
+  for (let i = 10; i < 20; i++) {
+    const mv = nodes[i].mv, k = p > 1.2 ? 0 : p < 0.15 ? easeOut(p / 0.15) : 1 - ease((p - 0.15) / 0.6);
+    const f = k >= 1 ? 0.8 : p < 0.15 ? 0.72 + 0.08 * k : 0.84 + 0.11 * (1 - k); // read the puff's own pose at that spread
+    const q = mv.anim(f * 10), o = nodes[i].o;
+    o.position.set(mv.pivot[0] + (q.x || 0), mv.pivot[1] + (q.y || 0), mv.pivot[2] + (q.z || 0));
+    const sc = Math.max(1e-3, q.s ?? 1); o.scale.set(sc, sc, sc); o.visible = sc > 2e-3;
+  }
+};
+// Its scene is held at 6.0 s on its own clock (booster down, legs out) apart from what we fly.
+const boostT = () => 6.0;
+const boostView = (T) => ({ pin: [0, 4.2, 0], at: [W / 2, 1250], az: Math.PI / 4 + 0.1 + 0.08 * (T - S.rockets), elev: 0.2, dist: 31, after: boostAfter(T) });
+// Then the pad rocket lights on the fourth up move and climbs out of the top of the frame, on a
+// steady clock (ignition at 8.64 s; gone by 11.7 s).
+const PAD_RATE = (11.7 - 8.64) / (S.build - BU[3]);
+const padT = (T) => 8.64 + (T - BU[3]) * PAD_RATE;
 const padView = (T) => ({ pin: [-3, 3.2, -3], at: [W / 2, 1300], az: Math.PI / 4 + 0.2 - 0.1 * (T - PAD_CUT), elev: 0.12, dist: 21 });
 
 // ---- the build: the café world pops up on the first up move, lands on the down, and the
@@ -214,7 +244,7 @@ function code(T) {
     }
   });
   // Up on the up move, held while the thumb is up, and down with a little squash on the down move.
-  const up = T >= CU[0] ? thumbUp(T) : 0, dd = since(T, CD), sq = dd < 0.22 ? 1 - 0.05 * Math.sin((dd / 0.22) * Math.PI) : 1;
+  const up = T >= CU[0] ? thumbUp(T, 0.2, easeOut) : 0, dd = since(T, CD), sq = dd < 0.22 ? 1 - 0.05 * Math.sin((dd / 0.22) * Math.PI) : 1;
   const base = QY + N * MOD + 2 * MOD;
   ctx.save(); ctx.translate(0, -40 * up); ctx.translate(W / 2, base); ctx.scale(1 / sq, sq); ctx.translate(-W / 2, -base);
   codeCard();

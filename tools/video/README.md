@@ -31,7 +31,7 @@ ffmpeg -framerate 30 -i /tmp/qrv/frames/f%05d.jpg -i /tmp/qrv/house.wav \
 
 ## The thumb video (`thumb/`)
 
-A 16.3 s vertical (9:16, 1080×1920) take on the "slide your thumb up, feel the beat" trend, cut to
+A 16.3 s vertical (9:16, 1080×1920, 60 fps) take on the "slide your thumb up, feel the beat" trend, cut to
 the original reel's song (about 147.6 bpm; beat k falls at -0.04 + 0.4065k s, measured from the
 reel's audio, and it cuts every two bars like the reel). Only the opening card has words.
 
@@ -44,13 +44,15 @@ matches the reel to about a frame. Each up move launches something and each down
   QR code, and it recoils on each down move.
 - **Finish:** the finished code goes up with confetti and thumps down, four times.
 
-The models' own clocks are driven off the beat (`pw()` keyframes in `thumb.html`). The video has no
+For smooth motion, each model's own clock runs at one steady rate per shot, and the booster is flown
+on a smooth arc by the video itself (`after()` in `model.js` lets it take over posed parts). The
+only single-frame jumps are the deliberate cuts. The video has no
 audio track: add the song where you post it (it starts with the video at 0 s). The last frame scans
 (checked with ZXing).
 
 ```sh
 node tools/video/thumb/render.cjs /tmp/qrv/thumb stills 1,4,9,13.5   # a few stills
-node tools/video/thumb/render.cjs /tmp/qrv/frames 30 3               # every frame (about 2.5 min)
-ffmpeg -framerate 30 -i /tmp/qrv/frames/f%05d.jpg -c:v libx264 -preset slow -crf 19 -pix_fmt yuv420p \
+node tools/video/thumb/render.cjs /tmp/qrv/frames 60 4               # every frame (about 5 min)
+ffmpeg -framerate 60 -i /tmp/qrv/frames/f%05d.jpg -c:v libx264 -preset slow -crf 19 -pix_fmt yuv420p \
   -movflags +faststart media/thumb/qr-thumb-swipe-16s.mp4
 ```

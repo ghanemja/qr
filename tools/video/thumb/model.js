@@ -21,7 +21,7 @@ export async function company(slug) {
 }
 
 // world(slug, W, H).render(t, view) draws the world at its animation time t and returns the
-// canvas. view: { pin: [x, y, z] (a point in the world), at: [px, py] (where it lands on screen),
+// canvas. view: { after(nodes) (adjust posed parts), pin: [x, y, z] (a point in the world), at: [px, py] (where it lands on screen),
 // az (π/4 is the site's front-right view), elev, dist, scale }.
 export async function world(slug, W, H) {
   const C = await company(slug), look = C.look, r = renderer(W, H);
@@ -50,8 +50,9 @@ export async function world(slug, W, H) {
   const cam = new THREE.PerspectiveCamera(30, W / H, 0.5, 700);
   return {
     name: C.name,
-    render(t, { pin = [0, 0, 0], at = [W / 2, H / 2], az = Math.PI / 4, elev = 0.55, dist = 30, spin = 0, lift = 0, squash = 1 } = {}) {
+    render(t, { pin = [0, 0, 0], at = [W / 2, H / 2], az = Math.PI / 4, elev = 0.55, dist = 30, spin = 0, lift = 0, squash = 1, after } = {}) {
       poseMovers(nodes, t);
+      if (after) after(nodes); // the video can take over single parts (e.g. fly the booster itself)
       const b = motion(C.model, cp, t);
       g.position.set(b.x * h, b.y * h, b.z * h); g.rotation.set(b.rx, b.ry, b.rz); g.scale.set(b.sx, b.sy, b.sz);
       // Whole-world moves for the video: a turn about the pin, a drop from above, a squash on landing.
