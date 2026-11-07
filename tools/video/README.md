@@ -33,12 +33,16 @@ ffmpeg -framerate 30 -i /tmp/qrv/frames/f%05d.jpg -i /tmp/qrv/house.wav \
 
 A 16.3 s vertical (9:16, 1080×1920) take on the "slide your thumb up, feel the beat" trend, cut to
 the original reel's song (about 147.6 bpm; beat k falls at -0.04 + 0.4065k s, measured from the
-reel's audio, and it cuts every two bars like the reel). Only the opening card has words. Every
-swipe lands on a hit that launches something:
-- **Roadster:** off its ramp, then down on its wheels, twice.
-- **Rockets:** the SpaceX booster lifts off, then the launch-pad rocket climbs out of the frame.
-- **Build:** the Starbucks world is fired up into its QR code, one slice per beat.
-- **Finish:** the finished code bounces, with confetti, on the last swipes.
+reel's audio, and it cuts every two bars like the reel). Only the opening card has words.
+
+The thumb moves like the reel's demo: in from the right edge, it flips up along the edge on every
+other beat and back down (pointing left) on the beat after. That's 20 cycles, four per section, and it
+matches the reel to about a frame. Each up move launches something and each down move brings it back:
+- **Roadster:** four jumps from four angles. It comes off the curl on the up move and lands on the down.
+- **Rockets:** the SpaceX booster climbs and lands three times, then the pad rocket climbs out of the frame.
+- **Build:** the Starbucks world pops up and lands. Then three up moves fire it, a slice at a time, into its
+  QR code, and it recoils on each down move.
+- **Finish:** the finished code goes up with confetti and thumps down, four times.
 
 The models' own clocks are driven off the beat (`pw()` keyframes in `thumb.html`). The video has no
 audio track: add the song where you post it (it starts with the video at 0 s). The last frame scans

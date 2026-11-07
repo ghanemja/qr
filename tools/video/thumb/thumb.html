@@ -2,9 +2,10 @@
 <!-- SPDX-License-Identifier: MIT · Copyright (c) 2026 Janelle Ghanem -->
 <!-- "Slide your thumb up! Feel the beat": the thumb-swipe trend, QR Compass edition (9:16).
      Cut to the original reel's song (about 147.6 bpm; it cuts every two bars, 3.25 s), so every
-     swipe the viewer makes lands on a hit that launches something: the Roadster off its ramp,
-     the SpaceX booster, a rocket off its pad, then a 3D world fired up piece by piece into a
-     real QR code, which bounces on the last swipes. No captions after the opening card.
+     thumb move lands on the beat: the thumb flips up and back down like the reel's demo, and
+     each up move launches something (the Roadster off its ramp, the SpaceX booster, a rocket
+     off its pad, slices of a 3D world fired up into a real QR code) while each down move brings
+     it back down (the car lands, the booster lands, the world recoils, the code thumps down). No captions after the opening card.
      window.frame(seconds) draws any moment; render.cjs captures it. -->
 <meta charset="utf-8">
 <title>loading</title>
@@ -23,18 +24,26 @@ const BEAT = 0.4065, K = (k) => -0.04 + BEAT * k;
 // Sections, two bars each, as the reel cuts them.
 const S = { intro: 0, roadster: K(8) + 0.04, rockets: K(16) + 0.04, build: K(24) + 0.04, code: K(32) + 0.04 };
 window.DURATION = +(BEAT * 40).toFixed(3); // 10 bars, so it loops like the reel
-const HITS = {
-  intro: [1, 3, 5, 7].map(K),                 // the demo thumb's swipes
-  roadster: [9, 11, 13, 15].map(K),           // launch, land, launch, land
-  rockets: [17, 21].map(K),                   // booster lift-off, rocket ignition
-  build: [25, 26, 27, 28, 29, 30, 31, 32].map(K), // a slice of the world each beat
-  code: [33, 35, 37, 39].map(K),              // the finished code bounces
-};
+// The thumb, as the reel's demo moves it: it flips up on every other beat and back down on the
+// beat after, so there are 20 up-and-down cycles, four per section. Up moves launch things;
+// down moves bring them back (or land them).
+const UP = (n) => K(2 * n) + 0.08, DN = (n) => K(2 * n + 1) + 0.15;
+const UPS = Array.from({ length: 20 }, (_, n) => UP(n)), DNS = Array.from({ length: 20 }, (_, n) => DN(n));
+const ups = (s) => UPS.slice(4 * s, 4 * s + 4), dns = (s) => DNS.slice(4 * s, 4 * s + 4);
+// How far the thumb is up (0 down, 1 up) at time T: a quick flip (0.08 s), then a hold.
+function thumbUp(T) {
+  let lastU = -Infinity, lastD = -Infinity;
+  for (const u of UPS) if (T >= u) lastU = u;
+  for (const d of DNS) if (T >= d) lastD = d;
+  if (lastU > lastD) return back((T - lastU) / 0.09);
+  if (lastD === -Infinity) return 0;
+  return 1 - back((T - lastD) / 0.09);
+}
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const ease = (x) => { x = clamp(x); return x * x * (3 - 2 * x); };
 const easeOut = (x) => 1 - (1 - clamp(x)) ** 3;
 const easeIn = (x) => clamp(x) ** 3;
-const back = (x) => { x = clamp(x); const s = 1.9; return 1 + (s + 1) * (x - 1) ** 3 + s * (x - 1) ** 2; };
+function back(x) { x = clamp(x); const s = 1.9; return 1 + (s + 1) * (x - 1) ** 3 + s * (x - 1) ** 2; }
 const lerp = (a, b, k) => a + (b - a) * k;
 const rand = (seed) => () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
 // Piecewise-linear map through [x, y] keys (for driving a model's clock off the beat).
@@ -63,9 +72,12 @@ function line(segs, y, size, T, t0 = -1, { weight = 900, stroke = 14 } = {}) {
   });
   ctx.restore();
 }
-// A cartoon thumb (seen from the nail side) with its tip at (x, y), running off at angle `ang`.
-function thumb(x, y, ang) {
-  ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
+// The reel's thumb: it comes in from the right edge and swings about a pivot off screen,
+// pointing left when down and straight up along the edge when up. Drawn seen from the nail side.
+const PIV = { x: 1130, y: 1330 }, TL = 780;
+function thumb(up) {
+  const ang = lerp(Math.PI + 0.2, -Math.PI / 2 - 0.12, up); // the direction from the pivot to the tip
+  ctx.save(); ctx.translate(PIV.x + Math.cos(ang) * TL, PIV.y + Math.sin(ang) * TL); ctx.rotate(ang + Math.PI);
   const w = 190, L = 1500;
   ctx.beginPath(); ctx.moveTo(w / 2, -w / 2); ctx.arc(w / 2, 0, w / 2, -Math.PI / 2, Math.PI / 2, true);
   ctx.bezierCurveTo(280, w / 2 + 6, 460, w / 2 + 30, L, w / 2 + 70); ctx.lineTo(L, -w / 2 - 60);
@@ -88,12 +100,11 @@ function streaks(T, hits, seed, col = 'rgba(23,32,44,0.18)') {
   }
   ctx.restore();
 }
-// A small zoom punch on each hit.
+// A zoom punch on each up move, a smaller one on each down, a big one when the code lands.
 function punch(T) {
+  if (T < S.roadster) return 1;
   let z = 0;
-  for (const [hits, a] of [[HITS.roadster, 0.035], [HITS.rockets, 0.05], [HITS.build, 0.02], [HITS.code, 0.03], [[S.code], 0.07]]) {
-    const d = since(T, hits); if (d < 0.6) z += a * Math.exp(-d * 9);
-  }
+  for (const [hits, a] of [[UPS, 0.035], [DNS, 0.015], [[S.code], 0.06]]) { const d = since(T, hits); if (d < 0.6) z += a * Math.exp(-d * 10); }
   return 1 + z;
 }
 
@@ -108,27 +119,42 @@ function background(T) {
 
 // ---- the 3D worlds, each on the song's clock ----
 const TESLA = await world('tesla', W, H), SPACEX = await world('spacex', W, H), PAD = await world('relativity-space', W, H), CAFE = await world('starbucks', W, H);
-// The Roadster: off the curl on a hit, down on its wheels on the next, then round again.
-// Its own clock: the curl ends at 2.2 s, it lands at 3.6 s, and the run repeats every 6 s.
-const R1 = HITS.roadster, roadT = (T) => pw(T, [[S.roadster, 1.72], [R1[0], 2.2], [R1[1], 3.6], [R1[1] + 0.12, 3.75], [R1[2] - 0.1, 7.9], [R1[2], 8.2], [R1[3], 9.6], [S.rockets, 10.1]]);
-const roadView = (T) => T < R1[1] + 0.2
-  ? { pin: [-0.1, 1.6, 3.35], at: [W / 2, 1060], az: -Math.PI / 4 + 0.1 + 0.15 * (T - S.roadster), elev: 0.32, dist: 19 }
-  : { pin: [-0.1, 1.6, 3.35], at: [W / 2, 1040], az: -Math.PI / 2 - 0.35 - 0.1 * (T - R1[1]), elev: 0.22, dist: 17 };
-// The booster lifts off its droneship on the first rocket hit (its relight is at 7.2 s).
-const R2 = HITS.rockets, boostEnd = K(20) + 0.04;
-const boostT = (T) => pw(T, [[S.rockets, 6.7], [R2[0], 7.2], [boostEnd, 9.75]]);
-const boostView = (T) => ({ pin: [0, 3.2 + 2.2 * easeIn((T - R2[0]) / 1.3), 0], at: [W / 2, 1180], az: Math.PI / 4 + 0.1, elev: 0.2 + 0.1 * clamp((T - S.rockets) / 1.6), dist: 31 });
-// The rocket on the pad lights on the second hit and climbs out of the top of the frame
-// (its pad is at (-3, -3); ignition at 8.64 s, and it's gone by 11.7 s).
-const padT = (T) => pw(T, [[boostEnd, 8.0], [R2[1], 8.64], [S.build, 11.7]]);
-const padView = (T) => ({ pin: [-3, 3.2, -3], at: [W / 2, 1300], az: Math.PI / 4 + 0.2 - 0.1 * (T - boostEnd), elev: 0.12, dist: 21 });
+// The Roadster, one jump per thumb cycle, each from a new angle: the cut comes just before
+// the up move, the up move throws it off the curl, and it lands on the down move. Its own
+// clock: in the curl from 1.6 s, off it at 2.2 s, down on its wheels at 3.6 s.
+const RU = ups(1), RD = dns(1);
+const ROAD_CUTS = [S.roadster, RU[1] - 0.14, RU[2] - 0.14, RU[3] - 0.14, S.rockets];
+const ROAD_VIEWS = [
+  { az: -Math.PI / 4 + 0.1, elev: 0.32, dist: 19 }, { az: -Math.PI / 2 - 0.35, elev: 0.22, dist: 17 },
+  { az: -0.15, elev: 0.42, dist: 21 }, { az: -Math.PI / 4 - 0.7, elev: 0.14, dist: 16 }];
+const roadCut = (T) => Math.max(0, ROAD_CUTS.findIndex((c, i) => T >= c && T < ROAD_CUTS[i + 1]));
+const roadT = (T) => { const j = roadCut(T), c = ROAD_CUTS[j]; return pw(T, [[c, j ? 1.45 : 1.2], [RU[j] - 0.02, 1.95], [RU[j], 2.2], [RD[j], 3.6], [ROAD_CUTS[j + 1], 3.6 + (ROAD_CUTS[j + 1] - RD[j]) * 1.6]]); };
+const roadView = (T) => { const j = roadCut(T), v = ROAD_VIEWS[j]; return { pin: [-0.1, 1.6, 3.35], at: [W / 2, 1060], ...v, az: v.az + 0.12 * (T - ROAD_CUTS[j]) }; };
+// The SpaceX booster, three cycles: it relights and climbs on the up move (its clock 7.2 s to
+// 10 s), comes back down on the down move and touches down just before the next up (10 s to
+// 14.2 s, then on round its 10 s loop). Then the pad rocket lights on the fourth up move and
+// climbs out of the top of the frame (ignition at 8.64 s; gone by 11.7 s).
+const BU = ups(2), BD = dns(2), PAD_CUT = BU[3] - 0.14;
+const boostKeys = [[S.rockets, 6.4]];
+for (let j = 0; j < 3; j++) {
+  const o = 10 * j;
+  boostKeys.push([BU[j] - 0.02, 7.15 + o], [BU[j], 7.2 + o], [BD[j], 9.95 + o], [BD[j] + 0.01, 10 + o]);
+  const next = j < 2 ? BU[j + 1] : PAD_CUT;
+  boostKeys.push([next - 0.07, 14.2 + o], [next - 0.03, 16.9 + o]);
+}
+const boostT = (T) => pw(T, boostKeys);
+const boostView = (T) => ({ pin: [0, 4.2, 0], at: [W / 2, 1250], az: Math.PI / 4 + 0.1 + 0.08 * (T - S.rockets), elev: 0.2, dist: 31 });
+const padT = (T) => pw(T, [[PAD_CUT, 8.3], [BU[3], 8.64], [BD[3], 10.0], [S.build, 11.7]]);
+const padView = (T) => ({ pin: [-3, 3.2, -3], at: [W / 2, 1300], az: Math.PI / 4 + 0.2 - 0.1 * (T - PAD_CUT), elev: 0.12, dist: 21 });
 
-// ---- the build: the café world is fired up into its QR code, a slice per beat ----
-const B = HITS.build, CAFE_AT = { x: W / 2, y: 1440 };
-const cafeView = (T) => ({ pin: [0, 0.6, 0], at: [CAFE_AT.x, CAFE_AT.y], az: Math.PI / 4 - 0.3 + 0.3 * clamp((T - S.build) / 0.4), elev: 0.62, dist: 50,
-  lift: 14 * (1 - easeOut((T - S.build) / 0.22)), squash: 1 - 0.16 * Math.sin(clamp((T - S.build - 0.2) / 0.2) * Math.PI) });
+// ---- the build: the café world pops up on the first up move, lands on the down, and the
+// next three up moves fire it, a slice at a time, up into its QR code; it recoils on each down ----
+const WU = ups(3), WD = dns(3), B = WU.slice(1), CAFE_AT = { x: W / 2, y: 1440 };
+const recoil = (T) => { const d = since(T, WD); return d < 0.25 ? 1 - 0.14 * Math.sin((d / 0.25) * Math.PI) : 1; };
+const cafeView = (T) => ({ pin: [0, 0.6, 0], at: [CAFE_AT.x, CAFE_AT.y], az: Math.PI / 4 - 0.3 + 0.3 * clamp((T - WU[0]) / 0.6), elev: 0.62, dist: 50,
+  lift: T < WD[0] ? lerp(-16, 0, back((T - WU[0]) / (WD[0] - WU[0]))) : 0, squash: recoil(T) });
 const BUILD = (() => {
-  const T0 = B[0], img = CAFE.render(2 + T0 - S.build, cafeView(T0));
+  const T0 = B[0], img = CAFE.render(2 + T0 - S.build, { ...cafeView(T0), squash: 1 });
   const tmp = document.createElement('canvas'); tmp.width = W; tmp.height = H; const tc = tmp.getContext('2d');
   tc.drawImage(img, 0, 0); const data = tc.getImageData(0, 0, W, H).data;
   // Opaque spots of the world on a grid fine enough to give every dark square one.
@@ -151,7 +177,11 @@ function build(T) {
   if (T < B[0]) ctx.drawImage(CAFE.render(2 + T - S.build, cafeView(T)), 0, 0);
   else {
     const done = B.filter((h) => T >= h).length, cut = done ? BUILD.cuts[done - 1] : 0;
-    if (done < B.length) { ctx.save(); ctx.beginPath(); ctx.rect(0, cut, W, H); ctx.clip(); ctx.drawImage(BUILD.img, 0, 0); ctx.restore(); }
+    if (done < B.length) {
+      const k = recoil(T), base = CAFE_AT.y + 260; // squash the still toward its bottom on each down move
+      ctx.save(); ctx.beginPath(); ctx.rect(0, cut, W, H); ctx.clip();
+      ctx.translate(W / 2, base); ctx.scale(1 / Math.sqrt(k), k); ctx.translate(-W / 2, -base); ctx.drawImage(BUILD.img, 0, 0); ctx.restore();
+    }
   }
   const card = easeOut((T - B[0]) / 0.25);
   if (card > 0) { ctx.save(); ctx.globalAlpha = card; codeCard(); ctx.restore(); }
@@ -173,17 +203,20 @@ function codeCard() {
 }
 
 // ---- the finished code: it hops on each swipe, and confetti squares fly up behind it ----
-const CONF = HITS.code.map((h, j) => { const R = rand(40 + j); return Array.from({ length: 46 }, (_, i) => ({ x: (i % 2 ? 0.1 + R() * 0.25 : 0.65 + R() * 0.25) * W, vx: (R() - 0.5) * 500, vy: 2300 + R() * 900, s: 18 + R() * 22, a: R() * 6, va: (R() - 0.5) * 14, col: ['#17202c', ORANGE, '#2b5aa8', '#3ddc84', '#f2c94c'][i % 5] })); });
+const CU = ups(4), CD = dns(4);
+const CONF = CU.map((h, j) => { const R = rand(40 + j); return Array.from({ length: 46 }, (_, i) => ({ x: (i % 2 ? 0.1 + R() * 0.25 : 0.65 + R() * 0.25) * W, vx: (R() - 0.5) * 500, vy: 2300 + R() * 900, s: 18 + R() * 22, a: R() * 6, va: (R() - 0.5) * 14, col: ['#17202c', ORANGE, '#2b5aa8', '#3ddc84', '#f2c94c'][i % 5] })); });
 function code(T) {
-  HITS.code.forEach((h, j) => {
+  CU.forEach((h, j) => {
     const d = T - h; if (d < 0 || d > 1.6) return;
     for (const p of CONF[j]) {
       const x = p.x + p.vx * d, y = H + 40 - p.vy * d + 0.5 * 3000 * d * d;
       ctx.save(); ctx.translate(x, y); ctx.rotate(p.a + p.va * d); rr(-p.s / 2, -p.s / 2, p.s, p.s, 4); ctx.fillStyle = p.col; ctx.fill(); ctx.restore();
     }
   });
-  const d = since(T, HITS.code), hop = d < 0.32 ? Math.sin((d / 0.32) * Math.PI) * 34 : 0;
-  ctx.save(); ctx.translate(0, -hop);
+  // Up on the up move, held while the thumb is up, and down with a little squash on the down move.
+  const up = T >= CU[0] ? thumbUp(T) : 0, dd = since(T, CD), sq = dd < 0.22 ? 1 - 0.05 * Math.sin((dd / 0.22) * Math.PI) : 1;
+  const base = QY + N * MOD + 2 * MOD;
+  ctx.save(); ctx.translate(0, -40 * up); ctx.translate(W / 2, base); ctx.scale(1 / sq, sq); ctx.translate(-W / 2, -base);
   codeCard();
   ctx.fillStyle = INK;
   for (const m of DARK) ctx.fillRect(QX + m.c * MOD, QY + m.r * MOD, MOD, MOD);
@@ -199,25 +232,21 @@ window.frame = (T) => {
   if (T < S.roadster) {
     line([['SLIDE YOUR THUMB UP!']], 330, 92, T, 0.0);
     line([['FEEL THE '], ['BEAT', ORANGE]], 440, 92, T, 0.2);
-    // The demo thumb swipes up on each hit and eases back down between them.
-    const d = since(T, HITS.intro), up = d === Infinity ? 0 : d < 0.12 ? easeOut(d / 0.12) : 1 - ease((d - 0.12) / 0.55);
-    const enter = easeOut(T / 0.35);
-    const x = lerp(800, 690, up) + (1 - enter) * 500, y = lerp(1480, 1020, up) + (1 - enter) * 600;
-    thumb(x, y, lerp(0.55, 1.2, up));
+    thumb(thumbUp(T));
     return;
   }
   if (T < S.rockets) {
-    streaks(T, R1.filter((_, i) => i % 2 === 0), 5);
+    streaks(T, RU, 5);
     ctx.drawImage(TESLA.render(roadT(T), roadView(T)), 0, 0);
     return;
   }
   if (T < S.build) {
-    streaks(T, R2, 9);
-    if (T < boostEnd) ctx.drawImage(SPACEX.render(boostT(T), boostView(T)), 0, 0);
+    streaks(T, BU, 9);
+    if (T < PAD_CUT) ctx.drawImage(SPACEX.render(boostT(T), boostView(T)), 0, 0);
     else ctx.drawImage(PAD.render(padT(T), padView(T)), 0, 0);
     return;
   }
-  if (T < S.code) { streaks(T, B, 13, 'rgba(23,32,44,0.1)'); build(T); return; }
+  if (T < S.code) { streaks(T, WU, 13, 'rgba(23,32,44,0.1)'); build(T); return; }
   code(T);
   // The flash as the code completes.
   const f = 1 - (T - S.code) / 0.35;
