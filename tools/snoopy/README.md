@@ -24,7 +24,7 @@ The drawings aren't kept in the repo (nor is the song, nor the video). To render
 3. Serve the repo root (`python3 -m http.server 8125`) and run `node tools/snoopy/render.cjs <frames> 30 1080`.
 4. `tools/snoopy/encode.sh <frames> <out.mp4> [screen recording of the original reel]` adds the song.
 
-`stage.html` draws everything on a 2D canvas from those pieces: the standing puppet (legs swing at the hips, the head
+`stage.html` draws everything on a 2D canvas from those pieces: the standing puppet (legs swing at the hips, arms drawn in the same ink reach, grab the roof and tap the switch, the head
 tilts, the body squashes and leans), the scarf drawn in thin rippling strips, the
 bird drawing with its wing flapping (in black and white with an added outline), and the wipe between the two worlds. The
 black-and-white world moves on twos (12 fps), like old cartoons.
