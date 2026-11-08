@@ -3,8 +3,8 @@
 <!-- "Slide your thumb up! Feel the beat": the thumb-swipe trend, QR Compass edition (9:16, 60 fps).
      Timed to the "move your thumb to the beat" sound: a beat every 0.451 s from 0.035 s, its
      drop on beat 9 (4.09 s), where the montage starts. The thumb (the first reel's drawings) flips
-     up on the odd beats and down on the even ones, and it stays on screen the whole way, so every
-     cut lands the moment it does. After the opening card it cuts on every beat: on an up beat a company's
+     up on the odd beats and down on the even ones on the opening card; after it, the cuts carry
+     the rhythm. After the opening card it cuts on every beat: on an up beat a company's
      world sends something up (the Roadster off its ramp, the SpaceX booster, the Amazon drone, a
      rocket, the Starship); on a down beat something comes down (Buffett's snowball down the
      Berkshire slope, the booster landing, the Oreo dunk, cereal pouring, an excavator digging).
@@ -53,7 +53,6 @@ function thumbUp(T, dur = 0.12, curve = back) {
 
 // ---- the QR code ----
 const q = qrcode(0, 'H'); q.addData(URL_); q.make();
-// Centred; once it's up, the thumb keeps swiping behind it, so it stays clean to scan.
 const N = q.getModuleCount(), MOD = 20, QX = Math.round(W / 2 - (N * MOD) / 2), QY = 560;
 const DARK = [];
 for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (q.isDark(r, c)) DARK.push({ r, c, x: QX + (c + 0.5) * MOD, y: QY + (r + 0.5) * MOD });
@@ -249,18 +248,8 @@ window.frame = (T) => {
   const d = T - S.code - MD, z = d >= 0 && d < 0.8 ? 1 + 0.05 * Math.exp(-d * 6) * Math.min(1, d / 0.05) : 1;
   ctx.translate(W / 2, H / 2); ctx.scale(z, z); ctx.translate(-W / 2, -H / 2);
   background(T);
-  if (T < S.code) { montage(T); ctx.setTransform(1, 0, 0, 1, 0, 0); reelThumb(T); ring(); tap(T); return; }
-  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); reelThumb(T); ring(); tap(T); ctx.restore();
-  code(T);
+  if (T < S.code) montage(T); else code(T);
 };
-// A ripple where the thumb touches as it lands: the ring on the way up, its rest spot on the way down.
-function tap(T) {
-  const n = beatOf(T), d = T - K(n);
-  if (n < 0 || d > 0.3) return;
-  const [x, y] = isUp(n) ? [983.5, 575.7] : [262, 1285], k = d / 0.3;
-  ctx.save(); ctx.strokeStyle = '#ffffff'; ctx.globalAlpha = 0.85 * (1 - k); ctx.lineWidth = 10 * (1 - k) + 2;
-  ctx.beginPath(); ctx.arc(x, y, 70 + 110 * easeOut(k), 0, 2 * Math.PI); ctx.stroke(); ctx.restore();
-}
 await document.fonts.load("900 100px 'Inter Display'");
 document.title = 'ready';
 </script>
