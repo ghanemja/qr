@@ -8,7 +8,8 @@
      world sends something up (the Roadster off its ramp, the SpaceX booster, the Amazon drone, a
      rocket, the Starship); on a down beat something comes down (Buffett's snowball down the
      Berkshire slope, the booster landing, the Oreo dunk, cereal pouring, an excavator digging).
-     The last swipe up breaks the world into the real, scannable QR code. The thumb drawings are
+     At the end the swipes morph it: up breaks the world into the QR code in place, down flies it
+     back out into a world, and the last swipe up keeps the real, scannable code. The thumb drawings are
      the reel's own (cut out by extract_thumb.py into reel/, kept out of the repo like the song).
      window.frame(seconds) draws any moment; render.cjs captures it. -->
 <meta charset="utf-8">
@@ -27,10 +28,11 @@ const URL_ = 'https://ghanemja.github.io/qr/';
 // 0.0353 + 0.4510 k s, fitted to its beats (all within 22 ms). Its drop is beat 9 (4.09 s). ----
 const BEAT = 0.4510, OFF = 0.0353, K = (k) => OFF + BEAT * k;
 const beatOf = (T) => Math.floor((T - OFF) / BEAT + 1e-9);
-const S = { intro: 0, montage: K(9), code: K(25) }; // the montage starts on the drop
-window.DURATION = +K(33).toFixed(3);
+// The montage starts on the drop; beats 25–30 morph world ↔ code; beat 31 lands the code.
+const S = { intro: 0, montage: K(9), morph: K(25), code: K(31) };
+window.DURATION = +K(35).toFixed(3);
 // Up on the odd beats (so the drop is a swipe up), down on the even ones.
-const UPS = Array.from({ length: 17 }, (_, n) => K(2 * n + 1)), DNS = Array.from({ length: 17 }, (_, n) => K(2 * n));
+const UPS = Array.from({ length: 20 }, (_, n) => K(2 * n + 1)), DNS = Array.from({ length: 20 }, (_, n) => K(2 * n));
 const isUp = (n) => ((n % 2) + 2) % 2 === 1;
 const clamp = (x, a = 0, b = 1) => Math.max(a, Math.min(b, x));
 const ease = (x) => { x = clamp(x); return x * x * (3 - 2 * x); };
@@ -172,8 +174,9 @@ function shot(T, sh, w, u, view) {
   return w.render(sh.t0 + u * BEAT * sh.rate, view);
 }
 
-// ---- the end: on the last swipe up, the world on screen breaks into the QR code ----
-const MD = 0.18; // fast: the code snaps together
+// ---- the end: each swipe up breaks the world on screen into the QR code, right where it is; each
+// swipe down flies the code back out into another world; the last swipe up (beat 31) keeps it ----
+const MD = 0.2; // fast: the code snaps together
 const LAST = SHOTS[SHOTS.length - 1];
 // Pair the world's opaque pixels with the code's dark squares, band by band from the top, so the
 // world's top goes to the code's top rows.
@@ -190,8 +193,16 @@ function pairs(img, seed) {
   }
   return { img: tmp, ps, size: step + 1 };
 }
-// The last shot as it is on the last swipe up (beat 25): the picture that breaks up.
-const FINAL = pairs(shot(S.code, LAST, WORLD[LAST.slug], 1, { ...LAST.view, az: LAST.view.az + 0.12 }), 61);
+// The worlds that break up: the montage's last shot on beat 25, then one world per swipe down
+// (beats 26, 28, 30), each live until it breaks up on the next swipe up.
+const HOLDS = [
+  { still: shot(S.morph, LAST, WORLD[LAST.slug], 1, { ...LAST.view, az: LAST.view.az + 0.12 }) },
+  { slug: 'tesla', down: K(26), t0: 2.0, rate: 2.6, view: V(-Math.PI / 4 + 0.1, 0.3, 19, [-0.1, 1.6, 3.35], 960) },
+  { slug: 'amazon', down: K(28), t0: 3.95, rate: 2.0, view: V(Math.PI / 4 - 0.15, 0.3, 26, [0, 4.0, 0], 1080) },
+  { slug: 'berkshire-hathaway', down: K(30), t0: 3.9, rate: 1.7, view: V(Math.PI / 4 - 0.2, 0.5, 26, [0, 1.8, 0], 960) },
+];
+const holdRender = (h, T) => WORLD[h.slug].render(h.t0 + (T - h.down) * h.rate, h.view);
+HOLDS.forEach((h, i) => { h.p = pairs(h.still || holdRender(h, h.down + BEAT), 61 + i); });
 // k runs 0 → 1 over the morph: each square flies from its spot in the world to its place in the code.
 function squares(P, d, toQR = true, alpha = 1) {
   ctx.save(); ctx.globalAlpha = alpha;
@@ -207,10 +218,25 @@ function squares(P, d, toQR = true, alpha = 1) {
   }
   ctx.restore();
 }
+function qrCode() {
+  codeCard(); ctx.fillStyle = INK;
+  for (const m of DARK) ctx.fillRect(QX + m.c * MOD, QY + m.r * MOD, MOD, MOD);
+}
 function toQR(P, d) { // world still → code
   ctx.save(); ctx.globalAlpha = 1 - ease(d / 0.06); ctx.drawImage(P.img, 0, 0); ctx.restore();
   ctx.save(); ctx.globalAlpha = ease(d / 0.12); codeCard(); ctx.restore();
-  squares(P, d);
+  if (d < MD + 0.07) squares(P, d); else qrCode();
+}
+function fromQR(h, T, d) { // code → live world
+  ctx.save(); ctx.globalAlpha = 1 - ease(d / 0.12); codeCard(); ctx.restore();
+  const w = ease((d - MD * 0.6) / (MD * 0.5));
+  if (w > 0) { ctx.save(); ctx.globalAlpha = w; ctx.drawImage(holdRender(h, T), 0, 0); ctx.restore(); }
+  if (d < MD + 0.07) squares(h.p, d, false, 1 - ease((d - MD) / 0.07));
+}
+function morph(T) {
+  const n = beatOf(T), d = T - K(n);
+  if (n % 2 === 1) toQR(HOLDS[(n - 25) / 2].p, d); // 25, 27, 29
+  else fromQR(HOLDS[(n - 24) / 2], T, d); // 26, 28, 30
 }
 function codeCard() {
   const pad = 2 * MOD;
@@ -218,7 +244,7 @@ function codeCard() {
 }
 
 // ---- the finished code: it hops on each swipe, and confetti squares fly up behind it ----
-const CU = [25, 27, 29, 31].map(K), CD = [26, 28, 30, 32].map(K);
+const CU = [31, 33].map(K), CD = [32, 34].map(K);
 const CONF = CU.map((h, j) => { const R = rand(40 + j); return Array.from({ length: 46 }, (_, i) => ({ x: (i % 2 ? 0.1 + R() * 0.25 : 0.65 + R() * 0.25) * W, vx: (R() - 0.5) * 500, vy: 2300 + R() * 900, s: 18 + R() * 22, a: R() * 6, va: (R() - 0.5) * 14, col: ['#17202c', ORANGE, '#2b5aa8', '#3ddc84', '#f2c94c'][i % 5] })); });
 function code(T) {
   CU.forEach((h, j) => {
@@ -230,7 +256,7 @@ function code(T) {
   });
   // Up on the up move, held while the thumb is up, and down with a little squash on the down move.
   const up = T >= CD[0] + 0.1 ? thumbUp(T, 0.2, easeOut) : 0, dd = since(T, CD), sq = dd < 0.22 ? 1 - 0.05 * Math.sin((dd / 0.22) * Math.PI) : 1;
-  if (T - S.code < MD + 0.07) { toQR(FINAL, T - S.code); return; }
+  if (T - S.code < MD + 0.07) { toQR(HOLDS[3].p, T - S.code); return; }
   const base = QY + N * MOD + 2 * MOD;
   ctx.save(); ctx.translate(0, -40 * up); ctx.translate(W / 2, base); ctx.scale(1 / sq, sq); ctx.translate(-W / 2, -base);
   codeCard();
@@ -244,11 +270,11 @@ function code(T) {
 window.frame = (T) => {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   if (T < S.montage) { background(T, SKY); title(); reelThumb(T); ring(); return; }
-  // One zoom punch, when the code lands.
+  // One zoom punch, when the code lands for good.
   const d = T - S.code - MD, z = d >= 0 && d < 0.8 ? 1 + 0.05 * Math.exp(-d * 6) * Math.min(1, d / 0.05) : 1;
   ctx.translate(W / 2, H / 2); ctx.scale(z, z); ctx.translate(-W / 2, -H / 2);
   background(T);
-  if (T < S.code) montage(T); else code(T);
+  if (T < S.morph) montage(T); else if (T < S.code) morph(T); else code(T);
 };
 await document.fonts.load("900 100px 'Inter Display'");
 document.title = 'ready';

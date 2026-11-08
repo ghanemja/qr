@@ -31,7 +31,7 @@ ffmpeg -framerate 30 -i /tmp/qrv/frames/f%05d.jpg -i /tmp/qrv/house.wav \
 
 ## The thumb video (`thumb/`)
 
-A 14.9 s vertical (9:16, 1080×1920, 60 fps) take on the "slide your thumb up, feel the beat" trend,
+A 15.8 s vertical (9:16, 1080×1920, 60 fps) take on the "slide your thumb up, feel the beat" trend,
 timed to the "move your thumb to the beat" sound: a beat every 0.451 s from 0.035 s (fitted to its
 beats, all within 22 ms), with its drop on beat 9 (4.09 s).
 
@@ -47,7 +47,11 @@ beats, all within 22 ms), with its drop on beat 9 (4.09 s).
   Starship, Disney's fireworks, the Goodyear blimp. Down beats bring something down: the Berkshire
   snowball, the Oreo dunk, the booster landing, General Mills cereal pouring, the McDonald's burger
   dropping together, the Heinz bottle flipping onto it, the oil pump nodding, the Caterpillar digging.
-- **Beat 25**, the last swipe up, breaks the world on screen into the QR code (centred). It hops on the swipes with confetti to the end, and the last frame scans (ZXing).
+- **Beats 25–30, the morphs** (centred, in place): each swipe up breaks the world on screen into the
+  QR code (its pixels fly into the code's squares); each swipe down flies the code back out into a
+  live world (the Roadster, the Amazon drone, the Berkshire snowball).
+- **Beat 31**, the last swipe up, keeps the code. It hops with confetti to the end, and the last frame
+  scans (ZXing).
 
 The video in the repo has no audio track; add the sound when posting, starting with the video at
 0 s. The clip of the sound we have is only 7.3 s long, so the preview with audio loops its 4-beat
@@ -58,5 +62,5 @@ python3 tools/video/thumb/extract_thumb.py <the reel's screen recording .mov>  #
 node tools/video/thumb/render.cjs /tmp/qrv/thumb stills 1,4,9,13.5   # a few stills
 node tools/video/thumb/render.cjs /tmp/qrv/frames 60 3               # every frame (about 5 min)
 ffmpeg -framerate 60 -i /tmp/qrv/frames/f%05d.jpg -c:v libx264 -preset slow -crf 19 -pix_fmt yuv420p \
-  -movflags +faststart media/thumb/qr-thumb-swipe-15s.mp4
+  -movflags +faststart media/thumb/qr-thumb-swipe-16s.mp4
 ```
