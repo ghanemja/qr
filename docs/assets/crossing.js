@@ -1,4 +1,5 @@
-// Snoopy Crossing: a crayon crosswalk seen from above. Snoopy does a happy dance now and then and
+// Snoopy Crossing: Snoopy is doodled in crayon on blank paper, coloured in and rigged, then the
+// camera pulls out to a crayon crosswalk seen from above. Snoopy does a happy dance now and then and
 // turns into the Flying Ace, looping over the crowd on his red doghouse. Snoopy, upright on two feet (black ear,
 // black nose, red collar), is walked across a zebra crossing among walkers and bikes; a little yellow bird
 // tags along. Everything is drawn in 2D canvas as wobbly crayon shapes, re-jittered a few
@@ -273,6 +274,146 @@
   };
   const SN_COLLAR = [(395 - 300) * SNOOPY_K, (538 - 940) * SNOOPY_K];
   const SN_TOP = (50 - 940) * SNOOPY_K;
+
+  // ---------- the opening: Snoopy doodled in crayon, coloured in, rigged, then into the world ----------
+  // Timeline (seconds): outline strokes, then colouring in, then the rig and a walk in place, then
+  // at T0 the camera pulls out and the crosswalk fades in around him.
+  const STROKE0 = 0.5, FILL0 = 4.4, RIG0 = 6.0, T0 = 7.8, PULL = 5, FADE = 1.4;
+  const ellD = (cx, cy, rx, ry, r) => {
+    let d = '';
+    for (let i = 0; i <= 48; i++) {
+      const a = -Math.PI / 2 + (i / 48) * Math.PI * 2;
+      const x = cx + rx * Math.cos(a) * Math.cos(r) - ry * Math.sin(a) * Math.sin(r);
+      const y = cy + rx * Math.cos(a) * Math.sin(r) + ry * Math.sin(a) * Math.cos(r);
+      d += (i ? ' L ' : 'M ') + x.toFixed(1) + ' ' + y.toFixed(1);
+    }
+    return d;
+  };
+  // outline strokes in drawing order (w: line weight relative to the main line)
+  const DOODLE_STROKES = [
+    ['M 300 380 C 220 300 230 150 330 80 C 370 55 430 45 480 65 C 505 75 515 90 512 110 C 515 160 530 195 580 210 C 660 225 740 260 772 320 C 795 370 780 440 735 470 C 690 495 620 498 585 478 C 540 460 490 455 470 460', 1], ['M 505 85 Q 520 88 532 103', 0.85], [ellD(232, 345, 66, 166, 0.2), 1],
+    [ellD(435, 215, 12, 25, 0.12), 0.8], [ellD(492, 220, 12, 25, 0.12), 0.8], [ellD(640, 368, 52, 25, 0.05), 0.9],
+    ['M 440 345 C 440 380 470 420 530 448 C 590 470 660 462 695 432', 0.85], ['M 690 420 Q 702 432 690 448', 0.85],
+    ['M 300 377 C 340 395 355 430 355 530', 1], ['M 476 458 C 455 485 440 515 432 545', 1], ['M 348 532 L 442 545', 1.9],
+    ['M 352 540 C 280 575 190 620 168 700 C 155 770 195 820 240 830 L 238 895 L 385 895 L 390 838 C 450 820 490 770 482 700 C 476 640 450 590 432 548 Z', 1], ['M 215 650 C 185 690 180 750 195 785', 0.85], ['M 430 595 C 455 640 470 720 450 795', 0.85],
+    ['M 245 880 C 160 882 90 900 85 930 C 85 948 200 945 300 940 C 305 920 300 895 290 880 Z', 1], ['M 330 882 C 325 900 325 925 330 942 C 420 948 510 950 518 930 C 515 900 450 885 380 880 Z', 1], ['M 325 840 C 318 870 316 885 316 892', 0.85],
+    ['M 162 912 L 152 938', 0.7], ['M 192 908 L 186 938', 0.7], ['M 452 912 L 462 940', 0.7], ['M 480 915 L 494 938', 0.7],
+    ['M 500 462 C 490 495 492 525 508 526 C 522 520 524 490 522 462 Z', 0.7],
+  ];
+  // regions coloured in afterwards, in order
+  const DOODLE_FILLS = [
+    ['M 300 380 C 220 300 230 150 330 80 C 370 55 430 45 480 65 C 505 75 515 90 512 110 C 515 160 530 195 580 210 C 660 225 740 260 772 320 C 795 370 780 440 735 470 C 690 495 620 498 585 478 C 540 460 490 455 470 460 C 440 440 380 420 300 380 Z', '#fdfbf5'], [ellD(232, 345, 66, 166, 0.2), '#fdfbf5'], ['M 330 390 L 478 452 L 432 548 L 352 540 Z', '#fdfbf5'], ['M 352 540 C 280 575 190 620 168 700 C 155 770 195 820 240 830 L 238 895 L 385 895 L 390 838 C 450 820 490 770 482 700 C 476 640 450 590 432 548 Z', '#fdfbf5'],
+    ['M 245 880 C 160 882 90 900 85 930 C 85 948 200 945 300 940 C 305 920 300 895 290 880 Z', '#fdfbf5'], ['M 330 882 C 325 900 325 925 330 942 C 420 948 510 950 518 930 C 515 900 450 885 380 880 Z', '#fdfbf5'],
+    [ellD(238, 335, 44, 134, 0.2), '#1d1b1a'], [ellD(435, 215, 12, 25, 0.12), '#1d1b1a'], [ellD(492, 220, 12, 25, 0.12), '#1d1b1a'],
+    [ellD(640, 368, 52, 25, 0.05), '#1d1b1a'], ['M 500 462 C 490 495 492 525 508 526 C 522 520 524 490 522 462 Z', '#f2a7a0'],
+  ];
+  // measure the paths once with SVG (length, points along them, bounding boxes)
+  let doodle = null;
+  function measureDoodle() {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width', '0'); svg.setAttribute('height', '0');
+    svg.style.position = 'absolute'; svg.style.visibility = 'hidden';
+    document.body.appendChild(svg);
+    const mk = (d) => { const e = document.createElementNS('http://www.w3.org/2000/svg', 'path'); e.setAttribute('d', d); svg.appendChild(e); return e; };
+    let total = 0;
+    const strokes = DOODLE_STROKES.map(([d, w]) => {
+      const el = mk(d), len = el.getTotalLength();
+      const o = { p: new Path2D(d), el, len, start: total, w }; total += len; return o;
+    });
+    const fills = DOODLE_FILLS.map(([d, col]) => {
+      const el = mk(d), b = el.getBBox();
+      const lines = [];
+      const slant = b.height * 0.35;
+      let i = 0;
+      for (let x = b.x - slant - 10; x < b.x + b.width + 10; x += 19, i++) {
+        lines.push(i % 2 ? [x + slant, b.y - 6, x, b.y + b.height + 6] : [x, b.y + b.height + 6, x + slant, b.y - 6]);
+      }
+      return { p: new Path2D(d), col, lines };
+    });
+    doodle = { strokes, fills, total };
+  }
+
+  // a wax crayon held at an angle, its tip at (x, y) in Snoopy's reference box
+  function drawCrayonStick(x, y, col) {
+    ctx.save();
+    ctx.translate(x, y); ctx.rotate(-0.8);
+    ctx.lineJoin = 'round';
+    ctx.fillStyle = 'rgba(26,78,88,0.22)';
+    ctx.beginPath(); ctx.moveTo(30, 34); ctx.lineTo(70, 56); ctx.lineTo(330, 56); ctx.lineTo(330, 6); ctx.lineTo(70, 6); ctx.closePath(); ctx.fill();
+    const out = col === '#1d1b1a' ? '#000' : '#2b2826';
+    ctx.strokeStyle = out; ctx.lineWidth = 7;
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(44, -20); ctx.lineTo(44, 20); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillRect(44, -24, 260, 48); ctx.strokeRect(44, -24, 260, 48);
+    ctx.fillStyle = col === '#fdfbf5' ? '#cfc3a8' : '#e9dcbc';
+    ctx.fillRect(92, -25, 170, 50); ctx.strokeRect(92, -25, 170, 50);
+    ctx.fillStyle = out; ctx.fillRect(110, -25, 10, 50); ctx.fillRect(234, -25, 10, 50);
+    ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.fillRect(140, -8, 70, 6); ctx.fillRect(140, 4, 50, 5);
+    ctx.restore();
+  }
+
+  // Snoopy at time tt of the opening: outlines drawing on, then the colouring in
+  function drawDoodle(rng, tt) {
+    if (!doodle) measureDoodle();
+    ctx.save();
+    ctx.scale(SNOOPY_K, SNOOPY_K); ctx.translate(-300, -940);
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    const fp = Math.max(0, (tt - FILL0) / (RIG0 - FILL0 - 0.2)) * doodle.fills.length;
+    let pen = null;
+    doodle.fills.forEach((f, i) => {
+      const qf = Math.min(1, Math.max(0, fp - i));
+      if (qf <= 0) return;
+      ctx.save(); ctx.clip(f.p);
+      if (qf >= 1) { ctx.fillStyle = f.col; ctx.fill(f.p); }
+      ctx.strokeStyle = f.col; ctx.lineWidth = 34; ctx.globalAlpha = 0.92;
+      const n = Math.ceil(qf * f.lines.length);
+      ctx.beginPath();
+      for (let k = 0; k < n; k++) { const [a, b, c, d] = f.lines[k]; ctx.moveTo(a + (rng() - 0.5) * 6, b); ctx.lineTo(c + (rng() - 0.5) * 6, d); }
+      ctx.stroke(); ctx.restore(); ctx.globalAlpha = 1;
+      if (qf < 1) { const l = f.lines[n - 1]; pen = [l[2], l[3], f.col]; }
+    });
+    const sp = Math.max(0, Math.min(1, (tt - STROKE0) / (FILL0 - STROKE0 - 0.2))) * doodle.total;
+    for (const st of doodle.strokes) {
+      const drawn = Math.min(st.len, sp - st.start);
+      if (drawn <= 0) break;
+      ctx.setLineDash([drawn, 1e5]);
+      for (let pass = 0; pass < 2; pass++) {
+        ctx.save(); ctx.translate((rng() - 0.5) * 7, (rng() - 0.5) * 7);
+        ctx.strokeStyle = '#1d1b1a'; ctx.lineWidth = (pass ? 13 : 24) * st.w; ctx.globalAlpha = pass ? 0.55 : 0.95;
+        ctx.stroke(st.p); ctx.restore();
+      }
+      if (drawn < st.len) { const pt = st.el.getPointAtLength(drawn); pen = [pt.x, pt.y, '#1d1b1a']; }
+    }
+    ctx.setLineDash([]); ctx.globalAlpha = 1;
+    if (pen) drawCrayonStick(pen[0], pen[1], pen[2]);
+    ctx.restore();
+  }
+
+  // After Effects-style rig: yellow joints and bones over Snoopy while he starts to walk
+  function drawRig(ph, a) {
+    const sw = Math.sin(ph), bob = Math.abs(Math.sin(ph)) * 22;
+    ctx.save();
+    ctx.scale(SNOOPY_K, SNOOPY_K); ctx.translate(-300, -940);
+    ctx.globalAlpha = a;
+    const J = {
+      nose: [640, 368 - bob], head: [430, 250 - bob], ear: [222, 470 - bob], neck: [396, 545 - bob],
+      armB: [196, 770 - bob], armF: [452, 785 - bob], hip: [316, 820 - bob],
+      footL: [190 - sw * 34, 925 - Math.max(0, sw) * 26], footR: [440 + sw * 34, 925 - Math.max(0, -sw) * 26],
+    };
+    const bones = [['nose', 'head'], ['head', 'neck'], ['head', 'ear'], ['neck', 'hip'], ['neck', 'armB'], ['neck', 'armF'], ['hip', 'footL'], ['hip', 'footR']];
+    ctx.strokeStyle = '#f2d22e'; ctx.lineWidth = 9; ctx.lineCap = 'round';
+    ctx.beginPath();
+    for (const [u, v] of bones) { ctx.moveTo(...J[u]); ctx.lineTo(...J[v]); }
+    ctx.stroke();
+    for (const [k, [x, y]] of Object.entries(J)) {
+      ctx.fillStyle = '#f2d22e'; ctx.beginPath(); ctx.arc(x, y, 17, 0, 7); ctx.fill();
+      if (k.startsWith('foot') || k.startsWith('arm') || k === 'nose') {
+        ctx.strokeStyle = '#f2d22e'; ctx.lineWidth = 6; ctx.strokeRect(x - 34, y - 34, 68, 68);
+      }
+    }
+    ctx.restore();
+  }
+
   // o.still: standing; o.dance: 0..1, the happy dance; o.ace: helmet, goggles and scarf, sitting
   // on the doghouse roof (o.wind drives the scarf)
   function drawSnoopy(rng, ph, o = {}) {
@@ -441,7 +582,7 @@
     clearTimeout(tagTimer); tagTimer = setTimeout(() => tagEl.classList.add('gone'), ms);
   }
   function startMode(m) {
-    if (mode) return false;
+    if (mode || t < T0 + PULL - 1) return false;
     mode = m; modeT = 0; lastEmit = 0;
     if (m === 'dance') say('happy dance!');
     if (m === 'ace') say('here\u2019s the World War I Flying Ace!', 3600);
@@ -494,25 +635,44 @@
     agents = [];
     for (let i = 0; i < n; i++) {
       const a = newPerson(R() < 0.1 ? 'bike' : 'person');
-      a.y = cam.y + 40 + (R() * 2 - 1) * span;
+      a.y = star.y + 64 + (R() * 2 - 1) * span; // around where the wide shot will be
       agents.push(a);
     }
   }
   function startIntro() {
     star = { kind: 'star', kid: true, dir: -1, x: -30, y: 0, speed: 24, phase: 0, id: 1,
       shirt: '#f4c430', pants: '#2a2a2a', skin: '#f3c6a0', hair: '#6b4a2b', hat: null, bag: null, sniff: 0 };
-    t = 0; mode = null; notes = []; puffs = []; nextDance = 9; nextAce = 15;
-    cam.x = star.x + 12; cam.y = star.y - 16; cam.zoom = 3.4;
+    t = 0; mode = null; notes = []; puffs = []; nextDance = T0 + 7; nextAce = T0 + 13;
+    push = 0;
+    placeCamera(0);
     populate();
-    say('a walk with snoopy', 4200);
   }
 
+  // Camera: k=0 frames Snoopy filling the screen (the doodle), k=1 the wide shot following the kid.
+  function placeCamera(k) {
+    const z0 = Math.min((0.6 * H) / (34 * base), (0.8 * W) / (30 * base));
+    const [ax, ay] = dogAnchor();
+    // Snoopy's middle is 7 right and 17 up on screen from his feet; turn that into world units
+    const ox = 7, oy = -17;
+    const c0x = ax + ox * COS + oy * SIN, c0y = ay - ox * SIN + oy * COS;
+    const [fx, fy] = [ax, ay];
+    cam.zoom = Math.exp(Math.log(z0) + (Math.log(END_ZOOM) - Math.log(z0)) * k) * (1 + push * 0.75);
+    cam.x = c0x + (star.x - c0x) * k + (fx - 6 - star.x) * push;
+    cam.y = c0y + (star.y + 24 - c0y) * k + (fy - 14 - (star.y + 24)) * push;
+  }
   const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
   function step(dt) {
     t += dt;
     // the walker and Snoopy stop for a sniff every so often
     star.sniff = Math.max(0, star.sniff - dt);
-    if (!mode && star.sniff === 0 && R() < dt * 0.05 && t > 7) star.sniff = 1.6;
+    if (!mode && star.sniff === 0 && R() < dt * 0.05 && t > T0 + 9) star.sniff = 1.6;
+    // captions for the opening, one per step
+    const at = (x) => t - dt < x && t >= x;
+    if (at(0.1)) say('1. doodle snoopy', 4000);
+    if (at(FILL0)) say('2. colour him in', 1600);
+    if (at(RIG0)) say('3. rig him and walk', 1800);
+    if (at(T0)) { say('4. into the world', 2600); star.phase = ((T0 - RIG0) * 9.4) / 1.4; }
+    if (at(T0 + 3.2)) say('a walk with snoopy', 3000);
     // the dance and the Flying Ace come round on their own too
     if (!mode && t > nextDance) startMode('dance');
     if (!mode && t > nextAce) startMode('ace');
@@ -541,17 +701,12 @@
     }
     notes = notes.filter((n) => t - n.born < 1.6);
     puffs = puffs.filter((q) => t - q.born < q.life);
-    const v = star.sniff > 0 || mode ? 0 : star.speed;
+    const v = star.sniff > 0 || mode || t < T0 ? 0 : star.speed;
     star.y -= v * dt; star.phase += v * dt * 0.28;
-    // camera: open close on the pair, then pull back to the whole crossing and follow them
-    const k = ease(Math.min(1, Math.max(0, (t - 1.2) / 3.6)));
     // ...and push in on Snoopy while he dances or flies
     const want = mode === 'dance' ? 1 : mode === 'ace' ? 0.55 : 0;
     push += (want - push) * Math.min(1, dt * 2.2);
-    cam.zoom = (3.4 + (END_ZOOM - 3.4) * k) * (1 + push * 0.75);
-    const [fx, fy] = dogAnchor();
-    cam.x = star.x + 12 - 12 * k + (fx - 6 - (star.x)) * push;
-    cam.y = star.y - 16 + 40 * k + (fy - 14 - (star.y + 24)) * push;
+    placeCamera(ease(Math.min(1, Math.max(0, (t - T0) / PULL))));
     // recycle against the wide shot's bounds even during the close-up, so the crowd stays spread out
     const rad = 0.5 * Math.hypot(W, H) / (base * END_ZOOM) + 90;
     for (const a of agents) {
@@ -568,9 +723,34 @@
     }
   }
 
+  function grainPass() {
+    // patchy wax: punch paper grain out of everything, shifted each boil so it shimmers
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.globalAlpha = 0.45;
+    ctx.save(); ctx.translate((boil * 73) % 220, (boil * 41) % 220);
+    ctx.fillStyle = grain; ctx.fillRect(-220, -220, cv.width + 440, cv.height + 440);
+    ctx.restore();
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+  }
   function render() {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, cv.width, cv.height);
+    if (t < T0) {
+      // the opening: just Snoopy on the paper
+      const s = S(), [dsx, dsy] = toScreen(...dogAnchor());
+      ctx.setTransform(dpr * s, 0, 0, dpr * s, dpr * dsx, dpr * dsy);
+      if (t < RIG0) drawDoodle(rngFor(9, 6), t);
+      else {
+        const ph = (t - RIG0) * 9.4 * Math.min(1, (t - RIG0) / 0.6);
+        drawSnoopy(rngFor(9, 2), ph, {});
+        const a = Math.min(1, (t - RIG0) / 0.3, (T0 - t) / 0.3);
+        drawRig(ph, Math.max(0, a));
+      }
+      grainPass();
+      return;
+    }
     drawStreet();
     const s = S();
     const items = [...agents, star].map((a) => {
@@ -583,6 +763,14 @@
     const ace = mode === 'ace' ? aceState(modeT) : null;
     const flying = ace && ace.gear;
     const place = (sx, sy) => ctx.setTransform(dpr * s, 0, 0, dpr * s, dpr * sx, dpr * sy);
+    const dogDraw = () => {
+      const still = star.sniff > 0 || (mode === 'ace');
+      ctx.scale(DOG, DOG);
+      if (mode === 'dance') {
+        const d = Math.min(1, modeT / 0.3, (DANCE_LEN - modeT) / 0.3);
+        drawSnoopy(rngFor(9, 2), modeT * 11, { dance: Math.max(0, d) });
+      } else drawSnoopy(rngFor(9, 2), still ? 0 : star.phase * 1.4, { still });
+    };
     // shadows first so nobody's shadow lands on top of someone else
     for (const o of items) {
       place(o.sx, o.sy);
@@ -604,14 +792,7 @@
     for (const o of items) {
       place(o.sx, o.sy);
       const a = o.a;
-      if (a.kind === 'dog') {
-        const still = star.sniff > 0 || (mode === 'ace');
-        ctx.scale(DOG, DOG);
-        if (mode === 'dance') {
-          const d = Math.min(1, modeT / 0.3, (DANCE_LEN - modeT) / 0.3);
-          drawSnoopy(rngFor(9, 2), modeT * 11, { dance: Math.max(0, d) });
-        } else drawSnoopy(rngFor(9, 2), still ? 0 : star.phase * 1.4, { still });
-      } else if (a.kind === 'bike') drawBike(a, rngFor(a.id, 2), a.phase);
+      if (a.kind === 'dog') dogDraw(); else if (a.kind === 'bike') drawBike(a, rngFor(a.id, 2), a.phase);
       else {
         const sw = a.kind === 'star' && (star.sniff > 0 || mode) ? 0 : Math.sin(a.phase);
         drawPerson(a, rngFor(a.id, 2), sw);
@@ -672,15 +853,15 @@
       if (Math.cos(t * sp - Math.PI / 2) < 0) ctx.scale(-1, 1);
       drawBird(rngFor(11, 2), t);
     }
-    // patchy wax: punch paper grain out of everything, shifted each boil so it shimmers
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.globalAlpha = 0.45;
-    ctx.save(); ctx.translate((boil * 73) % 220, (boil * 41) % 220);
-    ctx.fillStyle = grain; ctx.fillRect(-220, -220, cv.width + 440, cv.height + 440);
-    ctx.restore();
-    ctx.globalAlpha = 1;
-    ctx.globalCompositeOperation = 'source-over';
+    // the world fades in around Snoopy as the camera pulls out: paper over everything, Snoopy on top
+    if (t < T0 + FADE) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = 1 - ease((t - T0) / FADE);
+      ctx.fillStyle = '#e9e0cf'; ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.globalAlpha = 1;
+      place(dsx, dsy); dogDraw();
+    }
+    grainPass();
   }
 
   let last = 0, acc = 0;
