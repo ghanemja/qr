@@ -79,16 +79,14 @@ const am = meta.A_body.feet;
 // P: x, y (feet on screen), sq (squash), lean, head (tilt), legL, legR, and the arms: aN/LN, aF/LF (angle, length)
 // The drawing's own arms hang at his sides (prep.py takes them off); these are drawn in the same ink so they can reach.
 function arm(g, sh, a, L, bw) {
-  // like the strip's: a short, even, soft arm with a round mitten. It starts inside his body, so its outline
-  // only starts where it comes out (x0).
+  // like the strip's: a short, even, soft arm, fully outlined, with a round shoulder and a round mitten
   g.save(); g.translate(sh[0], sh[1]); g.rotate(a);
   g.fillStyle = bw ? PAPER : '#ffffff'; g.strokeStyle = INK; g.lineWidth = 13; g.lineCap = g.lineJoin = 'round';
-  const r = 29, x0 = 60, p = L + 8;
-  const edge = (from) => { g.moveTo(from, -r); g.quadraticCurveTo(L * 0.6, -r - 4, p - 22, -r);
-    g.bezierCurveTo(p - 4, -r - 12, p + 38, -r - 8, p + 38, 0); g.bezierCurveTo(p + 38, r + 8, p - 4, r + 12, p - 22, r);
-    g.quadraticCurveTo(L * 0.6, r + 4, from, r); };
-  g.beginPath(); edge(0); g.closePath(); g.fill();
-  g.beginPath(); edge(x0); g.stroke();
+  const r = 29, p = L + 8;
+  g.beginPath(); g.moveTo(0, -r); g.quadraticCurveTo(L * 0.6, -r - 4, p - 22, -r);
+  g.bezierCurveTo(p - 4, -r - 12, p + 38, -r - 8, p + 38, 0); g.bezierCurveTo(p + 38, r + 8, p - 4, r + 12, p - 22, r);
+  g.quadraticCurveTo(L * 0.6, r + 4, 0, r); g.arc(0, 0, r, Math.PI / 2, -Math.PI / 2); g.closePath();
+  g.fill(); g.stroke();
   g.lineWidth = 7; g.beginPath(); g.moveTo(p + 6, -12); g.quadraticCurveTo(p + 17, -12, p + 24, -7); g.moveTo(p + 6, 9); g.quadraticCurveTo(p + 17, 10, p + 24, 14); g.stroke();
   g.restore();
 }
@@ -97,7 +95,7 @@ function puppet(g, P, bw, probe) {
   const part = (n, a) => { const pv = meta[n].pivot; g.save(); g.translate(pv[0], pv[1]); g.rotate(a); g.translate(-pv[0], -pv[1]); g.drawImage(img[n], 0, 0); g.restore(); };
   const bm = meta.A_body;
   part('A_legL', P.legL); part('A_legR', P.legR);
-  if (P.LF > 110) arm(g, bm.shoulderF, P.aF, P.LF, bw);                  // the far arm, behind him (tucked away when he reaches)
+  arm(g, bm.shoulderF, P.aF, P.LF, bw);                                   // the far arm, behind him
   g.drawImage(img.A_body, 0, 0);
   part('A_head', P.head);
   arm(g, bm.shoulderN, P.aN, P.LN, bw);                                   // the near arm, in front of his chin when he reaches
@@ -106,13 +104,13 @@ function puppet(g, P, bw, probe) {
 }
 // the arms through the shot: keyframes [t, near angle, near length, far angle, far length]
 const AIM = -0.42;   // at the top of the jump his near paw reaches forward under his chin, to the switch
-const HANG = [1.45, 185, 1.62, 175], BACK = [2.2, 180, 2.3, 170], GRAB = [-0.5, 215, -1.0, 205], REACH = [-0.7, 235, -0.7, 60], AIMED = [AIM, 245, AIM, 60];  // reaching, the far arm stays behind the near one
+const HANG = [1.3, 175, 1.95, 170], BACK = [2.35, 175, 2.55, 165], GRAB = [-0.6, 215, -0.1, 215], REACH = [-0.75, 235, -0.3, 235], AIMED = [AIM, 245, AIM + 0.32, 240];  // the far arm a little lower, so both show
 const ARMS = [[0, HANG], [1.95, HANG], [2.15, BACK], [2.28, BACK], [2.48, GRAB], [3.35, GRAB], [3.46, HANG], [3.52, REACH], [3.7, REACH], [3.86, BACK], [3.98, BACK], [4.22, AIMED], [4.42, AIMED], [4.75, HANG], [99, HANG]];
 function arms(P, t) {
   let i = 0; while (ARMS[i + 1][0] <= t) i++;
   const [t0, a] = ARMS[i], [t1, b] = ARMS[i + 1], k = ss(t0, t1, t);
   [P.aN, P.LN, P.aF, P.LF] = a.map((v, j) => lerp(v, b[j], k));
-  if (t < 1.95) { P.aN += 0.35 * P.swing; P.aF -= 0.35 * P.swing; }                  // swing as he walks
+  if (t < 1.95) { P.aN += 0.5 * P.swing; P.aF -= 0.45 * P.swing; }                  // swing as he walks
   const hh = hump(2.62, 3.4, t) ** 0.3 * (t > 2.62 && t < 3.4 ? 1 : 0);              // hand over hand up the roof
   const w = Math.sin(TAU * 4 * (t - 2.62)); P.aN += 0.45 * w * hh; P.aF -= 0.45 * w * hh; P.LN += 18 * w * hh; P.LF -= 18 * w * hh;
   P.aN += 0.05 * Math.sin(TAU * 8 * t) * hump(3.5, 3.72, t);                        // straining
@@ -120,7 +118,8 @@ function arms(P, t) {
 const XS = -300, XT = 175, XR = 515;  // walk in from off the left to the doghouse; stand on the roof at XR
 function snoopyA(t) {
   const P = { x: XT, y: GROUND, sq: 1, lean: 0, head: 0, legL: 0, legR: 0, swing: 0 };
-  const walk = (x0, d, amp) => { const ph = TAU * d / 150, s = Math.sin(ph); P.legL = 0.28 * s * amp; P.legR = -0.28 * s * amp; P.swing = -s * amp; P.y -= 10 * Math.abs(Math.sin(ph)) * amp; P.head = 0.03 * Math.sin(2 * ph) * amp; };
+  const walk = (x0, d, amp) => { const ph = TAU * d / 150, s = Math.sin(ph); P.legL = 0.32 * s * amp; P.legR = -0.32 * s * amp; P.swing = -s * amp; P.y -= 16 * Math.abs(Math.sin(ph)) * amp; P.head = 0.05 * Math.sin(2 * ph) * amp;
+    P.lean = 0.06 * amp; P.sq = 1 - 0.035 * Math.cos(2 * ph) * amp; };
   if (t < 1.9) { const u = clamp(t / 1.9), a = 0.7, v = 2 / (1 + a), s = u < a ? v * u : v * a + v * (u - a) - v * (u - a) ** 2 / (2 * (1 - a));
     P.x = XS + (XT - XS) * s; walk(XS, P.x - XS, u < a ? 1 : 1 - (u - a) / (1 - a)); }
   // look up at the roof, crouch, and jump onto its bottom edge (landing on the click at 2.65 s)
