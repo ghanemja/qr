@@ -46,8 +46,8 @@ beats, all within 22 ms), with its drop on beat 9 (4.09 s).
   beats send something up: the Roadster off its ramp, the SpaceX booster lifting off, the Amazon
   drone, the pad rocket, the Starship. Down beats bring something down: the Berkshire snowball, the
   booster landing, the Oreo dunk, General Mills cereal pouring, the Caterpillar digging.
-- **Beat 25**, the last swipe up, breaks the world on screen into the QR code (left of centre, clear
-  of the thumb). It hops on the swipes with confetti to the end, and the last frame scans (ZXing).
+- **Beat 25**, the last swipe up, breaks the world on screen into the QR code (centred; the thumb keeps
+  swiping behind it). It hops on the swipes with confetti to the end, and the last frame scans (ZXing).
 
 The video in the repo has no audio track; add the sound when posting, starting with the video at
 0 s. The clip of the sound we have is only 7.3 s long, so the preview with audio loops its 4-beat

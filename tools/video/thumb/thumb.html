@@ -53,8 +53,8 @@ function thumbUp(T, dur = 0.12, curve = back) {
 
 // ---- the QR code ----
 const q = qrcode(0, 'H'); q.addData(URL_); q.make();
-// Left of centre, clear of the thumb, which keeps swiping along the right edge to the end.
-const N = q.getModuleCount(), MOD = 20, QX = 92, QY = 560;
+// Centred; once it's up, the thumb keeps swiping behind it, so it stays clean to scan.
+const N = q.getModuleCount(), MOD = 20, QX = Math.round(W / 2 - (N * MOD) / 2), QY = 560;
 const DARK = [];
 for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (q.isDark(r, c)) DARK.push({ r, c, x: QX + (c + 0.5) * MOD, y: QY + (r + 0.5) * MOD });
 
@@ -249,9 +249,9 @@ window.frame = (T) => {
   const d = T - S.code - MD, z = d >= 0 && d < 0.8 ? 1 + 0.05 * Math.exp(-d * 6) * Math.min(1, d / 0.05) : 1;
   ctx.translate(W / 2, H / 2); ctx.scale(z, z); ctx.translate(-W / 2, -H / 2);
   background(T);
-  if (T < S.code) montage(T); else code(T);
-  ctx.setTransform(1, 0, 0, 1, 0, 0);
-  reelThumb(T); ring(); tap(T);
+  if (T < S.code) { montage(T); ctx.setTransform(1, 0, 0, 1, 0, 0); reelThumb(T); ring(); tap(T); return; }
+  ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); reelThumb(T); ring(); tap(T); ctx.restore();
+  code(T);
 };
 // A ripple where the thumb touches as it lands: the ring on the way up, its rest spot on the way down.
 function tap(T) {
