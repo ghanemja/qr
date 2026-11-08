@@ -95,8 +95,10 @@ function puppet(g, P, bw, probe) {
   const part = (n, a) => { const pv = meta[n].pivot; g.save(); g.translate(pv[0], pv[1]); g.rotate(a); g.translate(-pv[0], -pv[1]); g.drawImage(img[n], 0, 0); g.restore(); };
   const bm = meta.A_body;
   part('A_legL', P.legL); part('A_legR', P.legR);
-  arm(g, bm.shoulderF, P.aF, P.LF, bw);                                   // the far arm, behind him
-  g.drawImage(img.A_body, 0, 0);
+  g.drawImage(img.A_body, 0, 0);                                         // (his far arm is the drawing's own)
+  g.beginPath(); g.moveTo(377, 556); g.quadraticCurveTo(424, 668, 371, 784); g.lineTo(374, 556); g.closePath();   // his side, where the near arm came off
+  g.fillStyle = bw ? PAPER : '#ffffff'; g.fill();
+  g.beginPath(); g.moveTo(377, 556); g.quadraticCurveTo(424, 668, 371, 784); g.strokeStyle = INK; g.lineWidth = 13; g.lineCap = 'round'; g.stroke();
   part('A_head', P.head);
   arm(g, bm.shoulderN, P.aN, P.LN, bw);                                   // the near arm, in front of his chin when he reaches
   const paw = probe ? new DOMPoint(bm.shoulderN[0] + (P.LN + 40) * Math.cos(P.aN), bm.shoulderN[1] + (P.LN + 40) * Math.sin(P.aN)).matrixTransform(g.getTransform()) : null;

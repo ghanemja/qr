@@ -69,10 +69,9 @@ rgb = ink_paper(c)
 HEAD = [(72, 38), (796, 38), (796, 520), (470, 520), (440, 540), (345, 540), (300, 520), (72, 520)]
 LEGL = [(72, 842), (306, 842), (306, 958), (72, 958)]
 LEGR = [(306, 842), (796, 842), (796, 958), (306, 958)]
-ARMN = [(453, 604), (530, 604), (530, 812), (453, 812)]                 # his arms hang at his sides: they come off,
-ARMF = [(120, 636), (193, 636), (196, 796), (150, 803), (120, 803)]    # the stage draws arms that move
+ARMN = [(453, 604), (530, 604), (530, 812), (453, 812)]   # his near arm comes off (the stage draws one that reaches); the far one stays
 body = keep(keep(keep(al, HEAD, box, False), LEGL, box, False), LEGR, box, False)
-body = keep(keep(body, ARMN, box, False), ARMF, box, False)
+body = keep(body, ARMN, box, False)
 o = lambda x, y: [x - box[0], y - box[1]]
 save('A_head', rgb, keep(al, HEAD, box), pivot=o(392, 535))
 save('A_body', rgb, body, feet=o(300, 948), shoulderN=o(462, 628), shoulderF=o(380, 625), hip=o(300, 842))
