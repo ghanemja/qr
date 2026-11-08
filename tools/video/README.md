@@ -35,15 +35,19 @@ A 16.3 s vertical (9:16, 1080×1920, 60 fps) take on the "slide your thumb up, f
 timed to the original reel's song: a beat every 0.4073 s from 0. The reel cuts every 8 beats, at
 3.24, 6.49, 9.73 and 13.01 s, and its actions land on the beats in between.
 
-- **The opening card** has the trend's look (sky blue, "SLIDE YOUR THUMB UP! FEEL THE BEAT
-  (QR edition)"). A cartoon thumb bends at the knuckle and comes in from the bottom right: up on
-  the even beats, down on the odd ones, like the reel's demo.
+- **The opening card** is the reel's: its sky blue, "SLIDE YOUR THUMB UP! FEEL THE BEAT", its
+  target ring and its own thumb drawings, up on the even beats and down on the odd ones.
+  `extract_thumb.py` cuts the 48 drawings of one cycle out of the screen recording into
+  `thumb/reel/` (the TikTok buttons and captions over them are removed). They're the reel's art,
+  so like the song they stay out of the repo (`reel/` is git-ignored): run it before rendering.
 - **The montage** (beats 8–23) cuts on every beat. Up beats send something up: the Roadster off its
   ramp, the SpaceX booster lifting off (flown on a smooth climb), the Amazon drone, the pad rocket,
   the Starship. Down beats bring something down: the Berkshire snowball rolling down its slope, the
   booster landing, the Oreo dunk, General Mills cereal pouring, the Caterpillar digging. Each shot runs
   its world's clock at one steady rate (smooth) and drifts with the swipe.
-- **Beats 24–31:** the Starbucks world is fired up into its QR code, slice by slice.
+- **Beats 24–32, the morphs:** each up beat breaks the world on screen into the QR code right where
+  it is (its pixels fly into the code's squares); each down beat flies the code back out into the
+  next world (Roadster, Berkshire, Amazon, Starship). Beat 32 lands the real code.
 - **Beats 32–39:** the code jumps up and thumps down with confetti. The last frame scans (checked with
   ZXing).
 
@@ -52,6 +56,7 @@ at 0 s. The song's strongest hits sit about 35 ms ahead of the grid, so a versio
 muxed in uses `adelay=35`.
 
 ```sh
+python3 tools/video/thumb/extract_thumb.py <the reel's screen recording .mov>  # once, makes thumb/reel/
 node tools/video/thumb/render.cjs /tmp/qrv/thumb stills 1,4,9,13.5   # a few stills
 node tools/video/thumb/render.cjs /tmp/qrv/frames 60 4               # every frame (about 5 min)
 ffmpeg -framerate 60 -i /tmp/qrv/frames/f%05d.jpg -c:v libx264 -preset slow -crf 19 -pix_fmt yuv420p \
