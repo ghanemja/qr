@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Snoopy Crossing</title>
-<meta name="description" content="A hand-drawn crayon crosswalk: Snoopy on a leash among walkers and bikes, doing his happy dance and flying his doghouse as the Flying Ace.">
+<title>Snoopy's Suppertime</title>
+<meta name="description" content="A crayon short: Snoopy is doodled in, rigged and walked home, does his suppertime happy dance and falls asleep on his doghouse.">
 <meta name="theme-color" content="#e9e0cf">
 <link rel="icon" href="assets/icon.svg">
 <script src="assets/analytics.js" data-goatcounter="ghanemja" data-site="qr"></script>
@@ -25,19 +25,16 @@
     font: inherit; font-size: 19px; color: #2d2b28; background: #f6efe0; border: 2.5px solid #2d2b28; border-radius: 12px 9px 13px 8px;
     padding: 6px 14px 4px; cursor: pointer; box-shadow: 3px 3px 0 rgba(28,72,82,.45); transform: rotate(-1deg);
   }
-  .bar button:nth-child(2) { background: #d8322b; color: #fff6e8; transform: rotate(1deg); }
   .bar button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 rgba(28,72,82,.45); }
   .gone { opacity: 0; }
 </style>
 </head>
 <body>
-<canvas id="c" aria-label="Crayon animation of people, bikes and Snoopy on a leash crossing a zebra crosswalk, seen from above"></canvas>
+<canvas id="c" aria-label="Crayon animation: Snoopy is drawn and rigged, then in his backyard at sunset he does his suppertime happy dance, eats and falls asleep on his doghouse"></canvas>
 <div class="tag" id="tag">1. doodle snoopy</div>
 <div class="bar">
-  <button id="bDance" type="button">&#9835; Happy dance</button>
-  <button id="bAce" type="button">&#9992; Flying Ace</button>
   <button id="bReplay" type="button">&#8634; Replay</button>
 </div>
-<script src="assets/crossing.js"></script>
+<script src="assets/snoopy.js"></script>
 </body>
 </html>

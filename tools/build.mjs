@@ -849,7 +849,7 @@ ${footer(0)}
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(join(OUT, 'c'), { recursive: true });
 mkdirSync(join(OUT, 'assets'), { recursive: true });
-for (const f of ['site.css', 'qrworld.css', 'atlas.js', 'qr-card.js', 'directory.js', 'icon.svg', 'qrworld.js', 'models.js', 'qrsculpture.js', 'company3d.js', 'home.js', 'BufferGeometryUtils.js', 'RoundedBoxGeometry.js', 'kit.js', 'heroes.js', 'heroes2.js', 'scenes.js', 'sitesearch.js', 'library.js', 'analytics.js', 'crossing.js']) copyFileSync(join(ROOT, 'src', f), join(OUT, 'assets', f));
+for (const f of ['site.css', 'qrworld.css', 'atlas.js', 'qr-card.js', 'directory.js', 'icon.svg', 'qrworld.js', 'models.js', 'qrsculpture.js', 'company3d.js', 'home.js', 'BufferGeometryUtils.js', 'RoundedBoxGeometry.js', 'kit.js', 'heroes.js', 'heroes2.js', 'scenes.js', 'sitesearch.js', 'library.js', 'analytics.js', 'snoopy.js']) copyFileSync(join(ROOT, 'src', f), join(OUT, 'assets', f));
 
 copyFileSync(join(ROOT, 'node_modules/qrcode-generator/qrcode.js'), join(OUT, 'assets/qrcode.js'));
 copyFileSync(join(ROOT, 'node_modules/three/build/three.module.min.js'), join(OUT, 'assets/three.module.min.js'));
@@ -874,7 +874,7 @@ writeFileSync(join(OUT, 'companies.html'), directoryPage());
 writeFileSync(join(OUT, 'about.html'), aboutPage());
 writeFileSync(join(OUT, 'library.html'), libraryPage());
 // A standalone crayon animation page (hand-written, no template).
-copyFileSync(join(ROOT, 'src/crossing.html'), join(OUT, 'crossing.html'));
+copyFileSync(join(ROOT, 'src/snoopy.html'), join(OUT, 'snoopy.html'));
 writeFileSync(join(OUT, '.nojekyll'), '');
 const ordered = [...companies.filter((c) => c.kind === 'f500').sort((a, b) => a.rank - b.rank), ...companies.filter((c) => c.kind === 'startup')];
 ordered.forEach((c, i) => writeFileSync(join(OUT, 'c', `${c.slug}.html`), companyPage(c, ordered[i - 1], ordered[i + 1])));
