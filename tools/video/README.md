@@ -41,10 +41,12 @@ beats, all within 22 ms), with its drop on beat 9 (4.09 s).
   removed). They're the reel's art, so like the song they stay out of the repo (`reel/` is
   git-ignored): run it before rendering.
 - **The thumb** swipes up on the odd beats and down on the even ones on the opening card only.
-- **The montage** (beats 9–24, from the drop) hard-cuts on every beat with a quick zoom snap. Up
-  beats send something up: the Roadster off its ramp, the SpaceX booster lifting off, the Amazon
-  drone, the pad rocket, the Starship. Down beats bring something down: the Berkshire snowball, the
-  booster landing, the Oreo dunk, General Mills cereal pouring, the Caterpillar digging.
+- **The montage** (beats 9–24, from the drop) hard-cuts on every beat with a quick zoom snap, a
+  different world each time. Up beats send something up: the Roadster off its ramp, the SpaceX
+  booster lifting off, the Amazon drone, the pad rocket, Lockheed's jet lifting off its pad, the
+  Starship, Disney's fireworks, the Goodyear blimp. Down beats bring something down: the Berkshire
+  snowball, the Oreo dunk, the booster landing, General Mills cereal pouring, the McDonald's burger
+  dropping together, the Heinz bottle flipping onto it, the oil pump nodding, the Caterpillar digging.
 - **Beat 25**, the last swipe up, breaks the world on screen into the QR code (centred). It hops on the swipes with confetti to the end, and the last frame scans (ZXing).
 
 The video in the repo has no audio track; add the sound when posting, starting with the video at
