@@ -31,34 +31,32 @@ ffmpeg -framerate 30 -i /tmp/qrv/frames/f%05d.jpg -i /tmp/qrv/house.wav \
 
 ## The thumb video (`thumb/`)
 
-A 16.3 s vertical (9:16, 1080×1920, 60 fps) take on the "slide your thumb up, feel the beat" trend,
-timed to the original reel's song: a beat every 0.4073 s from 0. The reel cuts every 8 beats, at
-3.24, 6.49, 9.73 and 13.01 s, and its actions land on the beats in between.
+A 14.9 s vertical (9:16, 1080×1920, 60 fps) take on the "slide your thumb up, feel the beat" trend,
+timed to the "move your thumb to the beat" sound: a beat every 0.451 s from 0.035 s (fitted to its
+beats, all within 22 ms), with its drop on beat 9 (4.09 s).
 
-- **The opening card** is the reel's: its sky blue, "SLIDE YOUR THUMB UP! FEEL THE BEAT", its
-  target ring and its own thumb drawings, up on the even beats and down on the odd ones.
-  `extract_thumb.py` cuts the 48 drawings of one cycle out of the screen recording into
-  `thumb/reel/` (the TikTok buttons and captions over them are removed). They're the reel's art,
-  so like the song they stay out of the repo (`reel/` is git-ignored): run it before rendering.
-- **The montage** (beats 8–23) cuts on every beat. Up beats send something up: the Roadster off its
-  ramp, the SpaceX booster lifting off (flown on a smooth climb), the Amazon drone, the pad rocket,
-  the Starship. Down beats bring something down: the Berkshire snowball rolling down its slope, the
-  booster landing, the Oreo dunk, General Mills cereal pouring, the Caterpillar digging. Each shot runs
-  its world's clock at one steady rate (smooth) and drifts with the swipe.
-- **Beats 24–32, the morphs:** each up beat breaks the world on screen into the QR code right where
-  it is (its pixels fly into the code's squares); each down beat flies the code back out into the
-  next world (Roadster, Berkshire, Amazon, Starship). Beat 32 lands the real code.
-- **Beats 32–39:** the code jumps up and thumps down with confetti. The last frame scans (checked with
-  ZXing).
+- **The opening card** is the first reel's: its sky blue, "SLIDE YOUR THUMB UP! FEEL THE BEAT", its
+  target ring and its own thumb drawings. `extract_thumb.py` cuts the 48 drawings of one cycle out
+  of that screen recording into `thumb/reel/` (the TikTok buttons and captions over them are
+  removed). They're the reel's art, so like the song they stay out of the repo (`reel/` is
+  git-ignored): run it before rendering.
+- **The thumb stays on screen the whole video**, swiping up on the odd beats and down on the even
+  ones, with a ripple where it touches, so every cut lands the moment it does.
+- **The montage** (beats 9–24, from the drop) hard-cuts on every beat with a quick zoom snap. Up
+  beats send something up: the Roadster off its ramp, the SpaceX booster lifting off, the Amazon
+  drone, the pad rocket, the Starship. Down beats bring something down: the Berkshire snowball, the
+  booster landing, the Oreo dunk, General Mills cereal pouring, the Caterpillar digging.
+- **Beat 25**, the last swipe up, breaks the world on screen into the QR code (left of centre, clear
+  of the thumb). It hops on the swipes with confetti to the end, and the last frame scans (ZXing).
 
-The video in the repo has no audio track. Add the reel's song when posting; it starts with the video
-at 0 s. The song's strongest hits sit about 35 ms ahead of the grid, so a version with the song
-muxed in uses `adelay=35`.
+The video in the repo has no audio track; add the sound when posting, starting with the video at
+0 s. The clip of the sound we have is only 7.3 s long, so the preview with audio loops its 4-beat
+bar after the drop (beats 9–13).
 
 ```sh
 python3 tools/video/thumb/extract_thumb.py <the reel's screen recording .mov>  # once, makes thumb/reel/
 node tools/video/thumb/render.cjs /tmp/qrv/thumb stills 1,4,9,13.5   # a few stills
-node tools/video/thumb/render.cjs /tmp/qrv/frames 60 4               # every frame (about 5 min)
+node tools/video/thumb/render.cjs /tmp/qrv/frames 60 3               # every frame (about 5 min)
 ffmpeg -framerate 60 -i /tmp/qrv/frames/f%05d.jpg -c:v libx264 -preset slow -crf 19 -pix_fmt yuv420p \
-  -movflags +faststart media/thumb/qr-thumb-swipe-16s.mp4
+  -movflags +faststart media/thumb/qr-thumb-swipe-15s.mp4
 ```
