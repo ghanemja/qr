@@ -16,7 +16,7 @@ The drawings aren't kept in the repo (nor is the song, nor the video). To render
 
 1. Put the four reference images in a folder as `A_stand.jpg` (standing), `B_ace.jpg` (flying ace on
    the doghouse), `C_astro.jpg` (astronaut on the red doghouse, with the moon) and `D_sit.jpg`
-   (sitting on the roof, grumpy).
+   (sitting on the roof, grumpy), plus `E_wood.png` (the bird, standing).
 2. `python3 tools/snoopy/prep.py <that folder> <pieces folder>` cuts them into pieces with transparent
    backgrounds (the standing drawing into head, body and two legs for the puppet; the flying ace, his
    scarf and the smoke puffs; the doghouse in colour and in black and white; the moon; the sitting
@@ -24,7 +24,7 @@ The drawings aren't kept in the repo (nor is the song, nor the video). To render
 3. Serve the repo root (`python3 -m http.server 8125`) and run `node tools/snoopy/render.cjs <frames> 30 1080`.
 4. `tools/snoopy/encode.sh <frames> <out.mp4> [screen recording of the original reel]` adds the song.
 
-`stage.html` draws everything on a 2D canvas: the standing puppet (legs swing at the hips, the head
-tilts, the body squashes and leans), the scarf drawn in thin rippling strips, the bird drawn in the
-strip's manner (big round head, beak, tuft, flapping wings), and the wipe between the two worlds. The
+`stage.html` draws everything on a 2D canvas from those pieces: the standing puppet (legs swing at the hips, the head
+tilts, the body squashes and leans), the scarf drawn in thin rippling strips, the
+bird drawing with its wing flapping (in black and white with an added outline), and the wipe between the two worlds. The
 black-and-white world moves on twos (12 fps), like old cartoons.

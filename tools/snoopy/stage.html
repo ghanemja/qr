@@ -11,7 +11,7 @@
 </head><body><canvas id="c"></canvas><script type="module">
 const Q = new URLSearchParams(location.search);
 const W = +(Q.get('w') || 1080), H = Math.round(W * 16 / 9), K = W / 1080; // the stage is laid out at 1080 × 1920
-const Z = 1.15, ZX = 540, ZY = 1880;                                         // and filmed 15% closer, from the bottom middle
+const Z = 1.15, ZX = 540, ZY = 1880, DY = 70;  // (and 70 px lower, clear of the app's top bar)                                         // and filmed 15% closer, from the bottom middle
 const cv = document.getElementById('c'); cv.width = W; cv.height = H;
 const ctx = cv.getContext('2d');
 const layer = () => { const c = document.createElement('canvas'); c.width = W; c.height = H; return [c, c.getContext('2d')]; };
@@ -65,18 +65,12 @@ function toggle(g, k, on, bw) {
 
 // ---------- the bird (drawn in the strip's manner: a big round head, a beak, a tuft, a little body) ----------
 function bird(g, x, y, s, face, flap, bw, peck = 0) {
-  g.save(); g.translate(x, y); g.scale(s * face, s); g.rotate(peck * 0.6);
-  g.lineJoin = g.lineCap = 'round'; g.strokeStyle = INK; g.lineWidth = 0.16; g.fillStyle = bw ? PAPER : '#ffd21f';
-  const sh = (f) => { g.beginPath(); f(); g.fill(); g.stroke(); };
-  g.save(); g.translate(-0.15, 0.95); g.rotate(-0.9 * flap); sh(() => g.ellipse(-0.35, 0, 0.6, 0.28, -0.3, 0, TAU)); g.restore();   // far wing
-  sh(() => g.ellipse(0, 1.05, 0.62, 0.78, 0, 0, TAU));                                                                              // body
-  g.beginPath(); g.moveTo(-0.2, 1.75); g.lineTo(-0.3, 2.15); g.moveTo(0.2, 1.75); g.lineTo(0.15, 2.15); g.stroke();                 // legs
-  sh(() => { g.moveTo(0.8, -0.15); g.quadraticCurveTo(1.55, -0.05, 1.65, 0.25); g.quadraticCurveTo(1.2, 0.35, 0.75, 0.3); });      // beak
-  sh(() => g.arc(0, 0, 1, 0, TAU));                                                                                                  // head
-  g.beginPath(); g.moveTo(0.42, -0.28); g.lineTo(0.4, 0.12); g.lineWidth = 0.2; g.stroke(); g.lineWidth = 0.13;                      // eye
-  for (const [a, b] of [[-0.75, -1.85], [-0.3, -2.05], [0.15, -1.9]]) { g.beginPath(); g.moveTo(-0.15, -0.9); g.quadraticCurveTo(a * 0.4, -1.5, a, b); g.stroke(); } // tuft
-  g.lineWidth = 0.16;
-  g.save(); g.translate(0.05, 0.95); g.rotate(-1.1 * flap); sh(() => g.ellipse(-0.4, 0, 0.62, 0.3, -0.3, 0, TAU)); g.restore();     // near wing
+  // the bird drawing itself; (x, y) is the middle of its head, s about a third of its height
+  const body = img[bw ? 'E_wood_bw' : 'E_wood'], wing = img[bw ? 'E_wing_bw' : 'E_wing'], m = meta.E_wood, wp = meta.E_wing.pivot, S = s * 0.0115;
+  g.save(); g.translate(x, y); g.scale(S * face, S); g.translate(m.head[0], m.head[1]); g.rotate(peck * 0.5); g.translate(-m.head[0], -m.head[1]);
+  g.translate(-m.head[0], -m.head[1]);
+  g.drawImage(body, 0, 0);
+  g.translate(wp[0], wp[1]); g.rotate(1.1 * flap - 0.2); g.translate(-wp[0], -wp[1]); g.drawImage(wing, 0, 0);
   g.restore();
 }
 
@@ -151,7 +145,7 @@ function birdAt(t) {
   const kOn = { x: KNOB.x0 + 124, y: KNOB.y };
   const a = TAU * (t - 4.6) / 2.3 - 1.2;
   const orbit = { x: SEATX + 330 * Math.cos(a), y: ROOF - 320 + 110 * Math.sin(a) + 30 * Math.sin(2 * a) };
-  const start = { x: kOn.x + 40, y: kOn.y - 120 }, perch = { x: kOn.x - 20, y: kOn.y - 56 - 2.15 * 30 - 4 };
+  const start = { x: kOn.x + 40, y: kOn.y - 120 }, perch = { x: kOn.x + 10, y: kOn.y - 44 - (432 - 160) * 30 * 0.0115 };
   let p = { x: lerp(start.x, orbit.x, ss(4.6, 5.4, t)), y: lerp(start.y, orbit.y, ss(4.6, 5.4, t)) };
   const k = ss(7.6, 8.32, t); p = { x: lerp(p.x, perch.x, k), y: lerp(p.y, perch.y, k) };
   p.y -= 26 * hump(9.12, 9.32, t);                                   // startled
@@ -198,10 +192,10 @@ function ring(g, cx, cy, r, t) {
 window.frame = (t) => {
   const r = wipeR(t), tq = Math.floor(t * 12 + 1e-6) / 12;   // the black-and-white world moves on twos, like old cartoons
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  if (r < 2290) { g2.setTransform(K * Z, 0, 0, K * Z, K * ZX * (1 - Z), K * ZY * (1 - Z)); world2(g2, tq); g2.setTransform(1, 0, 0, 1, 0, 0); g2.drawImage(grain, 0, 0); ctx.drawImage(c2, 0, 0); }
+  if (r < 2290) { g2.setTransform(K * Z, 0, 0, K * Z, K * ZX * (1 - Z), K * (ZY * (1 - Z) + DY)); world2(g2, tq); g2.setTransform(1, 0, 0, 1, 0, 0); g2.drawImage(grain, 0, 0); ctx.drawImage(c2, 0, 0); }
   if (r > 0) {
-    g3.setTransform(K * Z, 0, 0, K * Z, K * ZX * (1 - Z), K * ZY * (1 - Z)); world3(g3, t); g3.setTransform(1, 0, 0, 1, 0, 0); g3.globalAlpha = 0.5; g3.drawImage(grain, 0, 0); g3.globalAlpha = 1;
-    const kx = (ZX + (KNOB.x0 + (236 - 112) * toggleOn(t) - ZX) * Z) * K, ky = (ZY + (KNOB.y - ZY) * Z) * K;
+    g3.setTransform(K * Z, 0, 0, K * Z, K * ZX * (1 - Z), K * (ZY * (1 - Z) + DY)); world3(g3, t); g3.setTransform(1, 0, 0, 1, 0, 0); g3.globalAlpha = 0.5; g3.drawImage(grain, 0, 0); g3.globalAlpha = 1;
+    const kx = (ZX + (KNOB.x0 + (236 - 112) * toggleOn(t) - ZX) * Z) * K, ky = (ZY + (KNOB.y - ZY) * Z + DY) * K;
     ctx.save(); ring(ctx, kx, ky, r * K, t); ctx.clip(); ctx.drawImage(c3, 0, 0); ctx.restore();
     if (r < 2290) { ring(ctx, kx, ky, r * K, t); const cg = ctx.createConicGradient(t * 4, kx, ky);
       ['#ff5f6d', '#ffc371', '#fff36b', '#5ef08a', '#4fc3ff', '#b57bff', '#ff5f6d'].forEach((c, i, a) => cg.addColorStop(i / (a.length - 1), c));

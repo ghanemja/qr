@@ -8,6 +8,7 @@
   B_ace.jpg    the flying ace on his doghouse   -> the colour part (body, scarf, smoke puffs)
   C_astro.jpg  the astronaut on the red doghouse -> the doghouse (colour and black and white), the moon
   D_sit.jpg    sitting on the roof, grumpy      -> the ending
+  E_wood.png   the bird, standing               -> the bird (its wing cut out to flap)
 Each piece is a PNG with the background made transparent: the background is the light area connected
 to the crop's border, so everything inside the ink outlines stays. pieces.json gives each piece's
 size and the anchor points the stage lines up.
@@ -110,6 +111,20 @@ save('C_moon', cc, aa)
 D = load('D_sit.jpg'); box = (540, 18, 912, 466)
 c, al = cutout(D, box, seeds=[(545, 25), (905, 25), (545, 300), (905, 400)])
 save('D_sit', ink_paper(c), al, seat=[727 - box[0], 459 - box[1]])
+
+# ---- E: the bird, with its wing as a separate piece so it can flap ----
+E = load('E_wood.png')
+al = np.where((E.min(axis=2) > 232), 0, 255).astype(np.uint8)          # the background is plain white
+al = np.asarray(Image.fromarray(al).filter(__import__('PIL.ImageFilter', fromlist=['x']).GaussianBlur(0.6)))
+box = (0, 0, E.shape[1], E.shape[0])
+WING = [(30, 322), (171, 322), (174, 360), (152, 392), (126, 409), (30, 409)]
+ring = ndimage.binary_dilation(al > 128, iterations=4) & ~(al > 128)     # in black and white the tuft's yellow edge needs a line
+for bw in (0, 1):
+    rgb = ink_paper(E, 150) if bw else E
+    if bw: rgb = np.where(ring[..., None], INK, rgb); al = np.where(ring, 255, al).astype(np.uint8)
+    sfx = '_bw' if bw else ''
+    save('E_wood' + sfx, rgb, keep(al, WING, box, False), head=[200, 160], feet=[225, 432])
+    save('E_wing' + sfx, rgb, keep(al, WING, box), pivot=[166, 352])
 
 json.dump(meta, open(os.path.join(OUT, 'pieces.json'), 'w'), indent=1)
 print(json.dumps(meta))
