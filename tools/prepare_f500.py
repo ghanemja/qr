@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 # Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 """Build data/fortune500.json from the 2026 Fortune 500 list.
 

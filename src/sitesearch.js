@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 // Site-wide company search: every [data-sitesearch] box (an input and a results list) jumps to
 // the chosen company's page. The index (assets/search.json, written by tools/build.mjs) loads on

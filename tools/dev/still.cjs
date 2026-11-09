@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 const {chromium}=require('playwright');(async()=>{const b=await chromium.launch({args:['--use-gl=swiftshader','--enable-unsafe-swiftshader']});
 const S=(process.env.DEV_OUT||'/tmp/qr-dev')+'/';const [slug,out,w,h]=process.argv.slice(2);

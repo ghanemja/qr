@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 // Low-poly signature models: several shapes per kind of company (about 10 units tall, built at
 // the origin), plus optional moving parts (wings that flap, blades that spin, phones that fall).

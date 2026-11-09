@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 // The shared industry shapes, rebuilt as small animated scenes to the signature models' standard
 // (src/heroes.js): each sits on its own slab and shows how that kind of business wins. Unlike a

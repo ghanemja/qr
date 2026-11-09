@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 // Home: a 3D cartoon US map on a square tiled slab, split into seven regions. Hover a region and its
 // companies' 3D models come alive in that region's own way; click it and the piece breaks off the

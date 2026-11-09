@@ -1,7 +1,7 @@
 {
   "name": "qr-atlas",
   "private": true,
-  "license": "MIT",
+  "license": "PolyForm-Noncommercial-1.0.0",
   "author": "Janelle Ghanem (https://github.com/ghanemja)",
   "type": "module",
   "scripts": {

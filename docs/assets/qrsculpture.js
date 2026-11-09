@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 // A company's QR world, mountable anywhere: its signature model stands on a plaza whose tiles
 // faintly carry the QR code. setScan(true) breaks the model into cube pixels that arc down onto

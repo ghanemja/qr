@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 // Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 // Shared 3D pieces for the QR worlds: stage, isometric camera rig, palettes, helpers.
 import * as THREE from 'three';
