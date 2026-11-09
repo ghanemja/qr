@@ -7,7 +7,7 @@
      the rhythm. After the opening card it cuts on every beat: on an up beat a company's
      world sends something up (the Roadster off its ramp, the SpaceX booster, the Amazon drone, a
      rocket, the Starship); on a down beat something comes down (Buffett's snowball down the
-     Berkshire slope, the booster landing, a jet landing, cereal pouring, a parcel parachuting in).
+     Berkshire slope, the booster landing, a helicopter landing, cereal pouring, a parcel parachuting in).
      At the end it's the site's QR world: each swipe up breaks the model into cube pixels that
      sweep down into the QR code (sculpture.js, the site's morph posed per frame), each swipe down
      rebuilds the next company from them, and the last swipe up keeps the real, scannable code. The thumb drawings are
@@ -106,7 +106,7 @@ function reelThumb(T) {
 }
 
 // ---- the 3D worlds ----
-const SLUGS = ['tesla', 'berkshire-hathaway', 'spacex', 'amazon', 'relativity-space', 'general-mills', 'caterpillar', 'lockheed-martin', 'mcdonalds', 'kraft-heinz', 'boeing', 'conocophillips', 'american-airlines-group', 'zipline'];
+const SLUGS = ['tesla', 'berkshire-hathaway', 'spacex', 'amazon', 'relativity-space', 'general-mills', 'caterpillar', 'lockheed-martin', 'mcdonalds', 'kraft-heinz', 'boeing', 'conocophillips', 'american-airlines-group', 'unitedhealth-group', 'zipline'];
 const WORLD = {};
 for (const s of SLUGS) WORLD[s] = await world(s, W, H);
 
@@ -138,7 +138,7 @@ const SHOTS = [
   { dir: 1, slug: 'tesla', t0: 2.0, rate: 2.6, view: V(-Math.PI / 4 + 0.1, 0.3, 19, [-0.1, 1.6, 3.35], 1080) },
   { dir: -1, slug: 'berkshire-hathaway', t0: 3.9, rate: 1.7, view: V(Math.PI / 4 - 0.2, 0.5, 26, [0, 1.8, 0]) },
   { dir: 1, slug: 'spacex', booster: 'up', view: V(Math.PI / 4 + 0.1, 0.18, 30, [0, 4.6, 0], 1300) },
-  { dir: -1, slug: 'american-airlines-group', t0: 9.9, rate: 2.6, view: V(Math.PI / 4, 0.25, 16, [3.1, 2.4, 1.4], 1100) },
+  { dir: -1, slug: 'unitedhealth-group', t0: 11.0, rate: 2.4, view: V(Math.PI / 4, 0.3, 18, [0, 4.5, 0], 1150) },
   { dir: 1, slug: 'amazon', t0: 3.95, rate: 2.0, view: V(Math.PI / 4 - 0.15, 0.3, 26, [0, 4.0, 0], 1350) },
   { dir: -1, slug: 'spacex', booster: 'down', view: V(Math.PI / 4 + 0.7, 0.2, 30, [0, 4.6, 0], 1300) },
   { dir: 1, slug: 'relativity-space', t0: 9.9, rate: 2.3, view: V(Math.PI / 4 + 0.2, 0.12, 22, [-3, 3.4, -3], 1300) },
