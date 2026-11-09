@@ -8,8 +8,9 @@
      world sends something up (the Roadster off its ramp, the SpaceX booster, the Amazon drone, a
      rocket, the Starship); on a down beat something comes down (Buffett's snowball down the
      Berkshire slope, the booster landing, the Oreo dunk, cereal pouring, an excavator digging).
-     At the end the swipes morph it: up breaks the world into the QR code in place, down flies it
-     back out into a world, and the last swipe up keeps the real, scannable code. The thumb drawings are
+     At the end it's the site's QR world: each swipe up breaks the model into cube pixels that
+     sweep down into the QR code (sculpture.js, the site's morph posed per frame), each swipe down
+     rebuilds the next company from them, and the last swipe up keeps the real, scannable code. The thumb drawings are
      the reel's own (cut out by extract_thumb.py into reel/, kept out of the repo like the song).
      window.frame(seconds) draws any moment; render.cjs captures it. -->
 <meta charset="utf-8">
@@ -19,7 +20,8 @@
 <script src="/qr/assets/qrcode.js"></script>
 <canvas id="c" width="1080" height="1920"></canvas>
 <script type="module">
-import { world } from './model.js';
+import { world, company } from './model.js';
+import { sculpture } from './sculpture.js';
 const W = 1080, H = 1920, cv = document.getElementById('c'), ctx = cv.getContext('2d');
 const INK = '#17202c', CREAM = '#f6f1e7', ORANGE = '#e07a3f', SKY = '#a4dafc';
 const URL_ = 'https://ghanemja.github.io/qr/';
@@ -55,9 +57,7 @@ function thumbUp(T, dur = 0.12, curve = back) {
 
 // ---- the QR code ----
 const q = qrcode(0, 'H'); q.addData(URL_); q.make();
-const N = q.getModuleCount(), MOD = 20, QX = Math.round(W / 2 - (N * MOD) / 2), QY = 560;
-const DARK = [];
-for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (q.isDark(r, c)) DARK.push({ r, c, x: QX + (c + 0.5) * MOD, y: QY + (r + 0.5) * MOD });
+const N = q.getModuleCount();
 
 function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect(x, y, w, h, r); }
 function background(T, col = CREAM) {
@@ -174,77 +174,22 @@ function shot(T, sh, w, u, view) {
   return w.render(sh.t0 + u * BEAT * sh.rate, view);
 }
 
-// ---- the end: each swipe up breaks the world on screen into the QR code, right where it is; each
-// swipe down flies the code back out into another world; the last swipe up (beat 31) keeps it ----
-const MD = 0.2; // fast: the code snaps together
-const LAST = SHOTS[SHOTS.length - 1];
-// Pair the world's opaque pixels with the code's dark squares, band by band from the top, so the
-// world's top goes to the code's top rows.
-function pairs(img, seed) {
-  const tmp = document.createElement('canvas'); tmp.width = W; tmp.height = H; const tc = tmp.getContext('2d');
-  tc.drawImage(img, 0, 0); const data = tc.getImageData(0, 0, W, H).data;
-  let step = 26, src;
-  do { src = []; for (let y = 0; y < H; y += step) for (let x = 0; x < W; x += step) { const i = (y * W + x) * 4; if (data[i + 3] > 200) src.push({ x, y, col: [data[i], data[i + 1], data[i + 2]] }); } step -= 1; } while (src.length < DARK.length && step > 4);
-  const keep = Array.from({ length: DARK.length }, (_, i) => src[Math.floor((i * src.length) / DARK.length)]).sort((a, b) => a.y - b.y || a.x - b.x);
-  const mods = [...DARK].sort((a, b) => a.r - b.r || a.c - b.c), bands = 12, per = Math.ceil(DARK.length / bands), R = rand(seed), ps = [];
-  for (let b = 0; b < bands; b++) {
-    const sb = keep.slice(b * per, (b + 1) * per).sort((p, q) => p.x - q.x), mb = mods.slice(b * per, (b + 1) * per).sort((p, q) => p.c - q.c || p.r - q.r);
-    sb.forEach((p, i) => ps.push({ s: p, d: mb[i], delay: R() * 0.06, arc: (R() - 0.5) * 160, spin: (R() - 0.5) * 7 }));
-  }
-  return { img: tmp, ps, size: step + 1 };
-}
-// The worlds that break up: the montage's last shot on beat 25, then one world per swipe down
-// (beats 26, 28, 30), each live until it breaks up on the next swipe up.
-const HOLDS = [
-  { still: shot(S.morph, LAST, WORLD[LAST.slug], 1, { ...LAST.view, az: LAST.view.az + 0.12 }) },
-  { slug: 'tesla', down: K(26), t0: 2.0, rate: 2.6, view: V(-Math.PI / 4 + 0.1, 0.3, 19, [-0.1, 1.6, 3.35], 960) },
-  { slug: 'amazon', down: K(28), t0: 3.95, rate: 2.0, view: V(Math.PI / 4 - 0.15, 0.3, 26, [0, 4.0, 0], 1080) },
-  { slug: 'berkshire-hathaway', down: K(30), t0: 3.9, rate: 1.7, view: V(Math.PI / 4 - 0.2, 0.5, 26, [0, 1.8, 0], 960) },
-];
-const holdRender = (h, T) => WORLD[h.slug].render(h.t0 + (T - h.down) * h.rate, h.view);
-HOLDS.forEach((h, i) => { h.p = pairs(h.still || holdRender(h, h.down + BEAT), 61 + i); });
-// k runs 0 → 1 over the morph: each square flies from its spot in the world to its place in the code.
-function squares(P, d, toQR = true, alpha = 1) {
-  ctx.save(); ctx.globalAlpha = alpha;
-  for (const p of P.ps) {
-    const k = clamp((d - p.delay) / MD), e = easeOut(k), f = toQR ? k : 1 - k;
-    const a = toQR ? p.s : p.d, b = toQR ? p.d : p.s;
-    const x = lerp(a.x, b.x, e) + p.arc * Math.sin(k * Math.PI), y = lerp(a.y, b.y, e);
-    const [r, g, bl] = p.s.col, mix = ease((f - 0.3) / 0.7), c = (v, w) => Math.round(lerp(v, w, mix));
-    const s = lerp(P.size, MOD + 0.6, ease(f));
-    ctx.save(); ctx.translate(x, y); ctx.rotate(p.spin * Math.sin(k * Math.PI));
-    ctx.fillStyle = `rgb(${c(r, 23)},${c(g, 32)},${c(bl, 44)})`; ctx.fillRect(-s / 2, -s / 2, s, s);
-    ctx.restore();
-  }
-  ctx.restore();
-}
-function qrCode() {
-  codeCard(); ctx.fillStyle = INK;
-  for (const m of DARK) ctx.fillRect(QX + m.c * MOD, QY + m.r * MOD, MOD, MOD);
-}
-function toQR(P, d) { // world still → code
-  ctx.save(); ctx.globalAlpha = 1 - ease(d / 0.06); ctx.drawImage(P.img, 0, 0); ctx.restore();
-  ctx.save(); ctx.globalAlpha = ease(d / 0.12); codeCard(); ctx.restore();
-  if (d < MD + 0.07) squares(P, d); else qrCode();
-}
-function fromQR(h, T, d) { // code → live world
-  ctx.save(); ctx.globalAlpha = 1 - ease(d / 0.12); codeCard(); ctx.restore();
-  const w = ease((d - MD * 0.6) / (MD * 0.5));
-  if (w > 0) { ctx.save(); ctx.globalAlpha = w; ctx.drawImage(holdRender(h, T), 0, 0); ctx.restore(); }
-  if (d < MD + 0.07) squares(h.p, d, false, 1 - ease((d - MD) / 0.07));
-}
+// ---- the end: the site's QR world. Each swipe up breaks the model into cube pixels that arc
+// down onto the code's squares in a diagonal sweep as the camera tilts to top-down (exactly the
+// site's morph, sped up to a beat); each swipe down rebuilds a model from them, the next company
+// each time; the last swipe up (beat 31) keeps the code. ----
+const MDS = 0.36; // one morph: lands just before the next beat
+const BITS = Array.from({ length: N * N }, (_, i) => (q.isDark(Math.floor(i / N), i % N) ? '1' : '0')).join('');
+const ENDS = [];
+for (const s of ['caterpillar', 'tesla', 'amazon', 'berkshire-hathaway']) ENDS.push(sculpture(await company(s), { n: N, bits: BITS }, W, H));
 function morph(T) {
-  const n = beatOf(T), d = T - K(n);
-  if (n % 2 === 1) toQR(HOLDS[(n - 25) / 2].p, d); // 25, 27, 29
-  else fromQR(HOLDS[(n - 24) / 2], T, d); // 26, 28, 30
-}
-function codeCard() {
-  const pad = 2 * MOD;
-  rr(QX - pad, QY - pad, N * MOD + 2 * pad, N * MOD + 2 * pad, 26); ctx.fillStyle = '#fff'; ctx.fill(); ctx.lineWidth = 6; ctx.strokeStyle = INK; ctx.stroke();
+  const n = beatOf(T), k = clamp((T - K(n)) / MDS), cam = ease(clamp(k / 0.85)), t = T - S.morph;
+  if (n % 2 === 1) ctx.drawImage(ENDS[(n - 25) / 2].render(k, cam, t), 0, 0); // up: model → code
+  else ctx.drawImage(ENDS[(n - 24) / 2].render(1 - k, 1 - cam, t), 0, 0); // down: code → the next model
 }
 
-// ---- the finished code: it hops on each swipe, and confetti squares fly up behind it ----
-const CU = [31, 33].map(K), CD = [32, 34].map(K);
+// ---- the finished code: it hops on the swipes, and confetti squares fly up behind it ----
+const CU = [31, 33].map(K), CD = [32, 34].map(K), BASE = H / 2 + 0.43 * W;
 const CONF = CU.map((h, j) => { const R = rand(40 + j); return Array.from({ length: 46 }, (_, i) => ({ x: (i % 2 ? 0.1 + R() * 0.25 : 0.65 + R() * 0.25) * W, vx: (R() - 0.5) * 500, vy: 2300 + R() * 900, s: 18 + R() * 22, a: R() * 6, va: (R() - 0.5) * 14, col: ['#17202c', ORANGE, '#2b5aa8', '#3ddc84', '#f2c94c'][i % 5] })); });
 function code(T) {
   CU.forEach((h, j) => {
@@ -254,14 +199,11 @@ function code(T) {
       ctx.save(); ctx.translate(x, y); ctx.rotate(p.a + p.va * d); rr(-p.s / 2, -p.s / 2, p.s, p.s, 4); ctx.fillStyle = p.col; ctx.fill(); ctx.restore();
     }
   });
-  // Up on the up move, held while the thumb is up, and down with a little squash on the down move.
+  if (T - S.code < MDS + 0.02) { morph(T); return; }
+  // Up on the up move, held while the thumb would be up, down with a little squash on the down move.
   const up = T >= CD[0] + 0.1 ? thumbUp(T, 0.2, easeOut) : 0, dd = since(T, CD), sq = dd < 0.22 ? 1 - 0.05 * Math.sin((dd / 0.22) * Math.PI) : 1;
-  if (T - S.code < MD + 0.07) { toQR(HOLDS[3].p, T - S.code); return; }
-  const base = QY + N * MOD + 2 * MOD;
-  ctx.save(); ctx.translate(0, -40 * up); ctx.translate(W / 2, base); ctx.scale(1 / sq, sq); ctx.translate(-W / 2, -base);
-  codeCard();
-  ctx.fillStyle = INK;
-  for (const m of DARK) ctx.fillRect(QX + m.c * MOD, QY + m.r * MOD, MOD, MOD);
+  ctx.save(); ctx.translate(0, -40 * up); ctx.translate(W / 2, BASE); ctx.scale(1 / sq, sq); ctx.translate(-W / 2, -BASE);
+  ctx.drawImage(ENDS[3].render(1, 1, T - S.morph), 0, 0);
   ctx.restore();
 }
 
@@ -271,7 +213,7 @@ window.frame = (T) => {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   if (T < S.montage) { background(T, SKY); title(); reelThumb(T); ring(); return; }
   // One zoom punch, when the code lands for good.
-  const d = T - S.code - MD, z = d >= 0 && d < 0.8 ? 1 + 0.05 * Math.exp(-d * 6) * Math.min(1, d / 0.05) : 1;
+  const d = T - S.code - MDS, z = d >= 0 && d < 0.8 ? 1 + 0.05 * Math.exp(-d * 6) * Math.min(1, d / 0.05) : 1;
   ctx.translate(W / 2, H / 2); ctx.scale(z, z); ctx.translate(-W / 2, -H / 2);
   background(T);
   if (T < S.morph) montage(T); else if (T < S.code) morph(T); else code(T);

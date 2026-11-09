@@ -47,9 +47,11 @@ beats, all within 22 ms), with its drop on beat 9 (4.09 s).
   Starship, Disney's fireworks, the Goodyear blimp. Down beats bring something down: the Berkshire
   snowball, the Oreo dunk, the booster landing, General Mills cereal pouring, the McDonald's burger
   dropping together, the Heinz bottle flipping onto it, the oil pump nodding, the Caterpillar digging.
-- **Beats 25–30, the morphs** (centred, in place): each swipe up breaks the world on screen into the
-  QR code (its pixels fly into the code's squares); each swipe down flies the code back out into a
-  live world (the Roadster, the Amazon drone, the Berkshire snowball).
+- **Beats 25–30, the morphs** use the site's QR world (`sculpture.js`: `docs/assets/qrsculpture.js`
+  posed per frame, same pixel sampling, diagonal sweep, ink colours, plaza and camera). Each swipe
+  up breaks the model into cube pixels that arc down onto the code's squares as the camera tilts to
+  top-down; each swipe down rebuilds the next company from them (Caterpillar, Tesla, Amazon,
+  Berkshire). Each morph takes 0.36 s, so it lands just before the next beat.
 - **Beat 31**, the last swipe up, keeps the code. It hops with confetti to the end, and the last frame
   scans (ZXing).
 
