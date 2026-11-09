@@ -106,7 +106,7 @@ function reelThumb(T) {
 }
 
 // ---- the 3D worlds ----
-const SLUGS = ['tesla', 'berkshire-hathaway', 'spacex', 'amazon', 'mondelez-international', 'relativity-space', 'general-mills', 'caterpillar', 'lockheed-martin', 'mcdonalds', 'kraft-heinz', 'walt-disney', 'conocophillips', 'goodyear-tire-and-rubber'];
+const SLUGS = ['tesla', 'berkshire-hathaway', 'spacex', 'amazon', 'mondelez-international', 'relativity-space', 'general-mills', 'caterpillar', 'lockheed-martin', 'mcdonalds', 'kraft-heinz', 'walt-disney', 'conocophillips', 'american-airlines-group', 'zipline'];
 const WORLD = {};
 for (const s of SLUGS) WORLD[s] = await world(s, W, H);
 
@@ -144,13 +144,13 @@ const SHOTS = [
   { dir: 1, slug: 'relativity-space', t0: 9.9, rate: 2.3, view: V(Math.PI / 4 + 0.2, 0.12, 22, [-3, 3.4, -3], 1300) },
   { dir: -1, slug: 'general-mills', t0: 3.4, rate: 1.6, view: V(Math.PI / 4 - 0.1, 0.4, 19, [0, 1.6, 0], 1150) },
   { dir: 1, slug: 'lockheed-martin', t0: 2.0, rate: 2.2, view: V(Math.PI / 4 - 0.2, 0.3, 20, [0, 1.5, 0], 1250) },
-  { dir: -1, slug: 'mcdonalds', t0: 1.0, rate: 1.6, view: V(Math.PI / 4, 0.35, 18, [0, 2.5, 0], 1200) },
+  { dir: -1, slug: 'mcdonalds', t0: 3.85, rate: 1.6, view: V(Math.PI / 4, 0.35, 18, [0, 2.5, 0], 1200) },
   { dir: 1, slug: 'spacex', t0: 5.25, rate: 2.2, view: V(Math.PI / 4 - 0.3, 0.16, 15, [4.05, 3.0, -4.05], 1350) },
   { dir: -1, slug: 'kraft-heinz', t0: 1.2, rate: 2.0, view: V(Math.PI / 4 - 0.1, 0.35, 15, [0, 2.0, 0], 1150) },
   { dir: 1, slug: 'walt-disney', t0: 1.5, rate: 1.6, view: V(Math.PI / 4 + 0.15, 0.3, 24, [0, 3.0, 0], 1000) },
   { dir: -1, slug: 'conocophillips', t0: 2.5, rate: 2.2, view: V(Math.PI / 4 - 0.25, 0.3, 30, [0, 2.5, 0], 1050) },
-  { dir: 1, slug: 'goodyear-tire-and-rubber', t0: 4.0, rate: 6.0, view: V(Math.PI / 4 + 0.1, 0.3, 26, [0, 3.0, 0], 1250) },
-  { dir: -1, slug: 'caterpillar', t0: 3.0, rate: 1.6, view: V(Math.PI / 4, 0.55, 20, [0, 0.8, 0], 1150) },
+  { dir: 1, slug: 'american-airlines-group', t0: 5.6, rate: 3.5, view: V(Math.PI / 4 - 0.5, 0.2, 19, [0.3, 1.6, 2.9], 1150) },
+  { dir: -1, slug: 'zipline', t0: 5.6, rate: 2.0, view: V(Math.PI / 4, 0.3, 14, [3.2, 2.2, 4.4], 1000) },
 ];
 function montage(T) {
   const i = clamp(Math.floor((T - S.montage) / BEAT + 1e-9), 0, SHOTS.length - 1), sh = SHOTS[i], u = (T - S.montage - i * BEAT) / BEAT;
@@ -181,7 +181,7 @@ function shot(T, sh, w, u, view) {
 const MDS = 0.36; // one morph: lands just before the next beat
 const BITS = Array.from({ length: N * N }, (_, i) => (q.isDark(Math.floor(i / N), i % N) ? '1' : '0')).join('');
 const ENDS = [];
-for (const s of ['caterpillar', 'tesla', 'amazon', 'berkshire-hathaway']) ENDS.push(sculpture(await company(s), { n: N, bits: BITS }, W, H));
+for (const s of ['zipline', 'tesla', 'amazon', 'berkshire-hathaway']) ENDS.push(sculpture(await company(s), { n: N, bits: BITS }, W, H));
 function morph(T) {
   const n = beatOf(T), k = clamp((T - K(n)) / MDS), cam = ease(clamp(k / 0.85)), t = T - S.morph;
   if (n % 2 === 1) ctx.drawImage(ENDS[(n - 25) / 2].render(k, cam, t), 0, 0); // up: model → code

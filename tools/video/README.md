@@ -45,8 +45,9 @@ beats, all within 22 ms), with its drop on beat 9 (4.09 s).
   different world each time. Up beats send something up: the Roadster off its ramp, the SpaceX
   booster lifting off, the Amazon drone, the pad rocket, Lockheed's jet lifting off its pad, the
   Starship, Disney's fireworks, the Goodyear blimp. Down beats bring something down: the Berkshire
-  snowball, the Oreo dunk, the booster landing, General Mills cereal pouring, the McDonald's burger
-  dropping together, the Heinz bottle flipping onto it, the oil pump nodding, the Caterpillar digging.
+  snowball, the Oreo dunk, the booster landing, General Mills cereal pouring, the McDonald's top bun
+  landing, the Heinz bottle flipping onto a burger, the oil pump nodding, a Zipline parcel parachuting
+  onto a house.
 - **Beats 25–30, the morphs** use the site's QR world (`sculpture.js`: `docs/assets/qrsculpture.js`
   posed per frame, same pixel sampling, diagonal sweep, ink colours, plaza and camera). Each swipe
   up breaks the model into cube pixels that arc down onto the code's squares as the camera tilts to
