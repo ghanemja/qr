@@ -44,8 +44,8 @@ beats, all within 22 ms), with its drop on beat 9 (4.09 s).
 - **The montage** (beats 9–24, from the drop) hard-cuts on every beat with a quick zoom snap, a
   different world each time. Up beats send something up: the Roadster off its ramp, the SpaceX
   booster lifting off, the Amazon drone, the pad rocket, Lockheed's jet lifting off its pad, the
-  Starship, Disney's fireworks, an American Airlines takeoff. Down beats bring something down: the Berkshire
-  snowball, the Oreo dunk, the booster landing, General Mills cereal pouring, the McDonald's top bun
+  Starship, a Boeing jet taking off, an American Airlines takeoff. Down beats bring something down: the Berkshire
+  snowball, an American Airlines jet landing, the booster landing, General Mills cereal pouring, the McDonald's top bun
   landing, the Heinz bottle flipping onto a burger, the oil pump nodding, a Zipline parcel parachuting
   onto a house.
 - **Beats 25–30, the morphs** use the site's QR world (`sculpture.js`: `docs/assets/qrsculpture.js`
