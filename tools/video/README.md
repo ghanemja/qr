@@ -44,14 +44,14 @@ beats, all within 22 ms), with its drop on beat 9 (4.09 s).
 - **The montage** (beats 9–24, from the drop) hard-cuts on every beat with a quick zoom snap, a
   different world each time. Up beats send something up: the Roadster off its ramp, the SpaceX
   booster lifting off, the Amazon drone, the pad rocket, Lockheed's jet lifting off its pad, the
-  Starship, Disney's fireworks, the Goodyear blimp. Down beats bring something down: the Berkshire
+  Starship, Disney's fireworks, an American Airlines takeoff. Down beats bring something down: the Berkshire
   snowball, the Oreo dunk, the booster landing, General Mills cereal pouring, the McDonald's top bun
   landing, the Heinz bottle flipping onto a burger, the oil pump nodding, a Zipline parcel parachuting
   onto a house.
 - **Beats 25–30, the morphs** use the site's QR world (`sculpture.js`: `docs/assets/qrsculpture.js`
   posed per frame, same pixel sampling, diagonal sweep, ink colours, plaza and camera). Each swipe
   up breaks the model into cube pixels that arc down onto the code's squares as the camera tilts to
-  top-down; each swipe down rebuilds the next company from them (Caterpillar, Tesla, Amazon,
+  top-down; each swipe down rebuilds the next company from them (Zipline, Tesla, Amazon,
   Berkshire). Each morph takes 0.36 s, so it lands just before the next beat.
 - **Beat 31**, the last swipe up, keeps the code. It hops with confetti to the end, and the last frame
   scans (ZXing).
