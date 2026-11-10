@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 // The modelling kit shared by the kinds of company (models.js) and the signature models of the
 // biggest companies (heroes.js): soft primitives, colouring, brand slots and motion helpers.

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 const m = await import(new URL('../../src/models.js', import.meta.url).href);
 const [id, vi = 0] = process.argv[2].split(':');

@@ -28,7 +28,7 @@ Notes for the next session working on this repo. Live site: https://ghanemja.git
 3. **Advertisement video. Done and posted** (LinkedIn, "7 days of vibes: Day 3", 25 Oct 2026). See **The ad video** below.
 4. **"Access 3D asset library" button** next to **About** in the header. **Done** (see **3D asset library** below).
    - It should open a page where people can download the 3D models (for example GLB via three's `GLTFExporter`).
-   - Every model file must **credit the project and authors** and **embed the project licence**. In GLB, use `asset.copyright` and `asset.extras`, and add a LICENSE text alongside. The repo is under the PolyForm Noncommercial License 1.0.0 (`LICENSE`, chosen by the user, replacing MIT in Nov 2026): credit required, commercial use needs a paid licence. Embed that text and the copyright line.
+   - Every model file must **credit the project and authors** and **embed the open-source licence**. In GLB, use `asset.copyright` and `asset.extras`, and add a LICENSE text alongside. The repo is MIT-licensed (`LICENSE`, chosen by the user); embed that text and the copyright line.
 5. **Small fixes:** tidy the Apple Watch strap; tree shadows don't sway with the leaves.
 
 The Walmart "falling off the edge" fix (region-view lots kept fully on their piece, `tools/build.mjs`) has been merged to `main`.
@@ -36,7 +36,7 @@ The Walmart "falling off the edge" fix (region-view lots kept fully on their pie
 ## The ad video (`tools/video/`, final files in `media/ad/`)
 
 - **Posted:** `media/ad/qr-compass-ad-36s.mp4` (16:9, 1920×1080, 36 s) with `media/ad/cover-16x9.jpg` (crop-safe: LinkedIn's thumbnail preview centre-crops to about 4:3). `cover-4x5.jpg` matches a 4:5 cut that hasn't been rendered yet. Soundtrack: `soundtrack-house-36s.mp3`.
-- **Messaging (agreed with the user):** headline "The economy, built in 3D."; subline "See why every company wins, then scan it."; three acts: 1 · Understand (each world shows the moat), 2 · Scan (every world is a real QR code), 3 · Explore & build (region map, flat map, directory, free models for noncommercial use). It names the Fortune 500 *and* the 81 startups. End card: "Built by Janelle Ghanem", the link, and "Soundtrack made in Equalizer". Audience: people who'll use the site, builders, and future employers.
+- **Messaging (agreed with the user):** headline "The economy, built in 3D."; subline "See why every company wins, then scan it."; three acts: 1 · Understand (each world shows the moat), 2 · Scan (every world is a real QR code), 3 · Explore & build (region map, flat map, directory, free MIT models). It names the Fortune 500 *and* the 81 startups. End card: "Built by Janelle Ghanem", the link, and "Soundtrack made in Equalizer". Audience: people who'll use the site, builders, and future employers.
 - **Short cut (posted), 18 bars at 120 bpm:**
   - 0–2 s: title.
   - 2–12 s: Walmart, Nvidia, Tesla (Roadster stunt), SpaceX (launch), Anthropic.
@@ -115,8 +115,8 @@ Next: item 3 (the ad video).
 
 - Built by `libraryPage()` in `tools/build.mjs` from every model id: the 60 signature models plus all 137 shared shapes (`kind:variant`), with labels from `data/industries.json` and the companies that use each look. The browser code is `src/library.js`.
 - Export happens in the browser with three's `GLTFExporter` (copied with its `TextureUtils.js` helper into `docs/assets/` by the build). `buildModel()` in `models.js` builds a model uncached; the library bakes brand slots into vertex colours, turns `'W'` water into a plain glossy "Water" material, merges vertices, and poses movers at t = 0 (parts hidden at t = 0 are left out). "Include its animation" samples the movers into a 12 s clip.
-- Every GLB gets `asset.copyright` ("© 2026 Janelle Ghanem — QR Compass, PolyForm Noncommercial License 1.0.0") and `asset.extras` { title, project, url, page, author, license, copyright, licenseText }; the same credit is the scene's extras. The .zip download (a tiny stored-zip writer, no dependency) adds `LICENSE.txt` and `README.txt`. `window.QRLibrary.exportGLB('amazon:0')` exports without a download (for tests).
-- Licence: `LICENSE` is copied to `docs/LICENSE` and `docs/LICENSE.txt`; the footer (`footer()` in the build), the About page and company pages credit it. Project source files carry an `SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0` header; vendored three.js files (`BufferGeometryUtils.js`, `RoundedBoxGeometry.js`, etc.) keep their own.
+- Every GLB gets `asset.copyright` ("© 2026 Janelle Ghanem — QR Compass, MIT License") and `asset.extras` { title, project, url, page, author, license, copyright, licenseText }; the same credit is the scene's extras. The .zip download (a tiny stored-zip writer, no dependency) adds `LICENSE.txt` and `README.txt`. `window.QRLibrary.exportGLB('amazon:0')` exports without a download (for tests).
+- Licence: `LICENSE` is copied to `docs/LICENSE` and `docs/LICENSE.txt`; the footer (`footer()` in the build), the About page and company pages credit it. Project source files carry an `SPDX-License-Identifier: MIT` header; vendored three.js files (`BufferGeometryUtils.js`, `RoundedBoxGeometry.js`, etc.) keep their own.
 
 ## How the models work
 

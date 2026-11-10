@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 // Builds the static site into docs/ from data/*.json.
 //   npm install && npm run build
@@ -19,7 +19,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const OUT = join(ROOT, 'docs');
 const SITE_URL = (process.env.SITE_URL || 'https://ghanemja.github.io/qr/').replace(/\/?$/, '/');
 const LIST_YEAR = 2026;
-// The project's licence (LICENSE, PolyForm Noncommercial 1.0.0): credited in the footer and the About page, and embedded
+// The project's licence (LICENSE, MIT): credited in the footer and the About page, and embedded
 // in every model the 3D asset library exports.
 const LICENSE_TEXT = readFileSync(join(ROOT, 'LICENSE'), 'utf8');
 const AUTHOR = 'Janelle Ghanem';
@@ -392,7 +392,7 @@ const topbar = (depth, extra = '', current = '') => {
 // The site footer: credit and licence.
 const footer = (depth) => {
   const up = '../'.repeat(depth);
-  return `<footer class="site-foot">© ${LIST_YEAR} ${AUTHOR} · Free for noncommercial use with credit under the <a href="${up}LICENSE.txt">PolyForm Noncommercial License</a>; commercial use needs a licence · <a href="${up}library.html">3D models</a> · <a href="${REPO_URL}">Source on GitHub</a></footer>`;
+  return `<footer class="site-foot">© ${LIST_YEAR} ${AUTHOR} · QR Compass is open source under the <a href="${up}LICENSE.txt">MIT License</a> · <a href="${up}library.html">3D models</a> free to download · <a href="${REPO_URL}">Source on GitHub</a></footer>`;
 };
 
 // ---------- dot-matrix logo ----------
@@ -520,7 +520,7 @@ function companyPage(c, prev, next) {
   <p class="qw-source">${c.kind === 'f500'
     ? `Rank and financials: Fortune 500, ${LIST_YEAR} list (fiscal ${LIST_YEAR - 1}). HQ locations: the city on the list, placed with the US Census Gazetteer.`
     : 'Startup entries are curated by hand; check the company’s own site for current details.'} <a href="../about.html">About the data</a>.</p>
-  <p class="qw-source qw-licence">© ${LIST_YEAR} ${AUTHOR} · QR Compass is free for noncommercial use with credit under the <a href="../LICENSE.txt">PolyForm Noncommercial License</a>; commercial use needs a licence. Download this model and the others from the <a href="../library.html">3D asset library</a>.</p>
+  <p class="qw-source qw-licence">© ${LIST_YEAR} ${AUTHOR} · QR Compass is open source under the <a href="../LICENSE.txt">MIT License</a>. Download this model and the others from the <a href="../library.html">3D asset library</a>.</p>
 </main>
 <script>window.COMPANY=${JSON.stringify(data)};</script>
 <script src="../assets/qrcode.js"></script>
@@ -760,7 +760,7 @@ ${topbar(0, siteSearch('search'), 'about')}
   <h2>Corrections</h2>
   <p>Edit <code>data/fortune500.json</code> or <code>data/startups.json</code> and run <code>npm run build</code>.</p>
   <h2>Licence and credit</h2>
-  <p>QR Compass, including its code and 3D models, is made by <a href="https://github.com/ghanemja">${AUTHOR}</a> and released under the <a href="LICENSE.txt">PolyForm Noncommercial License 1.0.0</a> (© ${LIST_YEAR} ${AUTHOR}). You may use, change and share it for noncommercial purposes, as long as you credit ${AUTHOR} and pass on the licence and its <em>Required Notice</em> line. Commercial use (in a product, paid service, client work or anything sold) needs a separate commercial licence, which may involve payment or a revenue share: ask through <a href="https://github.com/ghanemja">GitHub</a>. The source is on <a href="${REPO_URL}">GitHub</a>. Company names belong to their owners; the data sources above keep their own terms.</p>
+  <p>QR Compass, including its code and 3D models, is made by <a href="https://github.com/ghanemja">${AUTHOR}</a> and released under the <a href="LICENSE.txt">MIT License</a> (© ${LIST_YEAR} ${AUTHOR}): you may use, change and share it, as long as the copyright notice and licence travel with it. The source is on <a href="${REPO_URL}">GitHub</a>. Company names belong to their owners; the data sources above keep their own terms.</p>
 </main>
 ${footer(0)}
 <script src="assets/sitesearch.js"></script>
@@ -805,14 +805,14 @@ const LIBRARY = (() => {
 function rankedCompanies() { return [...companies.filter((c) => c.kind === 'f500').sort((a, b) => a.rank - b.rank), ...companies.filter((c) => c.kind === 'startup')]; }
 function libraryPage() {
   const n = LIBRARY.groups.reduce((s, g) => s + g.items.length, 0);
-  const description = `Download any of the ${n} QR Compass 3D models as GLB files, free for noncommercial use with credit under the PolyForm Noncommercial License.`;
+  const description = `Download any of the ${n} QR Compass 3D models as GLB files, free under the MIT License.`;
   return `${head({ title: '3D asset library · QR Compass', description, path: 'library.html', depth: 0 }).replace('</head>', `<script type="importmap">{"imports":{"three":"./assets/three.module.min.js"}}</script>
 </head>`)}
 <body class="page library">
 ${topbar(0, siteSearch('search'), 'lib')}
 <main>
   <h1>3D asset library</h1>
-  <p class="lede">${esc(description)} Each file credits the project and carries the full licence; keep them with the model when you share it. Commercial use needs a separate licence.</p>
+  <p class="lede">${esc(description)} Each file credits the project and carries the full licence; keep them with the model when you share it.</p>
   <section class="lib-viewer" id="lib-viewer" aria-label="Model preview">
     <div class="lib-canvas" id="lib-canvas"></div>
     <div class="lib-panel">
@@ -830,7 +830,7 @@ ${topbar(0, siteSearch('search'), 'lib')}
         <a class="btn ghost" href="LICENSE.txt" download="LICENSE.txt">Download licence</a>
       </div>
       <p class="lib-status" id="lib-status" aria-live="polite"></p>
-      <p class="lib-fine">High detail, at its rest pose. Brand colours are baked into vertex colours; water is a plain glossy material. GLB metadata: <code>asset.copyright</code> “© ${LIST_YEAR} ${AUTHOR} — QR Compass, PolyForm Noncommercial License 1.0.0” and <code>asset.extras</code> with the title, project, author, link and licence text.</p>
+      <p class="lib-fine">High detail, at its rest pose. Brand colours are baked into vertex colours; water is a plain glossy material. GLB metadata: <code>asset.copyright</code> “© ${LIST_YEAR} ${AUTHOR} — QR Compass, MIT License” and <code>asset.extras</code> with the title, project, author, link and licence text.</p>
     </div>
   </section>
   <div class="lib-tools"><input id="lib-filter" type="search" placeholder="Filter models or companies…" aria-label="Filter models"></div>

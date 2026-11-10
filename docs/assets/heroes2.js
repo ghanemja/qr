@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 // The second batch of signature models: well-known companies that sat on shapes shared by only
 // a few companies. Same contract as src/heroes.js ({ finder, build } → { bare: true, ... }), and

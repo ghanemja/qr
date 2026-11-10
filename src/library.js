@@ -1,7 +1,7 @@
-// SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+// SPDX-License-Identifier: MIT
 // Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 // 3D asset library: browse every model on the site and download it as a GLB (via three's
-// GLTFExporter), with the project credit and the licence embedded in each file. A model can
+// GLTFExporter), with the project credit and the MIT licence embedded in each file. A model can
 // also be downloaded as a .zip holding the GLB, LICENSE.txt and a short credit note.
 import * as THREE from 'three';
 import { OrbitControls } from './OrbitControls.js';
@@ -12,7 +12,7 @@ import { buildModel, mountMovers, poseMovers, vertexColor } from './models.js';
 
 const LIB = window.LIBRARY;
 const $ = (id) => document.getElementById(id);
-const COPYRIGHT = `© ${LIB.year} ${LIB.author} — QR Compass, PolyForm Noncommercial License 1.0.0`;
+const COPYRIGHT = `© ${LIB.year} ${LIB.author} — QR Compass, MIT License`;
 const ANIM_SECONDS = 12, ANIM_FPS = 20;
 
 // ---------- turning a model into plain, exportable meshes ----------
@@ -113,7 +113,7 @@ const credit = (item) => ({
   url: LIB.site,
   page: `${LIB.site}library.html#${key(item)}`,
   author: LIB.author,
-  license: 'PolyForm-Noncommercial-1.0.0',
+  license: 'MIT',
   copyright: COPYRIGHT,
   licenseText: LIB.license,
 });
@@ -184,11 +184,9 @@ const readme = (item) => `${credit(item).title}
 A 3D model from QR Compass (${LIB.site})
 Made by ${LIB.author}. ${COPYRIGHT}.
 
-Free to use, change and share for noncommercial purposes under the PolyForm
-Noncommercial License 1.0.0 (LICENSE.txt), with credit: keep the copyright notice,
-the licence and its "Required Notice" line with the model. Commercial use needs a
-separate licence from ${LIB.author} (ask via https://github.com/ghanemja). The GLB
-carries the same credit in its asset.copyright and asset.extras fields.
+Free to use, change and share under the MIT License (LICENSE.txt). Please keep the
+copyright notice and licence with the model. The GLB carries the same credit in its
+asset.copyright and asset.extras fields.
 
 Browse more models: ${LIB.site}library.html
 `;

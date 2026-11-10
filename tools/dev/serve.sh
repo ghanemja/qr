@@ -1,5 +1,5 @@
 #!/bin/bash
-# SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
+# SPDX-License-Identifier: MIT
 # Copyright (c) 2026 Janelle Ghanem. QR Compass, https://ghanemja.github.io/qr/
 # Serve the built site and the model gallery for the preview scripts:
 #   /qr/...       -> docs/ (run `npm run build` first)
